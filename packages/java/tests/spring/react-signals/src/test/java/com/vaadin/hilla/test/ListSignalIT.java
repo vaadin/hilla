@@ -30,237 +30,157 @@ import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
 import com.vaadin.testbench.parallel.Browser;
 
+/**
+ * Tests that a list signal is kept in sync between two clients. The two clients
+ * are two browser windows of the same driver, so the tests switch between them
+ * by window handle.
+ */
 @RunWith(BlockJUnit4ClassRunner.class)
 public class ListSignalIT extends ChromeBrowserTest {
+
+    private String firstWindow;
+    private String secondWindow;
 
     @Override
     @Before
     public void setup() throws Exception {
         setDesiredCapabilities(Browser.CHROME.getDesiredCapabilities());
         super.setup();
-        getDriver().get(getRootURL() + "/SharedListSignal");
-        waitForPageToLoad();
-        // Start with a clean list
+
+        openListView();
+        firstWindow = getDriver().getWindowHandle();
+        // The list is shared by all tests, so it has to be emptied first
         clickButton("clearBtn");
-        waitForMillis(500);
+        waitForItemCount(0);
+
+        getDriver().switchTo().newWindow(WindowType.WINDOW);
+        secondWindow = getDriver().getWindowHandle();
+        openListView();
+        waitForItemCount(0);
+
+        switchToWindow(firstWindow);
     }
 
-    private void waitForPageToLoad() {
+    @Test
+    public void addedItem_isVisibleToTheOtherClient() {
+        addItem("Buy milk");
+        waitForItemCount(1);
+        Assert.assertEquals(List.of("Buy milk"), getItemTexts());
+
+        switchToWindow(secondWindow);
+        waitForItemCount(1);
+        Assert.assertEquals(List.of("Buy milk"), getItemTexts());
+    }
+
+    @Test
+    public void addedItem_isVisibleToTheClientThatIsNotFocused() {
+        switchToWindow(secondWindow);
+        addItem("Write tests");
+        waitForItemCount(1);
+
+        switchToWindow(firstWindow);
+        waitForItemCount(1);
+        Assert.assertEquals(List.of("Write tests"), getItemTexts());
+    }
+
+    @Test
+    public void toggledItem_isUpdatedForTheOtherClient() {
+        addItem("Write tests");
+        waitForItemCount(1);
+        Assert.assertEquals(List.of("pending"), getItemStatuses());
+
+        switchToWindow(secondWindow);
+        waitForItemCount(1);
+        Assert.assertEquals(List.of("pending"), getItemStatuses());
+
+        // Toggling changes the value of the child signal of the entry, without
+        // changing the structure of the list
+        switchToWindow(firstWindow);
+        clickFirst("toggleBtn");
+        waitUntil(driver -> getItemStatuses().equals(List.of("done")));
+
+        switchToWindow(secondWindow);
+        waitUntil(driver -> getItemStatuses().equals(List.of("done")));
+    }
+
+    @Test
+    public void removedItem_isRemovedForTheOtherClient() {
+        addItem("Item A");
+        waitForItemCount(1);
+        addItem("Item B");
+        waitForItemCount(2);
+
+        switchToWindow(secondWindow);
+        waitForItemCount(2);
+
+        switchToWindow(firstWindow);
+        clickFirst("removeBtn");
+        waitForItemCount(1);
+        Assert.assertEquals(List.of("Item B"), getItemTexts());
+
+        switchToWindow(secondWindow);
+        waitForItemCount(1);
+        Assert.assertEquals(List.of("Item B"), getItemTexts());
+    }
+
+    @Test
+    public void clearedList_isClearedForTheOtherClient() {
+        addItem("Item 1");
+        waitForItemCount(1);
+        addItem("Item 2");
+        waitForItemCount(2);
+
+        switchToWindow(secondWindow);
+        waitForItemCount(2);
+        clickButton("clearBtn");
+        waitForItemCount(0);
+
+        switchToWindow(firstWindow);
+        waitForItemCount(0);
+    }
+
+    private void openListView() {
+        getDriver().get(getRootURL() + "/SharedListSignal");
         waitForElementPresent(By.id("itemCount"));
-        waitUntil(driver -> $("h3").id("itemCount").getText() != null);
-        waitForMillis(1000);
+        waitUntil(driver -> !$("h3").id("itemCount").getText().isEmpty());
     }
 
-    @Test
-    public void shouldAddItem_andSyncToOtherClient() {
-        var firstWindow = getDriver().getWindowHandle();
-
-        // Open second window
-        var secondWindow = getDriver().switchTo()
-                .newWindow(WindowType.WINDOW);
-        try {
-            secondWindow.get(getRootURL() + "/SharedListSignal");
-            waitForPageToLoad();
-
-            // Add item from second window
-            secondWindow.findElement(By.id("newItemInput")).sendKeys("Buy milk");
-            secondWindow.findElement(By.id("addItemBtn")).click();
-            waitForMillis(500);
-
-            // Verify item appears in second window
-            Assert.assertEquals("Count: 1",
-                    secondWindow.findElement(By.id("itemCount")).getText());
-
-            // Verify item synced to first window
-            getDriver().switchTo().window(firstWindow);
-            waitForMillis(500);
-            Assert.assertEquals("Count: 1",
-                    $("h3").id("itemCount").getText());
-
-            // Verify item text
-            var items = getItemTexts();
-            Assert.assertEquals(1, items.size());
-            Assert.assertEquals("Buy milk", items.get(0));
-        } finally {
-            secondWindow.close();
-            getDriver().switchTo().window(firstWindow);
-        }
+    private void switchToWindow(String handle) {
+        getDriver().switchTo().window(handle);
     }
 
-    @Test
-    public void shouldToggleChildValue_andSyncToOtherClient() {
-        // Add an item
-        setInputValue("newItemInput", "Write tests");
+    private void addItem(String text) {
+        var input = getDriver().findElement(By.id("newItemInput"));
+        input.clear();
+        input.sendKeys(text);
         clickButton("addItemBtn");
-        waitForMillis(500);
-
-        Assert.assertEquals("Count: 1", $("h3").id("itemCount").getText());
-
-        // Verify initial status is pending
-        var statuses = getItemStatuses();
-        Assert.assertEquals(1, statuses.size());
-        Assert.assertEquals("pending", statuses.get(0));
-
-        var firstWindow = getDriver().getWindowHandle();
-
-        // Open second window
-        var secondWindow = getDriver().switchTo()
-                .newWindow(WindowType.WINDOW);
-        try {
-            secondWindow.get(getRootURL() + "/SharedListSignal");
-            waitForPageToLoad();
-
-            // Verify item exists in second window
-            Assert.assertEquals("Count: 1",
-                    secondWindow.findElement(By.id("itemCount")).getText());
-
-            // Toggle item completion from first window
-            getDriver().switchTo().window(firstWindow);
-            clickFirstToggleButton();
-            waitForMillis(500);
-
-            // Verify status changed locally
-            statuses = getItemStatuses();
-            Assert.assertEquals("done", statuses.get(0));
-
-            // Verify status synced to second window
-            getDriver().switchTo().window(secondWindow.getWindowHandle());
-            waitForMillis(500);
-
-            var secondWindowStatuses = getDriver()
-                    .findElements(By.cssSelector("[data-testid='item'] span:nth-child(2)"))
-                    .stream()
-                    .map(WebElement::getText)
-                    .toList();
-            Assert.assertEquals(1, secondWindowStatuses.size());
-            Assert.assertEquals("done", secondWindowStatuses.get(0));
-        } finally {
-            secondWindow.close();
-            getDriver().switchTo().window(firstWindow);
-        }
     }
 
-    @Test
-    public void shouldRemoveItem_andSyncToOtherClient() {
-        // Add two items
-        setInputValue("newItemInput", "Item A");
-        clickButton("addItemBtn");
-        waitForMillis(300);
-        setInputValue("newItemInput", "Item B");
-        clickButton("addItemBtn");
-        waitForMillis(500);
-
-        Assert.assertEquals("Count: 2", $("h3").id("itemCount").getText());
-
-        var firstWindow = getDriver().getWindowHandle();
-
-        // Open second window
-        var secondWindow = getDriver().switchTo()
-                .newWindow(WindowType.WINDOW);
-        try {
-            secondWindow.get(getRootURL() + "/SharedListSignal");
-            waitForPageToLoad();
-
-            // Verify both items in second window
-            Assert.assertEquals("Count: 2",
-                    secondWindow.findElement(By.id("itemCount")).getText());
-
-            // Remove first item from first window
-            getDriver().switchTo().window(firstWindow);
-            clickFirstRemoveButton();
-            waitForMillis(500);
-
-            Assert.assertEquals("Count: 1",
-                    $("h3").id("itemCount").getText());
-
-            // Verify removal synced to second window
-            getDriver().switchTo().window(secondWindow.getWindowHandle());
-            waitForMillis(500);
-            Assert.assertEquals("Count: 1",
-                    secondWindow.findElement(By.id("itemCount")).getText());
-        } finally {
-            secondWindow.close();
-            getDriver().switchTo().window(firstWindow);
-        }
-    }
-
-    @Test
-    public void shouldClearAll_andSyncToOtherClient() {
-        // Add items
-        setInputValue("newItemInput", "Item 1");
-        clickButton("addItemBtn");
-        waitForMillis(300);
-        setInputValue("newItemInput", "Item 2");
-        clickButton("addItemBtn");
-        waitForMillis(500);
-
-        var firstWindow = getDriver().getWindowHandle();
-
-        var secondWindow = getDriver().switchTo()
-                .newWindow(WindowType.WINDOW);
-        try {
-            secondWindow.get(getRootURL() + "/SharedListSignal");
-            waitForPageToLoad();
-
-            // Clear from second window
-            secondWindow.findElement(By.id("clearBtn")).click();
-            waitForMillis(500);
-
-            Assert.assertEquals("Count: 0",
-                    secondWindow.findElement(By.id("itemCount")).getText());
-
-            // Verify first window is cleared
-            getDriver().switchTo().window(firstWindow);
-            waitForMillis(500);
-            Assert.assertEquals("Count: 0",
-                    $("h3").id("itemCount").getText());
-        } finally {
-            secondWindow.close();
-            getDriver().switchTo().window(firstWindow);
-        }
+    private void waitForItemCount(int count) {
+        waitUntil(driver -> $("h3").id("itemCount").getText()
+                .equals("Count: " + count));
     }
 
     private List<String> getItemTexts() {
-        return getDriver()
-                .findElements(By.cssSelector(
-                        "[data-testid='item'] span:first-child"))
-                .stream().map(WebElement::getText).toList();
+        return getTexts("[data-testid='item'] span:first-child");
     }
 
     private List<String> getItemStatuses() {
-        return getDriver()
-                .findElements(By.cssSelector(
-                        "[data-testid='item'] span:nth-child(2)"))
-                .stream().map(WebElement::getText).toList();
+        return getTexts("[data-testid='item'] span:nth-child(2)");
     }
 
-    private void clickFirstToggleButton() {
-        getDriver()
-                .findElement(By.cssSelector("[data-testid='toggleBtn']"))
-                .click();
+    private List<String> getTexts(String selector) {
+        return getDriver().findElements(By.cssSelector(selector)).stream()
+                .map(WebElement::getText).toList();
     }
 
-    private void clickFirstRemoveButton() {
+    private void clickFirst(String testId) {
         getDriver()
-                .findElement(By.cssSelector("[data-testid='removeBtn']"))
+                .findElement(By.cssSelector("[data-testid='" + testId + "']"))
                 .click();
     }
 
     private void clickButton(String id) {
         $(ButtonElement.class).id(id).click();
-    }
-
-    private void setInputValue(String id, String value) {
-        var input = getDriver().findElement(By.id(id));
-        input.clear();
-        input.sendKeys(value);
-    }
-
-    private void waitForMillis(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
 }

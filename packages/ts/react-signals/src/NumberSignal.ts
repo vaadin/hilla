@@ -1,25 +1,30 @@
 import { createIncrementCommand } from './commands.js';
-import type { Operation } from './FullStackSignal.js';
+import type { Operation } from './Operation.js';
 import { ValueSignal } from './ValueSignal.js';
 
 /**
- * A signal containing a numeric value. The value is updated as a single atomic change.
+ * A signal containing a numeric value. The value is updated as a single atomic
+ * change.
  */
 export class NumberSignal extends ValueSignal<number> {
   /**
    * Atomically increments the value of this signal by the given delta amount.
-   * The value is decremented if the delta is negative. The increment is applied
-   * optimistically — the local value updates immediately before server
-   * confirmation.
+   * The value is decremented if the delta is negative.
+   * <p>
+   * The increment is applied locally right away and it is reverted again if the
+   * server rejects it. Unlike {@link ValueSignal.set}, an increment is applied
+   * relative to the value on the server, so concurrent increments from several
+   * clients all take effect.
+   *
    * @param delta - The increment amount
-   * @returns An operation containing the eventual result
+   * @returns An operation that allows reacting to the outcome
    */
   incrementBy(delta: number): Operation {
     if (delta === 0) {
-      return this.createResolvedOperation();
+      return this.noopOperation();
     }
 
-    return this.sendCommand(createIncrementCommand('', delta));
+    return this.submit(createIncrementCommand(this.id, delta));
   }
 
   /**

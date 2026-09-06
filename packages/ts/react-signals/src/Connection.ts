@@ -34,17 +34,29 @@ export type ServerConnectionConfig = Readonly<{
  * A server connection manager.
  */
 export class Connection {
-  readonly #id: string;
+  /**
+   * The id that identifies this client to the server.
+   */
+  readonly id: string;
+
   readonly config: ServerConnectionConfig;
   #subscription?: Subscription<SignalCommand>;
 
   constructor(id: string, config: ServerConnectionConfig) {
     this.config = config;
-    this.#id = id;
+    this.id = id;
   }
 
   get subscription(): Subscription<SignalCommand> | undefined {
     return this.#subscription;
+  }
+
+  /**
+   * Checks whether there is a subscription through which the server can send
+   * commands to this client.
+   */
+  isConnected(): boolean {
+    return this.#subscription !== undefined;
   }
 
   connect(): Subscription<SignalCommand> {
@@ -53,7 +65,7 @@ export class Connection {
     this.#subscription ??= client.subscribe(ENDPOINT, 'subscribe', {
       providerEndpoint: endpoint,
       providerMethod: method,
-      clientSignalId: this.#id,
+      clientSignalId: this.id,
       params,
     });
 
@@ -71,7 +83,7 @@ export class Connection {
       ENDPOINT,
       'update',
       {
-        clientSignalId: this.#id,
+        clientSignalId: this.id,
         command,
       },
       init ?? { mute: true },

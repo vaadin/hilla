@@ -81,7 +81,7 @@ describe('@vaadin/hilla-react-signals', () => {
       subscribeToSignalViaEffect(mapSignal);
       expect(client.subscribe).to.have.been.calledOnce;
       expect(client.subscribe).to.have.been.calledWith('SignalsHandler', 'subscribe', {
-        clientSignalId: mapSignal.id,
+        clientSignalId: mapSignal.tree.connection.id,
         providerEndpoint: 'TestService',
         providerMethod: 'testMapSignal',
         params: undefined,
@@ -99,7 +99,7 @@ describe('@vaadin/hilla-react-signals', () => {
         'SignalsHandler',
         'update',
         {
-          clientSignalId: mapSignal.id,
+          clientSignalId: mapSignal.tree.connection.id,
           command: {
             commandId: (params?.command as { commandId: string }).commandId,
             targetNodeId: '',
@@ -149,14 +149,14 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(mapSignal.value.get('name')!.value).to.equal('Bob');
     });
 
-    it('should send correct command when removeKey() is called', () => {
+    it('should send correct command when remove() is called', () => {
       subscribeToSignalViaEffect(mapSignal);
 
       const snapshotCommand = createServerSnapshotCommand('snapshot', { name: 'Alice' });
       simulateReceivedChange(subscription, snapshotCommand);
       expect(mapSignal.value.size).to.equal(1);
 
-      mapSignal.removeKey('name');
+      mapSignal.remove('name');
       expect(client.call).to.have.been.calledOnce;
 
       const [, , params] = client.call.firstCall.args;
@@ -164,7 +164,7 @@ describe('@vaadin/hilla-react-signals', () => {
         'SignalsHandler',
         'update',
         {
-          clientSignalId: mapSignal.id,
+          clientSignalId: mapSignal.tree.connection.id,
           command: {
             commandId: (params?.command as { commandId: string }).commandId,
             targetNodeId: '',
@@ -176,27 +176,27 @@ describe('@vaadin/hilla-react-signals', () => {
       );
     });
 
-    it('should apply optimistic remove immediately when removeKey() is called', () => {
+    it('should apply optimistic remove immediately when remove() is called', () => {
       subscribeToSignalViaEffect(mapSignal);
 
       const snapshotCommand = createServerSnapshotCommand('snapshot', { name: 'Alice', age: '30' });
       simulateReceivedChange(subscription, snapshotCommand);
       expect(mapSignal.value.size).to.equal(2);
 
-      mapSignal.removeKey('name');
+      mapSignal.remove('name');
       expect(mapSignal.value.size).to.equal(1);
       expect(mapSignal.value.has('name')).to.be.false;
       expect(mapSignal.value.has('age')).to.be.true;
     });
 
-    it('should skip re-applying own confirmed removeKey', () => {
+    it('should skip re-applying own confirmed remove', () => {
       subscribeToSignalViaEffect(mapSignal);
 
       const snapshotCommand = createServerSnapshotCommand('snapshot', { name: 'Alice', age: '30' });
       simulateReceivedChange(subscription, snapshotCommand);
       expect(mapSignal.value.size).to.equal(2);
 
-      mapSignal.removeKey('name');
+      mapSignal.remove('name');
       expect(mapSignal.value.size).to.equal(1);
 
       const [, , params] = client.call.firstCall.args;
@@ -209,7 +209,7 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(mapSignal.value.has('age')).to.be.true;
     });
 
-    it('should apply remote removeKey from another client', () => {
+    it('should apply remote remove from another client', () => {
       subscribeToSignalViaEffect(mapSignal);
 
       const snapshotCommand = createServerSnapshotCommand('snapshot', { name: 'Alice', age: '30' });
@@ -235,7 +235,7 @@ describe('@vaadin/hilla-react-signals', () => {
         'SignalsHandler',
         'update',
         {
-          clientSignalId: mapSignal.id,
+          clientSignalId: mapSignal.tree.connection.id,
           command: {
             commandId: (params?.command as { commandId: string }).commandId,
             targetNodeId: '',
@@ -293,14 +293,14 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(mapSignal.value.size).to.equal(0);
     });
 
-    it('should revert optimistic removeKey on rejection', () => {
+    it('should revert optimistic remove on rejection', () => {
       subscribeToSignalViaEffect(mapSignal);
 
       const snapshotCommand = createServerSnapshotCommand('snapshot', { name: 'Alice' });
       simulateReceivedChange(subscription, snapshotCommand);
       expect(mapSignal.value.size).to.equal(1);
 
-      const { result } = mapSignal.removeKey('name');
+      const { result } = mapSignal.remove('name');
       // Catch to prevent unhandled rejection
       result.catch(() => {});
       expect(mapSignal.value.size).to.equal(0);
@@ -334,13 +334,13 @@ describe('@vaadin/hilla-react-signals', () => {
       await expect(result).to.be.fulfilled;
     });
 
-    it('should resolve result promise after removeKey is confirmed', async () => {
+    it('should resolve result promise after remove is confirmed', async () => {
       subscribeToSignalViaEffect(mapSignal);
 
       const snapshotCommand = createServerSnapshotCommand('snapshot', { name: 'Alice' });
       simulateReceivedChange(subscription, snapshotCommand);
 
-      const { result } = mapSignal.removeKey('name');
+      const { result } = mapSignal.remove('name');
       const [, , params] = client.call.firstCall.args;
       const { commandId } = params!.command as { commandId: string };
       const confirmCommand = createServerRemoveByKeyCommand(commandId, 'name');

@@ -14,6 +14,7 @@ import type {
   Node,
 } from '../src/commands.js';
 import {
+  createSetCommand,
   createSnapshotCommand,
   createInsertCommand,
   createRemoveCommand,
@@ -129,7 +130,7 @@ describe('@vaadin/hilla-react-signals', () => {
       subscribeToSignalViaEffect(listSignal);
       expect(client.subscribe).to.have.been.calledOnce;
       expect(client.subscribe).to.have.been.calledWith('SignalsHandler', 'subscribe', {
-        clientSignalId: listSignal.id,
+        clientSignalId: listSignal.tree.connection.id,
         providerEndpoint: 'NameService',
         providerMethod: 'nameListSignal',
         params: undefined,
@@ -147,11 +148,125 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(listSignal.value).to.have.length(2);
     });
 
+    describe('child signals', () => {
+      it('should represent the same entry with the same signal instance', () => {
+        subscribeToSignalViaEffect(listSignal);
+        simulateReceivedChange(subscription, createServerSnapshotCommand('snapshot', { '1': 'Alice', '2': 'Bob' }));
+
+        const [alice] = listSignal.value;
+
+        // Adding another entry re-derives the list, but the signal of an
+        // existing entry has to stay the same instance
+        simulateReceivedChange(subscription, createServerInsertCommand('insert', '', 'Charlie'));
+
+        expect(listSignal.value).to.have.length(3);
+        expect(listSignal.value[0]).to.equal(alice);
+      });
+
+      it('should keep a child signal up to date after it has been read', () => {
+        subscribeToSignalViaEffect(listSignal);
+        simulateReceivedChange(subscription, createServerSnapshotCommand('snapshot', { '1': 'Alice' }));
+
+        const [child] = listSignal.value;
+        const observed = subscribeToSignalViaEffect(child);
+
+        simulateReceivedChange(subscription, { ...createSetCommand('1', 'Alicia'), commandId: 'set' });
+
+        expect(child.value).to.equal('Alicia');
+        expect(observed).to.deep.equal(['Alice', 'Alicia']);
+      });
+
+      it('should update a child signal without re-reading the list', () => {
+        subscribeToSignalViaEffect(listSignal);
+        simulateReceivedChange(subscription, createServerSnapshotCommand('snapshot', { '1': 'Alice' }));
+
+        const [child] = listSignal.value;
+        child.set('Alicia');
+
+        expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
+          command: { '@type': 'set', targetNodeId: '1', value: 'Alicia' },
+        });
+        expect(child.value).to.equal('Alicia');
+      });
+
+      it('should discard the signal of an entry that is removed', () => {
+        subscribeToSignalViaEffect(listSignal);
+        simulateReceivedChange(subscription, createServerSnapshotCommand('snapshot', { '1': 'Alice' }));
+
+        const [child] = listSignal.value;
+        simulateReceivedChange(subscription, createServerRemoveCommand('remove', '1'));
+        expect(listSignal.value).to.be.empty;
+
+        // The entry comes back as a different node, and therefore as a
+        // different signal
+        simulateReceivedChange(subscription, createServerSnapshotCommand('snapshot-2', { '2': 'Alice' }));
+        expect(listSignal.value[0]).to.not.equal(child);
+      });
+    });
+
+    describe('inserted entries', () => {
+      it('should give the inserted entry the id that the server will use', () => {
+        subscribeToSignalViaEffect(listSignal);
+
+        const operation = listSignal.insertLast('Alice');
+        const [, , params] = client.call.firstCall.args;
+        const { commandId } = params!.command as { commandId: string };
+
+        // The server derives the id of the new node from the id of the insert
+        // command, so the client can do the same and target the entry right
+        // away
+        expect(operation.signal.id).to.equal(commandId);
+        expect(operation.signal.value).to.equal('Alice');
+        expect(listSignal.value).to.deep.equal([operation.signal]);
+      });
+
+      it('should keep the same signal instance once the insert is confirmed', () => {
+        subscribeToSignalViaEffect(listSignal);
+
+        const operation = listSignal.insertLast('Alice');
+        const [, , params] = client.call.firstCall.args;
+        const insertCommand = params!.command as InsertCommand<string>;
+
+        simulateReceivedChange(subscription, insertCommand);
+
+        expect(listSignal.value).to.have.length(1);
+        expect(listSignal.value[0]).to.equal(operation.signal);
+      });
+
+      it('should allow updating an entry that is not confirmed yet', () => {
+        subscribeToSignalViaEffect(listSignal);
+
+        const operation = listSignal.insertLast('Alice');
+        client.call.resetHistory();
+
+        operation.signal.set('Alicia');
+
+        expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
+          command: { '@type': 'set', targetNodeId: operation.signal.id, value: 'Alicia' },
+        });
+        expect(listSignal.value[0].value).to.equal('Alicia');
+      });
+
+      it('should remove the entry again when the insert is rejected', async () => {
+        subscribeToSignalViaEffect(listSignal);
+
+        const operation = listSignal.insertLast('Alice');
+        const [, , params] = client.call.firstCall.args;
+        const insertCommand = params!.command as InsertCommand<string>;
+        expect(listSignal.value).to.have.length(1);
+
+        simulateReceivedChange(subscription, { ...insertCommand, accepted: false, reason: 'Not allowed' });
+
+        expect(listSignal.value).to.be.empty;
+        await expect(operation.result).to.be.rejectedWith('Not allowed');
+      });
+    });
+
     it('should throw an error when trying to set value externally', () => {
       expect(() => {
         // @ts-expect-error suppress TS error to fail at runtime for testing purposes
         listSignal.value = ['Alice', 'Bob'];
-      }).to.throw('Value of the collection signals cannot be set.');
+      }).to.throw('The value of a list signal cannot be set.');
     });
 
     it('should send the correct event when insertLast is called', () => {
@@ -166,7 +281,7 @@ describe('@vaadin/hilla-react-signals', () => {
         'SignalsHandler',
         'update',
         {
-          clientSignalId: listSignal.id,
+          clientSignalId: listSignal.tree.connection.id,
           command: {
             commandId: (params?.command as { commandId: string }).commandId,
             targetNodeId: '',
@@ -210,7 +325,7 @@ describe('@vaadin/hilla-react-signals', () => {
         'SignalsHandler',
         'update',
         {
-          clientSignalId: listSignal.id,
+          clientSignalId: listSignal.tree.connection.id,
           command: {
             commandId: (params?.command as { commandId: string }).commandId,
             targetNodeId: firstElement.id,
@@ -286,7 +401,7 @@ describe('@vaadin/hilla-react-signals', () => {
         'SignalsHandler',
         'update',
         {
-          clientSignalId: listSignal.id,
+          clientSignalId: listSignal.tree.connection.id,
           command: {
             commandId: (params?.command as { commandId: string }).commandId,
             targetNodeId: '',
@@ -345,7 +460,7 @@ describe('@vaadin/hilla-react-signals', () => {
         'SignalsHandler',
         'update',
         {
-          clientSignalId: listSignal.id,
+          clientSignalId: listSignal.tree.connection.id,
           command: {
             commandId: (params?.command as { commandId: string }).commandId,
             targetNodeId: '',
@@ -378,7 +493,7 @@ describe('@vaadin/hilla-react-signals', () => {
         '@type': 'clear',
         commandId: 'remote-clear',
         targetNodeId: '',
-      } as SignalCommand);
+      });
       expect(listSignal.value).to.be.empty;
     });
 
@@ -548,7 +663,7 @@ describe('@vaadin/hilla-react-signals', () => {
         'SignalsHandler',
         'update',
         {
-          clientSignalId: listSignal.id,
+          clientSignalId: listSignal.tree.connection.id,
           command: {
             commandId: (params?.command as { commandId: string }).commandId,
             targetNodeId: '',
@@ -648,7 +763,7 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(listSignal.value[0].value).to.equal('Updated Alice');
     });
 
-    it('should handle snapshot commands with missing child nodes gracefully', () => {
+    it('should represent a child without a value as a signal with an undefined value', () => {
       subscribeToSignalViaEffect(listSignal);
 
       const nodes: Record<string, Node> = {
@@ -682,9 +797,10 @@ describe('@vaadin/hilla-react-signals', () => {
       const snapshotCommand = { ...createSnapshotCommand(nodes), commandId: 'snapshot' };
       simulateReceivedChange(subscription, snapshotCommand);
 
-      // Node '2' has no value property, should be filtered out
-      expect(listSignal.value).to.have.length(1);
+      // Every node of the list is represented, whether it has a value or not
+      expect(listSignal.value).to.have.length(2);
       expect(listSignal.value[0].value).to.equal('Alice');
+      expect(listSignal.value[1].value).to.be.undefined;
     });
 
     it('should handle position condition commands', () => {

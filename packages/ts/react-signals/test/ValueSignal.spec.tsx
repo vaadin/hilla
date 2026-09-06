@@ -95,7 +95,7 @@ describe('@vaadin/hilla-react-signals', () => {
 
       expect(client.subscribe).to.have.been.calledOnce;
       expect(client.subscribe).to.have.been.calledWith('SignalsHandler', 'subscribe', {
-        clientSignalId: valueSignal.id,
+        clientSignalId: valueSignal.tree.connection.id,
         providerEndpoint: 'TestEndpoint',
         providerMethod: 'testMethod',
         params: undefined,

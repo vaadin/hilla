@@ -93,7 +93,7 @@ describe('@vaadin/hilla-react-signals', () => {
         'SignalsHandler',
         'update',
         {
-          clientSignalId: numberSignal.id,
+          clientSignalId: numberSignal.tree.connection.id,
           command: expectedCommand1,
         },
         { mute: true },
@@ -114,7 +114,7 @@ describe('@vaadin/hilla-react-signals', () => {
         'SignalsHandler',
         'update',
         {
-          clientSignalId: numberSignal.id,
+          clientSignalId: numberSignal.tree.connection.id,
           command: expectedCommand2,
         },
         { mute: true },
@@ -135,7 +135,7 @@ describe('@vaadin/hilla-react-signals', () => {
         'SignalsHandler',
         'update',
         {
-          clientSignalId: numberSignal.id,
+          clientSignalId: numberSignal.tree.connection.id,
           command: expectedCommand3,
         },
         { mute: true },
@@ -249,14 +249,15 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(negativeSignal.valueAsInt()).to.equal(-3);
     });
 
-    it('should clear pending increments on snapshot', () => {
+    it('should replay unconfirmed increments on top of a snapshot', () => {
       const numberSignal = new NumberSignal(42, config);
       subscribeToSignalViaEffect(numberSignal);
 
       numberSignal.incrementBy(10);
       expect(numberSignal.value).to.equal(52);
 
-      // Snapshot resets everything
+      // A snapshot replaces the confirmed state, but the increment has not
+      // been confirmed yet, so it is applied on top of the new state
       simulateReceivedChange(subscription, {
         commandId: 'snapshot-id',
         targetNodeId: '',
@@ -274,7 +275,18 @@ describe('@vaadin/hilla-react-signals', () => {
         },
       } as unknown as SignalCommand);
 
-      expect(numberSignal.value).to.equal(100);
+      expect(numberSignal.value).to.equal(110);
+
+      // Once the increment is confirmed, it is only counted once
+      const [, , params] = client.call.firstCall.args;
+      const confirmed: IncrementCommand = {
+        commandId: (params!.command as { commandId: string }).commandId,
+        targetNodeId: '',
+        '@type': 'inc',
+        delta: 10,
+      };
+      simulateReceivingAcceptedCommand(confirmed);
+      expect(numberSignal.value).to.equal(110);
     });
   });
 });

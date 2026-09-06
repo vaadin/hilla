@@ -113,22 +113,25 @@ public class InternalSignal {
 
     private void notifySubscribers(SignalCommand processedCommand,
             CommandResult result) {
-        var commandToEmit = inProgressCommands
+        var submittedCommand = inProgressCommands
                 .remove(processedCommand.commandId());
-        if (commandToEmit != null) {
-            commandToEmit.put("accepted", result.accepted());
-            if (result instanceof CommandResult.Reject reject) {
-                commandToEmit.put("reason", reject.reason());
-            }
+        // A command that originates on the server, e.g. from signal.set() in
+        // Java, has not been submitted by any client, so there is no JSON to
+        // reuse and it has to be serialized from the processed command:
+        ObjectNode commandToEmit = submittedCommand != null ? submittedCommand
+                : objectMapper.valueToTree(processedCommand);
+
+        // The client applies a command optimistically when submitting it, so it
+        // needs to know whether the command was accepted to be able to revert
+        // it again:
+        commandToEmit.put("accepted", result.accepted());
+        if (result instanceof CommandResult.Reject reject) {
+            commandToEmit.put("reason", reject.reason());
         }
+
         if (result.accepted()) {
-            // For server-originated commands (e.g. signal.set() from Java),
-            // there is no stored command JSON, so serialize from the processed
-            // command:
-            ObjectNode nodeToEmit = commandToEmit != null ? commandToEmit
-                    : objectMapper.valueToTree(processedCommand);
-            subscribers.entrySet()
-                    .removeIf(client -> tryEmitCommandToSubscriber(nodeToEmit,
+            subscribers.entrySet().removeIf(
+                    client -> tryEmitCommandToSubscriber(commandToEmit,
                             client.getKey(), client.getValue()));
         } else {
             // only notify the client that issued the failed command
@@ -141,9 +144,7 @@ public class InternalSignal {
                 return;
             }
 
-            ObjectNode rejectToEmit = commandToEmit != null ? commandToEmit
-                    : objectMapper.valueToTree(processedCommand);
-            boolean failure = tryEmitCommandToSubscriber(rejectToEmit,
+            boolean failure = tryEmitCommandToSubscriber(commandToEmit,
                     clientSignalId, subscribers.get(clientSignalId));
             if (failure) {
                 // remove the subscriber if it failed to emit to:

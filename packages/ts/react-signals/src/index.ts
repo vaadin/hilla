@@ -8,5 +8,6 @@ export { ValueSignal } from './ValueSignal.js';
 export { ListSignal } from './ListSignal.js';
 export { MapSignal } from './MapSignal.js';
 export { FullStackSignal } from './FullStackSignal.js';
-export type { Operation, ServerConnectionConfig } from './FullStackSignal.js';
-export { Connection } from './Connection.js';
+export type { ServerConnectionConfig } from './FullStackSignal.js';
+export type { InsertOperation, Operation } from './Operation.js';
+export { ListPosition } from './commands.js';
