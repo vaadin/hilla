@@ -16,7 +16,6 @@
 package com.vaadin.hilla.parser.plugins.subtypes;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -40,8 +39,17 @@ public class SubTypesTest extends AbstractFullStackTest {
             new Notification(), new EmailNotification(),
             new HtmlEmailNotification(), new MultipartSmsNotification(),
             new BaseEvent.NestedEvent(), new Circle(1), new Square(1),
-            new BatchJob(), new CronJob(), new TextPayload(),
-            new BinaryPayload());
+            new BatchJob(), new CronJob(), new NightlyJob(),
+            new Job.InlineJob(), new TextPayload(), new BinaryPayload());
+
+    /**
+     * The subtypes that get no discriminator at all, because Jackson builds
+     * their type ids from the name of the base class, which is not known here:
+     * the {@code Payload} hierarchy uses {@code Id.MINIMAL_CLASS}, so a
+     * generated property would hold values that the server never sends.
+     */
+    private static final List<String> WITHOUT_DISCRIMINATOR = List
+            .of("TextPayload", "BinaryPayload");
 
     @Test
     public void should_GenerateTheExpectedTypeScript() {
@@ -78,8 +86,12 @@ public class SubTypesTest extends AbstractFullStackTest {
             });
         });
 
-        assertTrue(generated.size() > 1,
-                "The generated discriminators were not found at all");
+        assertEquals(WITHOUT_DISCRIMINATOR, SUBTYPES.stream()
+                .map(Object::getClass)
+                .filter(cls -> discriminatorProperty(openApi, cls).isEmpty())
+                .map(Class::getSimpleName).toList(),
+                "Another set of subtypes than the expected one is left without"
+                        + " a discriminator");
         assertEquals(serialized, generated);
     }
 

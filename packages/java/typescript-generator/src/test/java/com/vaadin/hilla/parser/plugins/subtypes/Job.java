@@ -24,7 +24,17 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.SIMPLE_NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes({ @JsonSubTypes.Type(value = BatchJob.class),
-        @JsonSubTypes.Type(value = CronJob.class) })
+        @JsonSubTypes.Type(value = CronJob.class),
+        @JsonSubTypes.Type(value = NightlyJob.class),
+        @JsonSubTypes.Type(value = Job.InlineJob.class) })
 public class Job {
     public String name;
+
+    /**
+     * A subtype with no name of its own: with {@code Id.SIMPLE_NAME}, its id is
+     * the simple class name, whatever encloses it.
+     */
+    public static class InlineJob extends Job {
+        public String command;
+    }
 }
