@@ -15,14 +15,15 @@
  */
 package com.vaadin.hilla.parser.plugins.subtypes;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
-@JsonSubTypes({ @JsonSubTypes.Type(value = AddEvent.class, name = "add"),
-        @JsonSubTypes.Type(value = UpdateEvent.class, name = "update"),
-        @JsonSubTypes.Type(value = DeleteEvent.class, name = "delete"),
-        @JsonSubTypes.Type(value = MoveEvent.class) })
-public class BaseEvent {
-    public int id;
+/**
+ * A subtype whose name is not in the {@code @JsonSubTypes} annotation of the
+ * base class, but in its own {@code @JsonTypeName} annotation.
+ */
+@JsonTypeName("move")
+public class MoveEvent extends BaseEvent {
+
+    public String item;
+    public int position;
 }

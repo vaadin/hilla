@@ -18,11 +18,14 @@ package com.vaadin.hilla.parser.plugins.subtypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
-@JsonSubTypes({ @JsonSubTypes.Type(value = AddEvent.class, name = "add"),
-        @JsonSubTypes.Type(value = UpdateEvent.class, name = "update"),
-        @JsonSubTypes.Type(value = DeleteEvent.class, name = "delete"),
-        @JsonSubTypes.Type(value = MoveEvent.class) })
-public class BaseEvent {
-    public int id;
+/**
+ * A hierarchy whose type ids are built by Jackson from the name of the base
+ * class, which the generator does not know: no discriminator property is
+ * generated for it.
+ */
+@JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, include = JsonTypeInfo.As.PROPERTY)
+@JsonSubTypes({ @JsonSubTypes.Type(value = TextPayload.class),
+        @JsonSubTypes.Type(value = BinaryPayload.class) })
+public class Payload {
+    public String id;
 }

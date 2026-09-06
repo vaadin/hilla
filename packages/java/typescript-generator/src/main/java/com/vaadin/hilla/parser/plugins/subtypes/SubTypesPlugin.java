@@ -18,13 +18,16 @@ package com.vaadin.hilla.parser.plugins.subtypes;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Discriminator;
@@ -226,15 +229,30 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
      */
     private record SubTypesInfo(JsonTypeInfo typeInfo, JsonSubTypes subTypes) {
         /**
+         * The type id strategies whose values are known here: both take the id
+         * from the annotations and fall back to the simple class name. The ids
+         * of the class based strategies are built from the name of the base
+         * type, and those of a custom resolver are only known to the resolver
+         * itself, so no property is generated for them: leaving it out is
+         * better than declaring values that the server never sends.
+         */
+        private static final Set<JsonTypeInfo.Id> SUPPORTED_IDS = EnumSet
+                .of(JsonTypeInfo.Id.NAME, JsonTypeInfo.Id.SIMPLE_NAME);
+
+        /**
          * Returns the name of the property that holds the type discriminator,
          * or an empty optional if the type information is not serialized as a
-         * property of the object itself.
+         * property of the object itself, or if its values are not known here.
          */
         Optional<String> discriminatorProperty() {
             var include = typeInfo.include();
 
             if (include != JsonTypeInfo.As.PROPERTY
                     && include != JsonTypeInfo.As.EXISTING_PROPERTY) {
+                return Optional.empty();
+            }
+
+            if (!SUPPORTED_IDS.contains(typeInfo.use())) {
                 return Optional.empty();
             }
 
@@ -270,17 +288,24 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
         }
 
         /**
-         * Returns the value of the type discriminator for the given subtype,
-         * which defaults to the simple class name when the annotation does not
-         * specify a name.
+         * Returns the value of the type discriminator for the given subtype:
+         * the name given in the {@code @JsonSubTypes.Type} annotation, then the
+         * {@code @JsonTypeName} annotation of the subtype itself, and finally
+         * the simple class name.
          */
         private static String discriminatorValue(JsonSubTypes.Type type) {
             if (!type.name().isEmpty()) {
                 return type.name();
             }
 
-            return type.names().length > 0 ? type.names()[0]
-                    : type.value().getSimpleName();
+            if (type.names().length > 0) {
+                return type.names()[0];
+            }
+
+            return Optional
+                    .ofNullable(type.value().getAnnotation(JsonTypeName.class))
+                    .map(JsonTypeName::value).filter(name -> !name.isEmpty())
+                    .orElseGet(() -> type.value().getSimpleName());
         }
     }
 

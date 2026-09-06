@@ -31,6 +31,10 @@ public class SubTypesEndpoint {
         return new EmailNotification();
     }
 
+    public Payload sendPayload() {
+        return new TextPayload();
+    }
+
     public Shape sendShape() {
         return new Circle(1);
     }
