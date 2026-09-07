@@ -25,7 +25,7 @@
     "@rolldown/plugin-babel": "0.2.3",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.4.0",
-    "@types/node": "26.4.0",
+    "@types/node": "26.4.1",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
     "@vaadin/hilla-generator-core": "file:../../../../ts/generator-core",
     "@vaadin/hilla-generator-plugin-backbone": "file:../../../../ts/generator-plugin-backbone",
@@ -71,7 +71,7 @@
       "@rolldown/plugin-babel": "0.2.3",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.4.0",
-      "@types/node": "26.4.0",
+      "@types/node": "26.4.1",
       "@vaadin/hilla-generator-cli": "25.3.0-beta1",
       "@vaadin/hilla-generator-core": "25.3.0-beta1",
       "@vaadin/hilla-generator-plugin-backbone": "25.3.0-beta1",
@@ -93,7 +93,7 @@
       "vite": "8.2.2",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "7b5e3626535d233f4efdf3af4089a273ff4ea5e168a21dc7a57ab9240493faa6"
+    "hash": "9545bf6e2b63e75d18bccce7a1b0d1720f5be18be76db0803e2100ca5e6df132"
   },
   "overrides": {
     "@adobe/lit-mobx": "$@adobe/lit-mobx",
