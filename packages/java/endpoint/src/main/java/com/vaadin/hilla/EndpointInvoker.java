@@ -33,18 +33,25 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.googlecode.gentyref.GenericTypeReflector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNullApi;
+import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.authorization.AuthorizationEventPublisher;
+import org.springframework.security.core.Authentication;
 import org.springframework.util.ClassUtils;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
@@ -60,6 +67,7 @@ import com.vaadin.hilla.EndpointInvocationException.EndpointNotFoundException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointUnauthorizedException;
 import com.vaadin.hilla.EndpointRegistry.VaadinEndpointData;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
+import com.vaadin.hilla.auth.EndpointInvocation;
 import com.vaadin.hilla.exception.EndpointException;
 import com.vaadin.hilla.exception.EndpointValidationException;
 import com.vaadin.hilla.exception.EndpointValidationException.ValidationErrorData;
@@ -80,6 +88,7 @@ public class EndpointInvoker {
     private final ExplicitNullableTypeChecker explicitNullableTypeChecker;
     private final ServletContext servletContext;
     private final Validator validator;
+    private volatile Optional<AuthorizationEventPublisher> authorizationEventPublisher;
 
     /**
      * Creates an instance of this bean.
@@ -391,6 +400,28 @@ public class EndpointInvoker {
         }
     }
 
+    /**
+     * Checks that the given user is allowed to call the given endpoint method.
+     * <p>
+     * When the access is denied and an {@link AuthorizationEventPublisher} bean
+     * is available, an
+     * {@link org.springframework.security.authorization.event.AuthorizationDeniedEvent}
+     * carrying an {@link EndpointInvocation} is published, so that endpoint
+     * calls can be audited the same way as Spring method security invocations.
+     * The event is published for denied calls of unauthenticated users as well,
+     * and, like in Spring, the authentication it supplies is the anonymous
+     * authentication of the user rather than <code>null</code>.
+     *
+     * @param endpointData
+     *            the data of the endpoint to check
+     * @param methodToInvoke
+     *            the endpoint method to check
+     * @param principal
+     *            the user principal object
+     * @param rolesChecker
+     *            a function for checking if a user is in a given role
+     * @return an error message if the access is denied, {@code null} otherwise
+     */
     public String checkAccess(EndpointRegistry.VaadinEndpointData endpointData,
             Method methodToInvoke, Principal principal,
             Function<String, Boolean> rolesChecker) {
@@ -406,7 +437,68 @@ public class EndpointInvoker {
             checkError = accessChecker.check(invokedEndpointClass, principal,
                     rolesChecker);
         }
+        if (checkError != null) {
+            publishAuthorizationDeniedEvent(invokedEndpointClass, endpointData,
+                    methodToInvoke, principal);
+        }
         return checkError;
+    }
+
+    private void publishAuthorizationDeniedEvent(Class<?> invokedEndpointClass,
+            EndpointRegistry.VaadinEndpointData endpointData,
+            Method methodToInvoke, Principal principal) {
+        var publisher = getAuthorizationEventPublisher().orElse(null);
+        if (publisher == null) {
+            return;
+        }
+        var endpointName = EndpointRegistry
+                .getCanonicalEndpointNameForClass(invokedEndpointClass);
+        Supplier<Authentication> authentication = principal instanceof Authentication auth
+                ? () -> auth
+                : AuthenticationUtil::getRequiredSecurityHolderAuthentication;
+        var invocation = new EndpointInvocation(endpointName,
+                endpointData.getEndpointObject(), methodToInvoke);
+        try {
+            publisher.publishAuthorizationEvent(authentication, invocation,
+                    new AuthorizationDecision(false));
+        } catch (Exception e) {
+            getLogger().error(
+                    "Failed to publish an authorization denied event for endpoint '{}' method '{}'",
+                    endpointName, methodToInvoke.getName(), e);
+        }
+    }
+
+    private Optional<AuthorizationEventPublisher> getAuthorizationEventPublisher() {
+        var publisher = authorizationEventPublisher;
+        if (publisher == null) {
+            try {
+                publisher = Optional.ofNullable(applicationContext
+                        .getBean(AuthorizationEventPublisher.class));
+            } catch (NoUniqueBeanDefinitionException e) {
+                getLogger().warn(
+                        "Multiple AuthorizationEventPublisher beans are defined and none of them is primary, "
+                                + "authorization denied events are not published",
+                        e);
+                publisher = Optional.empty();
+            } catch (NoSuchBeanDefinitionException e) {
+                getLogger().debug(
+                        "AuthorizationEventPublisher not found in Spring Context, "
+                                + "authorization denied events are not published",
+                        e);
+                publisher = Optional.empty();
+            } catch (Exception e) {
+                // an unexpected failure may be transient, so it is logged and
+                // the bean is looked up again on the next denied call instead
+                // of turning the events off for good
+                getLogger().warn(
+                        "Looking up the AuthorizationEventPublisher bean failed, "
+                                + "this authorization denied event is not published",
+                        e);
+                return Optional.empty();
+            }
+            authorizationEventPublisher = publisher;
+        }
+        return publisher;
     }
 
     private Object invokeVaadinEndpointMethod(String endpointName,
