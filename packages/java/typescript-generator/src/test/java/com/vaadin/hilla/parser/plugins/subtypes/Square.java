@@ -15,23 +15,5 @@
  */
 package com.vaadin.hilla.parser.plugins.subtypes;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
-
-@Endpoint
-public class SubTypesEndpoint {
-
-    public BaseEvent sendEvent() {
-        return new AddEvent();
-    }
-
-    public void receiveEvent(BaseEvent event) {
-    }
-
-    public Notification sendNotification() {
-        return new EmailNotification();
-    }
-
-    public Shape sendShape() {
-        return new Circle(1);
-    }
+public record Square(double side) implements Shape {
 }

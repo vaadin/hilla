@@ -15,6 +15,7 @@ const sectionName = 'SubTypes';
 const USAGE = `
 import type BaseEventUnion from './${pathBase}/BaseEventUnion.js';
 import type NotificationUnion from './${pathBase}/NotificationUnion.js';
+import type ShapeUnion from './${pathBase}/ShapeUnion.js';
 
 export function describeEvent(event: BaseEventUnion): string {
   switch (event['@type']) {
@@ -32,6 +33,14 @@ export function describeNotification(notification: NotificationUnion): string {
     case 'html-email': return notification.html ?? '';
     case 'multipart-sms': return String(notification.parts);
     default: { const exhaustive: never = notification; return exhaustive; }
+  }
+}
+
+export function describeShape(shape: ShapeUnion): number {
+  switch (shape.shape) {
+    case 'circle': return shape.radius;
+    case 'square': return shape.side;
+    default: { const exhaustive: never = shape; return exhaustive; }
   }
 }
 `;
@@ -85,6 +94,15 @@ describe('SubTypesPlugin', () => {
     it('adds the discriminator below a class that is not a subtype', async () => {
       await expectSource(`${pathBase}/SmsNotification.ts`);
       await expectSource(`${pathBase}/MultipartSmsNotification.ts`);
+    });
+  });
+
+  describe('when the supertype is an interface', () => {
+    it('adds the discriminator to the implementations', async () => {
+      await expectSource(`${pathBase}/ShapeUnion.ts`);
+      await expectSource(`${pathBase}/Circle.ts`);
+      // the import of the model that only the discriminator used is dropped
+      await expectSource(`${pathBase}/CircleModel.ts`);
     });
   });
 

@@ -13,25 +13,22 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.hilla.parser.plugins.subtypes;
+package com.vaadin.hilla.parser.plugins.subtypes.typeids;
 
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
-public class SubTypesEndpoint {
+public class TypeIdsEndpoint {
 
-    public BaseEvent sendEvent() {
-        return new AddEvent();
+    public NameBase sendNamed() {
+        return new NameBase.Named();
     }
 
-    public void receiveEvent(BaseEvent event) {
+    public SimpleBase sendSimple() {
+        return new SimpleBase.Nested();
     }
 
-    public Notification sendNotification() {
-        return new EmailNotification();
-    }
-
-    public Shape sendShape() {
-        return new Circle(1);
+    public MinimalBase sendMinimal() {
+        return new MinimalBase.Subtype();
     }
 }
