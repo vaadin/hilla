@@ -97,8 +97,17 @@ public class TypeParameterModelTests {
     @Test
     public void should_CompareFBoundedTypeParameter() {
         var origin = FBoundedSample.class.getTypeParameters()[0];
+        var otherOrigin = OtherFBoundedSample.class.getTypeParameters()[0];
 
         assertEquals(TypeParameterModel.of(origin),
+                TypeParameterModel.of(origin));
+
+        // Both are named E and both are F-bounded, so only the bounds tell
+        // them apart: breaking out of the cycle may not stop the comparison
+        // before they are reached.
+        assertNotEquals(TypeParameterModel.of(origin),
+                TypeParameterModel.of(otherOrigin));
+        assertNotEquals(TypeParameterModel.of(otherOrigin),
                 TypeParameterModel.of(origin));
     }
 
@@ -214,6 +223,13 @@ public class TypeParameterModelTests {
      * any type parameterized by an enum.
      */
     static final class FBoundedSample<E extends Enum<E>> {
+    }
+
+    /**
+     * Another F-bounded type parameter, of the same name as the one of
+     * {@link FBoundedSample} but with a different bound.
+     */
+    static final class OtherFBoundedSample<E extends Comparable<E>> {
     }
 
     static final class Sample<@Sample.Foo RegularTypeParameter, @Sample.Foo BoundedTypeParameter extends Sample.Bound> {
