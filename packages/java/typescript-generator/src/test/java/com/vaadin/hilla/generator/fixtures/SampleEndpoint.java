@@ -45,12 +45,40 @@ public class SampleEndpoint {
         return null;
     }
 
+    public List<Sample> all() {
+        return List.of();
+    }
+
+    public Wrapper<Sample> wrapped() {
+        return null;
+    }
+
+    public Kind kind() {
+        return null;
+    }
+
     public String describe(String firstName, String lastName, int age) {
         return firstName + lastName + age;
     }
 
-    public Box<String> box() {
-        return null;
+    public enum Kind {
+        ONE, OTHER
+    }
+
+    /**
+     * An entity with a type parameter, which the type it is used with is
+     * written into.
+     */
+    public static class Wrapper<T> {
+        private T value;
+
+        public T getValue() {
+            return value;
+        }
+
+        public void setValue(T value) {
+            this.value = value;
+        }
     }
 
     public static class Sample {
@@ -62,22 +90,6 @@ public class SampleEndpoint {
 
         public void setName(String name) {
             this.name = name;
-        }
-    }
-
-    /**
-     * An entity with a type parameter, which the type it is used with is
-     * written into.
-     */
-    public static class Box<T> {
-        private T value;
-
-        public T getValue() {
-            return value;
-        }
-
-        public void setValue(T value) {
-            this.value = value;
         }
     }
 }
