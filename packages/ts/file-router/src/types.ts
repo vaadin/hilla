@@ -119,6 +119,9 @@ export type AgnosticRoute = Readonly<{
  * @typeParam T - The type of the detail object, same as in the view configuration.
  */
 export type MenuItem<T = unknown> = Readonly<{
+  /**
+   * The path of the view relative to the application base URI, i.e. without a leading slash.
+   */
   to: string;
   icon?: string;
   title?: string;

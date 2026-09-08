@@ -25,32 +25,43 @@ describe('@vaadin/hilla-file-router', () => {
       expect(deepRemoveNullProps(items)).to.be.deep.equal([
         {
           title: 'About',
-          to: '/about',
+          to: 'about',
         },
         {
           title: 'Profile',
-          to: '/profile/',
+          to: 'profile/',
         },
         {
           title: 'Password',
-          to: '/profile/account/security/password',
+          to: 'profile/account/security/password',
         },
         {
           title: 'Two Factor Auth',
-          to: '/profile/account/security/two-factor-auth',
+          to: 'profile/account/security/two-factor-auth',
         },
         {
           title: 'List',
-          to: '/profile/friends/list',
+          to: 'profile/friends/list',
         },
         {
-          to: '/test/empty',
+          to: 'test/empty',
         },
         {
           title: 'No Default Export',
-          to: '/test/no-default-export',
+          to: 'test/no-default-export',
         },
       ]);
+    });
+
+    it('should generate paths relative to the base URI so that they work under a context path', () => {
+      viewsSignal.value = {
+        '': { title: 'Index' },
+        '/': { title: 'Root' },
+        '/page1': { title: 'Page 1' },
+        '/admin/users': { title: 'Users' },
+      };
+
+      expect(createMenuItems().map(({ to }) => to)).to.be.deep.equal(['', '', 'admin/users', 'page1']);
     });
 
     it('should sort menu items by order then by natural string comparison based on path', () => {
@@ -69,22 +80,22 @@ describe('@vaadin/hilla-file-router', () => {
         {
           order: 5,
           title: 'empty',
-          to: '/test/empty',
+          to: 'test/empty',
         },
         {
           order: 10,
           title: 'No Default Export',
-          to: '/test/no-default-export',
+          to: 'test/no-default-export',
         },
         {
           order: 20,
           title: 'Password',
-          to: '/profile/account/security/password',
+          to: 'profile/account/security/password',
         },
         {
           order: 20,
           title: 'Two Factor Auth',
-          to: '/profile/account/security/two-factor-auth',
+          to: 'profile/account/security/two-factor-auth',
         },
         {
           title: 'Profile',
@@ -92,15 +103,15 @@ describe('@vaadin/hilla-file-router', () => {
         },
         {
           title: 'Root',
-          to: '/',
+          to: '',
         },
         {
           title: 'About',
-          to: '/a/b',
+          to: 'a/b',
         },
         {
           title: 'List',
-          to: '/b',
+          to: 'b',
         },
       ]);
     });
@@ -119,23 +130,23 @@ describe('@vaadin/hilla-file-router', () => {
       expect(deepRemoveNullProps(createMenuItems())).to.be.deep.equal([
         {
           title: 'Bar Foo',
-          to: '/bar/foo',
+          to: 'bar/foo',
         },
         {
           title: 'Baz',
-          to: '/baz',
+          to: 'baz',
         },
         {
           title: 'Baz Bar',
-          to: '/baz/bar',
+          to: 'baz/bar',
         },
         {
           title: 'Baz Bar Foo Buzz',
-          to: '/baz/bar/foo/buzz',
+          to: 'baz/bar/foo/buzz',
         },
         {
           title: 'Foo',
-          to: '/foo',
+          to: 'foo',
         },
       ]);
     });
@@ -154,15 +165,15 @@ describe('@vaadin/hilla-file-router', () => {
       expect(deepRemoveNullProps(createMenuItems())).to.be.deep.equal([
         {
           title: 'Baz',
-          to: '/baz',
+          to: 'baz',
         },
         {
           title: 'Baz Foo',
-          to: '/baz/foo',
+          to: 'baz/foo',
         },
         {
           title: 'Foo',
-          to: '/foo',
+          to: 'foo',
         },
       ]);
     });
@@ -185,12 +196,12 @@ describe('@vaadin/hilla-file-router', () => {
       expect(deepRemoveNullProps(items)).to.be.deep.equal([
         {
           title: 'Bar',
-          to: '/bar',
+          to: 'bar',
           detail: { foo: '1', bar: 2 },
         },
         {
           title: 'Foo',
-          to: '/foo',
+          to: 'foo',
           detail: { foo: '3' },
         },
       ]);
