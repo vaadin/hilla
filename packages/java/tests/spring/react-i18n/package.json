@@ -34,7 +34,7 @@
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.4.0",
     "@types/react": "19.2.18",
-    "@types/react-dom": "19.2.5",
+    "@types/react-dom": "19.2.7",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
     "@vaadin/hilla-generator-core": "file:../../../../ts/generator-core",
     "@vaadin/hilla-generator-plugin-backbone": "file:../../../../ts/generator-plugin-backbone",
@@ -90,7 +90,7 @@
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.4.0",
       "@types/react": "19.2.18",
-      "@types/react-dom": "19.2.5",
+      "@types/react-dom": "19.2.7",
       "@vaadin/hilla-generator-cli": "24.9.21",
       "@vaadin/hilla-generator-core": "24.9.21",
       "@vaadin/hilla-generator-plugin-backbone": "24.9.21",
@@ -113,7 +113,7 @@
       "vite": "7.3.6",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "d22bada2f4d599a4f477775463791bbc85dd4b7cfce1497a35e2dc8cb4cb1e2a",
+    "hash": "7771b01ed6da1d06e5d0b43ba3929b6b1ae6d655e5ee67e02c5c90c3533811ab",
     "overrides": {
       "@polymer/polymer": "$@polymer/polymer",
       "@vaadin/a11y-base": "24.9.18",
