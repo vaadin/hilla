@@ -19,11 +19,13 @@ This module consolidates the following previously separate modules:
 ## Generating TypeScript in Java
 
 The endpoint TypeScript is being moved from the Node generator into this
-module. The parser still produces OpenAPI, so `com.vaadin.hilla.generator.openapi`
-converts it into the model in `com.vaadin.hilla.generator.model`: plain records
-holding what the writers need, with the questions a Java type raises, such as
-whether a value can be absent, already answered. The model exists only while a
-generation runs; nothing writes it to a file.
+module. `com.vaadin.hilla.generator.model` holds what the writers need as plain
+records, with the questions a Java type raises, such as whether a value can be
+absent, already answered. It is built by a plugin while the parser walks the
+browser callable classes, which is what lets it keep the Java type each value
+comes from: OpenAPI has no place for it, and a date, an instant and a string
+are all a string there. The model exists only while a generation runs; nothing
+writes it to a file.
 
 `com.vaadin.hilla.generator.typescript` writes the files from that model, by
 filling in text templates, as nothing needs the TypeScript to be parsed. So far
@@ -42,8 +44,8 @@ still come from the Node generator, which is what the pipeline runs.
 
 ```
 com.vaadin.hilla.generator
-├── model/             - What the generator needs to know, as plain records
-├── openapi/           - Builds that model out of the OpenAPI the parser produces
+├── model/             - What the generator needs to know, as plain records,
+│                        built from the classes while the parser walks them
 └── typescript/        - Writes the TypeScript files
 
 com.vaadin.hilla.parser

@@ -23,11 +23,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import io.swagger.v3.oas.models.media.Schema;
-import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
-import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
@@ -203,10 +201,11 @@ public final class EndpointModelPlugin
 
     /**
      * Whether the type is generated as a declaration of its own, which every
-     * type outside the JDK is, an enum included.
+     * type outside the JDK is, an enum included: an enum becomes a TypeScript
+     * enum of its own, not the string it is serialized as.
      */
     private static boolean isEntity(SignatureModel signature) {
-        return signature.isNonJDKClass() && !signature.isEnum();
+        return signature.isNonJDKClass();
     }
 
     private static String name(SignatureModel signature) {
@@ -243,9 +242,4 @@ public final class EndpointModelPlugin
                 .filter(node -> node instanceof EndpointNode).findFirst();
     }
 
-    @NonNull
-    @Override
-    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
-        return nodeDependencies;
-    }
 }
