@@ -54,15 +54,6 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
  * This plugin adds support for {@code @JsonTypeInfo} and {@code @JsonSubTypes}.
  */
 public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
-    /**
-     * Marks a discriminator property which the type declares itself, as
-     * {@code As.EXISTING_PROPERTY} does, so that the generated model keeps it:
-     * it is an ordinary property as well as the type id. A discriminator
-     * without the mark exists in the serialized form alone, and a form has
-     * nothing to bind to it.
-     */
-    private static final String EXISTING_PROPERTY = "x-existing-property";
-
     @Override
     public void enter(NodePath<?> nodePath) {
     }
@@ -232,20 +223,20 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
      * <p>
      * With {@code As.EXISTING_PROPERTY} the discriminator is a property the
      * type declares itself, and everything else known about it, such as the
-     * Java type it comes from, has to survive: only the accepted values are
-     * added to it, and it is marked as declared so that the model keeps it. A
-     * discriminator which the type does not declare is added instead, and
-     * exists in the serialized form alone.
+     * Java type it comes from, is worth keeping: the accepted values are added
+     * to it rather than replacing it. That only holds for a property which is
+     * already a string, as the type ids are strings; a property of any other
+     * type, such as an enum, is replaced by a schema of the type ids
+     * themselves, which is what the generated TypeScript describes.
      */
     private static void setDiscriminatorProperty(Schema<?> schema,
             String property, List<String> values) {
         var properties = schema.getProperties();
         var declared = properties == null ? null : properties.get(property);
 
-        if (declared != null) {
+        if (declared != null && "string".equals(declared.getType())) {
             values.forEach(declared::addEnumItemObject);
             declared.setExample(values.get(0));
-            declared.addExtension(EXISTING_PROPERTY, true);
             return;
         }
 

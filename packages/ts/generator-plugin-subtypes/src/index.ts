@@ -17,10 +17,6 @@ import { schemaKey } from './utils.js';
 // one: kept as a fallback for OpenAPI documents without a `discriminator`
 const DEFAULT_DISCRIMINATOR = '@type';
 
-// set by the Java parser on a discriminator property which the type declares
-// itself, as `As.EXISTING_PROPERTY` does
-const EXISTING_PROPERTY = 'x-existing-property';
-
 type Components = Readonly<Record<string, Schema>>;
 
 /**
@@ -91,24 +87,7 @@ function findDiscriminatorValues(
   return values;
 }
 
-/**
- * Whether the type declares the discriminator property itself, rather than it
- * being one the Java parser added. A declared property belongs in the model of
- * a form like any other, while an added one exists in the serialized form
- * alone.
- */
-function declaresDiscriminator(component: Schema | undefined, discriminatorPropertyName: string): boolean {
-  if (!component) {
-    return false;
-  }
-
-  return ownSchemas(component).some((schema) => {
-    const property = schema.properties?.[discriminatorPropertyName];
-    return !!property && EXISTING_PROPERTY in property;
-  });
-}
-
-function fixSubType(sources: SourceFile[], components: Components, subKey: string, discriminator: Discriminator): void {
+function fixSubType(sources: SourceFile[], subKey: string, discriminator: Discriminator): void {
   const { propertyName: discriminatorPropertyName, values } = discriminator;
   const typeValues = values.get(subKey);
 
@@ -123,11 +102,7 @@ function fixSubType(sources: SourceFile[], components: Components, subKey: strin
   const fixedSource = new TypeFixProcessor(subSource, discriminatorPropertyName, typeValues).process();
   sources.splice(sources.indexOf(subSource), 1, fixedSource);
 
-  // the model keeps a discriminator which the type declares itself
-  if (declaresDiscriminator(components[subKey], discriminatorPropertyName)) {
-    return;
-  }
-
+  // fix the model to remove the discriminator property
   const modelFn = `${convertFullyQualifiedNameToRelativePath(subKey)}Model.ts`;
   const modelSource = sources.find(({ fileName }) => fileName === modelFn)!;
   const fixedModelSource = new ModelFixProcessor(modelSource, discriminatorPropertyName).process();
@@ -174,7 +149,7 @@ export default class SubTypesPlugin extends Plugin {
 
         // mentioned types in the oneOf need to be fixed as well
         subKeys.forEach((subKey) => {
-          fixSubType(sources, components, subKey, discriminator);
+          fixSubType(sources, subKey, discriminator);
         });
 
         // remove the union type model file
