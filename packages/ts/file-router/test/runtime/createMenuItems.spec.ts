@@ -8,7 +8,7 @@ const collator = new Intl.Collator('en-US');
 
 describe('@vaadin/hilla-file-router', () => {
   describe('createMenuItems', () => {
-    it('should generate a set of menu items', () => {
+    it('should generate a set of menu items with paths relative to the base URI', () => {
       viewsSignal.value = {
         '/about': { route: 'about', title: 'About' },
         '/profile/': { title: 'Profile' },
@@ -51,17 +51,6 @@ describe('@vaadin/hilla-file-router', () => {
           to: 'test/no-default-export',
         },
       ]);
-    });
-
-    it('should generate paths relative to the base URI so that they work under a context path', () => {
-      viewsSignal.value = {
-        '': { title: 'Index' },
-        '/': { title: 'Root' },
-        '/page1': { title: 'Page 1' },
-        '/admin/users': { title: 'Users' },
-      };
-
-      expect(createMenuItems().map(({ to }) => to)).to.be.deep.equal(['', '', 'admin/users', 'page1']);
     });
 
     it('should sort menu items by order then by natural string comparison based on path', () => {
