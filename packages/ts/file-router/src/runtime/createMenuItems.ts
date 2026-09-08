@@ -31,7 +31,10 @@ function toBaseRelativePath(path: string): string {
  * comparison.
  *
  * The `to` property of the returned items is relative to the application base URI, i.e. it has no leading slash, so
- * that it also resolves correctly when the application is deployed under a context path.
+ * that it also resolves correctly when the application is deployed under a context path. It can be used as is as the
+ * `path` of a side nav item or the `href` of a link. When it is given to a React Router API instead, such as
+ * `navigate()` or `<Link>`, from a layout that is not the root one, prefix it with a slash, e.g.
+ * `navigate('/' + to)`, so that it is resolved from the router root instead of the enclosing route.
  *
  * @returns A list of menu items.
  */

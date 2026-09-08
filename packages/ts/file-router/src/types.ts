@@ -120,7 +120,9 @@ export type AgnosticRoute = Readonly<{
  */
 export type MenuItem<T = unknown> = Readonly<{
   /**
-   * The path of the view relative to the application base URI, i.e. without a leading slash.
+   * The path of the view relative to the application base URI, i.e. without a leading slash. Prefix it with a slash
+   * when passing it to a React Router API from a layout that is not the root one, so that it is resolved from the
+   * router root instead of the enclosing route.
    */
   to: string;
   icon?: string;
