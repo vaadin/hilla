@@ -1,0 +1,251 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.hilla.generator.model;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import io.swagger.v3.oas.models.media.Schema;
+import org.jspecify.annotations.NonNull;
+
+import com.vaadin.hilla.parser.core.AbstractPlugin;
+import com.vaadin.hilla.parser.core.Node;
+import com.vaadin.hilla.parser.core.NodeDependencies;
+import com.vaadin.hilla.parser.core.NodePath;
+import com.vaadin.hilla.parser.core.Plugin;
+import com.vaadin.hilla.parser.core.PluginConfiguration;
+import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
+import com.vaadin.hilla.parser.models.SignatureModel;
+import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
+import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointNode;
+import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
+import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
+import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
+
+/**
+ * Builds the model the TypeScript generator works from out of the browser
+ * callable classes, while the parser walks them.
+ *
+ * <p>
+ * The model is assembled from the Java signatures the walk carries, so it keeps
+ * the type each value comes from, which the OpenAPI representation of the same
+ * walk cannot: a date, an instant and a plain string are all a string there.
+ * Whether a value can be absent is the one thing taken from that
+ * representation, since resolving it from the annotations, the Kotlin metadata
+ * and the defaults of the project is the work of the plugins which run before
+ * this one.
+ *
+ * <p>
+ * The plugin only collects: it changes nothing the other plugins produce, so
+ * the OpenAPI definition is exactly what it would be without it.
+ */
+public final class EndpointModelPlugin
+        extends AbstractPlugin<PluginConfiguration> {
+    private final Map<Node<?, ?>, List<TypeModel>> types = new IdentityHashMap<>();
+    private final Map<Node<?, ?>, List<ParameterModel>> parameters = new IdentityHashMap<>();
+    private final Map<Node<?, ?>, List<MethodModel>> methods = new IdentityHashMap<>();
+    private final List<EndpointModel> endpoints = new ArrayList<>();
+
+    /**
+     * The endpoints built by the last run of the parser.
+     */
+    public List<EndpointModel> getEndpoints() {
+        return List.copyOf(endpoints);
+    }
+
+    @Override
+    public void enter(NodePath<?> nodePath) {
+    }
+
+    @Override
+    public void exit(NodePath<?> nodePath) {
+        var node = nodePath.getNode();
+
+        if (node instanceof TypeSignatureNode type) {
+            collect(parentOf(nodePath), buildType(type, taken(node)));
+        } else if (node instanceof MethodParameterNode parameter) {
+            collect(parentOf(nodePath), parameter, taken(node));
+        } else if (node instanceof MethodNode method) {
+            collectMethod(nodePath, method);
+        } else if (node instanceof EndpointNode endpoint) {
+            endpoints.add(new EndpointModel(endpoint.getTarget().getName(),
+                    endpoint.getSource().getName(),
+                    methods.getOrDefault(node, List.of())));
+        }
+    }
+
+    @Override
+    public Collection<Class<? extends Plugin>> getRequiredPlugins() {
+        return List.of(BackbonePlugin.class);
+    }
+
+    /**
+     * A method of an endpoint, or of a class the endpoint exposes, in which
+     * case it belongs to the endpoint below which the walk found it.
+     */
+    private void collectMethod(NodePath<?> nodePath, MethodNode node) {
+        var returnType = taken(node).stream().findFirst().orElseGet(
+                () -> TypeModel.Scalar.of(TypeModel.ScalarKind.VOID, "void"));
+
+        var method = new MethodModel(node.getSource().getName(),
+                parameters.getOrDefault(node, List.of()), returnType);
+
+        findEndpoint(nodePath).ifPresent(endpoint -> methods
+                .computeIfAbsent(endpoint, key -> new ArrayList<>())
+                .add(method));
+    }
+
+    private void collect(Node<?, ?> parent, TypeModel type) {
+        if (parent != null) {
+            types.computeIfAbsent(parent, key -> new ArrayList<>()).add(type);
+        }
+    }
+
+    private void collect(Node<?, ?> parent, MethodParameterNode node,
+            List<TypeModel> ownTypes) {
+        if (parent == null) {
+            return;
+        }
+
+        var type = ownTypes.stream().findFirst().orElseGet(
+                () -> TypeModel.Scalar.of(TypeModel.ScalarKind.UNKNOWN,
+                        Object.class.getName()));
+
+        parameters.computeIfAbsent(parent, key -> new ArrayList<>())
+                .add(new ParameterModel(node.getTarget(), type));
+    }
+
+    /**
+     * Builds the type of one signature out of the types built for the
+     * signatures it refers to, such as the items of an array.
+     */
+    private TypeModel buildType(TypeSignatureNode node,
+            List<TypeModel> referred) {
+        var signature = node.getType();
+        var optional = Boolean.TRUE.equals(nullable(node.getTarget()));
+
+        if (signature.isTypeVariable() || signature.isTypeParameter()) {
+            return new TypeModel.TypeVariable(name(signature));
+        }
+
+        // A type argument, such as the String of a List<String>, stands for the
+        // type it is bound to, which the walk visits below it
+        if (signature.isTypeArgument()) {
+            return optional ? asOptional(only(referred)) : only(referred);
+        }
+
+        if (signature.isArray() || signature.isIterable()) {
+            return new TypeModel.ArrayOf(only(referred), optional);
+        }
+
+        if (signature.isMap()) {
+            return new TypeModel.MapOf(only(referred), optional);
+        }
+
+        if (signature.isClassRef() && isEntity(signature)) {
+            return new TypeModel.EntityRef(name(signature), referred, optional);
+        }
+
+        return new TypeModel.Scalar(scalarKind(signature), optional,
+                name(signature));
+    }
+
+    private static TypeModel asOptional(TypeModel type) {
+        return switch (type) {
+        case TypeModel.Scalar scalar ->
+            new TypeModel.Scalar(scalar.kind(), true, scalar.javaType());
+        case TypeModel.ArrayOf array ->
+            new TypeModel.ArrayOf(array.items(), true);
+        case TypeModel.MapOf map -> new TypeModel.MapOf(map.values(), true);
+        case TypeModel.EntityRef entity -> new TypeModel.EntityRef(
+                entity.javaClass(), entity.typeArguments(), true);
+        case TypeModel.TypeVariable variable -> variable;
+        };
+    }
+
+    private static TypeModel.ScalarKind scalarKind(SignatureModel signature) {
+        if (signature.isBoolean()) {
+            return TypeModel.ScalarKind.BOOLEAN;
+        }
+
+        if (signature.isInteger() || signature.isFloat() || signature.isLong()
+                || signature.isShort() || signature.isByte()
+                || signature.isDouble() || signature.isBigDecimal()
+                || signature.isBigInteger()) {
+            return TypeModel.ScalarKind.NUMBER;
+        }
+
+        if (signature.isString() || signature.isCharacter()
+                || signature.isDate() || signature.isDateTime()
+                || signature.isEnum()) {
+            return TypeModel.ScalarKind.STRING;
+        }
+
+        return TypeModel.ScalarKind.UNKNOWN;
+    }
+
+    /**
+     * Whether the type is generated as a declaration of its own, which every
+     * type outside the JDK is, an enum included.
+     */
+    private static boolean isEntity(SignatureModel signature) {
+        return signature.isNonJDKClass() && !signature.isEnum();
+    }
+
+    private static String name(SignatureModel signature) {
+        if (signature instanceof ClassRefSignatureModel classRef) {
+            return classRef.getClassInfo().getName();
+        }
+
+        return signature.get() == null ? Object.class.getName()
+                : String.valueOf(signature.get());
+    }
+
+    private static Boolean nullable(Schema<?> schema) {
+        return schema == null ? null : schema.getNullable();
+    }
+
+    private static TypeModel only(List<TypeModel> types) {
+        return types.stream().findFirst().orElseGet(() -> TypeModel.Scalar
+                .of(TypeModel.ScalarKind.UNKNOWN, Object.class.getName()));
+    }
+
+    private List<TypeModel> taken(Node<?, ?> node) {
+        var own = types.remove(node);
+        return own == null ? List.of() : own;
+    }
+
+    private static Node<?, ?> parentOf(NodePath<?> nodePath) {
+        return nodePath.getParentPath() == null ? null
+                : nodePath.getParentPath().getNode();
+    }
+
+    private static Optional<Node<?, ?>> findEndpoint(NodePath<?> nodePath) {
+        return nodePath.getParentPath().stream()
+                .<Node<?, ?>> map(NodePath::getNode)
+                .filter(node -> node instanceof EndpointNode).findFirst();
+    }
+
+    @NonNull
+    @Override
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
+        return nodeDependencies;
+    }
+}
