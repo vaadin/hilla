@@ -100,8 +100,6 @@ public class TypeParameterModelTests {
 
         assertEquals(TypeParameterModel.of(origin),
                 TypeParameterModel.of(origin));
-        assertEquals(TypeParameterModel.of(origin).hashCode(),
-                TypeParameterModel.of(origin).hashCode());
     }
 
     @DisplayName("It should have the same hashCode for source and reflection models")

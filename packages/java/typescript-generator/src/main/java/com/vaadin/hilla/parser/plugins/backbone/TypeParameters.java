@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.vaadin.hilla.parser.models.ArraySignatureModel;
@@ -37,23 +38,26 @@ final class TypeParameters {
     }
 
     /**
-     * Returns the bounds of a type parameter which say something about it.
+     * Returns the bounds of a type parameter which say something about it,
+     * which leaves out {@code Object} and the bounds leading back to the type
+     * parameter itself.
      *
      * <p>
-     * A bound is left out when it leads back to the type parameter it belongs
-     * to, which is the shape of an F-bounded type parameter such as the
-     * {@code <E extends Enum<E>>} of {@link Enum} itself, and the only way to
-     * constrain a type parameter to be an enum. Such a bound describes nothing
-     * beyond the type parameter, and following it never ends, so the type
-     * parameter is treated as if the bound were not there.
+     * A bound leads back to the type parameter it belongs to in an F-bounded
+     * type parameter such as the {@code <E extends Enum<E>>} of {@link Enum}
+     * itself, which is the only way to constrain a type parameter to be an
+     * enum. Such a bound describes nothing beyond the type parameter, and
+     * following it never ends, so the type parameter is treated as if the bound
+     * were not there.
      *
      * @param typeParameter
      *            the type parameter to read the bounds of
-     * @return the bounds which do not lead back to the type parameter
+     * @return the bounds which constrain the type parameter
      */
     static List<SignatureModel> getEffectiveBounds(
             TypeParameterModel typeParameter) {
         return typeParameter.getBounds().stream().filter(Objects::nonNull)
+                .filter(Predicate.not(SpecializedModel::isNativeObject))
                 .filter(bound -> !leadsTo(bound, typeParameter.getName(),
                         new HashSet<>()))
                 .collect(Collectors.toList());
@@ -65,12 +69,10 @@ final class TypeParameters {
      *
      * @param typeParameter
      *            the type parameter to check
-     * @return {@code true} if the type parameter has no effective bound beyond
-     *         {@code Object}
+     * @return {@code true} if the type parameter has no effective bound
      */
     static boolean isUnbounded(TypeParameterModel typeParameter) {
-        return getEffectiveBounds(typeParameter).stream()
-                .allMatch(SpecializedModel::isNativeObject);
+        return getEffectiveBounds(typeParameter).isEmpty();
     }
 
     /**

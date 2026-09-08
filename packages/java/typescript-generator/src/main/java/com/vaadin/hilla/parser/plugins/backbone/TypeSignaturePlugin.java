@@ -19,7 +19,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -40,7 +39,6 @@ import com.vaadin.hilla.parser.models.ArraySignatureModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.ReflectionSignatureModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
-import com.vaadin.hilla.parser.models.SpecializedModel;
 import com.vaadin.hilla.parser.models.TypeArgumentModel;
 import com.vaadin.hilla.parser.models.TypeParameterModel;
 import com.vaadin.hilla.parser.models.TypeVariableModel;
@@ -261,9 +259,7 @@ public final class TypeSignaturePlugin
             }
         } else if (signature.isTypeParameter()) {
             items = TypeParameters
-                    .getEffectiveBounds((TypeParameterModel) signature).stream()
-                    .filter(Predicate.not(SpecializedModel::isNativeObject))
-                    .collect(Collectors.toList());
+                    .getEffectiveBounds((TypeParameterModel) signature);
         } else if (signature.isTypeVariable()) {
             items = List.of(((TypeVariableModel) signature).resolve());
         } else if (signature.isClassRef()) {
