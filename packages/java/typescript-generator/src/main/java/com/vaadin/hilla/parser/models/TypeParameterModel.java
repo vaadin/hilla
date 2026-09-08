@@ -16,14 +16,27 @@
 package com.vaadin.hilla.parser.models;
 
 import java.lang.reflect.TypeVariable;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import io.github.classgraph.TypeParameter;
 import org.jspecify.annotations.NonNull;
 
 public abstract class TypeParameterModel extends AnnotatedAbstractModel
         implements SignatureModel, NamedModel {
+    /**
+     * The origins of the type parameter pairs whose bounds are being compared
+     * on the current thread. The origins are the key rather than the models
+     * themselves, because a model is created anew every time a type parameter
+     * is reached.
+     *
+     * @see #equals(Object)
+     */
+    private static final ThreadLocal<Set<List<Object>>> COMPARED_BOUNDS = ThreadLocal
+            .withInitial(HashSet::new);
+
     private List<SignatureModel> bounds;
 
     @Deprecated
@@ -47,9 +60,32 @@ public abstract class TypeParameterModel extends AnnotatedAbstractModel
 
         var other = (TypeParameterModel) obj;
 
-        return getName().equals(other.getName())
-                && getAnnotations().equals(other.getAnnotations())
-                && getBounds().equals(other.getBounds());
+        if (!getName().equals(other.getName())
+                || !getAnnotations().equals(other.getAnnotations())) {
+            return false;
+        }
+
+        var comparedBounds = COMPARED_BOUNDS.get();
+        var pair = List.<Object> of(get(), other.get());
+
+        // The bounds of an F-bounded type parameter, such as the
+        // <E extends Enum<E>> of Enum itself, lead back to the type parameter,
+        // which starts the very same comparison again. Meeting the same pair
+        // twice means that everything on the way back to it has matched, which
+        // is as far as the bounds can be compared, so they are equal.
+        if (!comparedBounds.add(pair)) {
+            return true;
+        }
+
+        try {
+            return getBounds().equals(other.getBounds());
+        } finally {
+            comparedBounds.remove(pair);
+
+            if (comparedBounds.isEmpty()) {
+                COMPARED_BOUNDS.remove();
+            }
+        }
     }
 
     public List<SignatureModel> getBounds() {

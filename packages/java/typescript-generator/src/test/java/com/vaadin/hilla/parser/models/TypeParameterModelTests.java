@@ -37,6 +37,7 @@ import io.github.classgraph.TypeParameter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -90,6 +91,17 @@ public class TypeParameterModelTests {
                             .collect(Collectors.toList()));
             break;
         }
+    }
+
+    @DisplayName("It should compare an F-bounded type parameter")
+    @Test
+    public void should_CompareFBoundedTypeParameter() {
+        var origin = FBoundedSample.class.getTypeParameters()[0];
+
+        assertEquals(TypeParameterModel.of(origin),
+                TypeParameterModel.of(origin));
+        assertEquals(TypeParameterModel.of(origin).hashCode(),
+                TypeParameterModel.of(origin).hashCode());
     }
 
     @DisplayName("It should have the same hashCode for source and reflection models")
@@ -196,6 +208,14 @@ public class TypeParameterModelTests {
                                 entry.getKey()));
             }
         }
+    }
+
+    /**
+     * An F-bounded type parameter: its bound leads back to the type parameter
+     * itself, which is the shape of the type parameter of {@link Enum} and of
+     * any type parameterized by an enum.
+     */
+    static final class FBoundedSample<E extends Enum<E>> {
     }
 
     static final class Sample<@Sample.Foo RegularTypeParameter, @Sample.Foo BoundedTypeParameter extends Sample.Bound> {
