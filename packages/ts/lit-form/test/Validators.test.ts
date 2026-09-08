@@ -271,6 +271,9 @@ describe('@vaadin/hilla-lit-form', () => {
       assert.isNotTrue(noMinValidator.impliesRequired);
       assert.isTrue(noMinValidator.validate(undefined));
       assert.isTrue(noMinValidator.validate(null));
+      // `Size` is also generated for array properties
+      assert.isTrue(noMinValidator.validate([] as never));
+      assert.isFalse(validator.validate([] as never));
       // eslint-disable-next-line sort-keys
       const minZeroValidator = new Size({ min: 0, max: 3 });
       assert.isNotTrue(minZeroValidator.impliesRequired);
