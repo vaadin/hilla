@@ -37,6 +37,8 @@ import reactor.core.publisher.Flux;
 
 import com.vaadin.flow.internal.FrontendUtils;
 import com.vaadin.hilla.EndpointSubscription;
+import com.vaadin.hilla.generator.model.EndpointModel;
+import com.vaadin.hilla.generator.model.EndpointModelPlugin;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
@@ -102,6 +104,7 @@ public final class FullStackGenerator {
     private final ResourceLoader resourceLoader;
     private final Path targetDir;
     private final List<Class<?>> endpointClasses;
+    private final EndpointModelPlugin modelPlugin = new EndpointModelPlugin();
     private final List<Plugin> plugins = defaultParserPlugins();
     private boolean clientFileIncluded;
     private String snapshotsPackage;
@@ -178,6 +181,15 @@ public final class FullStackGenerator {
     }
 
     /**
+     * Runs the Java part of the pipeline and returns the model the TypeScript
+     * is written from, which the parser builds while it walks the classes.
+     */
+    public List<EndpointModel> parseModel() {
+        parse();
+        return modelPlugin.getEndpoints();
+    }
+
+    /**
      * Runs only the Java part of the pipeline. Available for the few tests
      * which assert on things that are not visible in the generated TypeScript.
      */
@@ -190,6 +202,9 @@ public final class FullStackGenerator {
                     .endpointAnnotations(ENDPOINT_ANNOTATIONS)
                     .endpointExposedAnnotations(ENDPOINT_EXPOSED_ANNOTATIONS);
             plugins.forEach(parser::addPlugin);
+            // Collects the model while the other plugins build the OpenAPI
+            // definition, without changing anything they produce
+            parser.addPlugin(modelPlugin);
 
             return parser.execute(endpointClasses);
         } catch (URISyntaxException e) {

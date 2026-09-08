@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.hilla.generator.fixtures.SampleEndpoint;
 import com.vaadin.hilla.generator.fixtures.ShadowingEndpoint;
 import com.vaadin.hilla.generator.model.EndpointModel;
-import com.vaadin.hilla.generator.openapi.OpenAPIToModel;
 import com.vaadin.hilla.generator.typescript.BarrelWriter;
 import com.vaadin.hilla.generator.typescript.ClientWriter;
 import com.vaadin.hilla.generator.typescript.EndpointWriter;
@@ -154,8 +153,7 @@ public class GeneratedTypeScriptTest {
     }
 
     private static List<EndpointModel> endpointsOf(Class<?> endpoint) {
-        return OpenAPIToModel.endpoints(
-                new FullStackGenerator(GeneratedTypeScriptTest.class, endpoint)
-                        .parse());
+        return new FullStackGenerator(GeneratedTypeScriptTest.class, endpoint)
+                .parseModel();
     }
 }
