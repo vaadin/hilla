@@ -25,4 +25,11 @@ public class ShadowingEndpoint {
     public String echo(String client, String init) {
         return client + init;
     }
+
+    /**
+     * Named after the client the generated file calls the server with.
+     */
+    public String client() {
+        return "";
+    }
 }
