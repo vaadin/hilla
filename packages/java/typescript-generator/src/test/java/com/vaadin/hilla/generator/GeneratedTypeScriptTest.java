@@ -46,12 +46,13 @@ public class GeneratedTypeScriptTest {
         assertEquals(
                 """
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
-                        import type Box from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Box.js';
+                        import type Kind from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Kind.js';
                         import type Sample from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Sample.js';
+                        import type Wrapper from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Wrapper.js';
                         import client from './connect-client.default.js';
 
-                        async function box(init?: EndpointRequestInit): Promise<Box<string | undefined> | undefined> {
-                          return client.call('SampleEndpoint', 'box', {}, init);
+                        export async function all(init?: EndpointRequestInit): Promise<Array<Sample | undefined> | undefined> {
+                          return client.call('SampleEndpoint', 'all', {}, init);
                         }
 
                         async function count(init?: EndpointRequestInit): Promise<number> {
@@ -74,7 +75,11 @@ public class GeneratedTypeScriptTest {
                           return client.call('SampleEndpoint', 'greet', { name }, init);
                         }
 
-                        async function names(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
+                        export async function kind(init?: EndpointRequestInit): Promise<Kind | undefined> {
+                          return client.call('SampleEndpoint', 'kind', {}, init);
+                        }
+
+                        export async function names(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'names', {}, init);
                         }
 
@@ -82,7 +87,9 @@ public class GeneratedTypeScriptTest {
                           return client.call('SampleEndpoint', 'ping', {}, init);
                         }
 
-                        export { box, count, counts, describe, find, greet, names, ping };
+                        export async function wrapped(init?: EndpointRequestInit): Promise<Wrapper<Sample | undefined> | undefined> {
+                          return client.call('SampleEndpoint', 'wrapped', {}, init);
+                        }
                         """,
                 file.content());
     }
@@ -96,12 +103,30 @@ public class GeneratedTypeScriptTest {
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
                         import client_1 from './connect-client.default.js';
 
-                        async function echo(client: string | undefined, init: string | undefined, _init?: EndpointRequestInit): Promise<string | undefined> {
+                        export async function client(init?: EndpointRequestInit): Promise<string | undefined> {
+                          return client_1.call('ShadowingEndpoint', 'client', {}, init);
+                        }
+
+                        export async function echo(
+                          client: string | undefined,
+                          init: string | undefined,
+                          _init?: EndpointRequestInit,
+                        ): Promise<string | undefined> {
                           return client_1.call('ShadowingEndpoint', 'echo', { client, init }, _init);
                         }
 
                         export { echo };
                         """,
+                new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
+                        .write(endpoint).content());
+    }
+
+    @Test
+    public void should_WriteAModuleForAnEndpointWithoutMethods() {
+        var endpoint = new EndpointModel("Empty", "com.example.Empty",
+                List.of());
+
+        assertEquals("export {};\n",
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpoint).content());
     }
