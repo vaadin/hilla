@@ -54,6 +54,15 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
  * This plugin adds support for {@code @JsonTypeInfo} and {@code @JsonSubTypes}.
  */
 public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
+    /**
+     * Marks a discriminator property which the type declares itself, as
+     * {@code As.EXISTING_PROPERTY} does, so that the generated model keeps it:
+     * it is an ordinary property as well as the type id. A discriminator
+     * without the mark exists in the serialized form alone, and a form has
+     * nothing to bind to it.
+     */
+    public static final String EXISTING_PROPERTY = "x-existing-property";
+
     @Override
     public void enter(NodePath<?> nodePath) {
     }
@@ -209,12 +218,38 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                 && composedSchema.getAnyOf() != null) {
             composedSchema.getAnyOf().stream()
                     .filter(ObjectSchema.class::isInstance)
-                    .map(ObjectSchema.class::cast)
-                    .forEach(s -> s.addProperty(property,
-                            discriminatorSchema(values)));
+                    .map(ObjectSchema.class::cast).forEach(
+                            s -> setDiscriminatorProperty(s, property, values));
         } else {
-            schema.addProperty(property, discriminatorSchema(values));
+            setDiscriminatorProperty(schema, property, values);
         }
+    }
+
+    /**
+     * Narrows the discriminator property of one schema to the values the type
+     * accepts.
+     *
+     * <p>
+     * With {@code As.EXISTING_PROPERTY} the discriminator is a property the
+     * type declares itself, and everything else known about it, such as the
+     * Java type it comes from, has to survive: only the accepted values are
+     * added to it, and it is marked as declared so that the model keeps it. A
+     * discriminator which the type does not declare is added instead, and
+     * exists in the serialized form alone.
+     */
+    private static void setDiscriminatorProperty(Schema<?> schema,
+            String property, List<String> values) {
+        var properties = schema.getProperties();
+        var declared = properties == null ? null : properties.get(property);
+
+        if (declared != null) {
+            values.forEach(declared::addEnumItemObject);
+            declared.setExample(values.get(0));
+            declared.addExtension(EXISTING_PROPERTY, true);
+            return;
+        }
+
+        schema.addProperty(property, discriminatorSchema(values));
     }
 
     /**
