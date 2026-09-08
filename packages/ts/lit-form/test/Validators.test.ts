@@ -264,8 +264,16 @@ describe('@vaadin/hilla-lit-form', () => {
       assert.isFalse(validator.validate('a'));
       assert.isTrue(validator.validate('aa'));
       assert.isTrue(validator.validate('aaa'));
+      // A positive min implies required, so an empty value stays invalid
+      assert.isFalse(validator.validate(undefined));
+      assert.isFalse(validator.validate(null));
       const noMinValidator = new Size({ max: 3 });
       assert.isNotTrue(noMinValidator.impliesRequired);
+      assert.isTrue(noMinValidator.validate(undefined));
+      assert.isTrue(noMinValidator.validate(null));
+      // `Size` is also generated for array properties
+      assert.isTrue(noMinValidator.validate([] as never));
+      assert.isFalse(validator.validate([] as never));
       // eslint-disable-next-line sort-keys
       const minZeroValidator = new Size({ min: 0, max: 3 });
       assert.isNotTrue(minZeroValidator.impliesRequired);
@@ -344,6 +352,8 @@ describe('@vaadin/hilla-lit-form', () => {
       assert.isTrue(validator.validate('+35 123 456 789'));
       assert.isTrue(validator.validate('123 456 789'));
       assert.isTrue(validator.validate('123-456-789'));
+      assert.isTrue(validator.validate(undefined));
+      assert.isTrue(validator.validate(null));
       validator = new Pattern('\\d+');
       assert.isTrue(validator.validate('1'));
       assert.isFalse(validator.validate('a'));
