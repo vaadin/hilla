@@ -41,13 +41,21 @@ public sealed interface TypeModel {
         STRING, NUMBER, BOOLEAN, UNKNOWN, VOID
     }
 
-    record Scalar(ScalarKind kind, boolean optional) implements TypeModel {
+    /**
+     * @param javaType
+     *            the fully qualified name of the Java type the value comes
+     *            from, which TypeScript has no way of telling apart: a date and
+     *            an instant are both written as a string
+     */
+    record Scalar(ScalarKind kind, boolean optional,
+            String javaType) implements TypeModel {
         public Scalar {
             Objects.requireNonNull(kind);
+            Objects.requireNonNull(javaType);
         }
 
-        public static Scalar of(ScalarKind kind) {
-            return new Scalar(kind, false);
+        public static Scalar of(ScalarKind kind, String javaType) {
+            return new Scalar(kind, false, javaType);
         }
     }
 
