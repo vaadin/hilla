@@ -61,7 +61,7 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
      * without the mark exists in the serialized form alone, and a form has
      * nothing to bind to it.
      */
-    public static final String EXISTING_PROPERTY = "x-existing-property";
+    private static final String EXISTING_PROPERTY = "x-existing-property";
 
     @Override
     public void enter(NodePath<?> nodePath) {

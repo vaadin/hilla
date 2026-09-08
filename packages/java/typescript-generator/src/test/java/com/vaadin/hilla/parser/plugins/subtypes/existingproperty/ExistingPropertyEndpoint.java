@@ -22,4 +22,8 @@ public class ExistingPropertyEndpoint {
     public DeclaredBase send() {
         return new DeclaredBase.First();
     }
+
+    public InheritedBase sendInherited() {
+        return new InheritedBase.Sweet();
+    }
 }
