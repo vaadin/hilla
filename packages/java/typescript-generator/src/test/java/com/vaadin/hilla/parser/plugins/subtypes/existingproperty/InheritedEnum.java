@@ -15,23 +15,25 @@
  */
 package com.vaadin.hilla.parser.plugins.subtypes.existingproperty;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-@Endpoint
-public class ExistingPropertyEndpoint {
-    public DeclaredBase send() {
-        return new DeclaredBase.First();
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "colour")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = InheritedEnum.Red.class, name = "RED"),
+        @JsonSubTypes.Type(value = InheritedEnum.Blue.class, name = "BLUE") })
+public class InheritedEnum {
+    public Colour colour;
+
+    public enum Colour {
+        RED, BLUE
     }
 
-    public InheritedBase sendInherited() {
-        return new InheritedBase.Sweet();
+    public static class Red extends InheritedEnum {
+        public String note;
     }
 
-    public EnumDiscriminated sendEnumDiscriminated() {
-        return new EnumDiscriminated.Bitter();
-    }
-
-    public InheritedEnum sendInheritedEnum() {
-        return new InheritedEnum.Red();
+    public static class Blue extends InheritedEnum {
+        public int level;
     }
 }

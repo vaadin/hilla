@@ -15,6 +15,8 @@
  */
 package com.vaadin.hilla.parser.plugins.subtypes;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -170,7 +172,8 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                 .filter(c -> c.getAnnotation(JsonTypeInfo.class) != null
                         && c.getAnnotation(JsonSubTypes.class) != null)
                 .findFirst()
-                .map(c -> new SubTypesInfo(c.getAnnotation(JsonTypeInfo.class),
+                .map(c -> new SubTypesInfo(c,
+                        c.getAnnotation(JsonTypeInfo.class),
                         c.getAnnotation(JsonSubTypes.class)));
     }
 
@@ -209,38 +212,12 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                 && composedSchema.getAnyOf() != null) {
             composedSchema.getAnyOf().stream()
                     .filter(ObjectSchema.class::isInstance)
-                    .map(ObjectSchema.class::cast).forEach(
-                            s -> setDiscriminatorProperty(s, property, values));
+                    .map(ObjectSchema.class::cast)
+                    .forEach(s -> s.addProperty(property,
+                            discriminatorSchema(values)));
         } else {
-            setDiscriminatorProperty(schema, property, values);
+            schema.addProperty(property, discriminatorSchema(values));
         }
-    }
-
-    /**
-     * Narrows the discriminator property of one schema to the values the type
-     * accepts.
-     *
-     * <p>
-     * With {@code As.EXISTING_PROPERTY} the discriminator is a property the
-     * type declares itself, and everything else known about it, such as the
-     * Java type it comes from, is worth keeping: the accepted values are added
-     * to it rather than replacing it. That only holds for a property which is
-     * already a string, as the type ids are strings; a property of any other
-     * type, such as an enum, is replaced by a schema of the type ids
-     * themselves, which is what the generated TypeScript describes.
-     */
-    private static void setDiscriminatorProperty(Schema<?> schema,
-            String property, List<String> values) {
-        var properties = schema.getProperties();
-        var declared = properties == null ? null : properties.get(property);
-
-        if (declared != null && "string".equals(declared.getType())) {
-            values.forEach(declared::addEnumItemObject);
-            declared.setExample(values.get(0));
-            return;
-        }
-
-        schema.addProperty(property, discriminatorSchema(values));
     }
 
     /**
@@ -259,7 +236,9 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
      * The {@code @JsonTypeInfo} and {@code @JsonSubTypes} annotations that
      * apply to a class.
      */
-    private record SubTypesInfo(JsonTypeInfo typeInfo, JsonSubTypes subTypes) {
+    private record SubTypesInfo(Class<?> declaringClass, JsonTypeInfo typeInfo,
+            JsonSubTypes subTypes) {
+
         /**
          * The type id strategies whose values are known here: both take the id
          * from the annotations and fall back to the name of the class itself.
@@ -288,12 +267,71 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                 return Optional.empty();
             }
 
-            var property = typeInfo.property();
+            var property = typeInfo.property().isBlank()
+                    ? typeInfo.use().getDefaultPropertyName()
+                    : typeInfo.property();
 
-            return property.isBlank()
-                    ? Optional
-                            .ofNullable(typeInfo.use().getDefaultPropertyName())
-                    : Optional.of(property);
+            if (property == null || !acceptsTypeIds(property)) {
+                return Optional.empty();
+            }
+
+            return Optional.of(property);
+        }
+
+        /**
+         * Whether the property can be described as the type ids the hierarchy
+         * uses, which are strings.
+         *
+         * <p>
+         * With {@code As.EXISTING_PROPERTY} the discriminator is a property the
+         * types declare themselves, and Jackson serializes the type id as its
+         * value, so a declared property of any other type, an enum being the
+         * common case, cannot be described as the ids without contradicting the
+         * type it is declared with. Nothing is generated for it then, which
+         * leaves the property as what it is declared as: describing it as the
+         * ids instead produced TypeScript which did not compile.
+         */
+        private boolean acceptsTypeIds(String property) {
+            return declaredType(property)
+                    .map(type -> type == String.class || type == Object.class)
+                    .orElse(true);
+        }
+
+        /**
+         * The type the hierarchy declares the property with, if it declares it
+         * at all, looking at the type which declares the subtypes as well as at
+         * the subtypes themselves. A discriminator which no type declares is
+         * added by the parser, and is a string by construction.
+         */
+        private Optional<Class<?>> declaredType(String property) {
+            return Stream
+                    .concat(Stream.of(declaringClass),
+                            Arrays.stream(subTypes.value())
+                                    .map(JsonSubTypes.Type::value))
+                    .flatMap(SubTypesPlugin::hierarchyOf).distinct()
+                    .<Class<?>> flatMap(
+                            cls -> Stream.concat(
+                                    Arrays.stream(cls.getDeclaredFields())
+                                            .filter(field -> field.getName()
+                                                    .equals(property))
+                                            .map(Field::getType),
+                                    Arrays.stream(cls.getDeclaredMethods())
+                                            .filter(method -> isGetterOf(method,
+                                                    property))
+                                            .map(Method::getReturnType)))
+                    .findFirst();
+        }
+
+        private static boolean isGetterOf(Method method, String property) {
+            if (method.getParameterCount() > 0) {
+                return false;
+            }
+
+            var capitalized = Character.toUpperCase(property.charAt(0))
+                    + property.substring(1);
+
+            return method.getName().equals("get" + capitalized)
+                    || method.getName().equals("is" + capitalized);
         }
 
         /**

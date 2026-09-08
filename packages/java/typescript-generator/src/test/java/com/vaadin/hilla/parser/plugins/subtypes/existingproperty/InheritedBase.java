@@ -23,6 +23,13 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * how {@code As.EXISTING_PROPERTY} is usually written: the subtypes inherit the
  * property rather than declaring it again, so their own schemas do not mention
  * it and each of them gets a discriminator of its own instead.
+ *
+ * <p>
+ * The model of the base keeps the property, unlike the models of the subtypes,
+ * which leaves a form for a subtype with a field it can only set to the one
+ * value the subtype accepts. Leaving out a property of the very type which
+ * declares it would be worse, so the models follow where the property is
+ * declared.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "flavour")
 @JsonSubTypes({
