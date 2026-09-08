@@ -333,9 +333,11 @@ export class Size extends AbstractValidator<string> {
     }
   }
 
-  override validate(value: string): boolean {
-    if (this.min && this.min > 0 && !new Required().validate(value)) {
-      return false;
+  override validate(value: string | null | undefined): boolean {
+    if (value == null) {
+      // JSR380 considers empty values valid, unless a positive `min` makes the
+      // value required (see `impliesRequired` above).
+      return !(this.min > 0);
     }
     // eslint-disable-next-line sort-keys
     return isLength(value, { min: this.min, max: this.max });
@@ -448,7 +450,8 @@ export class Pattern extends AbstractValidator<string> {
   }
 
   override validate(value: any): boolean {
-    return matches(value, this.regexp);
+    // JSR380: null values are considered valid
+    return value == null || matches(value, this.regexp);
   }
 
   readonly name = 'Pattern';

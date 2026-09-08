@@ -14,6 +14,7 @@ import {
   field,
   type InterpolateMessageCallback,
   NotBlank,
+  NotEmpty,
   Required,
   Size,
   ValidationError,
@@ -455,6 +456,17 @@ describe('@vaadin/hilla-lit-form', () => {
           expect(errors[0].property).to.equal('');
           expect(errors[0].value).to.eql({ idString: '' });
         });
+      });
+
+      it('should not throw when validating an undefined value of a required field', async () => {
+        const testBinder = new Binder(view, TestModel);
+        const optionalString = testBinder.for(testBinder.model.fieldOptionalString);
+        optionalString.addValidator(new NotEmpty());
+        optionalString.addValidator(new Size({ max: 255 }));
+        assert.isUndefined(optionalString.value);
+
+        const errors = await optionalString.validate();
+        expect(errors.map((e) => e.validator.constructor.name)).to.eql(['NotEmpty']);
       });
 
       it('should fail validation after adding an asynchronous validator to the model', async () => {
