@@ -16,8 +16,10 @@
 package com.vaadin.hilla.parser.plugins.model;
 
 import java.lang.reflect.AnnotatedArrayType;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -32,9 +34,11 @@ import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.models.AnnotatedModel;
 import com.vaadin.hilla.parser.models.AnnotationInfoModel;
+import com.vaadin.hilla.parser.models.AnnotationParameterEnumValueModel;
 import com.vaadin.hilla.parser.models.AnnotationParameterModel;
 import com.vaadin.hilla.parser.models.ArraySignatureModel;
 import com.vaadin.hilla.parser.models.BaseSignatureModel;
+import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
@@ -62,18 +66,44 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
             AnnotationInfoModel annotation) {
         var simpleName = extractSimpleName(annotation.getName());
 
-        var attributes = annotation.getParameters().stream()
-                .filter(Predicate.not(AnnotationParameterModel::isDefault))
-                .collect(Collectors.toMap(AnnotationParameterModel::getName,
-                        AnnotationParameterModel::getValue));
-
         return new ValidationConstraint(simpleName,
-                !attributes.isEmpty() ? attributes : null);
+                extractAttributes(annotation));
     }
 
     private static Annotation convertAnnotation(
             AnnotationInfoModel annotation) {
-        return new Annotation(annotation.getName(), null);
+        return new Annotation(annotation.getName(),
+                extractAttributes(annotation));
+    }
+
+    private static Map<String, Object> extractAttributes(
+            AnnotationInfoModel annotation) {
+        var attributes = annotation.getParameters().stream()
+                .filter(Predicate.not(AnnotationParameterModel::isDefault))
+                .collect(Collectors.toMap(AnnotationParameterModel::getName,
+                        parameter -> convertAttributeValue(
+                                parameter.getValue())));
+
+        return !attributes.isEmpty() ? attributes : null;
+    }
+
+    /**
+     * Converts an annotation parameter value into something the OpenAPI
+     * document can hold. The parser hands back its own models for enum
+     * constants and class references, which carry a whole type graph behind
+     * them.
+     */
+    private static Object convertAttributeValue(Object value) {
+        return switch (value) {
+        case AnnotationParameterEnumValueModel enumValue ->
+            enumValue.getValueName();
+        case ClassInfoModel classInfo -> new JvmTypeRef(classInfo.getName());
+        case Collection<?> collection -> collection.stream()
+                .map(ModelPlugin::convertAttributeValue).toList();
+        case Object[] array -> Arrays.stream(array)
+                .map(ModelPlugin::convertAttributeValue).toList();
+        default -> value;
+        };
     }
 
     private static String extractSimpleName(String fullyQualifiedName) {
