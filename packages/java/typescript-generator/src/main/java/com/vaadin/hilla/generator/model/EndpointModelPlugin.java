@@ -107,6 +107,9 @@ public final class EndpointModelPlugin
      */
     public List<UnionModel> getUnions() {
         return unions.entrySet().stream()
+                // A type can say that its values are of a subtype without
+                // saying which subtypes there are, and then there is no union
+                .filter(union -> !union.getValue().isEmpty())
                 .map(union -> new UnionModel(union.getKey(),
                         union.getValue().stream().map(this::member).toList()))
                 .toList();
@@ -228,9 +231,19 @@ public final class EndpointModelPlugin
                             .map(FieldInfoModel::getName).toList());
         }
 
+        var discriminator = discriminator(node.getTarget());
+
+        // The discriminator is written as the ids it accepts rather than as
+        // the type the class declares it with, so it is not among the
+        // properties as well: TypeScript would have the name twice
+        var properties = ownProperties.stream()
+                .filter(property -> discriminator
+                        .map(EntityModel.Discriminator::name)
+                        .filter(property.name()::equals).isEmpty())
+                .toList();
+
         return new EntityModel.Bean(cls.getName(), typeParameters(cls),
-                superTypes(cls), ownProperties,
-                discriminator(node.getTarget()));
+                superTypes(cls), properties, discriminator);
     }
 
     /**

@@ -113,6 +113,10 @@ public class SampleEndpoint {
         return null;
     }
 
+    public Shaded shaded() {
+        return null;
+    }
+
     public enum Kind {
         ONE, OTHER
     }
@@ -155,10 +159,11 @@ public class SampleEndpoint {
      * so that reading the discriminator of a value of the base type narrows it
      * to the right one.
      */
-    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "figure")
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
     @JsonSubTypes({
             @JsonSubTypes.Type(value = Figure.Round.class, name = "round"),
-            @JsonSubTypes.Type(value = Figure.Ring.class, name = "ring") })
+            @JsonSubTypes.Type(value = Figure.Ring.class, name = "ring"),
+            @JsonSubTypes.Type(value = Figure.Blank.class, name = "blank") })
     public static class Figure {
         private String label;
 
@@ -182,6 +187,13 @@ public class SampleEndpoint {
             }
         }
 
+        /**
+         * A subtype with nothing of its own, which the id it is written as
+         * still tells from the others.
+         */
+        public static class Blank extends Figure {
+        }
+
         public static class Ring extends Round {
             private double hole;
 
@@ -192,6 +204,27 @@ public class SampleEndpoint {
             public void setHole(double hole) {
                 this.hole = hole;
             }
+        }
+    }
+
+    /**
+     * A hierarchy whose discriminator is a property the types declare
+     * themselves, which is written as the ids rather than twice.
+     */
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "shade")
+    @JsonSubTypes(@JsonSubTypes.Type(value = Shaded.Pale.class, name = "pale"))
+    public static class Shaded {
+        private String shade;
+
+        public String getShade() {
+            return shade;
+        }
+
+        public void setShade(String shade) {
+            this.shade = shade;
+        }
+
+        public static class Pale extends Shaded {
         }
     }
 

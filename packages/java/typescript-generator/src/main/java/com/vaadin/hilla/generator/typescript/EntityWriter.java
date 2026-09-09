@@ -116,7 +116,7 @@ public final class EntityWriter {
      */
     private static String writeDiscriminator(
             EntityModel.Discriminator discriminator) {
-        return "  " + discriminator.name() + ": "
+        return "  " + Names.property(discriminator.name()) + ": "
                 + discriminator.acceptedValues().stream()
                         .map(value -> "'" + value + "'")
                         .collect(Collectors.joining(" | "))
