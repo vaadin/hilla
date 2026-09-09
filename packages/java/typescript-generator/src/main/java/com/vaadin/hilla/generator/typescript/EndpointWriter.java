@@ -38,10 +38,16 @@ public final class EndpointWriter {
      */
     private static final int MAX_WIDTH = 120;
 
+    private static final String METHOD = """
+            export async function {{method}}({{parameters}}): Promise<{{returnType}}> {
+              return {{client}}.call('{{endpoint}}', '{{method}}', {{arguments}}, {{init}});
+            }""";
+
     /**
-     * What follows the signature on its line.
+     * The first line of a method, which is what has to fit the width.
      */
-    private static final String BODY_START = " {";
+    private static final String FIRST_LINE = """
+            export async function {{method}}({{parameters}}): Promise<{{returnType}}> {""";
 
     private final String clientModule;
 
@@ -80,8 +86,24 @@ public final class EndpointWriter {
 
     private String writeMethod(EndpointModel endpoint, MethodModel method,
             ImportRegistry imports, TypeWriter types, String client) {
-        // The init parameter gives way to a parameter of the method if they
-        // happen to have the same name
+        var init = initParameter(method);
+
+        return Template.of(METHOD) //
+                .with("method", method.name()) //
+                .with("parameters", parameters(method, init, imports, types)) //
+                .with("returnType", types.write(method.returnType())) //
+                .with("client", client) //
+                .with("endpoint", endpoint.name()) //
+                .with("arguments", packParameters(method.parameters())) //
+                .with("init", init) //
+                .fill();
+    }
+
+    /**
+     * The name the request options go by, which gives way to a parameter of the
+     * method if they happen to have the same name.
+     */
+    private static String initParameter(MethodModel method) {
         var names = method.parameters().stream().map(ParameterModel::name)
                 .toList();
         var init = INIT_PARAMETER;
@@ -90,36 +112,42 @@ public final class EndpointWriter {
             init = "_" + init;
         }
 
-        var initType = imports.importNamed(HILLA_FRONTEND, INIT_TYPE, true);
-        var parameters = new ArrayList<String>();
-        method.parameters().forEach(parameter -> parameters
-                .add(parameter.name() + ": " + types.write(parameter.type())));
-        parameters.add(init + "?: " + initType);
-
-        var returnType = types.write(method.returnType());
-        var call = "return " + client + ".call('" + endpoint.name() + "', '"
-                + method.name() + "', " + packParameters(method.parameters())
-                + ", " + init + ");";
-
-        return signature(method.name(), parameters, returnType) + BODY_START
-                + "\n  " + call + "\n}";
+        return init;
     }
 
-    private static String signature(String name, List<String> parameters,
-            String returnType) {
-        var oneLine = "export async function " + name + "("
-                + String.join(", ", parameters) + "): Promise<" + returnType
-                + ">";
+    /**
+     * The parameters as they are declared, on one line, or on a line each when
+     * that would be too wide to read.
+     */
+    private String parameters(MethodModel method, String init,
+            ImportRegistry imports, TypeWriter types) {
+        var initType = imports.importNamed(HILLA_FRONTEND, INIT_TYPE, true);
+        var declared = new ArrayList<String>();
+        method.parameters().forEach(parameter -> declared
+                .add(parameter.name() + ": " + types.write(parameter.type())));
+        declared.add(init + "?: " + initType);
 
-        // The body follows on the same line, so it counts towards the width
-        if (oneLine.length() + BODY_START.length() <= MAX_WIDTH) {
+        var oneLine = String.join(", ", declared);
+
+        if (widthOf(method, oneLine, types) <= MAX_WIDTH) {
             return oneLine;
         }
 
-        return "export async function " + name + "(\n"
-                + parameters.stream()
-                        .collect(Collectors.joining(",\n  ", "  ", ",\n"))
-                + "): Promise<" + returnType + ">";
+        return declared.stream()
+                .collect(Collectors.joining(",\n  ", "\n  ", ",\n"));
+    }
+
+    /**
+     * How wide the first line of the method would be with the parameters on it,
+     * the start of the body included, since it follows on the same line.
+     */
+    private static int widthOf(MethodModel method, String parameters,
+            TypeWriter types) {
+        return Template.of(FIRST_LINE) //
+                .with("method", method.name()) //
+                .with("parameters", parameters) //
+                .with("returnType", types.write(method.returnType())) //
+                .fill().length();
     }
 
     /**
