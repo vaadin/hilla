@@ -59,15 +59,30 @@ public sealed interface TypeModel {
         }
     }
 
-    record ArrayOf(TypeModel items, boolean optional) implements TypeModel {
+    /**
+     * @param javaType
+     *            the fully qualified name of the Java type the values come in,
+     *            which a form model tells its bindings about: an array, a list
+     *            and a set are all an array in TypeScript
+     */
+    record ArrayOf(TypeModel items, boolean optional,
+            String javaType) implements TypeModel {
         public ArrayOf {
             Objects.requireNonNull(items);
+            Objects.requireNonNull(javaType);
         }
     }
 
-    record MapOf(TypeModel values, boolean optional) implements TypeModel {
+    /**
+     * @param javaType
+     *            the fully qualified name of the Java type the values come in,
+     *            as for an array
+     */
+    record MapOf(TypeModel values, boolean optional,
+            String javaType) implements TypeModel {
         public MapOf {
             Objects.requireNonNull(values);
+            Objects.requireNonNull(javaType);
         }
     }
 
