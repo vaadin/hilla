@@ -19,9 +19,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "colour")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = InheritedEnum.Red.class, name = "RED"),
-        @JsonSubTypes.Type(value = InheritedEnum.Blue.class, name = "BLUE") })
+@JsonSubTypes(@JsonSubTypes.Type(value = InheritedEnum.Red.class, name = "RED"))
 public class InheritedEnum {
     public Colour colour;
 
@@ -31,9 +29,5 @@ public class InheritedEnum {
 
     public static class Red extends InheritedEnum {
         public String note;
-    }
-
-    public static class Blue extends InheritedEnum {
-        public int level;
     }
 }

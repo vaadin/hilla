@@ -23,9 +23,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * which Jackson both reads and writes as an ordinary property.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "kind")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = DeclaredBase.First.class, name = "first"),
-        @JsonSubTypes.Type(value = DeclaredBase.Second.class, name = "second") })
+@JsonSubTypes(@JsonSubTypes.Type(value = DeclaredBase.First.class, name = "first"))
 public class DeclaredBase {
     public String label;
 
@@ -38,11 +36,5 @@ public class DeclaredBase {
         public String kind;
 
         public String note;
-    }
-
-    public static class Second extends DeclaredBase {
-        public String kind;
-
-        public int size;
     }
 }

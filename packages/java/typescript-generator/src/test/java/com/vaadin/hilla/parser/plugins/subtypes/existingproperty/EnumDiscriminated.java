@@ -25,9 +25,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * as the enum.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "taste")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = EnumDiscriminated.Bitter.class, name = "BITTER"),
-        @JsonSubTypes.Type(value = EnumDiscriminated.Salty.class, name = "SALTY") })
+@JsonSubTypes(@JsonSubTypes.Type(value = EnumDiscriminated.Bitter.class, name = "BITTER"))
 public class EnumDiscriminated {
     public String label;
 
@@ -39,11 +37,5 @@ public class EnumDiscriminated {
         public Taste taste;
 
         public String note;
-    }
-
-    public static class Salty extends EnumDiscriminated {
-        public Taste taste;
-
-        public int level;
     }
 }

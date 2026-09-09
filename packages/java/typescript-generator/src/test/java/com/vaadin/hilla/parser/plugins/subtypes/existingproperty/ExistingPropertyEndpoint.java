@@ -23,10 +23,6 @@ public class ExistingPropertyEndpoint {
         return new DeclaredBase.First();
     }
 
-    public InheritedBase sendInherited() {
-        return new InheritedBase.Sweet();
-    }
-
     public EnumDiscriminated sendEnumDiscriminated() {
         return new EnumDiscriminated.Bitter();
     }
