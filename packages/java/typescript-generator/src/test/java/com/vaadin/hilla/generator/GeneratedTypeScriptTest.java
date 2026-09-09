@@ -58,7 +58,7 @@ public class GeneratedTypeScriptTest {
         assertEquals("SampleEndpoint.ts", file.path());
         assertEquals(
                 """
-                        import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
+                        import type { EndpointRequestInit, Subscription } from '@vaadin/hilla-frontend';
                         import type Bounded from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Bounded.js';
                         import type Detailed from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Detailed.js';
                         import type Figure from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Figure.js';
@@ -149,6 +149,14 @@ public class GeneratedTypeScriptTest {
 
                         export async function shaded(init?: EndpointRequestInit): Promise<Shaded | undefined> {
                           return client.call('SampleEndpoint', 'shaded', {}, init);
+                        }
+
+                        export function stream(count: number): Subscription<string | undefined> {
+                          return client.subscribe('SampleEndpoint', 'stream', { count });
+                        }
+
+                        export function watch(): Subscription<Sample | undefined> {
+                          return client.subscribe('SampleEndpoint', 'watch', {});
                         }
 
                         export async function wrapped(init?: EndpointRequestInit): Promise<Wrapper<Sample | undefined> | undefined> {

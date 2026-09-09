@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import io.swagger.v3.oas.models.media.Schema;
@@ -78,6 +79,16 @@ public final class EndpointModelPlugin
     private final List<EndpointModel> endpoints = new ArrayList<>();
     private final List<EntityModel> entities = new ArrayList<>();
     private final Map<String, List<String>> unions = new LinkedHashMap<>();
+
+    /**
+     * The Java types an endpoint sends a series of values through, which the
+     * plugin handling the transfer types has already mapped the ones of the
+     * application to.
+     */
+    private static final Set<String> PUSHED_TYPES = Set.of(
+            com.vaadin.hilla.runtime.transfertypes.Flux.class.getName(),
+            com.vaadin.hilla.runtime.transfertypes.EndpointSubscription.class
+                    .getName());
 
     /**
      * The endpoints built by the last run of the parser.
@@ -190,12 +201,29 @@ public final class EndpointModelPlugin
         var returnType = taken(node).stream().findFirst().orElseGet(
                 () -> TypeModel.Scalar.of(TypeModel.ScalarKind.VOID, "void"));
 
+        var pushed = pushedValue(returnType);
+
         var method = new MethodModel(node.getSource().getName(),
-                parameters.getOrDefault(node, List.of()), returnType);
+                parameters.getOrDefault(node, List.of()),
+                pushed.orElse(returnType), pushed.isPresent());
 
         findEndpoint(nodePath).ifPresent(endpoint -> methods
                 .computeIfAbsent(endpoint, key -> new LinkedHashMap<>())
                 .put(method.name(), method));
+    }
+
+    /**
+     * The type of the values a method pushes, if it pushes them rather than
+     * returning one: the types the endpoint sends values through are carried as
+     * the collection of what they hold, since that is what the walk which
+     * builds the OpenAPI needs, and the name of the Java type is what tells one
+     * of them from an ordinary collection.
+     */
+    private static Optional<TypeModel> pushedValue(TypeModel returnType) {
+        return returnType instanceof TypeModel.ArrayOf array
+                && PUSHED_TYPES.contains(array.javaType())
+                        ? Optional.of(array.items())
+                        : Optional.empty();
     }
 
     private void collect(Node<?, ?> parent, TypeModel type) {
