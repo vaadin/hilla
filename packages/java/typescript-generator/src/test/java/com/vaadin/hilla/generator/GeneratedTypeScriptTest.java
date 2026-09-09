@@ -84,12 +84,20 @@ public class GeneratedTypeScriptTest {
                           return client.call('SampleEndpoint', 'kind', {}, init);
                         }
 
+                        export async function maybe(init?: EndpointRequestInit): Promise<string | undefined> {
+                          return client.call('SampleEndpoint', 'maybe', {}, init);
+                        }
+
                         export async function names(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'names', {}, init);
                         }
 
                         export async function ping(init?: EndpointRequestInit): Promise<void> {
                           return client.call('SampleEndpoint', 'ping', {}, init);
+                        }
+
+                        export async function required(name: string, init?: EndpointRequestInit): Promise<string> {
+                          return client.call('SampleEndpoint', 'required', { name }, init);
                         }
 
                         export async function wrapped(init?: EndpointRequestInit): Promise<Wrapper<Sample | undefined> | undefined> {
@@ -173,6 +181,15 @@ public class GeneratedTypeScriptTest {
 
                 export { SampleEndpoint, ShadowingEndpoint };
                 """, written.content());
+    }
+
+    @Test
+    public void should_DescribeOnlyTheLastRunOfTheParser() {
+        var generator = new FullStackGenerator(GeneratedTypeScriptTest.class,
+                SampleEndpoint.class);
+        generator.parseModel();
+
+        assertEquals(1, generator.parseModel().size());
     }
 
     private static List<EndpointModel> endpointsOf(Class<?> endpoint) {

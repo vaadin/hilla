@@ -15,8 +15,11 @@
  */
 package com.vaadin.hilla.generator.fixtures;
 
+import jakarta.annotation.Nonnull;
+
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
@@ -59,6 +62,22 @@ public class SampleEndpoint {
 
     public String describe(String firstName, String lastName, int age) {
         return firstName + lastName + age;
+    }
+
+    /**
+     * Annotated as always having a value, both what it returns and what it
+     * takes, which the writers have to tell apart from the rest.
+     */
+    @Nonnull
+    public String required(@Nonnull String name) {
+        return name;
+    }
+
+    /**
+     * Holds a value or does not, which TypeScript has nothing of its own for.
+     */
+    public Optional<String> maybe() {
+        return Optional.empty();
     }
 
     public enum Kind {
