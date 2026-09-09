@@ -16,6 +16,7 @@
 package com.vaadin.hilla.generator.typescript;
 
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.generator.model.PropertyModel;
@@ -60,11 +61,14 @@ public final class EntityWriter {
 
         var declaration = name + typeParameters(bean) + extended(bean, types);
 
-        var properties = bean.properties().stream()
-                .map(property -> writeProperty(property, types))
+        var properties = Stream
+                .concat(bean.properties().stream()
+                        .map(property -> writeProperty(property, types)),
+                        bean.discriminator().stream()
+                                .map(EntityWriter::writeDiscriminator))
                 .collect(Collectors.joining("\n"));
 
-        var body = Template.of(BEAN) //
+        var body = Template.of(properties.isEmpty() ? EMPTY_BEAN : BEAN) //
                 .with("declaration", declaration) //
                 .with("properties", properties) //
                 .with("name", name) //
@@ -96,6 +100,20 @@ public final class EntityWriter {
             TypeWriter types) {
         return property.name() + (property.type().optional() ? "?" : "") + ": "
                 + types.writeRequired(property.type()) + ";";
+    }
+
+    /**
+     * Writes the property saying which subtype a value is, which holds one of
+     * the ids of the hierarchy rather than any string: that is what lets
+     * TypeScript tell a value of one subtype from a value of another.
+     */
+    private static String writeDiscriminator(
+            EntityModel.Discriminator discriminator) {
+        return "  " + discriminator.name() + ": "
+                + discriminator.acceptedValues().stream()
+                        .map(value -> "'" + value + "'")
+                        .collect(Collectors.joining(" | "))
+                + ";";
     }
 
     /**
