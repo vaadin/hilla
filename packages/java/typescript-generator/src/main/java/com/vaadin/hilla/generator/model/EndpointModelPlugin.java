@@ -88,12 +88,14 @@ public final class EndpointModelPlugin
      * signals are exported by a module of the framework, which the class says
      * itself.
      */
-    private static final Set<String> PROVIDED_TYPES = Set.of(
-            com.vaadin.hilla.runtime.transfertypes.File.class.getName(),
-            com.vaadin.hilla.runtime.transfertypes.Signal.class.getName(),
-            com.vaadin.hilla.runtime.transfertypes.NumberSignal.class.getName(),
-            com.vaadin.hilla.runtime.transfertypes.ValueSignal.class.getName(),
-            com.vaadin.hilla.runtime.transfertypes.ListSignal.class.getName());
+    private static final Map<String, TypeModel.Provided> PROVIDED_TYPES = Stream
+            .of(com.vaadin.hilla.runtime.transfertypes.File.class,
+                    com.vaadin.hilla.runtime.transfertypes.Signal.class,
+                    com.vaadin.hilla.runtime.transfertypes.NumberSignal.class,
+                    com.vaadin.hilla.runtime.transfertypes.ValueSignal.class,
+                    com.vaadin.hilla.runtime.transfertypes.ListSignal.class)
+            .collect(java.util.stream.Collectors.toMap(Class::getName,
+                    EndpointModelPlugin::providedType));
 
     /**
      * The Java types an endpoint sends a series of values through, which the
@@ -434,7 +436,7 @@ public final class EndpointModelPlugin
                 entity.javaClass(), entity.typeArguments(), true);
         case TypeModel.Provided provided ->
             new TypeModel.Provided(provided.name(), provided.module(),
-                    provided.defaultExport(), provided.typeArguments(), true);
+                    provided.typeArguments(), true);
         case TypeModel.TypeVariable variable ->
             new TypeModel.TypeVariable(variable.name(), true);
         };
@@ -462,34 +464,34 @@ public final class EndpointModelPlugin
     }
 
     private static boolean isProvided(String javaClass) {
-        return PROVIDED_TYPES.contains(javaClass);
+        return PROVIDED_TYPES.containsKey(javaClass);
     }
 
     /**
-     * The type as it is referred to: the name of the Java class, and the module
-     * exporting it when the class says which one, since the browser has the
-     * rest.
+     * The name a type is referred to by and the module exporting it under that
+     * name, both of which the class says itself: the ones the browser has say
+     * nothing, and go by the name of the class.
+     */
+    private static TypeModel.Provided providedType(Class<?> javaClass) {
+        var fromModule = javaClass.getAnnotation(FromModule.class);
+
+        return fromModule == null
+                ? new TypeModel.Provided(javaClass.getSimpleName(), "",
+                        List.of(), false)
+                : new TypeModel.Provided(fromModule.namedSpecifier(),
+                        fromModule.module(), List.of(), false);
+    }
+
+    /**
+     * The type as it is referred to where it is used, which is what the class
+     * says of it together with the arguments it is used with.
      */
     private static TypeModel provided(String javaClass,
             List<TypeModel> typeArguments, boolean optional) {
-        var name = javaClass.substring(javaClass.lastIndexOf('.') + 1);
-        var fromModule = fromModuleOf(javaClass);
+        var provided = PROVIDED_TYPES.get(javaClass);
 
-        return new TypeModel.Provided(name,
-                fromModule.map(FromModule::module).orElse(""),
-                fromModule.map(module -> !module.defaultSpecifier().isEmpty())
-                        .orElse(false),
+        return new TypeModel.Provided(provided.name(), provided.module(),
                 typeArguments, optional);
-    }
-
-    private static Optional<FromModule> fromModuleOf(String javaClass) {
-        try {
-            return Optional.ofNullable(
-                    Class.forName(javaClass).getAnnotation(FromModule.class));
-        } catch (ClassNotFoundException e) {
-            throw new IllegalStateException("Unable to look at " + javaClass
-                    + ", which the generator" + " refers to by name", e);
-        }
     }
 
     /**

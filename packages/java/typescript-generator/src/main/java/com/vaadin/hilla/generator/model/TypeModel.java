@@ -113,13 +113,10 @@ public sealed interface TypeModel {
      * @param name
      *            the name the type goes by in TypeScript
      * @param module
-     *            the module exporting it, or empty for one the browser has
-     * @param defaultExport
-     *            whether the module exports it as its default rather than under
-     *            its name
+     *            the module exporting it under that name, or empty for one the
+     *            browser has
      */
-    record Provided(String name, String module, boolean defaultExport,
-            List<TypeModel> typeArguments,
+    record Provided(String name, String module, List<TypeModel> typeArguments,
             boolean optional) implements TypeModel {
         public Provided {
             Objects.requireNonNull(name);
