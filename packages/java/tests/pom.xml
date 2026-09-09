@@ -330,9 +330,15 @@
             </modules>
         </profile>
 
-        <!-- the spring module constains submodules to run with different profiles -->
+        <!-- The it-modules-* profiles below split the ITs of the it-modules
+             profile into the groups that the ITs job of the Validation
+             workflow runs in parallel, one group per matrix leg. Every IT
+             module belongs to exactly one group, and the groups are balanced
+             by measured run time rather than by topic, so a module may sit in
+             a group it has no thematic relation to. The spring module carries
+             the same profiles to select its own submodules. -->
         <profile>
-            <id>it-modules-group-1</id>
+            <id>it-modules-endpoints</id>
             <modules>
                 <module>csrf</module>
                 <module>csrf-context</module>
@@ -341,14 +347,14 @@
         </profile>
 
         <profile>
-            <id>it-modules-group-2</id>
+            <id>it-modules-security</id>
             <modules>
                 <module>spring</module>
             </modules>
         </profile>
 
         <profile>
-            <id>it-modules-some</id>
+            <id>it-modules-react</id>
             <modules>
                 <module>spring</module>
             </modules>

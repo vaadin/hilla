@@ -240,8 +240,21 @@ TODO: Re-enable when postinstall script to copy Vite isn't needed
             </modules>
         </profile>
 
+        <!-- See the comment on these profiles in the parent pom: the groups
+             are balanced by measured run time, so security-urlmapping lives in
+             the react group to even the three legs out. Measured medians over
+             seven main runs, in seconds:
+               endpoints group 172 = csrf 31, csrf-context 14, endpoints 55,
+                 endpoints-contextpath 18, endpoints discovery 15,
+                 endpoints-custom-client 19, endpoints-latest-java 19
+               security group 161 = security 58, security-contextpath 50,
+                 security-jwt 53
+               react group 174 = react-grid-test 74, react-signals 23,
+                 react-i18n 29, security-urlmapping 48
+             Keep the three sums within about ten seconds of each other when
+             adding or removing a module. -->
         <profile>
-            <id>it-modules-group-1</id>
+            <id>it-modules-endpoints</id>
             <modules>
                 <module>endpoints</module>
                 <module>endpoints-contextpath</module>
@@ -252,17 +265,15 @@ TODO: Re-enable when postinstall script to copy Vite isn't needed
         <module>endpoints-maven-engine</module>
         -->
                 <module>endpoints-latest-java</module>
-                <module>react-i18n</module>
             </modules>
         </profile>
 
         <profile>
-            <id>it-modules-group-2</id>
+            <id>it-modules-security</id>
             <modules>
                 <module>security</module>
                 <module>security-contextpath</module>
                 <module>security-jwt</module>
-                <module>security-urlmapping</module>
 <!--
 TODO: Re-enable when postinstall script to copy Vite isn't needed
                 <module>no-endpoints</module>
@@ -271,12 +282,12 @@ TODO: Re-enable when postinstall script to copy Vite isn't needed
         </profile>
 
         <profile>
-            <id>it-modules-some</id>
+            <id>it-modules-react</id>
             <modules>
-                <module>endpoints</module>
-                <module>endpoints discovery</module>
                 <module>react-grid-test</module>
                 <module>react-signals</module>
+                <module>react-i18n</module>
+                <module>security-urlmapping</module>
             </modules>
         </profile>
 
