@@ -123,6 +123,12 @@ public class GeneratedTypeScriptTest {
     }
 
     @Test
+    public void should_WriteAnEmptyBarrelWithoutEndpoints() {
+        assertEquals("export {};\n",
+                new BarrelWriter().write(List.of()).content());
+    }
+
+    @Test
     public void should_WriteTheBarrel() {
         assertEquals("""
                 import * as SampleEndpoint from './SampleEndpoint.js';
