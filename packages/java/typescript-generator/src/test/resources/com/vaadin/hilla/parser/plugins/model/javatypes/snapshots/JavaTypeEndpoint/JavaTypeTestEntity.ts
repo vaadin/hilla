@@ -1,4 +1,4 @@
-import type CustomEntity_1 from "./CustomEntity.js";
+import type CustomEntity from "./CustomEntity.js";
 interface JavaTypeTestEntity {
     aBoolean: boolean;
     aNullableBoolean?: boolean;
@@ -24,6 +24,6 @@ interface JavaTypeTestEntity {
     aStringArray?: Array<string | undefined>;
     aByteArray?: Array<number>;
     aStringList?: Array<string | undefined>;
-    aCustomEntity?: CustomEntity_1;
+    aCustomEntity?: CustomEntity;
 }
 export default JavaTypeTestEntity;

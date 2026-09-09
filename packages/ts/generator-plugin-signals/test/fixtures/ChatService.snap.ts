@@ -1,15 +1,15 @@
-import { ListSignal as ListSignal_1 } from "@vaadin/hilla-react-signals";
-import type Message_1 from "./com/github/taefi/services/ChatService/Message.js";
-import client_1 from "./connect-client.default.js";
-function chatChannel_1(): ListSignal_1<Message_1> { return new ListSignal_1({
-    client: client_1,
+import { ListSignal } from "@vaadin/hilla-react-signals";
+import type Message from "./com/github/taefi/services/ChatService/Message.js";
+import client from "./connect-client.default.js";
+function chatChannel(): ListSignal<Message> { return new ListSignal({
+    client: client,
     endpoint: "ChatService",
     method: "chatChannel"
 }); }
-function chatChannelByName_1(channelName: string): ListSignal_1<Message_1> { return new ListSignal_1({
-    client: client_1,
+function chatChannelByName(channelName: string): ListSignal<Message> { return new ListSignal({
+    client: client,
     endpoint: "ChatService",
     method: "chatChannelByName",
     params: { channelName }
 }); }
-export { chatChannel_1 as chatChannel, chatChannelByName_1 as chatChannelByName };
+export { chatChannel, chatChannelByName };
