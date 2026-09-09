@@ -42,7 +42,12 @@ final class TypeWriter {
     String write(TypeModel type) {
         var written = writeRequired(type);
 
-        return type.optional() ? written + " | undefined" : written;
+        // A type variable stands for whatever the declaration is used with,
+        // which says for itself whether it can be absent
+        var union = type.optional()
+                && !(type instanceof TypeModel.TypeVariable);
+
+        return union ? written + " | undefined" : written;
     }
 
     /**

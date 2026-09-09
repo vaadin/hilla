@@ -51,7 +51,11 @@ final class ModulePaths {
      */
     static String directoryOf(String javaClass) {
         var path = fileOf(javaClass);
-        return path.substring(0, path.lastIndexOf('/'));
+        var separator = path.lastIndexOf('/');
+
+        // A class of the default package is written to the output folder
+        // itself, which is what an empty folder stands for
+        return separator < 0 ? "" : path.substring(0, separator);
     }
 
     /**
