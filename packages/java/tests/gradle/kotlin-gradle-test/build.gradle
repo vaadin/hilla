@@ -165,6 +165,13 @@ tasks.register('integrationTest', Test) {
 	finalizedBy bootStop
 	testClassesDirs = sourceSets.test.output.classesDirs
 	classpath = sourceSets.test.runtimeClasspath
+	// TestBench runs the tests in parallel by default, which starts one Chrome
+	// per test at the same time. The Windows runner does not get all of them
+	// through the initial render within TestBench's ten second wait, so a test
+	// would fail in setup() while waiting for the view. There are only a
+	// handful of tests here, so run them one at a time instead of having them
+	// compete for the runner's CPUs.
+	systemProperty 'com.vaadin.testbench.Parameters.testsInParallel', '1'
 }
 
 java {

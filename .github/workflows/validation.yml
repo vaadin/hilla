@@ -305,6 +305,15 @@ jobs:
         run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin build publishToMavenLocal -x functionalTest
       - name: Test gradle-plugin's functional tests
         run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin functionalTest
+      # The windows-latest image ships a ChromeDriver in C:\SeleniumWebDrivers\ChromeDriver
+      # and puts it on PATH, but it lags behind the Chrome that Selenium Manager
+      # resolves. Selenium uses the driver it finds on PATH instead of downloading a
+      # matching one, so the ITs fail with "This version of ChromeDriver only supports
+      # Chrome version <older>". Drop the stale driver and let Selenium Manager
+      # provision the one that matches the browser it resolved.
+      - name: Remove the stale preinstalled ChromeDriver (Windows)
+        if: runner.os == 'Windows'
+        run: rm -rf "/c/SeleniumWebDrivers/ChromeDriver"
       - name: Gradle ITs
         run: ./packages/java/tests/gradle/kotlin-gradle-test/gradlew --info --stacktrace -p packages/java/tests/gradle/kotlin-gradle-test clean integrationTest
       - uses: actions/upload-artifact@v4
