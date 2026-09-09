@@ -224,8 +224,13 @@ public final class EndpointModelPlugin
         var optional = schema != null
                 && Boolean.TRUE.equals(schema.getNullable());
 
+        // A type parameter bound to something else than an object stands for
+        // that bound, which the walk visits below it, since the declaration
+        // does not keep such a parameter
         if (signature.isTypeVariable() || signature.isTypeParameter()) {
-            return new TypeModel.TypeVariable(name(signature), optional);
+            return referred.isEmpty()
+                    ? new TypeModel.TypeVariable(name(signature), optional)
+                    : bound(only(referred), optional);
         }
 
         // A type argument, such as the String of a List<String>, stands for
@@ -262,6 +267,10 @@ public final class EndpointModelPlugin
         }
 
         return new TypeModel.Scalar(kind, optional, name(signature));
+    }
+
+    private static TypeModel bound(TypeModel type, boolean optional) {
+        return optional ? asOptional(type) : type;
     }
 
     private static TypeModel asOptional(TypeModel type) {
