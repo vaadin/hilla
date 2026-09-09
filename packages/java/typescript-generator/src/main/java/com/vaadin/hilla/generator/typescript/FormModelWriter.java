@@ -38,8 +38,6 @@ public final class FormModelWriter {
      */
     public static final String SUFFIX = "Model";
 
-    private static final String LIT_FORM = "@vaadin/hilla-lit-form";
-
     private static final String BEAN = """
             class {{name}}<T extends {{entity}} = {{entity}}> extends {{superModel}}<T> {
               static override createEmptyValue = {{emptyValue}}({{name}});
@@ -76,11 +74,8 @@ public final class FormModelWriter {
             export default {{name}};""";
 
     public GeneratedFile write(EntityModel entity) {
-        var path = ModulePaths.fileOf(entity.javaClass());
-
         return new GeneratedFile(
-                path.substring(0, path.length() - ".ts".length()) + SUFFIX
-                        + ".ts",
+                ModulePaths.fileOf(entity.javaClass() + SUFFIX),
                 switch (entity) {
                 case EntityModel.Bean bean -> write(bean);
                 case EntityModel.Enumeration enumeration -> write(enumeration);
@@ -94,7 +89,7 @@ public final class FormModelWriter {
 
         var directory = ModulePaths.directoryOf(bean.javaClass());
         var types = new TypeWriter(imports, directory);
-        var models = new ModelWriter(imports, types, directory);
+        var models = new ModelWriter(imports, directory);
 
         var body = Template
                 .of(bean.properties().isEmpty() ? BEAN_WITHOUT_PROPERTIES
@@ -104,10 +99,8 @@ public final class FormModelWriter {
                         types.writeRequired(
                                 TypeModel.EntityRef.of(bean.javaClass()))) //
                 .with("superModel", superModel(bean, models)) //
-                .with("emptyValue",
-                        imports.importNamed(LIT_FORM,
-                                "makeObjectEmptyValueCreator", false)) //
-                .with("properties", writeProperties(bean, imports, models)) //
+                .with("emptyValue", models.emptyValueCreator(false)) //
+                .with("properties", writeProperties(bean, models)) //
                 .fill();
 
         return file(imports, body);
@@ -117,6 +110,9 @@ public final class FormModelWriter {
         var name = ModulePaths.entityName(enumeration.javaClass()) + SUFFIX;
         var imports = new ImportRegistry();
         imports.reserve(name);
+
+        var models = new ModelWriter(imports,
+                ModulePaths.directoryOf(enumeration.javaClass()));
 
         // The enum itself is used as a value rather than as a type, since the
         // model tells the form which constants there are
@@ -130,12 +126,9 @@ public final class FormModelWriter {
         var body = Template.of(ENUMERATION) //
                 .with("name", name) //
                 .with("entity", entity) //
-                .with("enumModel",
-                        imports.importNamed(LIT_FORM, "EnumModel", false)) //
-                .with("emptyValue",
-                        imports.importNamed(LIT_FORM,
-                                "makeEnumEmptyValueCreator", false)) //
-                .with("enumKey", imports.importNamed(LIT_FORM, "_enum", false)) //
+                .with("enumModel", models.enumModel()) //
+                .with("emptyValue", models.emptyValueCreator(true)) //
+                .with("enumKey", models.enumConstants()) //
                 .fill();
 
         return file(imports, body);
@@ -153,9 +146,8 @@ public final class FormModelWriter {
     }
 
     private static String writeProperties(EntityModel.Bean bean,
-            ImportRegistry imports, ModelWriter models) {
-        var getPropertyModel = imports.importNamed(LIT_FORM,
-                "_getPropertyModel", false);
+            ModelWriter models) {
+        var getPropertyModel = models.propertyModel();
 
         return bean.properties().stream()
                 .map(property -> writeProperty(property, getPropertyModel,
