@@ -80,6 +80,14 @@ public class SampleEndpoint {
         return Optional.empty();
     }
 
+    public Optional<List<String>> maybeNames() {
+        return Optional.empty();
+    }
+
+    public Optional<Map<String, Integer>> maybeCounts() {
+        return Optional.empty();
+    }
+
     public enum Kind {
         ONE, OTHER
     }
