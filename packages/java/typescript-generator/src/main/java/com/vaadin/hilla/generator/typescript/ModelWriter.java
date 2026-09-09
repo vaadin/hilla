@@ -37,15 +37,15 @@ final class ModelWriter {
     /**
      * @param imports
      *            the imports of the file being written
-     * @param types
-     *            the writer of the types the models hold
      * @param directory
      *            the folder of the file being written, relative to the output
      *            folder, which decides how the other models are referred to
      */
-    ModelWriter(ImportRegistry imports, TypeWriter types, String directory) {
+    ModelWriter(ImportRegistry imports, String directory) {
         this.imports = imports;
-        this.types = types;
+        // A model holds values which cannot be changed through it, so an array
+        // it holds is written as a read only one
+        this.types = new TypeWriter(imports, directory).readOnly();
         this.directory = directory;
     }
 
@@ -61,7 +61,7 @@ final class ModelWriter {
         // A map is an object whose properties are the keys, so the model of it
         // says which values those properties hold
         case TypeModel.MapOf map -> objectModel() + "<Record<string, "
-                + types.readOnly().write(map.values()) + ">>";
+                + types.write(map.values()) + ">>";
         case TypeModel.EntityRef entity -> name(entity);
         case TypeModel.TypeVariable variable -> objectModel();
         };
@@ -107,6 +107,37 @@ final class ModelWriter {
 
     String objectModel() {
         return imports.importNamed(LIT_FORM, OBJECT_MODEL, false);
+    }
+
+    /**
+     * The model of an enum, which binds the constants it accepts rather than
+     * properties, and what tells it which those are.
+     */
+    String enumModel() {
+        return imports.importNamed(LIT_FORM, "EnumModel", false);
+    }
+
+    String enumConstants() {
+        return imports.importNamed(LIT_FORM, "_enum", false);
+    }
+
+    /**
+     * What a model asks for the model of one of its properties by, which is
+     * what keeps one model per property rather than one per read.
+     */
+    String propertyModel() {
+        return imports.importNamed(LIT_FORM, "_getPropertyModel", false);
+    }
+
+    /**
+     * What builds the empty value a form starts from, which differs between a
+     * type with properties and an enum.
+     */
+    String emptyValueCreator(boolean enumeration) {
+        return imports.importNamed(LIT_FORM,
+                enumeration ? "makeEnumEmptyValueCreator"
+                        : "makeObjectEmptyValueCreator",
+                false);
     }
 
     private String arrayModel() {

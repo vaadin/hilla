@@ -69,25 +69,36 @@ public class ImportRegistryTest {
     }
 
     @Test
-    public void should_RenameANamedImportWhichClashes() {
-        imports.reserve("ConnectClient");
+    public void should_ImportOneNamePerLineWhenTheyDoNotFitOnOne() {
+        var module = "@vaadin/hilla-lit-form";
 
-        assertEquals("ConnectClient_1", imports
-                .importNamed("@vaadin/hilla-frontend", "ConnectClient", false));
-        assertEquals(List.of(
-                "import { ConnectClient as ConnectClient_1 } from '@vaadin/hilla-frontend';"),
-                imports.write());
+        imports.importNamed(module, "ArrayModel", false);
+        imports.importNamed(module, "BooleanModel", false);
+        imports.importNamed(module, "NumberModel", false);
+        imports.importNamed(module, "ObjectModel", false);
+        imports.importNamed(module, "StringModel", false);
+        imports.importNamed(module, "_getPropertyModel", false);
+        imports.importNamed(module, "makeObjectEmptyValueCreator", false);
+
+        assertEquals(List.of("""
+                import {
+                  ArrayModel,
+                  BooleanModel,
+                  NumberModel,
+                  ObjectModel,
+                  StringModel,
+                  _getPropertyModel,
+                  makeObjectEmptyValueCreator,
+                } from '@vaadin/hilla-lit-form';"""), imports.write());
     }
 
     @Test
-    public void should_WriteTypeOnlyNamedImportsApartFromValueOnes() {
-        imports.importNamed("@vaadin/hilla-frontend", "ConnectClient", false);
-        imports.importNamed("@vaadin/hilla-frontend", "EndpointRequestInit",
-                true);
+    public void should_ImportAsOneLineWhatFitsOnOne() {
+        imports.importNamed("@vaadin/hilla-lit-form", "ObjectModel", false);
+        imports.importNamed("@vaadin/hilla-lit-form", "StringModel", false);
 
         assertEquals(List.of(
-                "import type { EndpointRequestInit } from '@vaadin/hilla-frontend';",
-                "import { ConnectClient } from '@vaadin/hilla-frontend';"),
+                "import { ObjectModel, StringModel } from '@vaadin/hilla-lit-form';"),
                 imports.write());
     }
 
