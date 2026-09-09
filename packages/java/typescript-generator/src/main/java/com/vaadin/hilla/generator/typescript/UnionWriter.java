@@ -52,7 +52,7 @@ public final class UnionWriter {
 
         var body = Template.of(UNION) //
                 .with("name", name) //
-                .with("subTypes", wrapped(subTypes)) //
+                .with("subTypes", subTypes) //
                 .fill();
 
         var lines = new ArrayList<>(imports.write());
@@ -74,20 +74,9 @@ public final class UnionWriter {
 
         return member.narrowedTo()
                 .map(discriminator -> "(" + written + " & { "
-                        + discriminator.name() + ": '"
+                        + Names.property(discriminator.name()) + ": '"
                         + discriminator.acceptedValues().get(0) + "' })")
                 .orElse(written);
     }
 
-    /**
-     * The subtypes on lines of their own when they do not fit on one, since a
-     * hierarchy can have more of them than a line holds.
-     */
-    private static String wrapped(String subTypes) {
-        if (subTypes.length() <= Layout.MAX_WIDTH) {
-            return subTypes;
-        }
-
-        return subTypes.replace(SEPARATOR, "\n| ");
-    }
 }
