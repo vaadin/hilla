@@ -68,6 +68,11 @@ public final class EntityWriter {
         var types = new TypeWriter(imports,
                 ModulePaths.directoryOf(bean.javaClass()));
 
+        // A type the browser has is written as it is, so no import may take
+        // the name of one
+        bean.properties()
+                .forEach(property -> types.reserveProvided(property.type()));
+
         var declaration = name + typeParameters(bean) + extended(bean, types);
 
         var properties = Stream
