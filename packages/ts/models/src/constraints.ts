@@ -4,22 +4,21 @@ import { Model } from './Model.js';
 import { ArrayModel, BooleanModel, NumberModel, RecordModel, StringModel } from './models.js';
 
 /**
+ * The message attribute every constraint accepts. It defaults to `undefined`
+ * rather than to the empty string of {@link StringModel}, so that a constraint
+ * without a message lets the validator keep its own wording.
+ */
+const message = m.withDefaultValue(m.optional(StringModel), undefined);
+
+/**
  * The constrained model value must be `undefined`.
  */
-export const Null = new ConstraintBuilder()
-  .model(Model)
-  .attribute('message', m.optional(StringModel))
-  .name('Null')
-  .build();
+export const Null = new ConstraintBuilder().model(Model).attribute('message', message).name('Null').build();
 
 /**
  * The constrained model value must not be `undefined`.
  */
-export const NotNull = new ConstraintBuilder()
-  .model(Model)
-  .attribute('message', m.optional(StringModel))
-  .name('NotNull')
-  .build();
+export const NotNull = new ConstraintBuilder().model(Model).attribute('message', message).name('NotNull').build();
 
 /**
  * The constrained model value must be `true`.
@@ -28,7 +27,7 @@ export const NotNull = new ConstraintBuilder()
  */
 export const AssertTrue = new ConstraintBuilder()
   .model(BooleanModel)
-  .attribute('message', m.optional(StringModel))
+  .attribute('message', message)
   .name('AssertTrue')
   .build();
 
@@ -39,7 +38,7 @@ export const AssertTrue = new ConstraintBuilder()
  */
 export const AssertFalse = new ConstraintBuilder()
   .model(BooleanModel)
-  .attribute('message', m.optional(StringModel))
+  .attribute('message', message)
   .name('AssertFalse')
   .build();
 
@@ -50,7 +49,7 @@ export const AssertFalse = new ConstraintBuilder()
  */
 export const Min = new ConstraintBuilder()
   .model(NumberModel)
-  .attribute('message', m.optional(StringModel))
+  .attribute('message', message)
   .name('Min')
   .attribute('value', NumberModel)
   .build();
@@ -62,7 +61,7 @@ export const Min = new ConstraintBuilder()
  */
 export const Max = new ConstraintBuilder()
   .model(NumberModel)
-  .attribute('message', m.optional(StringModel))
+  .attribute('message', message)
   .name('Max')
   .attribute('value', NumberModel)
   .build();
@@ -74,8 +73,10 @@ export const Max = new ConstraintBuilder()
  */
 export const DecimalMin = new ConstraintBuilder()
   .model(m.union(NumberModel, StringModel))
+  .attribute('message', message)
   .name('DecimalMin')
   .attribute('value', NumberModel)
+  .attribute('inclusive', m.optional(m.withDefaultValue(BooleanModel, true)))
   .build();
 
 /**
@@ -83,7 +84,13 @@ export const DecimalMin = new ConstraintBuilder()
  *
  * `undefined` value is considered valid.
  */
-export const DecimalMax = new ConstraintBuilder().model(m.union(NumberModel, StringModel)).name('DecimalMax').build();
+export const DecimalMax = new ConstraintBuilder()
+  .model(m.union(NumberModel, StringModel))
+  .attribute('message', message)
+  .name('DecimalMax')
+  .attribute('value', NumberModel)
+  .attribute('inclusive', m.optional(m.withDefaultValue(BooleanModel, true)))
+  .build();
 
 /**
  * The constrained model value must be strictly below zero.
@@ -92,7 +99,7 @@ export const DecimalMax = new ConstraintBuilder().model(m.union(NumberModel, Str
  */
 export const Negative = new ConstraintBuilder()
   .model(NumberModel)
-  .attribute('message', m.optional(StringModel))
+  .attribute('message', message)
   .name('Negative')
   .build();
 
@@ -103,7 +110,7 @@ export const Negative = new ConstraintBuilder()
  */
 export const NegativeOrZero = new ConstraintBuilder()
   .model(NumberModel)
-  .attribute('message', m.optional(StringModel))
+  .attribute('message', message)
   .name('NegativeOrZero')
   .build();
 
@@ -114,7 +121,7 @@ export const NegativeOrZero = new ConstraintBuilder()
  */
 export const Positive = new ConstraintBuilder()
   .model(NumberModel)
-  .attribute('message', m.optional(StringModel))
+  .attribute('message', message)
   .name('Positive')
   .build();
 
@@ -125,7 +132,7 @@ export const Positive = new ConstraintBuilder()
  */
 export const PositiveOrZero = new ConstraintBuilder()
   .model(NumberModel)
-  .attribute('message', m.optional(StringModel))
+  .attribute('message', message)
   .name('PositiveOrZero')
   .build();
 
@@ -136,6 +143,7 @@ export const PositiveOrZero = new ConstraintBuilder()
  */
 export const Size = new ConstraintBuilder()
   .model(m.union(StringModel, ArrayModel))
+  .attribute('message', message)
   .name('Size')
   .attribute('min', m.optional(m.withDefaultValue(NumberModel, 0)))
   .attribute('max', m.optional(m.withDefaultValue(NumberModel, Number.MAX_SAFE_INTEGER)))
@@ -148,6 +156,7 @@ export const Size = new ConstraintBuilder()
  */
 export const Digits = new ConstraintBuilder()
   .model(m.union(StringModel, NumberModel))
+  .attribute('message', message)
   .name('Digits')
   .attribute('integer', NumberModel)
   .attribute('fraction', NumberModel)
@@ -158,28 +167,36 @@ export const Digits = new ConstraintBuilder()
  *
  * `undefined` value is considered valid.
  */
-export const Past = new ConstraintBuilder().model(StringModel).name('Past').build();
+export const Past = new ConstraintBuilder().model(StringModel).attribute('message', message).name('Past').build();
 
 /**
  * The constrained value must be a date, time, or timestamp in the past or present.
  *
  * `undefined` value is considered valid.
  */
-export const PastOrPresent = new ConstraintBuilder().model(StringModel).name('PastOrPresent').build();
+export const PastOrPresent = new ConstraintBuilder()
+  .model(StringModel)
+  .attribute('message', message)
+  .name('PastOrPresent')
+  .build();
 
 /**
  * The constrained value must be a date, time, or timestamp in the future.
  *
  * `undefined` value is considered valid.
  */
-export const Future = new ConstraintBuilder().model(StringModel).name('Future').build();
+export const Future = new ConstraintBuilder().model(StringModel).attribute('message', message).name('Future').build();
 
 /**
  * The constrained value must be a date, time, or timestamp in the future or present.
  *
  * `undefined` value is considered valid.
  */
-export const FutureOrPresent = new ConstraintBuilder().model(StringModel).name('FutureOrPresent').build();
+export const FutureOrPresent = new ConstraintBuilder()
+  .model(StringModel)
+  .attribute('message', message)
+  .name('FutureOrPresent')
+  .build();
 
 /**
  * The constrained value must match the specified regular expression.
@@ -188,6 +205,7 @@ export const FutureOrPresent = new ConstraintBuilder().model(StringModel).name('
  */
 export const Pattern = new ConstraintBuilder()
   .model(StringModel)
+  .attribute('message', message)
   .name('Pattern')
   .attribute('regexp', StringModel)
   .build();
@@ -199,6 +217,7 @@ export const Pattern = new ConstraintBuilder()
  */
 export const NotEmpty = new ConstraintBuilder()
   .model(m.union(StringModel, ArrayModel, RecordModel))
+  .attribute('message', message)
   .name('NotEmpty')
   .build();
 
@@ -207,11 +226,15 @@ export const NotEmpty = new ConstraintBuilder()
  *
  * `undefined` value is considered valid.
  */
-export const NotBlank = new ConstraintBuilder().model(StringModel).name('NotBlank').build();
+export const NotBlank = new ConstraintBuilder()
+  .model(StringModel)
+  .attribute('message', message)
+  .name('NotBlank')
+  .build();
 
 /**
  * The constrained value must be a valid email address.
  *
  * `undefined` value is considered valid.
  */
-export const Email = new ConstraintBuilder().model(StringModel).name('Email').build();
+export const Email = new ConstraintBuilder().model(StringModel).attribute('message', message).name('Email').build();
