@@ -78,6 +78,7 @@ final class TypeWriter {
         case TypeModel.MapOf map ->
             "Record<string, " + write(map.values()) + ">";
         case TypeModel.EntityRef entity -> write(entity);
+        case TypeModel.Provided provided -> write(provided);
         case TypeModel.TypeVariable variable -> variable.name();
         };
     }
@@ -92,16 +93,32 @@ final class TypeWriter {
         };
     }
 
+    /**
+     * Writes a type which is not generated: the name it goes by, imported from
+     * the module exporting it unless the browser has it.
+     */
+    private String write(TypeModel.Provided provided) {
+        var name = provided.module().isEmpty() ? provided.name()
+                : provided.defaultExport()
+                        ? imports.importDefault(provided.module(),
+                                provided.name(), true)
+                        : imports.importNamed(provided.module(),
+                                provided.name(), true);
+
+        return name + typeArguments(provided.typeArguments());
+    }
+
     private String write(TypeModel.EntityRef entity) {
         var name = imports.importDefault(
                 ModulePaths.forEntity(entity.javaClass(), directory),
                 ModulePaths.entityName(entity.javaClass()), true);
 
-        if (entity.typeArguments().isEmpty()) {
-            return name;
-        }
+        return name + typeArguments(entity.typeArguments());
+    }
 
-        return name + entity.typeArguments().stream().map(this::write)
-                .collect(Collectors.joining(", ", "<", ">"));
+    private String typeArguments(java.util.List<TypeModel> arguments) {
+        return arguments.isEmpty() ? ""
+                : arguments.stream().map(this::write)
+                        .collect(Collectors.joining(", ", "<", ">"));
     }
 }
