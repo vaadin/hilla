@@ -34,7 +34,13 @@ public class EnumDiscriminated {
     }
 
     public static class Bitter extends EnumDiscriminated {
-        public Taste taste;
+        /**
+         * Read from a getter rather than from a field of its own, which is how
+         * Jackson usually reads a property.
+         */
+        public Taste getTaste() {
+            return Taste.BITTER;
+        }
 
         public String note;
     }

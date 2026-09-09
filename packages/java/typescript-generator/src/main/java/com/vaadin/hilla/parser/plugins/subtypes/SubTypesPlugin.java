@@ -240,6 +240,12 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
             JsonSubTypes subTypes) {
 
         /**
+         * How a method reading a property is named after it.
+         */
+        private static final List<String> GETTER_PREFIXES = List.of("get",
+                "is");
+
+        /**
          * The type id strategies whose values are known here: both take the id
          * from the annotations and fall back to the name of the class itself.
          * The ids of the class based strategies are built from the name of the
@@ -267,15 +273,14 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                 return Optional.empty();
             }
 
+            // Every id strategy supported here has a default property name,
+            // so the annotation is free to leave the name out
             var property = typeInfo.property().isBlank()
                     ? typeInfo.use().getDefaultPropertyName()
                     : typeInfo.property();
 
-            if (property == null || !acceptsTypeIds(property)) {
-                return Optional.empty();
-            }
-
-            return Optional.of(property);
+            return acceptsTypeIds(property) ? Optional.of(property)
+                    : Optional.empty();
         }
 
         /**
@@ -292,8 +297,9 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
          * ids instead produced TypeScript which did not compile.
          */
         private boolean acceptsTypeIds(String property) {
+            // A type a string fits in, which an enum is not
             return declaredType(property)
-                    .map(type -> type == String.class || type == Object.class)
+                    .map(type -> type.isAssignableFrom(String.class))
                     .orElse(true);
         }
 
@@ -322,6 +328,10 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                     .findFirst();
         }
 
+        /**
+         * Whether the method is what the property is read by, which is its name
+         * under either of the prefixes a getter goes by.
+         */
         private static boolean isGetterOf(Method method, String property) {
             if (method.getParameterCount() > 0) {
                 return false;
@@ -330,8 +340,8 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
             var capitalized = Character.toUpperCase(property.charAt(0))
                     + property.substring(1);
 
-            return method.getName().equals("get" + capitalized)
-                    || method.getName().equals("is" + capitalized);
+            return GETTER_PREFIXES.stream().anyMatch(
+                    prefix -> method.getName().equals(prefix + capitalized));
         }
 
         /**
