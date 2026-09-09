@@ -49,6 +49,7 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 import com.vaadin.hilla.parser.plugins.model.Annotation;
 import com.vaadin.hilla.parser.plugins.model.ValidationConstraint;
 import com.vaadin.hilla.parser.plugins.subtypes.SubTypesPlugin;
+import com.vaadin.hilla.transfertypes.annotations.FromModule;
 
 /**
  * Builds the model the TypeScript generator works from out of the browser
@@ -95,6 +96,20 @@ public final class EndpointModelPlugin
     private final List<EndpointModel> endpoints = new ArrayList<>();
     private final List<EntityModel> entities = new ArrayList<>();
     private final Map<String, List<String>> unions = new LinkedHashMap<>();
+
+    /**
+     * The Java types the generated TypeScript refers to by name rather than by
+     * declaring them, which the plugin handling the transfer types has already
+     * mapped the ones of the application to. The browser knows a file, and the
+     * signals are exported by a module of the framework, which the class says
+     * itself.
+     */
+    private static final Set<String> PROVIDED_TYPES = Set.of(
+            com.vaadin.hilla.runtime.transfertypes.File.class.getName(),
+            com.vaadin.hilla.runtime.transfertypes.Signal.class.getName(),
+            com.vaadin.hilla.runtime.transfertypes.NumberSignal.class.getName(),
+            com.vaadin.hilla.runtime.transfertypes.ValueSignal.class.getName(),
+            com.vaadin.hilla.runtime.transfertypes.ListSignal.class.getName());
 
     /**
      * The Java types an endpoint sends a series of values through, which the
@@ -190,7 +205,8 @@ public final class EndpointModelPlugin
             collectMethod(nodePath, method);
         } else if (node instanceof PropertyNode property) {
             collect(parentOf(nodePath), property, taken(node));
-        } else if (node instanceof EntityNode entity) {
+        } else if (node instanceof EntityNode entity
+                && !isProvided(entity.getSource().getName())) {
             entities.add(buildEntity(entity,
                     properties.getOrDefault(node, List.of())));
         } else if (node instanceof SubTypesPlugin.UnionNode union) {
@@ -409,6 +425,11 @@ public final class EndpointModelPlugin
                     name(signature), constraints, annotations);
         }
 
+        if (signature.isClassRef() && isProvided(name(signature))) {
+            return provided(name(signature), referred, optional, constraints,
+                    annotations);
+        }
+
         if (signature.isClassRef() && isEntity(signature)) {
             return new TypeModel.EntityRef(name(signature), referred, optional,
                     constraints, annotations);
@@ -435,6 +456,10 @@ public final class EndpointModelPlugin
         case TypeModel.EntityRef entity ->
             new TypeModel.EntityRef(entity.javaClass(), entity.typeArguments(),
                     true, entity.constraints(), entity.annotations());
+        case TypeModel.Provided provided ->
+            new TypeModel.Provided(provided.name(), provided.module(),
+                    provided.defaultExport(), provided.typeArguments(), true,
+                    provided.constraints(), provided.annotations());
         case TypeModel.TypeVariable variable ->
             new TypeModel.TypeVariable(variable.name(), true,
                     variable.constraints(), variable.annotations());
@@ -460,6 +485,38 @@ public final class EndpointModelPlugin
         }
 
         return TypeModel.ScalarKind.UNKNOWN;
+    }
+
+    private static boolean isProvided(String javaClass) {
+        return PROVIDED_TYPES.contains(javaClass);
+    }
+
+    /**
+     * The type as it is referred to: the name of the Java class, and the module
+     * exporting it when the class says which one, since the browser has the
+     * rest.
+     */
+    private static TypeModel provided(String javaClass,
+            List<TypeModel> typeArguments, boolean optional,
+            List<ConstraintModel> constraints, List<String> annotations) {
+        var name = javaClass.substring(javaClass.lastIndexOf('.') + 1);
+        var fromModule = fromModuleOf(javaClass);
+
+        return new TypeModel.Provided(name,
+                fromModule.map(FromModule::module).orElse(""),
+                fromModule.map(module -> !module.defaultSpecifier().isEmpty())
+                        .orElse(false),
+                typeArguments, optional, constraints, annotations);
+    }
+
+    private static Optional<FromModule> fromModuleOf(String javaClass) {
+        try {
+            return Optional.ofNullable(
+                    Class.forName(javaClass).getAnnotation(FromModule.class));
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException("Unable to look at " + javaClass
+                    + ", which the generator" + " refers to by name", e);
+        }
     }
 
     /**
