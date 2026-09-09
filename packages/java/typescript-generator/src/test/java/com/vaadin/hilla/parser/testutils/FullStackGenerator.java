@@ -201,10 +201,12 @@ public final class FullStackGenerator {
                     .classPath(classPath.split(File.pathSeparator))
                     .endpointAnnotations(ENDPOINT_ANNOTATIONS)
                     .endpointExposedAnnotations(ENDPOINT_EXPOSED_ANNOTATIONS);
-            plugins.forEach(parser::addPlugin);
             // Collects the model while the other plugins build the OpenAPI
-            // definition, without changing anything they produce
+            // definition, without changing anything they produce. It goes
+            // first so that it is the last to exit a node, by which time the
+            // plugins deciding whether a value can be absent have run
             parser.addPlugin(modelPlugin);
+            plugins.forEach(parser::addPlugin);
 
             return parser.execute(endpointClasses);
         } catch (URISyntaxException e) {

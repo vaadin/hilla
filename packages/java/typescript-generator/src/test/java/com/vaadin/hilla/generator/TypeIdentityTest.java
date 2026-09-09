@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.hilla.generator.fixtures.TypeIdentityEndpoint;
+import com.vaadin.hilla.generator.model.EndpointModel;
 import com.vaadin.hilla.generator.model.MethodModel;
 import com.vaadin.hilla.generator.model.TypeModel;
 import com.vaadin.hilla.parser.testutils.FullStackGenerator;
@@ -34,9 +35,18 @@ import com.vaadin.hilla.parser.testutils.FullStackGenerator;
  * long from a double.
  */
 public class TypeIdentityTest {
-    private final List<MethodModel> methods = new FullStackGenerator(
+    private final EndpointModel endpoint = new FullStackGenerator(
             TypeIdentityTest.class, TypeIdentityEndpoint.class).parseModel()
-            .get(0).methods();
+            .get(0);
+    private final List<MethodModel> methods = endpoint.methods();
+
+    @Test
+    public void should_TellWhichClassTheEndpointComesFrom() {
+        assertEquals(TypeIdentityEndpoint.class.getSimpleName(),
+                endpoint.name());
+        assertEquals(TypeIdentityEndpoint.class.getName(),
+                endpoint.javaClass());
+    }
 
     @Test
     public void should_TellApartTheTypesWrittenAsAString() {
