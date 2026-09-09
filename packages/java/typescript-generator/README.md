@@ -26,9 +26,9 @@ whether a value can be absent, already answered. The model exists only while a
 generation runs; nothing writes it to a file.
 
 `com.vaadin.hilla.generator.typescript` writes the files from that model, by
-concatenating strings. So far it covers the client, the endpoints and the
-barrel; entities, models and signals still come from the Node generator, which
-is what the pipeline runs.
+filling in text templates, as nothing needs the TypeScript to be parsed. So far
+it covers the client, the endpoints and the barrel; entities, models and signals
+still come from the Node generator, which is what the pipeline runs.
 
 ## Architecture
 
