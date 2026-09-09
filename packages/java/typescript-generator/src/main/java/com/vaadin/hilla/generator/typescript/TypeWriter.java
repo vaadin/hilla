@@ -99,13 +99,32 @@ final class TypeWriter {
      */
     private String write(TypeModel.Provided provided) {
         var name = provided.module().isEmpty() ? provided.name()
-                : provided.defaultExport()
-                        ? imports.importDefault(provided.module(),
-                                provided.name(), true)
-                        : imports.importNamed(provided.module(),
-                                provided.name(), true);
+                : imports.importNamed(provided.module(), provided.name(), true);
 
         return name + typeArguments(provided.typeArguments());
+    }
+
+    /**
+     * Claims the names of the types the browser has, which are written as they
+     * are, so that an import of a type of the application does not take one of
+     * them and turn it into something else.
+     */
+    void reserveProvided(TypeModel type) {
+        switch (type) {
+        case TypeModel.Provided provided -> {
+            if (provided.module().isEmpty()) {
+                imports.reserve(provided.name());
+            }
+
+            provided.typeArguments().forEach(this::reserveProvided);
+        }
+        case TypeModel.ArrayOf array -> reserveProvided(array.items());
+        case TypeModel.MapOf map -> reserveProvided(map.values());
+        case TypeModel.EntityRef entity ->
+            entity.typeArguments().forEach(this::reserveProvided);
+        default -> {
+        }
+        }
     }
 
     private String write(TypeModel.EntityRef entity) {
