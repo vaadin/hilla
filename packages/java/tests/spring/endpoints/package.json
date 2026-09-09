@@ -8,6 +8,7 @@
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
     "@vaadin/icon": "25.3.0-rc1",
     "@vaadin/icons": "25.3.0-rc1",
+    "@vaadin/hilla-models": "file:../../../../ts/models",
     "@vaadin/router": "2.0.1",
     "@vaadin/tooltip": "25.3.0-rc1",
     "@vaadin/vaadin-lumo-styles": "25.3.0-rc1",
