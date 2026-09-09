@@ -20,6 +20,7 @@ import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -159,6 +160,14 @@ public class SampleEndpoint {
 
         private Sample sample;
 
+        private String[] words;
+
+        private Set<String> unique;
+
+        private Map<String, List<String>> grouped;
+
+        private Optional<List<String>> maybeTags;
+
         public int getCount() {
             return count;
         }
@@ -205,6 +214,38 @@ public class SampleEndpoint {
 
         public void setSample(Sample sample) {
             this.sample = sample;
+        }
+
+        public String[] getWords() {
+            return words;
+        }
+
+        public void setWords(String[] words) {
+            this.words = words;
+        }
+
+        public Set<String> getUnique() {
+            return unique;
+        }
+
+        public void setUnique(Set<String> unique) {
+            this.unique = unique;
+        }
+
+        public Map<String, List<String>> getGrouped() {
+            return grouped;
+        }
+
+        public void setGrouped(Map<String, List<String>> grouped) {
+            this.grouped = grouped;
+        }
+
+        public Optional<List<String>> getMaybeTags() {
+            return maybeTags;
+        }
+
+        public void setMaybeTags(Optional<List<String>> maybeTags) {
+            this.maybeTags = maybeTags;
         }
     }
 

@@ -41,12 +41,6 @@ final class ImportRegistry {
     private static final Set<String> GLOBAL_TYPES = Set.of("Array", "Promise",
             "ReadonlyArray", "Record");
 
-    /**
-     * The width beyond which an import of many names goes on lines of its own.
-     * Same as the width the sources of the project are formatted to.
-     */
-    private static final int MAX_WIDTH = 120;
-
     private final Map<String, Module> modules = new TreeMap<>(
             ImportRegistry::compareModules);
     private final Set<String> usedNames = new HashSet<>(GLOBAL_TYPES);
@@ -201,7 +195,7 @@ final class ImportRegistry {
 
             // A file importing a lot from one module, which the models of a
             // form do, reads better with a name per line than as one long one
-            lines.add(line.length() <= MAX_WIDTH ? line
+            lines.add(line.length() <= Layout.MAX_WIDTH ? line
                     : start + specifiers.stream().collect(
                             Collectors.joining(",\n  ", "{\n  ", ",\n}"))
                             + end);
