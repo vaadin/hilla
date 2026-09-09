@@ -26,9 +26,12 @@ import com.vaadin.hilla.generator.fixtures.InheritingEndpoint;
 import com.vaadin.hilla.generator.fixtures.SampleEndpoint;
 import com.vaadin.hilla.generator.fixtures.ShadowingEndpoint;
 import com.vaadin.hilla.generator.model.EndpointModel;
+import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.generator.typescript.BarrelWriter;
 import com.vaadin.hilla.generator.typescript.ClientWriter;
 import com.vaadin.hilla.generator.typescript.EndpointWriter;
+import com.vaadin.hilla.generator.typescript.EntityWriter;
+import com.vaadin.hilla.generator.typescript.GeneratedFile;
 import com.vaadin.hilla.parser.testutils.FullStackGenerator;
 
 /**
@@ -38,6 +41,9 @@ import com.vaadin.hilla.parser.testutils.FullStackGenerator;
 public class GeneratedTypeScriptTest {
     private final List<EndpointModel> endpoints = endpointsOf(
             SampleEndpoint.class);
+    private final List<EntityModel> entities = new FullStackGenerator(
+            GeneratedTypeScriptTest.class, SampleEndpoint.class)
+            .parseEntities();
 
     @Test
     public void should_WriteTheEndpoint() {
@@ -48,7 +54,9 @@ public class GeneratedTypeScriptTest {
         assertEquals(
                 """
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
+                        import type Detailed from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Detailed.js';
                         import type Kind from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Kind.js';
+                        import type Marker from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Marker.js';
                         import type Sample from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Sample.js';
                         import type Wrapper from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Wrapper.js';
                         import client from './connect-client.default.js';
@@ -74,6 +82,10 @@ public class GeneratedTypeScriptTest {
                           return client.call('SampleEndpoint', 'describe', { firstName, lastName, age }, init);
                         }
 
+                        export async function detailed(init?: EndpointRequestInit): Promise<Detailed | undefined> {
+                          return client.call('SampleEndpoint', 'detailed', {}, init);
+                        }
+
                         export async function find(id: string | undefined, init?: EndpointRequestInit): Promise<Sample | undefined> {
                           return client.call('SampleEndpoint', 'find', { id }, init);
                         }
@@ -84,6 +96,10 @@ public class GeneratedTypeScriptTest {
 
                         export async function kind(init?: EndpointRequestInit): Promise<Kind | undefined> {
                           return client.call('SampleEndpoint', 'kind', {}, init);
+                        }
+
+                        export async function marker(init?: EndpointRequestInit): Promise<Marker | undefined> {
+                          return client.call('SampleEndpoint', 'marker', {}, init);
                         }
 
                         export async function maybe(init?: EndpointRequestInit): Promise<string | undefined> {
@@ -227,6 +243,80 @@ public class GeneratedTypeScriptTest {
         generator.parseModel();
 
         assertEquals(1, generator.parseModel().size());
+    }
+
+    @Test
+    public void should_WriteAnEntity() {
+        var file = write(entity(SampleEndpoint.Sample.class));
+
+        assertEquals(
+                "com/vaadin/hilla/generator/fixtures/SampleEndpoint/Sample.ts",
+                file.path());
+        assertEquals("""
+                interface Sample {
+                  name?: string;
+                }
+
+                export default Sample;
+                """, file.content());
+    }
+
+    @Test
+    public void should_WriteAnEntityExtendingAnother() {
+        assertEquals("""
+                import type Sample from './Sample.js';
+
+                interface Detailed extends Sample {
+                  note?: string;
+                }
+
+                export default Detailed;
+                """, write(entity(SampleEndpoint.Detailed.class)).content());
+    }
+
+    @Test
+    public void should_WriteAGenericEntity() {
+        // The type parameter defaults to an unknown type, so that the
+        // declaration can also be referred to without saying what it holds
+        assertEquals("""
+                interface Wrapper<T = unknown> {
+                  value?: T;
+                }
+
+                export default Wrapper;
+                """, write(entity(SampleEndpoint.Wrapper.class)).content());
+    }
+
+    @Test
+    public void should_WriteAnEntityWithoutProperties() {
+        assertEquals("""
+                interface Marker {}
+
+                export default Marker;
+                """, write(entity(SampleEndpoint.Marker.class)).content());
+    }
+
+    @Test
+    public void should_WriteAnEnumAsTheValuesItIsSerializedAs() {
+        assertEquals("""
+                enum Kind {
+                  ONE = 'ONE',
+                  OTHER = 'OTHER',
+                }
+
+                export default Kind;
+                """, write(entity(SampleEndpoint.Kind.class)).content());
+    }
+
+    private static GeneratedFile write(EntityModel entity) {
+        return new EntityWriter().write(entity);
+    }
+
+    private EntityModel entity(Class<?> javaClass) {
+        return entities.stream().filter(
+                entity -> entity.javaClass().equals(javaClass.getName()))
+                .findFirst().orElseThrow(() -> new AssertionError(
+                        "Nothing was generated for " + javaClass));
     }
 
     private static List<EndpointModel> endpointsOf(Class<?> endpoint) {
