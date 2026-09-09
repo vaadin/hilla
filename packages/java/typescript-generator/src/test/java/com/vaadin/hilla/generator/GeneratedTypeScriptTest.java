@@ -21,6 +21,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.hilla.generator.fixtures.EmptyEndpoint;
+import com.vaadin.hilla.generator.fixtures.InheritingEndpoint;
 import com.vaadin.hilla.generator.fixtures.SampleEndpoint;
 import com.vaadin.hilla.generator.fixtures.ShadowingEndpoint;
 import com.vaadin.hilla.generator.model.EndpointModel;
@@ -88,6 +90,14 @@ public class GeneratedTypeScriptTest {
                           return client.call('SampleEndpoint', 'maybe', {}, init);
                         }
 
+                        export async function maybeCounts(init?: EndpointRequestInit): Promise<Record<string, number | undefined> | undefined> {
+                          return client.call('SampleEndpoint', 'maybeCounts', {}, init);
+                        }
+
+                        export async function maybeNames(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
+                          return client.call('SampleEndpoint', 'maybeNames', {}, init);
+                        }
+
                         export async function names(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'names', {}, init);
                         }
@@ -132,12 +142,39 @@ public class GeneratedTypeScriptTest {
                         .write(endpoint).content());
     }
 
+    /**
+     * The Node generator writes no file at all for such an endpoint, and no
+     * entry in the barrel either. Writing a module which exports nothing keeps
+     * the barrel able to name every endpoint; whether the file is worth writing
+     * is for the step which puts these writers in the pipeline.
+     */
     @Test
     public void should_WriteAModuleForAnEndpointWithoutMethods() {
-        var endpoint = new EndpointModel("Empty", "com.example.Empty",
-                List.of());
+        var endpoint = endpointsOf(EmptyEndpoint.class).get(0);
 
+        assertEquals(List.of(), endpoint.methods());
         assertEquals("export {};\n",
+                new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
+                        .write(endpoint).content());
+    }
+
+    @Test
+    public void should_WriteAMethodOnceAlthoughTheWalkCarriesItTwice() {
+        var endpoint = endpointsOf(InheritingEndpoint.class).get(0);
+
+        assertEquals(
+                """
+                        import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
+                        import client from './connect-client.default.js';
+
+                        export async function shared(init?: EndpointRequestInit): Promise<string | undefined> {
+                          return client.call('InheritingEndpoint', 'shared', {}, init);
+                        }
+
+                        export async function twice(one: string | undefined, init?: EndpointRequestInit): Promise<string | undefined> {
+                          return client.call('InheritingEndpoint', 'twice', { one }, init);
+                        }
+                        """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpoint).content());
     }
