@@ -12,9 +12,9 @@
     "@vaadin/hilla-react-form": "file:../../../../ts/react-form",
     "@vaadin/hilla-react-i18n": "file:../../../../ts/react-i18n",
     "@vaadin/hilla-react-signals": "file:../../../../ts/react-signals",
-    "@vaadin/icon": "25.3.0-beta1",
-    "@vaadin/icons": "25.3.0-beta1",
-    "@vaadin/tooltip": "25.3.0-beta1",
+    "@vaadin/icon": "25.3.0-beta2",
+    "@vaadin/icons": "25.3.0-beta2",
+    "@vaadin/tooltip": "25.3.0-beta2",
     "@vaadin/vaadin-lumo-styles": "25.3.0-beta1",
     "@vaadin/vaadin-themable-mixin": "25.3.0-beta1",
     "lit": "3.3.3",
@@ -66,9 +66,9 @@
       "@vaadin/hilla-react-form": "25.3.0-beta2",
       "@vaadin/hilla-react-i18n": "25.3.0-beta2",
       "@vaadin/hilla-react-signals": "25.3.0-beta2",
-      "@vaadin/icon": "25.3.0-beta1",
-      "@vaadin/icons": "25.3.0-beta1",
-      "@vaadin/tooltip": "25.3.0-beta1",
+      "@vaadin/icon": "25.3.0-beta2",
+      "@vaadin/icons": "25.3.0-beta2",
+      "@vaadin/tooltip": "25.3.0-beta2",
       "@vaadin/vaadin-lumo-styles": "25.3.0-beta1",
       "@vaadin/vaadin-themable-mixin": "25.3.0-beta1",
       "lit": "3.3.3",
@@ -109,7 +109,7 @@
       "vite": "8.2.2",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "8e2921fbd73551ec357dd8ab935557d58676886632944dd7ce7090f9434e1480"
+    "hash": "4af4ce17240e8d1f867384991657865ff2b74c3d29e535c01995f6a03c0d62a1"
   },
   "overrides": {
     "@vaadin/a11y-base": "25.3.0-beta1",
