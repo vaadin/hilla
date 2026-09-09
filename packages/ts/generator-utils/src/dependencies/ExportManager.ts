@@ -4,25 +4,31 @@ import ts, {
   type Identifier,
   type Statement,
 } from '@typescript/typescript6';
-import createFullyUniqueIdentifier from '../createFullyUniqueIdentifier.js';
 import type CodeConvertable from './CodeConvertable.js';
+import NameRegistry from './NameRegistry.js';
 import StatementRecordManager, { type StatementRecord } from './StatementRecordManager.js';
 import { createDependencyRecord, type DependencyRecord } from './utils.js';
 
 export class NamedExportManager implements CodeConvertable<ExportDeclaration | undefined> {
   readonly collator: Intl.Collator;
   readonly #map = new Map<string, DependencyRecord>();
+  readonly #names: NameRegistry;
 
   get size(): number {
     return this.#map.size;
   }
 
-  constructor(collator: Intl.Collator) {
+  constructor(collator: Intl.Collator, names: NameRegistry) {
     this.collator = collator;
+    this.#names = names;
   }
 
   add(name: string, isType?: boolean, uniqueId?: Identifier): Identifier {
-    const id = uniqueId ?? createFullyUniqueIdentifier(name);
+    if (uniqueId) {
+      this.#names.claim(uniqueId.text);
+    }
+
+    const id = uniqueId ?? this.getIdentifier(name) ?? this.#names.reserveIdentifier(name);
     this.#map.set(name, createDependencyRecord(id, isType));
     return id;
   }
@@ -60,7 +66,11 @@ export class NamedExportManager implements CodeConvertable<ExportDeclaration | u
       ts.factory.createNamedExports(
         names.map((name) => {
           const { id, isType } = this.#map.get(name)!;
-          return ts.factory.createExportSpecifier(isType, id, ts.factory.createIdentifier(name));
+          return ts.factory.createExportSpecifier(
+            isType,
+            id.text === name ? undefined : id,
+            ts.factory.createIdentifier(name),
+          );
         }),
       ),
       undefined,
@@ -70,13 +80,23 @@ export class NamedExportManager implements CodeConvertable<ExportDeclaration | u
 
 export class NamespaceExportManager extends StatementRecordManager<ExportDeclaration> {
   readonly #map = new Map<string, Identifier | null>();
+  readonly #names: NameRegistry;
+
+  constructor(collator: Intl.Collator, names: NameRegistry) {
+    super(collator);
+    this.#names = names;
+  }
 
   get size(): number {
     return this.#map.size;
   }
 
   addCombined(path: string, name: string, uniqueId?: Identifier): Identifier {
-    const id = uniqueId ?? createFullyUniqueIdentifier(name);
+    if (uniqueId) {
+      this.#names.claim(uniqueId.text);
+    }
+
+    const id = uniqueId ?? this.#map.get(path) ?? this.#names.reserveIdentifier(name);
     this.#map.set(path, id);
     return id;
   }
@@ -125,14 +145,24 @@ export class NamespaceExportManager extends StatementRecordManager<ExportDeclara
 }
 
 export class DefaultExportManager implements CodeConvertable<ExportAssignment | undefined> {
+  readonly #names: NameRegistry;
   #id?: Identifier;
+
+  constructor(names: NameRegistry) {
+    this.#names = names;
+  }
 
   get isEmpty(): boolean {
     return !this.#id;
   }
 
+  /**
+   * The name is taken as given rather than made unique: it belongs to a
+   * declaration the caller emits, so the caller decides how it is spelled.
+   */
   set(id: Identifier | string): Identifier {
     this.#id = typeof id === 'string' ? ts.factory.createIdentifier(id) : id;
+    this.#names.claim(this.#id.text);
     return this.#id;
   }
 
@@ -142,17 +172,20 @@ export class DefaultExportManager implements CodeConvertable<ExportAssignment | 
 }
 
 export default class ExportManager implements CodeConvertable<readonly Statement[]> {
-  readonly default: DefaultExportManager = new DefaultExportManager();
+  readonly default: DefaultExportManager;
   readonly named: NamedExportManager;
+  readonly names: NameRegistry;
   readonly namespace: NamespaceExportManager;
 
   get size(): number {
     return (this.default.isEmpty ? 0 : 1) + this.named.size + this.namespace.size;
   }
 
-  constructor(collator: Intl.Collator) {
-    this.named = new NamedExportManager(collator);
-    this.namespace = new NamespaceExportManager(collator);
+  constructor(collator: Intl.Collator, names: NameRegistry = new NameRegistry()) {
+    this.default = new DefaultExportManager(names);
+    this.named = new NamedExportManager(collator, names);
+    this.namespace = new NamespaceExportManager(collator, names);
+    this.names = names;
   }
 
   toCode(): readonly Statement[] {

@@ -1,2 +1,2 @@
-import * as PropertyEndpoint_1 from "./PropertyEndpoint.js";
-export { PropertyEndpoint_1 as PropertyEndpoint };
+import * as PropertyEndpoint from "./PropertyEndpoint.js";
+export { PropertyEndpoint };
