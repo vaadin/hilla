@@ -242,11 +242,13 @@ public final class EndpointModelPlugin
         }
 
         if (signature.isArray() || signature.isIterable()) {
-            return new TypeModel.ArrayOf(only(referred), optional);
+            return new TypeModel.ArrayOf(only(referred), optional,
+                    name(signature));
         }
 
         if (signature.isMap()) {
-            return new TypeModel.MapOf(only(referred), optional);
+            return new TypeModel.MapOf(only(referred), optional,
+                    name(signature));
         }
 
         if (signature.isClassRef() && isEntity(signature)) {
@@ -266,8 +268,9 @@ public final class EndpointModelPlugin
         case TypeModel.Scalar scalar ->
             new TypeModel.Scalar(scalar.kind(), true, scalar.javaType());
         case TypeModel.ArrayOf array ->
-            new TypeModel.ArrayOf(array.items(), true);
-        case TypeModel.MapOf map -> new TypeModel.MapOf(map.values(), true);
+            new TypeModel.ArrayOf(array.items(), true, array.javaType());
+        case TypeModel.MapOf map ->
+            new TypeModel.MapOf(map.values(), true, map.javaType());
         case TypeModel.EntityRef entity -> new TypeModel.EntityRef(
                 entity.javaClass(), entity.typeArguments(), true);
         case TypeModel.TypeVariable variable ->

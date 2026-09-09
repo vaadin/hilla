@@ -102,6 +102,10 @@ public class SampleEndpoint {
         return null;
     }
 
+    public Mixed mixed() {
+        return null;
+    }
+
     public enum Kind {
         ONE, OTHER
     }
@@ -135,6 +139,72 @@ public class SampleEndpoint {
 
         public void setNote(String note) {
             this.note = note;
+        }
+    }
+
+    /**
+     * An entity with a property of every kind, so that the model of each of
+     * them is written from something.
+     */
+    public static class Mixed {
+        private int count;
+
+        private boolean active;
+
+        private List<String> tags;
+
+        private Map<String, Integer> counts;
+
+        private Kind kind;
+
+        private Sample sample;
+
+        public int getCount() {
+            return count;
+        }
+
+        public void setCount(int count) {
+            this.count = count;
+        }
+
+        public boolean isActive() {
+            return active;
+        }
+
+        public void setActive(boolean active) {
+            this.active = active;
+        }
+
+        public List<String> getTags() {
+            return tags;
+        }
+
+        public void setTags(List<String> tags) {
+            this.tags = tags;
+        }
+
+        public Map<String, Integer> getCounts() {
+            return counts;
+        }
+
+        public void setCounts(Map<String, Integer> counts) {
+            this.counts = counts;
+        }
+
+        public Kind getKind() {
+            return kind;
+        }
+
+        public void setKind(Kind kind) {
+            this.kind = kind;
+        }
+
+        public Sample getSample() {
+            return sample;
+        }
+
+        public void setSample(Sample sample) {
+            this.sample = sample;
         }
     }
 
