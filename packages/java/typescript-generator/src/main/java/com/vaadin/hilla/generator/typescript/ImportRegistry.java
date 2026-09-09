@@ -126,12 +126,17 @@ final class ImportRegistry {
         }
 
         private String namedImport(String exportedName, boolean typeOnly) {
-            var name = named.computeIfAbsent(exportedName,
-                    key -> uniqueName(key));
+            var name = named.get(exportedName);
 
-            if (typeOnly) {
-                typeOnlyNames.add(exportedName);
-            } else {
+            if (name == null) {
+                name = uniqueName(exportedName);
+                named.put(exportedName, name);
+
+                if (typeOnly) {
+                    typeOnlyNames.add(exportedName);
+                }
+            } else if (!typeOnly) {
+                // A value import covers a type-only one, but not the reverse
                 typeOnlyNames.remove(exportedName);
             }
 
