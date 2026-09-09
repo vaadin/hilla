@@ -43,12 +43,6 @@ public final class EndpointWriter {
               return {{client}}.call('{{endpoint}}', '{{method}}', {{arguments}}, {{init}});
             }""";
 
-    /**
-     * The first line of a method, which is what has to fit the width.
-     */
-    private static final String FIRST_LINE = """
-            export async function {{method}}({{parameters}}): Promise<{{returnType}}> {""";
-
     private final String clientModule;
 
     /**
@@ -87,16 +81,38 @@ public final class EndpointWriter {
     private String writeMethod(EndpointModel endpoint, MethodModel method,
             ImportRegistry imports, TypeWriter types, String client) {
         var init = initParameter(method);
+        var declared = declaredParameters(method, init, imports, types);
 
+        var written = fill(endpoint, method, String.join(", ", declared), types,
+                client, init);
+
+        // Written again with the parameters on a line each when the first line
+        // came out too wide to read
+        if (firstLineOf(written).length() <= MAX_WIDTH) {
+            return written;
+        }
+
+        return fill(endpoint, method,
+                declared.stream()
+                        .collect(Collectors.joining(",\n  ", "\n  ", ",\n")),
+                types, client, init);
+    }
+
+    private String fill(EndpointModel endpoint, MethodModel method,
+            String parameters, TypeWriter types, String client, String init) {
         return Template.of(METHOD) //
                 .with("method", method.name()) //
-                .with("parameters", parameters(method, init, imports, types)) //
+                .with("parameters", parameters) //
                 .with("returnType", types.write(method.returnType())) //
                 .with("client", client) //
                 .with("endpoint", endpoint.name()) //
                 .with("arguments", packParameters(method.parameters())) //
                 .with("init", init) //
                 .fill();
+    }
+
+    private static String firstLineOf(String method) {
+        return method.lines().findFirst().orElse("");
     }
 
     /**
@@ -116,38 +132,17 @@ public final class EndpointWriter {
     }
 
     /**
-     * The parameters as they are declared, on one line, or on a line each when
-     * that would be too wide to read.
+     * Every parameter as it is declared, the request options last.
      */
-    private String parameters(MethodModel method, String init,
-            ImportRegistry imports, TypeWriter types) {
+    private static List<String> declaredParameters(MethodModel method,
+            String init, ImportRegistry imports, TypeWriter types) {
         var initType = imports.importNamed(HILLA_FRONTEND, INIT_TYPE, true);
         var declared = new ArrayList<String>();
         method.parameters().forEach(parameter -> declared
                 .add(parameter.name() + ": " + types.write(parameter.type())));
         declared.add(init + "?: " + initType);
 
-        var oneLine = String.join(", ", declared);
-
-        if (widthOf(method, oneLine, types) <= MAX_WIDTH) {
-            return oneLine;
-        }
-
-        return declared.stream()
-                .collect(Collectors.joining(",\n  ", "\n  ", ",\n"));
-    }
-
-    /**
-     * How wide the first line of the method would be with the parameters on it,
-     * the start of the body included, since it follows on the same line.
-     */
-    private static int widthOf(MethodModel method, String parameters,
-            TypeWriter types) {
-        return Template.of(FIRST_LINE) //
-                .with("method", method.name()) //
-                .with("parameters", parameters) //
-                .with("returnType", types.write(method.returnType())) //
-                .fill().length();
+        return declared;
     }
 
     /**
