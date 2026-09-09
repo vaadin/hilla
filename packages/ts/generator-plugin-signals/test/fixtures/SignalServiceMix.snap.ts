@@ -1,41 +1,41 @@
-import { EndpointRequestInit as EndpointRequestInit_1 } from "@vaadin/hilla-frontend";
-import { ArrayModel as ArrayModel_1 } from "@vaadin/hilla-lit-form";
-import { ListSignal as ListSignal_1, SignalMethodOptions as SignalMethodOptions_1, ValueSignal as ValueSignal_1 } from "@vaadin/hilla-react-signals";
-import type Person_1 from "./com/github/taefi/data/Person.js";
-import PersonModel_1 from "./com/github/taefi/data/PersonModel.js";
-import client_1 from "./connect-client.default.js";
-async function getPerson_1(init?: EndpointRequestInit_1): Promise<Person_1 | undefined> { return client_1.call("PersonService", "getPerson", {}, init); }
-function personArraySignal_1(options?: SignalMethodOptions_1<Array<Person_1>>): ValueSignal_1<Array<Person_1>> { return new ValueSignal_1(options?.defaultValue ?? ArrayModel_1.createEmptyValue(), {
-    client: client_1,
+import { EndpointRequestInit } from "@vaadin/hilla-frontend";
+import { ArrayModel } from "@vaadin/hilla-lit-form";
+import { ListSignal, SignalMethodOptions, ValueSignal } from "@vaadin/hilla-react-signals";
+import type Person from "./com/github/taefi/data/Person.js";
+import PersonModel from "./com/github/taefi/data/PersonModel.js";
+import client from "./connect-client.default.js";
+async function getPerson(init?: EndpointRequestInit): Promise<Person | undefined> { return client.call("PersonService", "getPerson", {}, init); }
+function personArraySignal(options?: SignalMethodOptions<Array<Person>>): ValueSignal<Array<Person>> { return new ValueSignal(options?.defaultValue ?? ArrayModel.createEmptyValue(), {
+    client: client,
     endpoint: "PersonService",
     method: "personArraySignal"
 }); }
-function personListSignal_1(): ListSignal_1<Person_1> { return new ListSignal_1({
-    client: client_1,
+function personListSignal(): ListSignal<Person> { return new ListSignal({
+    client: client,
     endpoint: "PersonService",
     method: "personListSignal"
 }); }
-function personSignalNotNull_1(options?: SignalMethodOptions_1<Person_1>): ValueSignal_1<Person_1> { return new ValueSignal_1(options?.defaultValue ?? PersonModel_1.createEmptyValue(), {
-    client: client_1,
+function personSignalNotNull(options?: SignalMethodOptions<Person>): ValueSignal<Person> { return new ValueSignal(options?.defaultValue ?? PersonModel.createEmptyValue(), {
+    client: client,
     endpoint: "PersonService",
     method: "personSignalNotNull"
 }); }
-function personSignalNullable_1(isAdult: boolean, options?: SignalMethodOptions_1<Person_1 | undefined>): ValueSignal_1<Person_1 | undefined> { return new ValueSignal_1(options?.defaultValue, {
-    client: client_1,
+function personSignalNullable(isAdult: boolean, options?: SignalMethodOptions<Person | undefined>): ValueSignal<Person | undefined> { return new ValueSignal(options?.defaultValue, {
+    client: client,
     endpoint: "PersonService",
     method: "personSignalNullable",
     params: { isAdult }
 }); }
-function personSignalWithParams_1(dummyBoolean: boolean, dummyString: string | undefined, options?: SignalMethodOptions_1<Person_1 | undefined>): ValueSignal_1<Person_1 | undefined> { return new ValueSignal_1(options?.defaultValue, {
-    client: client_1,
+function personSignalWithParams(dummyBoolean: boolean, dummyString: string | undefined, options?: SignalMethodOptions<Person | undefined>): ValueSignal<Person | undefined> { return new ValueSignal(options?.defaultValue, {
+    client: client,
     endpoint: "PersonService",
     method: "personSignalWithParams",
     params: { dummyBoolean, dummyString }
 }); }
-function personSignalNonNullWithParams_1(dummyBoolean: boolean, dummyString: string | undefined, options?: SignalMethodOptions_1<Person_1>): ValueSignal_1<Person_1> { return new ValueSignal_1(options?.defaultValue ?? PersonModel_1.createEmptyValue(), {
-    client: client_1,
+function personSignalNonNullWithParams(dummyBoolean: boolean, dummyString: string | undefined, options?: SignalMethodOptions<Person>): ValueSignal<Person> { return new ValueSignal(options?.defaultValue ?? PersonModel.createEmptyValue(), {
+    client: client,
     endpoint: "PersonService",
     method: "personSignalNonNullWithParams",
     params: { dummyBoolean, dummyString }
 }); }
-export { getPerson_1 as getPerson, personArraySignal_1 as personArraySignal, personListSignal_1 as personListSignal, personSignalNonNullWithParams_1 as personSignalNonNullWithParams, personSignalNotNull_1 as personSignalNotNull, personSignalNullable_1 as personSignalNullable, personSignalWithParams_1 as personSignalWithParams };
+export { getPerson, personArraySignal, personListSignal, personSignalNonNullWithParams, personSignalNotNull, personSignalNullable, personSignalWithParams };

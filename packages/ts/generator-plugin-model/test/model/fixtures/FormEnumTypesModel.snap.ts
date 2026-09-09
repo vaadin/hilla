@@ -1,7 +1,7 @@
-import { _enum as _enum_1, EnumModel as EnumModel_1, makeEnumEmptyValueCreator as makeEnumEmptyValueCreator_1 } from "@vaadin/hilla-lit-form";
-import FormEnumTypes_1 from "./FormEnumTypes.js";
-class FormEnumTypesModel extends EnumModel_1<typeof FormEnumTypes_1> {
-    static override createEmptyValue = makeEnumEmptyValueCreator_1(FormEnumTypesModel);
-    readonly [_enum_1] = FormEnumTypes_1;
+import { _enum, EnumModel, makeEnumEmptyValueCreator } from "@vaadin/hilla-lit-form";
+import FormEnumTypes from "./FormEnumTypes.js";
+class FormEnumTypesModel extends EnumModel<typeof FormEnumTypes> {
+    static override createEmptyValue = makeEnumEmptyValueCreator(FormEnumTypesModel);
+    readonly [_enum] = FormEnumTypes;
 }
 export default FormEnumTypesModel;

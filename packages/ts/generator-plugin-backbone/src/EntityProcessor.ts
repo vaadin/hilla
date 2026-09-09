@@ -50,6 +50,10 @@ export class EntityProcessor {
     this.#path = convertFullyQualifiedNameToRelativePath(name);
     this.#dependencies = new DependencyManager(new PathManager({ extension: '.js', relativeTo: dirname(this.#path) }));
     this.#transferTypes = storage.transferTypes;
+
+    // claimed up front so that an entity of the same simple name imported from
+    // another package gets the suffix, not this file's own declaration
+    this.#dependencies.names.claim(this.#name);
   }
 
   get #id(): Identifier {
