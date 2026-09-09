@@ -47,8 +47,12 @@ public class ImportRegistryTest {
     public void should_KeepAValueImportWhenTheSameThingIsAlsoNeededAsAType() {
         imports.importDefault("./client.js", "client", true);
         imports.importDefault("./client.js", "client", false);
+        imports.importNamed("./client.js", "ConnectClient", false);
+        imports.importNamed("./client.js", "ConnectClient", true);
 
-        assertEquals(List.of("import client from './client.js';"),
+        assertEquals(
+                List.of("import client from './client.js';",
+                        "import { ConnectClient } from './client.js';"),
                 imports.write());
     }
 
