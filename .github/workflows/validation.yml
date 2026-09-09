@@ -147,7 +147,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{ env.COVFILES }}
-          flags: unittests
+          flags: java
           fail_ci_if_error: true
           root_dir: ${{ github.workspace }}
 
@@ -191,7 +191,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{ env.COVFILES }}
-          flags: unittests
+          flags: typescript
           fail_ci_if_error: true
           root_dir: ${{ github.workspace }}
 

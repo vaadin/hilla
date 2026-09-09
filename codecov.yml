@@ -1,0 +1,16 @@
+# Java and TypeScript are measured by a job of their own, so each uploads under
+# a flag of its own and is compared against itself. A single flag over both is
+# a single number, in which the Java coverage could go missing altogether
+# without anything noticing.
+coverage:
+  status:
+    project:
+      # The total mixes the two languages, so it moves whenever the set of
+      # measured files changes on either side rather than when coverage does.
+      default: false
+      java:
+        flags:
+          - java
+      typescript:
+        flags:
+          - typescript
