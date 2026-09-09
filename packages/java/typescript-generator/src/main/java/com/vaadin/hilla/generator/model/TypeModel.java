@@ -94,14 +94,13 @@ public sealed interface TypeModel {
      * A reference to a type parameter of the declaration being written, which
      * is written as it is.
      */
-    record TypeVariable(String name) implements TypeModel {
+    record TypeVariable(String name, boolean optional) implements TypeModel {
         public TypeVariable {
             Objects.requireNonNull(name);
         }
 
-        @Override
-        public boolean optional() {
-            return false;
+        public static TypeVariable of(String name) {
+            return new TypeVariable(name, false);
         }
     }
 }
