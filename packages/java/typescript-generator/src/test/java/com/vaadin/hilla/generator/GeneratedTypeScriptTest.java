@@ -27,12 +27,14 @@ import com.vaadin.hilla.generator.fixtures.SampleEndpoint;
 import com.vaadin.hilla.generator.fixtures.ShadowingEndpoint;
 import com.vaadin.hilla.generator.model.EndpointModel;
 import com.vaadin.hilla.generator.model.EntityModel;
+import com.vaadin.hilla.generator.model.UnionModel;
 import com.vaadin.hilla.generator.typescript.BarrelWriter;
 import com.vaadin.hilla.generator.typescript.ClientWriter;
 import com.vaadin.hilla.generator.typescript.EndpointWriter;
 import com.vaadin.hilla.generator.typescript.EntityWriter;
 import com.vaadin.hilla.generator.typescript.FormModelWriter;
 import com.vaadin.hilla.generator.typescript.GeneratedFile;
+import com.vaadin.hilla.generator.typescript.UnionWriter;
 import com.vaadin.hilla.parser.testutils.FullStackGenerator;
 
 /**
@@ -45,6 +47,8 @@ public class GeneratedTypeScriptTest {
     private static final List<EntityModel> entities = new FullStackGenerator(
             GeneratedTypeScriptTest.class, SampleEndpoint.class)
             .parseEntities();
+    private static final List<UnionModel> unions = new FullStackGenerator(
+            GeneratedTypeScriptTest.class, SampleEndpoint.class).parseUnions();
 
     @Test
     public void should_WriteTheEndpoint() {
@@ -57,6 +61,7 @@ public class GeneratedTypeScriptTest {
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
                         import type Bounded from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Bounded.js';
                         import type Detailed from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Detailed.js';
+                        import type Figure from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Figure.js';
                         import type Kind from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Kind.js';
                         import type Marker from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Marker.js';
                         import type Mixed from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Mixed.js';
@@ -91,6 +96,10 @@ public class GeneratedTypeScriptTest {
 
                         export async function detailed(init?: EndpointRequestInit): Promise<Detailed | undefined> {
                           return client.call('SampleEndpoint', 'detailed', {}, init);
+                        }
+
+                        export async function figure(init?: EndpointRequestInit): Promise<Figure | undefined> {
+                          return client.call('SampleEndpoint', 'figure', {}, init);
                         }
 
                         export async function find(id: string | undefined, init?: EndpointRequestInit): Promise<Sample | undefined> {
@@ -565,6 +574,65 @@ public class GeneratedTypeScriptTest {
                         export default KindModel;
                         """,
                 file.content());
+    }
+
+    @Test
+    public void should_WriteWhichSubtypeAValueOfAPolymorphicTypeCanBe() {
+        // A subtype accepting the discriminator of the one below it is
+        // narrowed to its own value, or a value of it would be a value of both
+        var file = new UnionWriter().write(unions.get(0));
+
+        assertEquals(
+                "com/vaadin/hilla/generator/fixtures/SampleEndpoint/FigureUnion.ts",
+                file.path());
+        assertEquals("""
+                import type Ring from './Figure/Ring.js';
+                import type Round from './Figure/Round.js';
+
+                type FigureUnion = (Round & { figure: 'round' }) | Ring;
+
+                export default FigureUnion;
+                """, file.content());
+    }
+
+    @Test
+    public void should_WriteTheDiscriminatorOfASubtypeAsTheValuesItAccepts() {
+        assertEquals("""
+                import type Figure from '../Figure.js';
+
+                interface Round extends Figure {
+                  radius: number;
+                  figure: 'round' | 'ring';
+                }
+
+                export default Round;
+                """,
+                write(entity(SampleEndpoint.Figure.Round.class)).content());
+    }
+
+    @Test
+    public void should_LeaveTheDiscriminatorOutOfTheModelOfASubtype() {
+        // A form binds what the type declares, and the discriminator is
+        // decided by which subtype the value is rather than edited
+        assertEquals(
+                """
+                        import { NumberModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+                        import FigureModel from '../FigureModel.js';
+                        import type Round from './Round.js';
+
+                        class RoundModel<T extends Round = Round> extends FigureModel<T> {
+                          static override createEmptyValue = makeObjectEmptyValueCreator(RoundModel);
+
+                          get radius(): NumberModel {
+                            return this[_getPropertyModel]('radius', (parent, key) =>
+                              new NumberModel(parent, key, false, { meta: { javaType: 'double' } }));
+                          }
+                        }
+
+                        export default RoundModel;
+                        """,
+                writeModel(entity(SampleEndpoint.Figure.Round.class))
+                        .content());
     }
 
     private static GeneratedFile write(EntityModel entity) {

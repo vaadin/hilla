@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
+
+import io.swagger.v3.oas.models.media.Schema;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
@@ -40,6 +43,7 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
+import com.vaadin.hilla.parser.plugins.subtypes.SubTypesPlugin;
 
 /**
  * Builds the model the TypeScript generator works from out of the browser
@@ -73,6 +77,7 @@ public final class EndpointModelPlugin
     private final Map<Node<?, ?>, List<PropertyModel>> properties = new IdentityHashMap<>();
     private final List<EndpointModel> endpoints = new ArrayList<>();
     private final List<EntityModel> entities = new ArrayList<>();
+    private final Map<String, List<String>> unions = new LinkedHashMap<>();
 
     /**
      * The endpoints built by the last run of the parser.
@@ -89,6 +94,45 @@ public final class EndpointModelPlugin
         return List.copyOf(entities);
     }
 
+    /**
+     * The polymorphic types of the last run, each with the subtypes a value of
+     * it can be.
+     *
+     * <p>
+     * A subtype accepting the discriminator of the subtypes below it is
+     * narrowed to its own value here, since a value of it would otherwise be a
+     * value of any of them as far as TypeScript is concerned. That is why the
+     * unions are built once the walk is over rather than while it runs: it is
+     * the subtypes which say what they accept.
+     */
+    public List<UnionModel> getUnions() {
+        return unions.entrySet().stream()
+                .map(union -> new UnionModel(union.getKey(),
+                        union.getValue().stream().map(this::member).toList()))
+                .toList();
+    }
+
+    private UnionModel.Member member(String javaClass) {
+        var accepted = entities.stream()
+                .filter(EntityModel.Bean.class::isInstance)
+                .map(EntityModel.Bean.class::cast)
+                .filter(bean -> bean.javaClass().equals(javaClass))
+                .flatMap(bean -> bean.discriminator().stream()).findFirst();
+
+        // The value of the subtype itself comes first, followed by the ones of
+        // the subtypes below it
+        return accepted.filter(
+                discriminator -> discriminator.acceptedValues().size() > 1)
+                .map(discriminator -> new EntityModel.Discriminator(
+                        discriminator.name(),
+                        List.of(discriminator.acceptedValues().get(0))))
+                .map(narrowedTo -> new UnionModel.Member(
+                        TypeModel.EntityRef.of(javaClass),
+                        Optional.of(narrowedTo)))
+                .orElseGet(() -> UnionModel.Member
+                        .of(TypeModel.EntityRef.of(javaClass)));
+    }
+
     @Override
     public void enter(NodePath<?> nodePath) {
         if (nodePath.getNode() instanceof RootNode) {
@@ -100,6 +144,7 @@ public final class EndpointModelPlugin
             properties.clear();
             endpoints.clear();
             entities.clear();
+            unions.clear();
         }
     }
 
@@ -118,6 +163,8 @@ public final class EndpointModelPlugin
         } else if (node instanceof EntityNode entity) {
             entities.add(buildEntity(entity,
                     properties.getOrDefault(node, List.of())));
+        } else if (node instanceof SubTypesPlugin.UnionNode union) {
+            unions.put(union.getSource().getName(), subTypesOf(union));
         } else if (node instanceof EndpointNode endpoint) {
             endpoints.add(new EndpointModel(endpoint.getTarget().getName(),
                     endpoint.getSource().getName(), List.copyOf(
@@ -182,7 +229,58 @@ public final class EndpointModelPlugin
         }
 
         return new EntityModel.Bean(cls.getName(), typeParameters(cls),
-                superTypes(cls), ownProperties);
+                superTypes(cls), ownProperties,
+                discriminator(node.getTarget()));
+    }
+
+    /**
+     * The types a value of a polymorphic type can be, which the walk carries as
+     * a node of its own next to the type itself.
+     */
+    private static List<String> subTypesOf(SubTypesPlugin.UnionNode node) {
+        var members = node.getTarget().getOneOf();
+
+        return members == null ? List.of()
+                : members.stream().map(Schema::get$ref).filter(Objects::nonNull)
+                        .map(EndpointModelPlugin::classOfRef).toList();
+    }
+
+    /**
+     * The property saying which subtype a value is, which the plugin handling
+     * the subtypes adds to the schema of every type of the hierarchy: it is the
+     * only property whose schema holds the values it accepts.
+     */
+    private static Optional<EntityModel.Discriminator> discriminator(
+            Schema<?> schema) {
+        return schemasOf(schema)
+                .flatMap(member -> member.getProperties() == null
+                        ? Stream.<Map.Entry<String, Schema>> of()
+                        : member.getProperties().entrySet().stream())
+                .filter(property -> property.getValue().getEnum() != null
+                        && !property.getValue().getEnum().isEmpty())
+                .findFirst()
+                .map(property -> new EntityModel.Discriminator(
+                        property.getKey(), property.getValue().getEnum()
+                                .stream().map(String::valueOf).toList()));
+    }
+
+    /**
+     * The schema itself and the ones it is composed of, since the properties a
+     * subtype declares itself are in a member of its own.
+     */
+    private static Stream<Schema<?>> schemasOf(Schema<?> schema) {
+        if (schema == null) {
+            return Stream.of();
+        }
+
+        var members = schema.getAnyOf() == null ? Stream.<Schema<?>> of()
+                : schema.getAnyOf().stream().map(member -> (Schema<?>) member);
+
+        return Stream.concat(Stream.of(schema), members);
+    }
+
+    private static String classOfRef(String ref) {
+        return ref.substring(ref.lastIndexOf('/') + 1);
     }
 
     /**

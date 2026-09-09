@@ -23,6 +23,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
@@ -107,6 +109,10 @@ public class SampleEndpoint {
         return null;
     }
 
+    public Figure figure() {
+        return null;
+    }
+
     public enum Kind {
         ONE, OTHER
     }
@@ -140,6 +146,52 @@ public class SampleEndpoint {
 
         public void setNote(String note) {
             this.note = note;
+        }
+    }
+
+    /**
+     * A type a value of which is one of the subtypes it declares, which is what
+     * a union is written from. A subtype of a subtype accepts the id of both,
+     * so that reading the discriminator of a value of the base type narrows it
+     * to the right one.
+     */
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "figure")
+    @JsonSubTypes({
+            @JsonSubTypes.Type(value = Figure.Round.class, name = "round"),
+            @JsonSubTypes.Type(value = Figure.Ring.class, name = "ring") })
+    public static class Figure {
+        private String label;
+
+        public String getLabel() {
+            return label;
+        }
+
+        public void setLabel(String label) {
+            this.label = label;
+        }
+
+        public static class Round extends Figure {
+            private double radius;
+
+            public double getRadius() {
+                return radius;
+            }
+
+            public void setRadius(double radius) {
+                this.radius = radius;
+            }
+        }
+
+        public static class Ring extends Round {
+            private double hole;
+
+            public double getHole() {
+                return hole;
+            }
+
+            public void setHole(double hole) {
+                this.hole = hole;
+            }
         }
     }
 

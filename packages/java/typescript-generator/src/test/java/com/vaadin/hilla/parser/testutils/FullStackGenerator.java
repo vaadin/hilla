@@ -40,6 +40,7 @@ import com.vaadin.hilla.EndpointSubscription;
 import com.vaadin.hilla.generator.model.EndpointModel;
 import com.vaadin.hilla.generator.model.EndpointModelPlugin;
 import com.vaadin.hilla.generator.model.EntityModel;
+import com.vaadin.hilla.generator.model.UnionModel;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
@@ -197,6 +198,15 @@ public final class FullStackGenerator {
     public List<EntityModel> parseEntities() {
         parse();
         return modelPlugin.getEntities();
+    }
+
+    /**
+     * Runs the Java part of the pipeline and returns the polymorphic types the
+     * endpoints refer to, each with the subtypes a value of it can be.
+     */
+    public List<UnionModel> parseUnions() {
+        parse();
+        return modelPlugin.getUnions();
     }
 
     /**
