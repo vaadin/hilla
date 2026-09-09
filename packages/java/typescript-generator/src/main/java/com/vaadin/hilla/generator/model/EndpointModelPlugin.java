@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import io.swagger.v3.oas.models.media.Schema;
@@ -99,17 +100,14 @@ public final class EndpointModelPlugin
     private final Map<String, List<String>> unions = new LinkedHashMap<>();
 
     /**
-     * What has been built below one node, which the node is built from once the
-     * walk leaves it.
+     * The Java types an endpoint sends a series of values through, which the
+     * plugin handling the transfer types has already mapped the ones of the
+     * application to.
      */
-    private record Frame(Node<?, ?> node, List<TypeModel> types,
-            List<ParameterModel> parameters, Map<String, MethodModel> methods,
-            List<PropertyModel> properties) {
-        Frame(Node<?, ?> node) {
-            this(node, new ArrayList<>(), new ArrayList<>(),
-                    new LinkedHashMap<>(), new ArrayList<>());
-        }
-    }
+    private static final Set<String> PUSHED_TYPES = Set.of(
+            com.vaadin.hilla.runtime.transfertypes.Flux.class.getName(),
+            com.vaadin.hilla.runtime.transfertypes.EndpointSubscription.class
+                    .getName());
 
     /**
      * The endpoints built by the last run of the parser.
@@ -223,12 +221,47 @@ public final class EndpointModelPlugin
         var returnType = own.types().stream().findFirst().orElseGet(
                 () -> TypeModel.Scalar.of(TypeModel.ScalarKind.VOID, "void"));
 
-        var method = new MethodModel(node.getSource().getName(),
-                List.copyOf(own.parameters()), returnType);
+        var pushed = pushedValue(returnType);
 
-        frames.stream().filter(frame -> frame.node() instanceof EndpointNode)
-                .findFirst().ifPresent(endpoint -> endpoint.methods()
-                        .put(method.name(), method));
+        var method = new MethodModel(node.getSource().getName(),
+                parameters.getOrDefault(node, List.of()),
+                pushed.orElse(returnType), pushed.isPresent());
+
+        findEndpoint(nodePath).ifPresent(endpoint -> methods
+                .computeIfAbsent(endpoint, key -> new LinkedHashMap<>())
+                .put(method.name(), method));
+    }
+
+    /**
+     * The type of the values a method pushes, if it pushes them rather than
+     * returning one: the types the endpoint sends values through are carried as
+     * the collection of what they hold, since that is what the walk which
+     * builds the OpenAPI needs, and the name of the Java type is what tells one
+     * of them from an ordinary collection.
+     */
+    private static Optional<TypeModel> pushedValue(TypeModel returnType) {
+        return returnType instanceof TypeModel.ArrayOf array
+                && PUSHED_TYPES.contains(array.javaType())
+                        ? Optional.of(array.items())
+                        : Optional.empty();
+    }
+
+    private void collect(Node<?, ?> parent, TypeModel type) {
+        types.computeIfAbsent(parent, key -> new ArrayList<>()).add(type);
+    }
+
+    private void collect(Node<?, ?> parent, MethodParameterNode node,
+            List<TypeModel> ownTypes) {
+        var type = only(ownTypes);
+
+        parameters.computeIfAbsent(parent, key -> new ArrayList<>())
+                .add(new ParameterModel(node.getTarget(), type));
+    }
+
+    private void collect(Node<?, ?> parent, PropertyNode node,
+            List<TypeModel> ownTypes) {
+        properties.computeIfAbsent(parent, key -> new ArrayList<>())
+                .add(new PropertyModel(node.getTarget(), only(ownTypes)));
     }
 
     /**
