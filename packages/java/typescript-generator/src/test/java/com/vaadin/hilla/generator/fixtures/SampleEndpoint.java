@@ -88,6 +88,14 @@ public class SampleEndpoint {
         return Optional.empty();
     }
 
+    public Detailed detailed() {
+        return null;
+    }
+
+    public Marker marker() {
+        return null;
+    }
+
     public enum Kind {
         ONE, OTHER
     }
@@ -106,6 +114,29 @@ public class SampleEndpoint {
         public void setValue(T value) {
             this.value = value;
         }
+    }
+
+    /**
+     * An entity which inherits the properties of another one rather than
+     * declaring them again.
+     */
+    public static class Detailed extends Sample {
+        private String note;
+
+        public String getNote() {
+            return note;
+        }
+
+        public void setNote(String note) {
+            this.note = note;
+        }
+    }
+
+    /**
+     * An entity with no property at all, which TypeScript still needs a
+     * declaration of.
+     */
+    public static class Marker {
     }
 
     public static class Sample {
