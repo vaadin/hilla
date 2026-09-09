@@ -47,8 +47,13 @@ public class GeneratedTypeScriptTest {
         assertEquals(
                 """
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
+                        import type Box from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Box.js';
                         import type Sample from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Sample.js';
                         import client from './connect-client.default.js';
+
+                        export async function box(init?: EndpointRequestInit): Promise<Box<string | undefined> | undefined> {
+                          return client.call('SampleEndpoint', 'box', {}, init);
+                        }
 
                         export async function count(init?: EndpointRequestInit): Promise<number> {
                           return client.call('SampleEndpoint', 'count', {}, init);
@@ -81,10 +86,6 @@ public class GeneratedTypeScriptTest {
 
                         export async function ping(init?: EndpointRequestInit): Promise<void> {
                           return client.call('SampleEndpoint', 'ping', {}, init);
-                        }
-
-                        export async function shadow(init: string | undefined, _init?: EndpointRequestInit): Promise<string | undefined> {
-                          return client.call('SampleEndpoint', 'shadow', { init }, _init);
                         }
                         """,
                 file.content());
@@ -135,6 +136,21 @@ public class GeneratedTypeScriptTest {
 
                 export { SampleEndpoint };
                 """, new BarrelWriter().write(endpoints).content());
+    }
+
+    @Test
+    public void should_ReExportEveryEndpointInTheSameOrderWhicheverItIsGiven() {
+        // Given the other way around than they are written, so that the order
+        // is the one the barrel decides rather than the one it was handed
+        var written = new BarrelWriter().write(List.of(
+                endpointsOf(ShadowingEndpoint.class).get(0), endpoints.get(0)));
+
+        assertEquals("""
+                import * as SampleEndpoint from './SampleEndpoint.js';
+                import * as ShadowingEndpoint from './ShadowingEndpoint.js';
+
+                export { SampleEndpoint, ShadowingEndpoint };
+                """, written.content());
     }
 
     private static List<EndpointModel> endpointsOf(Class<?> endpoint) {
