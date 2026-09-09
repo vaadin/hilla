@@ -32,9 +32,9 @@ filling in text templates, as nothing needs the TypeScript to be parsed. So far
 it covers the client, the endpoints, the barrel, the types they refer to, the
 models a form binds those types through, with what the annotations of the
 validation API say a value has to satisfy and what the ones of the persistence
-API say it is, and the unions saying which subtype a value of a polymorphic
-type is; push and signals still come from the Node generator, which is what
-the pipeline runs.
+API say it is, the unions saying which subtype a value of a polymorphic type
+is and the methods sending a series of values rather than returning one; the
+signals still come from the Node generator, which is what the pipeline runs.
 
 ## Architecture
 
