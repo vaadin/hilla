@@ -244,11 +244,13 @@ public final class EndpointModelPlugin
         }
 
         if (signature.isArray() || signature.isIterable()) {
-            return new TypeModel.ArrayOf(only(referred), optional);
+            return new TypeModel.ArrayOf(only(referred), optional,
+                    name(signature));
         }
 
         if (signature.isMap()) {
-            return new TypeModel.MapOf(only(referred), optional);
+            return new TypeModel.MapOf(only(referred), optional,
+                    name(signature));
         }
 
         var kind = scalarKind(signature);
@@ -264,13 +266,23 @@ public final class EndpointModelPlugin
         return new TypeModel.Scalar(kind, optional, name(signature));
     }
 
-    /**
-     * Whether the walk is inside an entity, where the parser keeps type
-     * variables and parameters as they are rather than resolving them.
-     */
-    private boolean isInEntity() {
-        return frames.stream()
-                .anyMatch(frame -> frame.node() instanceof EntityNode);
+    private static TypeModel bound(TypeModel type, boolean optional) {
+        return optional ? asOptional(type) : type;
+    }
+
+    private static TypeModel asOptional(TypeModel type) {
+        return switch (type) {
+        case TypeModel.Scalar scalar ->
+            new TypeModel.Scalar(scalar.kind(), true, scalar.javaType());
+        case TypeModel.ArrayOf array ->
+            new TypeModel.ArrayOf(array.items(), true, array.javaType());
+        case TypeModel.MapOf map ->
+            new TypeModel.MapOf(map.values(), true, map.javaType());
+        case TypeModel.EntityRef entity -> new TypeModel.EntityRef(
+                entity.javaClass(), entity.typeArguments(), true);
+        case TypeModel.TypeVariable variable ->
+            new TypeModel.TypeVariable(variable.name(), true);
+        };
     }
 
     private static TypeModel.ScalarKind scalarKind(SignatureModel signature) {
