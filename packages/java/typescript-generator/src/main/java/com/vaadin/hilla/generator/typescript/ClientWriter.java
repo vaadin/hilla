@@ -46,9 +46,9 @@ public final class ClientWriter {
     public static final String CUSTOM_MODULE_SPECIFIER = CUSTOM_MODULE + ".js";
 
     private static final String BODY = """
-            const {{client}} = new {{connectClient}}({ prefix: 'connect' });
+            const client = new {{connectClient}}({ prefix: 'connect' });
 
-            export default {{client}};""";
+            export default client;""";
 
     public GeneratedFile write() {
         var imports = new ImportRegistry();
@@ -56,7 +56,6 @@ public final class ClientWriter {
                 "ConnectClient", false);
 
         var body = Template.of(BODY) //
-                .with("client", "client") //
                 .with("connectClient", connectClient) //
                 .fill();
 
