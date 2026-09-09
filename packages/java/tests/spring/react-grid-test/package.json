@@ -15,8 +15,8 @@
     "@vaadin/icon": "25.3.0-beta2",
     "@vaadin/icons": "25.3.0-beta2",
     "@vaadin/tooltip": "25.3.0-beta2",
-    "@vaadin/vaadin-lumo-styles": "25.3.0-beta1",
-    "@vaadin/vaadin-themable-mixin": "25.3.0-beta1",
+    "@vaadin/vaadin-lumo-styles": "25.3.0-beta2",
+    "@vaadin/vaadin-themable-mixin": "25.3.0-beta2",
     "lit": "3.3.3",
     "react": "19.2.8",
     "react-dom": "19.2.8",
@@ -69,8 +69,8 @@
       "@vaadin/icon": "25.3.0-beta2",
       "@vaadin/icons": "25.3.0-beta2",
       "@vaadin/tooltip": "25.3.0-beta2",
-      "@vaadin/vaadin-lumo-styles": "25.3.0-beta1",
-      "@vaadin/vaadin-themable-mixin": "25.3.0-beta1",
+      "@vaadin/vaadin-lumo-styles": "25.3.0-beta2",
+      "@vaadin/vaadin-themable-mixin": "25.3.0-beta2",
       "lit": "3.3.3",
       "react": "19.2.8",
       "react-dom": "19.2.8",
@@ -109,7 +109,7 @@
       "vite": "8.2.2",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "4af4ce17240e8d1f867384991657865ff2b74c3d29e535c01995f6a03c0d62a1"
+    "hash": "29061677da8e64766aa2371d532296bf7230fd00a36da343de8d4a0101f0c426"
   },
   "overrides": {
     "@vaadin/a11y-base": "25.3.0-beta1",
