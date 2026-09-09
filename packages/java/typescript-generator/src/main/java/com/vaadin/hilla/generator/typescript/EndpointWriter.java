@@ -30,10 +30,21 @@ public final class EndpointWriter {
     private static final String HILLA_FRONTEND = "@vaadin/hilla-frontend";
     private static final String INIT_TYPE = "EndpointRequestInit";
     private static final String INIT_PARAMETER = "init";
+    private static final String SUBSCRIPTION_TYPE = "Subscription";
 
     private static final String METHOD = """
             export async function {{method}}({{parameters}}): Promise<{{returnType}}> {
               return {{client}}.call('{{endpoint}}', '{{method}}', {{arguments}}, {{init}});
+            }""";
+
+    /**
+     * A method sending a series of values rather than returning one, which the
+     * client subscribes to instead of calling, and which has nothing to do with
+     * the options of a single request.
+     */
+    private static final String SUBSCRIPTION = """
+            export function {{method}}({{parameters}}): {{subscription}}<{{returnType}}> {
+              return {{client}}.subscribe('{{endpoint}}', '{{method}}', {{arguments}});
             }""";
 
     private final String clientModule;
@@ -86,7 +97,7 @@ public final class EndpointWriter {
         var declared = declaredParameters(method, init, imports, types);
 
         var written = fill(endpoint, method, String.join(", ", declared), types,
-                client, init);
+                client, init, imports);
 
         // Written again with the parameters on a line each when the first line
         // came out too wide to read
@@ -97,20 +108,26 @@ public final class EndpointWriter {
         return fill(endpoint, method,
                 declared.stream()
                         .collect(Collectors.joining(",\n  ", "\n  ", ",\n")),
-                types, client, init);
+                types, client, init, imports);
     }
 
     private String fill(EndpointModel endpoint, MethodModel method,
-            String parameters, TypeWriter types, String client, String init) {
-        return Template.of(METHOD) //
+            String parameters, TypeWriter types, String client, String init,
+            ImportRegistry imports) {
+        var template = Template.of(method.pushes() ? SUBSCRIPTION : METHOD) //
                 .with("method", method.name()) //
                 .with("parameters", parameters) //
                 .with("returnType", types.write(method.returnType())) //
                 .with("client", client) //
                 .with("endpoint", endpoint.name()) //
-                .with("arguments", packParameters(method.parameters())) //
-                .with("init", init) //
-                .fill();
+                .with("arguments", packParameters(method.parameters()));
+
+        return (method.pushes()
+                ? template
+                        .with("subscription",
+                                imports.importNamed(HILLA_FRONTEND,
+                                        SUBSCRIPTION_TYPE, true))
+                : template.with("init", init)).fill();
     }
 
     private static String firstLineOf(String method) {
@@ -134,15 +151,20 @@ public final class EndpointWriter {
     }
 
     /**
-     * Every parameter as it is declared, the request options last.
+     * Every parameter as it is declared, the request options last. A method
+     * sending a series of values takes none, since the options are those of a
+     * single request.
      */
     private static List<String> declaredParameters(MethodModel method,
             String init, ImportRegistry imports, TypeWriter types) {
-        var initType = imports.importNamed(HILLA_FRONTEND, INIT_TYPE, true);
         var declared = new ArrayList<String>();
         method.parameters().forEach(parameter -> declared
                 .add(parameter.name() + ": " + types.write(parameter.type())));
-        declared.add(init + "?: " + initType);
+
+        if (!method.pushes()) {
+            declared.add(init + "?: "
+                    + imports.importNamed(HILLA_FRONTEND, INIT_TYPE, true));
+        }
 
         return declared;
     }
