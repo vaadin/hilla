@@ -39,9 +39,9 @@ import com.vaadin.hilla.parser.testutils.FullStackGenerator;
  * from the class itself.
  */
 public class GeneratedTypeScriptTest {
-    private final List<EndpointModel> endpoints = endpointsOf(
+    private static final List<EndpointModel> endpoints = endpointsOf(
             SampleEndpoint.class);
-    private final List<EntityModel> entities = new FullStackGenerator(
+    private static final List<EntityModel> entities = new FullStackGenerator(
             GeneratedTypeScriptTest.class, SampleEndpoint.class)
             .parseEntities();
 
@@ -54,6 +54,7 @@ public class GeneratedTypeScriptTest {
         assertEquals(
                 """
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
+                        import type Bounded from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Bounded.js';
                         import type Detailed from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Detailed.js';
                         import type Kind from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Kind.js';
                         import type Marker from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Marker.js';
@@ -63,6 +64,10 @@ public class GeneratedTypeScriptTest {
 
                         export async function all(init?: EndpointRequestInit): Promise<Array<Sample | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'all', {}, init);
+                        }
+
+                        export async function bounded(init?: EndpointRequestInit): Promise<Bounded | undefined> {
+                          return client.call('SampleEndpoint', 'bounded', {}, init);
                         }
 
                         export async function count(init?: EndpointRequestInit): Promise<number> {
@@ -253,8 +258,12 @@ public class GeneratedTypeScriptTest {
                 "com/vaadin/hilla/generator/fixtures/SampleEndpoint/Sample.ts",
                 file.path());
         assertEquals("""
+                import type Sample_1 from './Sample.js';
+
                 interface Sample {
                   name?: string;
+                  parent?: Sample_1;
+                  label?: string;
                 }
 
                 export default Sample;
@@ -288,6 +297,21 @@ public class GeneratedTypeScriptTest {
     }
 
     @Test
+    public void should_WriteWhatATypeParameterIsBoundToInsteadOfItsName() {
+        // The declaration does not keep a parameter bound to something else
+        // than an object, so nothing would declare the name it goes by
+        assertEquals("""
+                import type Sample from './Sample.js';
+
+                interface Bounded {
+                  held?: Sample;
+                }
+
+                export default Bounded;
+                """, write(entity(SampleEndpoint.Bounded.class)).content());
+    }
+
+    @Test
     public void should_WriteAnEntityWithoutProperties() {
         assertEquals("""
                 interface Marker {}
@@ -312,7 +336,7 @@ public class GeneratedTypeScriptTest {
         return new EntityWriter().write(entity);
     }
 
-    private EntityModel entity(Class<?> javaClass) {
+    private static EntityModel entity(Class<?> javaClass) {
         return entities.stream().filter(
                 entity -> entity.javaClass().equals(javaClass.getName()))
                 .findFirst().orElseThrow(() -> new AssertionError(
