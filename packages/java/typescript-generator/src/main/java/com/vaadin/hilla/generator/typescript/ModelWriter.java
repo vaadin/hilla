@@ -83,9 +83,39 @@ final class ModelWriter {
     String model(TypeModel type) {
         var model = switch (type) {
         case TypeModel.Scalar scalar -> scalarModel(scalar.kind());
-        case TypeModel.ArrayOf array -> call("array", model(array.items()));
-        case TypeModel.MapOf map -> call("record", model(map.values()));
-        case TypeModel.EntityRef entity -> reference(entity);
+        case TypeModel.ArrayOf array ->
+            arrayModel() + "<" + type(array.items()) + ">";
+        // A map is an object whose properties are the keys, so the model of it
+        // says which values those properties hold
+        case TypeModel.MapOf map -> objectModel() + "<Record<string, "
+                + types.write(map.values()) + ">>";
+        case TypeModel.EntityRef entity -> name(entity);
+        // A value the framework provides is not bound as properties: it is
+        // whatever the module exporting it makes of it
+        case TypeModel.Provided provided -> objectModel();
+        case TypeModel.TypeVariable variable -> objectModel();
+        };
+    }
+
+    /**
+     * How a model of a value is built, which a form model hands to the binding
+     * of the property holding it.
+     */
+    String instance(TypeModel type) {
+        return switch (type) {
+        case TypeModel.Scalar scalar -> instance(scalarModel(scalar.kind()),
+                scalar.optional(), options(scalar, scalar.javaType()));
+        // The model of the items goes on a line of its own, since a model
+        // holding a model holding a model is unreadable as one line
+        case TypeModel.ArrayOf array -> instance(arrayModel(), array.optional(),
+                "\n  (parent, key) => " + instance(array.items()),
+                "\n  " + options(array, array.javaType()));
+        case TypeModel.MapOf map -> instance(objectModel(), map.optional(),
+                options(map, map.javaType()));
+        case TypeModel.EntityRef entity ->
+            instance(name(entity), entity.optional(), options(entity, null));
+        case TypeModel.Provided provided -> instance(objectModel(),
+                provided.optional(), options(provided, null));
         // A type variable holds whatever the declaration is used with, which
         // is nothing the model can be told about
         case TypeModel.TypeVariable variable -> named("Model");
