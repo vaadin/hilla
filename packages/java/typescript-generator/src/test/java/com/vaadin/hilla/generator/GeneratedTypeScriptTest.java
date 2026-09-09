@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import com.vaadin.hilla.generator.fixtures.EmptyEndpoint;
 import com.vaadin.hilla.generator.fixtures.InheritingEndpoint;
+import com.vaadin.hilla.generator.fixtures.ProvidedTypesEndpoint;
 import com.vaadin.hilla.generator.fixtures.PushingEndpoint;
 import com.vaadin.hilla.generator.fixtures.SampleEndpoint;
 import com.vaadin.hilla.generator.fixtures.ShadowingEndpoint;
@@ -198,6 +199,32 @@ public class GeneratedTypeScriptTest {
      * the barrel able to name every endpoint; whether the file is worth writing
      * is for the step which puts these writers in the pipeline.
      */
+    @Test
+    public void should_ReferToATypeItDoesNotDeclareByName() {
+        // The browser has a file, and a module of the framework exports the
+        // signals, so nothing is generated for either of them
+        var generator = new FullStackGenerator(GeneratedTypeScriptTest.class,
+                ProvidedTypesEndpoint.class);
+
+        assertEquals(
+                """
+                        import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
+                        import type { Signal } from '@vaadin/hilla-react-signals';
+                        import client from './connect-client.default.js';
+
+                        export async function signal(init?: EndpointRequestInit): Promise<Signal<string | undefined> | undefined> {
+                          return client.call('ProvidedTypesEndpoint', 'signal', {}, init);
+                        }
+
+                        export async function upload(file: File | undefined, init?: EndpointRequestInit): Promise<void> {
+                          return client.call('ProvidedTypesEndpoint', 'upload', { file }, init);
+                        }
+                        """,
+                new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
+                        .write(generator.parseModel().get(0)).content());
+        assertEquals(List.of(), generator.parseEntities());
+    }
+
     @Test
     public void should_TakeNoRequestOptionsWhenEveryMethodSendsASeries() {
         // The options are those of a single request, so a file with nothing

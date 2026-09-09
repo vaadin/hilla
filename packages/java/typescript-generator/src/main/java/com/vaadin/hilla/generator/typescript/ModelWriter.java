@@ -63,6 +63,9 @@ final class ModelWriter {
         case TypeModel.MapOf map -> objectModel() + "<Record<string, "
                 + types.write(map.values()) + ">>";
         case TypeModel.EntityRef entity -> name(entity);
+        // A value the framework provides is not bound as properties: it is
+        // whatever the module exporting it makes of it
+        case TypeModel.Provided provided -> objectModel();
         case TypeModel.TypeVariable variable -> objectModel();
         };
     }
@@ -84,6 +87,8 @@ final class ModelWriter {
             instance(objectModel(), map.optional(), meta(map.javaType()));
         case TypeModel.EntityRef entity ->
             instance(name(entity), entity.optional());
+        case TypeModel.Provided provided ->
+            instance(objectModel(), provided.optional());
         // A type variable holds whatever the declaration is used with, which
         // is nothing the model can be told about
         case TypeModel.TypeVariable variable ->
