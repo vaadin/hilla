@@ -16,7 +16,6 @@
 package com.vaadin.hilla.generator.model;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,11 +26,10 @@ import io.swagger.v3.oas.models.media.Schema;
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
 import com.vaadin.hilla.parser.core.NodePath;
-import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
+import com.vaadin.hilla.parser.core.RootNode;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
-import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
@@ -47,8 +45,15 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
  * walk cannot: a date, an instant and a plain string are all a string there.
  * Whether a value can be absent is the one thing taken from that
  * representation, since resolving it from the annotations, the Kotlin metadata
- * and the defaults of the project is the work of the plugins which run before
- * this one.
+ * and the defaults of the project is the work of the other plugins.
+ *
+ * <p>
+ * That is why the plugin belongs <em>first</em> in the chain, although it reads
+ * what the others write: a composite plugin enters its plugins in order and
+ * exits them in the opposite one, so the first plugin is the last to see a node
+ * it is done with. Anywhere else, the nullability of a value would be read
+ * before the plugins which decide it have run, and an annotated value would be
+ * written as one which can be absent.
  *
  * <p>
  * The plugin only collects: it changes nothing the other plugins produce, so
@@ -70,6 +75,14 @@ public final class EndpointModelPlugin
 
     @Override
     public void enter(NodePath<?> nodePath) {
+        if (nodePath.getNode() instanceof RootNode) {
+            // The plugin can be handed to more than one run of the parser, and
+            // each of them describes the whole set of endpoints
+            types.clear();
+            parameters.clear();
+            methods.clear();
+            endpoints.clear();
+        }
     }
 
     @Override
@@ -89,11 +102,6 @@ public final class EndpointModelPlugin
         }
     }
 
-    @Override
-    public Collection<Class<? extends Plugin>> getRequiredPlugins() {
-        return List.of(BackbonePlugin.class);
-    }
-
     /**
      * A method of an endpoint, or of a class the endpoint exposes, in which
      * case it belongs to the endpoint below which the walk found it.
@@ -111,20 +119,12 @@ public final class EndpointModelPlugin
     }
 
     private void collect(Node<?, ?> parent, TypeModel type) {
-        if (parent != null) {
-            types.computeIfAbsent(parent, key -> new ArrayList<>()).add(type);
-        }
+        types.computeIfAbsent(parent, key -> new ArrayList<>()).add(type);
     }
 
     private void collect(Node<?, ?> parent, MethodParameterNode node,
             List<TypeModel> ownTypes) {
-        if (parent == null) {
-            return;
-        }
-
-        var type = ownTypes.stream().findFirst().orElseGet(
-                () -> TypeModel.Scalar.of(TypeModel.ScalarKind.UNKNOWN,
-                        Object.class.getName()));
+        var type = only(ownTypes);
 
         parameters.computeIfAbsent(parent, key -> new ArrayList<>())
                 .add(new ParameterModel(node.getTarget(), type));
@@ -147,6 +147,12 @@ public final class EndpointModelPlugin
         // type it is bound to, which the walk visits below it
         if (signature.isTypeArgument()) {
             return optional ? asOptional(only(referred)) : only(referred);
+        }
+
+        // An Optional is written as the type it holds, which can be absent:
+        // TypeScript has nothing of its own for it
+        if (signature.isOptional()) {
+            return asOptional(only(referred));
         }
 
         if (signature.isArray() || signature.isIterable()) {
@@ -232,8 +238,7 @@ public final class EndpointModelPlugin
     }
 
     private static Node<?, ?> parentOf(NodePath<?> nodePath) {
-        return nodePath.getParentPath() == null ? null
-                : nodePath.getParentPath().getNode();
+        return nodePath.getParentPath().getNode();
     }
 
     private static Optional<Node<?, ?>> findEndpoint(NodePath<?> nodePath) {
