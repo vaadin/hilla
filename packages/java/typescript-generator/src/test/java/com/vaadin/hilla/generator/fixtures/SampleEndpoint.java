@@ -49,8 +49,8 @@ public class SampleEndpoint {
         return firstName + lastName + age;
     }
 
-    public String shadow(String init) {
-        return init;
+    public Box<String> box() {
+        return null;
     }
 
     public static class Sample {
@@ -62,6 +62,22 @@ public class SampleEndpoint {
 
         public void setName(String name) {
             this.name = name;
+        }
+    }
+
+    /**
+     * An entity with a type parameter, which the type it is used with is
+     * written into.
+     */
+    public static class Box<T> {
+        private T value;
+
+        public T getValue() {
+            return value;
+        }
+
+        public void setValue(T value) {
+            this.value = value;
         }
     }
 }
