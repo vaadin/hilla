@@ -12,6 +12,8 @@ import m, {
   $optional,
   $owner,
   $constraints,
+  $literal,
+  $valueModel,
   ArrayModel,
   BooleanModel,
   type EnumModel,
@@ -19,6 +21,7 @@ import m, {
   NumberModel,
   ObjectModel,
   PrimitiveModel,
+  RecordModel,
   StringModel,
   type Target,
   Null,
@@ -405,6 +408,120 @@ describe('@vaadin/hilla-models', () => {
         expect(ObjectModel[$defaultValue]).to.be.like({});
       });
     });
+
+    describe('RecordModel', () => {
+      it('should have a default value', () => {
+        expect(RecordModel[$defaultValue]).to.be.like({});
+      });
+    });
+  });
+
+  describe('m.record', () => {
+    it('should keep the value model', () => {
+      const model = m.record(NumberModel);
+
+      expect(model[$valueModel]).to.be.equal(NumberModel);
+      expect(model).to.be.instanceof(RecordModel);
+      expect(model[$defaultValue]).to.be.like({});
+      expect(model[$name]).to.be.equal('Record<string, number>');
+    });
+
+    it('should accept a record of records', () => {
+      const model = m.record(m.record(StringModel));
+
+      expect(model[$valueModel][$valueModel]).to.be.equal(StringModel);
+    });
+  });
+
+  describe('m.literal', () => {
+    it('should pin the value and derive from the matching primitive', () => {
+      const model = m.literal('add');
+
+      expect(model[$literal]).to.be.equal('add');
+      expect(model[$defaultValue]).to.be.equal('add');
+      expect(model).to.be.instanceof(StringModel);
+      expect(model[$name]).to.be.equal('"add"');
+    });
+
+    it('should support number and boolean values', () => {
+      expect(m.literal(42)).to.be.instanceof(NumberModel);
+      expect(m.literal(42)[$defaultValue]).to.be.equal(42);
+      expect(m.literal(true)).to.be.instanceof(BooleanModel);
+      expect(m.literal(true)[$defaultValue]).to.be.equal(true);
+    });
+
+    it('should default a union of literals to the first member', () => {
+      const model = m.union(m.literal('a'), m.literal('b'));
+
+      expect(model[$defaultValue]).to.be.equal('a');
+      expect(model[$members]).to.have.lengthOf(2);
+    });
+  });
+
+  describe('m.isLiteral', () => {
+    it('should detect a literal model and a union of them', () => {
+      expect(m.isLiteral(m.literal('add'))).to.be.true;
+      expect(m.isLiteral(m.union(m.literal('a'), m.literal('b')))).to.be.true;
+    });
+
+    it('should reject models that are not pinned to fixed values', () => {
+      expect(m.isLiteral(StringModel)).to.be.false;
+      expect(m.isLiteral(m.union(StringModel, NumberModel))).to.be.false;
+      expect(m.isLiteral(m.union(m.literal('a'), StringModel))).to.be.false;
+    });
+  });
+
+  describe('m.lazy', () => {
+    // Mutually referencing models cannot have their types inferred, so each one
+    // that takes part in a cycle needs an explicit annotation. `m.lazy` only
+    // defers the *value*, which is what keeps the eager builder from reading an
+    // uninitialised binding.
+    interface Author {
+      name: string;
+      book?: Book;
+    }
+    interface Book {
+      title: string;
+      author?: Author;
+    }
+
+    const AuthorModel: ObjectModel<Author> = m
+      .object<Author>('Author')
+      .property('name', StringModel)
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      .property('book', m.optional(m.lazy(() => BookModel)))
+      .build();
+
+    const BookModel: ObjectModel<Book> = m
+      .object<Book>('Book')
+      .property('title', StringModel)
+      .property('author', m.optional(m.lazy(() => AuthorModel)))
+      .build();
+
+    it('should resolve the other model of a cycle on access', () => {
+      const { book } = AuthorModel as typeof AuthorModel & { book: Model };
+
+      expect(book).to.be.instanceof(BookModel);
+      expect(book[$optional]).to.be.true;
+      expect(book[$name]).to.be.equal('Book');
+    });
+
+    it('should produce a default value for both ends of the cycle', () => {
+      expect(AuthorModel[$defaultValue]).to.be.like({ name: '', book: undefined });
+      expect(BookModel[$defaultValue]).to.be.like({ title: '', author: undefined });
+    });
+
+    it('should compose with array', () => {
+      type Branch = { name: string; children: Branch[] };
+
+      const BranchModel = m
+        .object<Branch>('Branch')
+        .property('name', StringModel)
+        .property('children', m.array(m.self))
+        .build();
+
+      expect(BranchModel.children[$itemModel]).to.be.equal(BranchModel);
+    });
   });
 
   describe('Validation constraints support', () => {
@@ -495,6 +612,20 @@ describe('@vaadin/hilla-models', () => {
       expect(m.isConstraint(personModelWithNonEmptyComments.comments[$constraints][0], Size)).to.be.false;
       expect(personModelWithNonEmptyComments.comments[$constraints][0].attributes).to.be.like({});
       expect(personModelWithNonEmptyComments.comments[$constraints][0].name).to.be.equal('NotEmpty');
+    });
+
+    it('should leave out attributes that were not given', () => {
+      // Consumers spread the attributes over their own defaults, so a `message`
+      // that is present but empty would silently replace the default wording.
+      expect(NotBlank()).to.have.property('attributes').which.does.not.have.property('message');
+      expect(Size({ min: 4 }))
+        .to.have.property('attributes')
+        .which.does.not.have.property('message');
+      expect(NotBlank({ message: 'required' }).attributes).to.be.like({ message: 'required' });
+    });
+
+    it('should keep the declared default of an omitted attribute', () => {
+      expect(Size({ max: 140 }).attributes).to.be.like({ min: 0, max: 140 });
     });
 
     it('should support custom constraints', () => {

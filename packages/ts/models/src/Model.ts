@@ -45,6 +45,11 @@ export declare enum Enum {}
 
 export type AnyObject = Readonly<Record<never, never>>; // {}
 
+/**
+ * The value types a model can be pinned to a single instance of.
+ */
+export type Literal = boolean | number | string;
+
 /* eslint-disable tsdoc/syntax */
 /**
  * The symbol that represents the {@link Model[$key]} property.

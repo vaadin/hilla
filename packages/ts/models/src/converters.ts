@@ -103,6 +103,28 @@ function optionalImpl<const M extends Model>(model: M) {
 export const optional = createModelConverter<OptionalOf, typeof optionalImpl>(optionalImpl);
 
 /**
+ * HKT signature for the lazy model converter, which resolves to the model the
+ * provider returns.
+ */
+export interface LazyOf<M extends Model> extends ModelConverter {
+  readonly [$targetModel]: M;
+}
+
+/**
+ * Defers resolving the model until the owner property is first read.
+ *
+ * Object models are built eagerly, so two models that reference each other
+ * would read an uninitialized binding of the circular import. The provider
+ * turns that read into a property access, which happens after both modules
+ * have been evaluated.
+ *
+ * @param provider - Returns the model to use.
+ */
+export function lazy<const M extends Model>(this: void, provider: () => M): LazyOf<M> & (() => M) {
+  return provider as LazyOf<M> & (() => M);
+}
+
+/**
  * HKT signature for array model converte, which returns array model with
  * items of the given model.
  */
