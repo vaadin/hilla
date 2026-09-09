@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
@@ -96,6 +98,10 @@ public class SampleEndpoint {
         return null;
     }
 
+    public Bounded bounded() {
+        return null;
+    }
+
     public enum Kind {
         ONE, OTHER
     }
@@ -133,6 +139,23 @@ public class SampleEndpoint {
     }
 
     /**
+     * An entity whose type parameter is bound to another entity, which the
+     * declaration stands for: TypeScript is not told what the parameter is,
+     * only what it has to be.
+     */
+    public static class Bounded<T extends Sample> {
+        private T held;
+
+        public T getHeld() {
+            return held;
+        }
+
+        public void setHeld(T held) {
+            this.held = held;
+        }
+    }
+
+    /**
      * An entity with no property at all, which TypeScript still needs a
      * declaration of.
      */
@@ -142,12 +165,40 @@ public class SampleEndpoint {
     public static class Sample {
         private String name;
 
+        /**
+         * Serialized under a name of its own, which is the one the generated
+         * TypeScript has to use.
+         */
+        @JsonProperty("label")
+        private String title;
+
+        /**
+         * Of the type declaring it, so that the file refers to itself.
+         */
+        private Sample parent;
+
         public String getName() {
             return name;
         }
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public Sample getParent() {
+            return parent;
+        }
+
+        public void setParent(Sample parent) {
+            this.parent = parent;
         }
     }
 }

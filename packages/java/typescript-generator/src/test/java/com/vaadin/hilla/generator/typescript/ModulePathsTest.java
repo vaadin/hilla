@@ -46,6 +46,20 @@ public class ModulePathsTest {
     }
 
     @Test
+    public void should_WriteAnEntityOfTheDefaultPackageToTheOutputFolder() {
+        assertEquals("Person.ts", ModulePaths.fileOf("Person"));
+        assertEquals("", ModulePaths.directoryOf("Person"));
+    }
+
+    @Test
+    public void should_FindTheFileAndTheFolderOfAnEntity() {
+        assertEquals("com/example/Person/Address.ts",
+                ModulePaths.fileOf("com.example.Person$Address"));
+        assertEquals("com/example/Person",
+                ModulePaths.directoryOf("com.example.Person$Address"));
+    }
+
+    @Test
     public void should_StepDownIntoTheFolderOfTheEntity() {
         assertEquals("./data/Address.js", ModulePaths
                 .forEntity("com.example.data.Address", "com/example"));
