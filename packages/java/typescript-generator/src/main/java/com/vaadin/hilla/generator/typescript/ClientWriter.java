@@ -28,22 +28,10 @@ public final class ClientWriter {
     public static final String MODULE = "connect-client.default";
 
     /**
-     * The module of the client an application provides itself, which sits next
-     * to the output folder rather than in it.
-     */
-    public static final String CUSTOM_MODULE = "../connect-client";
-
-    /**
      * How the generated endpoints, which sit in the output folder, refer to the
      * generated client.
      */
     public static final String MODULE_SPECIFIER = "./" + MODULE + ".js";
-
-    /**
-     * How the generated endpoints refer to a client the application provides
-     * itself, which sits next to the output folder.
-     */
-    public static final String CUSTOM_MODULE_SPECIFIER = CUSTOM_MODULE + ".js";
 
     private static final String BODY = """
             const client = new {{connectClient}}({ prefix: 'connect' });
