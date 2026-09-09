@@ -43,8 +43,8 @@ public class OpenAPIToModelTest {
         assertEquals("SampleEndpoint", endpoint.name());
         assertEquals(SampleEndpoint.class.getName(), endpoint.javaClass());
         assertEquals(
-                List.of("count", "counts", "describe", "find", "greet", "names",
-                        "ping", "shadow"),
+                List.of("box", "count", "counts", "describe", "find", "greet",
+                        "names", "ping"),
                 endpoint.methods().stream().map(MethodModel::name).toList());
     }
 
@@ -79,6 +79,16 @@ public class OpenAPIToModelTest {
                 new TypeModel.EntityRef(SampleEndpoint.Sample.class.getName(),
                         List.of(), true),
                 method("find").returnType());
+    }
+
+    @Test
+    public void should_KeepWhatAGenericEntityIsUsedWith() {
+        assertEquals(
+                new TypeModel.EntityRef(SampleEndpoint.Box.class.getName(),
+                        List.of(new TypeModel.Scalar(
+                                TypeModel.ScalarKind.STRING, true)),
+                        true),
+                method("box").returnType());
     }
 
     @Test
