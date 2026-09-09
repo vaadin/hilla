@@ -135,7 +135,11 @@ jobs:
         run: mvn -B -am -P\!it-modules verify -pl '!:hilla-gradle-plugin'
       - name: Collect Coverage
         run: |
-          COVFILES=$(find packages/java -wholename 'target/site/jacoco/jacoco.xml' | tr '\n' ',' | sed '$s/,$//')
+          COVFILES=$(find packages/java -wholename '*/target/site/jacoco/jacoco.xml' | tr '\n' ',' | sed '$s/,$//')
+          if [ -z "$COVFILES" ]; then
+            echo "::error::No JaCoCo report found under packages/java, so there is nothing to upload."
+            exit 1
+          fi
           echo "COVFILES=$COVFILES" >> $GITHUB_ENV
       - name: Send Coverage to Codecov
         if: ${{ env.COVFILES != '' && !github.event.pull_request.head.repo.fork }}
