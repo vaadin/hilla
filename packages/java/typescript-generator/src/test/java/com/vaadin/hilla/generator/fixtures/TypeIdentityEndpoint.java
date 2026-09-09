@@ -15,8 +15,10 @@
  */
 package com.vaadin.hilla.generator.fixtures;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
@@ -48,5 +50,25 @@ public class TypeIdentityEndpoint {
 
     public double measured() {
         return 0;
+    }
+
+    public float approximated() {
+        return 0;
+    }
+
+    public BigDecimal exact() {
+        return null;
+    }
+
+    public boolean enabled() {
+        return false;
+    }
+
+    public char initial() {
+        return 0;
+    }
+
+    public LocalDateTime moment() {
+        return null;
     }
 }

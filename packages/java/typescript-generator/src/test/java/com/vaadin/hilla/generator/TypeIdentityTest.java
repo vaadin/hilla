@@ -50,11 +50,16 @@ public class TypeIdentityTest {
 
     @Test
     public void should_TellApartTheTypesWrittenAsAString() {
-        assertEquals(List.of("counted: number (int)",
-                "date: string (java.time.LocalDate)",
-                "identifier: number (long)",
-                "instant: string (java.time.Instant)",
-                "measured: number (double)", "text: string (java.lang.String)"),
+        assertEquals(
+                List.of("approximated: number (float)", "counted: number (int)",
+                        "date: string (java.time.LocalDate)",
+                        "enabled: boolean (boolean)",
+                        "exact: number (java.math.BigDecimal)",
+                        "identifier: number (long)", "initial: string (char)",
+                        "instant: string (java.time.Instant)",
+                        "measured: number (double)",
+                        "moment: string (java.time.LocalDateTime)",
+                        "text: string (java.lang.String)"),
                 methods.stream().map(TypeIdentityTest::describe).sorted()
                         .collect(Collectors.toList()));
     }

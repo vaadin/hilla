@@ -17,11 +17,10 @@ package com.vaadin.hilla.generator.model;
 
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import io.swagger.v3.oas.models.media.Schema;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
@@ -63,7 +62,7 @@ public final class EndpointModelPlugin
         extends AbstractPlugin<PluginConfiguration> {
     private final Map<Node<?, ?>, List<TypeModel>> types = new IdentityHashMap<>();
     private final Map<Node<?, ?>, List<ParameterModel>> parameters = new IdentityHashMap<>();
-    private final Map<Node<?, ?>, List<MethodModel>> methods = new IdentityHashMap<>();
+    private final Map<Node<?, ?>, Map<String, MethodModel>> methods = new IdentityHashMap<>();
     private final List<EndpointModel> endpoints = new ArrayList<>();
 
     /**
@@ -97,14 +96,21 @@ public final class EndpointModelPlugin
             collectMethod(nodePath, method);
         } else if (node instanceof EndpointNode endpoint) {
             endpoints.add(new EndpointModel(endpoint.getTarget().getName(),
-                    endpoint.getSource().getName(),
-                    methods.getOrDefault(node, List.of())));
+                    endpoint.getSource().getName(), List.copyOf(
+                            methods.getOrDefault(node, Map.of()).values())));
         }
     }
 
     /**
      * A method of an endpoint, or of a class the endpoint exposes, in which
      * case it belongs to the endpoint below which the walk found it.
+     *
+     * <p>
+     * A name is only there once, although the walk can carry it more than once:
+     * a method overriding one of an exposed superclass is visited for each
+     * declaration of it, and Java allows two methods to share a name while
+     * TypeScript does not. The last one wins, which is what the endpoint is
+     * called with, since a call names the method rather than its signature.
      */
     private void collectMethod(NodePath<?> nodePath, MethodNode node) {
         var returnType = taken(node).stream().findFirst().orElseGet(
@@ -114,8 +120,8 @@ public final class EndpointModelPlugin
                 parameters.getOrDefault(node, List.of()), returnType);
 
         findEndpoint(nodePath).ifPresent(endpoint -> methods
-                .computeIfAbsent(endpoint, key -> new ArrayList<>())
-                .add(method));
+                .computeIfAbsent(endpoint, key -> new LinkedHashMap<>())
+                .put(method.name(), method));
     }
 
     private void collect(Node<?, ?> parent, TypeModel type) {
@@ -137,7 +143,9 @@ public final class EndpointModelPlugin
     private TypeModel buildType(TypeSignatureNode node,
             List<TypeModel> referred) {
         var signature = node.getType();
-        var optional = Boolean.TRUE.equals(nullable(node.getTarget()));
+        var schema = node.getTarget();
+        var optional = schema != null
+                && Boolean.TRUE.equals(schema.getNullable());
 
         if (signature.isTypeVariable() || signature.isTypeParameter()) {
             return new TypeModel.TypeVariable(name(signature));
@@ -221,10 +229,6 @@ public final class EndpointModelPlugin
 
         return signature.get() == null ? Object.class.getName()
                 : String.valueOf(signature.get());
-    }
-
-    private static Boolean nullable(Schema<?> schema) {
-        return schema == null ? null : schema.getNullable();
     }
 
     private static TypeModel only(List<TypeModel> types) {
