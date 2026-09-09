@@ -22,7 +22,7 @@ import java.util.Objects;
  * A method of a browser callable class.
  */
 public record MethodModel(String name, List<ParameterModel> parameters,
-        TypeModel returnType) {
+        TypeModel returnType, boolean pushes) {
     public MethodModel {
         Objects.requireNonNull(name);
         Objects.requireNonNull(returnType);
