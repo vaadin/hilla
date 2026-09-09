@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 /**
  * Collects the imports of one generated file and writes them out.
@@ -32,6 +33,12 @@ import java.util.TreeMap;
  * they asked for before.
  */
 final class ImportRegistry {
+    /**
+     * The width beyond which an import of many names goes on lines of its own.
+     * Same as the width the sources of the project are formatted to.
+     */
+    private static final int MAX_WIDTH = 120;
+
     private final Map<String, Module> modules = new TreeMap<>(
             ImportRegistry::compareModules);
     private final Set<String> usedNames = new HashSet<>();
@@ -175,11 +182,21 @@ final class ImportRegistry {
                             : entry.getKey() + " as " + entry.getValue())
                     .toList();
 
-            if (!specifiers.isEmpty()) {
-                lines.add("import " + (typeOnly ? "type " : "") + "{ "
-                        + String.join(", ", specifiers) + " } from '" + path
-                        + "';");
+            if (specifiers.isEmpty()) {
+                return;
             }
+
+            var start = "import " + (typeOnly ? "type " : "");
+            var end = " from '" + path + "';";
+            var line = start + "{ " + String.join(", ", specifiers) + " }"
+                    + end;
+
+            // A file importing a lot from one module, which the models of a
+            // form do, reads better with a name per line than as one long one
+            lines.add(line.length() <= MAX_WIDTH ? line
+                    : start + specifiers.stream().collect(
+                            Collectors.joining(",\n  ", "{\n  ", ",\n}"))
+                            + end);
         }
     }
 }

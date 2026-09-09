@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Fills the holes of a piece of TypeScript written as a text block.
@@ -78,9 +79,28 @@ final class Template {
                         "Nothing to fill {{" + name + "}} with");
             }
 
-            matcher.appendReplacement(result, Matcher.quoteReplacement(value));
+            matcher.appendReplacement(result, Matcher
+                    .quoteReplacement(alignedTo(matcher.start(), value)));
         }
 
         return matcher.appendTail(result).toString();
+    }
+
+    /**
+     * A value which spans lines, lined up under the hole it fills, so that a
+     * template says where a block goes without saying how deep it sits.
+     *
+     * <p>
+     * A value starting on a line of its own says where its lines go itself, so
+     * it is left as it is.
+     */
+    private String alignedTo(int hole, String value) {
+        if (!value.contains("\n") || value.startsWith("\n")) {
+            return value;
+        }
+
+        var indent = " ".repeat(hole - template.lastIndexOf('\n', hole) - 1);
+
+        return value.lines().collect(Collectors.joining("\n" + indent));
     }
 }

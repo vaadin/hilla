@@ -29,9 +29,10 @@ writes it to a file.
 
 `com.vaadin.hilla.generator.typescript` writes the files from that model, by
 filling in text templates, as nothing needs the TypeScript to be parsed. So far
-it covers the client, the endpoints, the barrel and the types they refer to; the
-form models, the unions of a polymorphic type, push and signals still come from
-the Node generator, which is what the pipeline runs.
+it covers the client, the endpoints, the barrel, the types they refer to and the
+models a form binds those types through; the unions of a polymorphic type, push
+and signals still come from the Node generator, which is what the pipeline
+runs.
 
 ## Architecture
 
