@@ -92,12 +92,17 @@ export class ConstraintBuilder<V = unknown, const N extends string = string, A e
     }
 
     let NonAttributedConstraint = ((valueOrAttributes?: unknown) => {
-      const attributes: Required<A> = {
-        ...attributeDefaults,
-        ...(typeof valueOrAttributes === 'object' && valueOrAttributes !== null
-          ? valueOrAttributes
-          : { value: valueOrAttributes }),
-      };
+      // Attributes without a value are left out rather than set to `undefined`:
+      // consumers spread them over their own defaults, which an explicit
+      // `undefined` would overwrite.
+      const attributes = Object.fromEntries(
+        Object.entries({
+          ...attributeDefaults,
+          ...(typeof valueOrAttributes === 'object' && valueOrAttributes !== null
+            ? valueOrAttributes
+            : { value: valueOrAttributes }),
+        }).filter(([, attributeValue]) => attributeValue !== undefined),
+      ) as Required<A>;
 
       return Object.defineProperties(Object.create(NonAttributedConstraint), {
         attributes: { value: attributes },
