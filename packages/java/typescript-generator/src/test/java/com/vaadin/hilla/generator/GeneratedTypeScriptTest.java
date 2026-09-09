@@ -197,32 +197,6 @@ public class GeneratedTypeScriptTest {
      * is for the step which puts these writers in the pipeline.
      */
     @Test
-    public void should_ReferToATypeItDoesNotDeclareByName() {
-        // The browser has a file, and a module of the framework exports the
-        // signals, so nothing is generated for either of them
-        var generator = new FullStackGenerator(GeneratedTypeScriptTest.class,
-                ProvidedTypesEndpoint.class);
-
-        assertEquals(
-                """
-                        import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
-                        import type { Signal } from '@vaadin/hilla-react-signals';
-                        import client from './connect-client.default.js';
-
-                        export async function signal(init?: EndpointRequestInit): Promise<Signal<string | undefined> | undefined> {
-                          return client.call('ProvidedTypesEndpoint', 'signal', {}, init);
-                        }
-
-                        export async function upload(file: File | undefined, init?: EndpointRequestInit): Promise<void> {
-                          return client.call('ProvidedTypesEndpoint', 'upload', { file }, init);
-                        }
-                        """,
-                new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
-                        .write(generator.parseModel().get(0)).content());
-        assertEquals(List.of(), generator.parseEntities());
-    }
-
-    @Test
     public void should_TakeNoRequestOptionsWhenEveryMethodSendsASeries() {
         // The options are those of a single request, so a file with nothing
         // but subscriptions in it has no use for the type of them either. A
@@ -325,6 +299,32 @@ public class GeneratedTypeScriptTest {
     }
 
     @Test
+    public void should_ReferToATypeItDoesNotDeclareByName() {
+        // The browser has a file, and a module of the framework exports the
+        // signals, so nothing is generated for either of them
+        var generator = new FullStackGenerator(GeneratedTypeScriptTest.class,
+                ProvidedTypesEndpoint.class);
+
+        assertEquals(
+                """
+                        import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
+                        import type { Signal } from '@vaadin/hilla-react-signals';
+                        import client from './connect-client.default.js';
+
+                        export async function signal(init?: EndpointRequestInit): Promise<Signal<string | undefined> | undefined> {
+                          return client.call('ProvidedTypesEndpoint', 'signal', {}, init);
+                        }
+
+                        export async function upload(file: File | undefined, init?: EndpointRequestInit): Promise<void> {
+                          return client.call('ProvidedTypesEndpoint', 'upload', { file }, init);
+                        }
+                        """,
+                new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
+                        .write(generator.parseModel().get(0)).content());
+        assertEquals(List.of(), generator.parseEntities());
+    }
+
+    @Test
     public void should_WriteTheClient() {
         assertEquals("""
                 import { ConnectClient } from '@vaadin/hilla-frontend';
@@ -424,6 +424,36 @@ public class GeneratedTypeScriptTest {
     }
 
     @Test
+    public void should_WriteAPropertyOfEveryKind() {
+        // A property of a type which is not generated is referred to by name,
+        // as everywhere else, and the model of it is the one of an object: the
+        // module exporting the type is what makes a value of it
+        assertEquals(
+                """
+                        import type { Signal } from '@vaadin/hilla-react-signals';
+                        import type Kind from './Kind.js';
+                        import type Sample from './Sample.js';
+
+                        interface Mixed {
+                          count: number;
+                          active: boolean;
+                          tags?: Array<string | undefined>;
+                          counts?: Record<string, number | undefined>;
+                          kind?: Kind;
+                          sample?: Sample;
+                          words?: Array<string | undefined>;
+                          unique?: Array<string | undefined>;
+                          grouped?: Record<string, Array<string | undefined> | undefined>;
+                          maybeTags?: Array<string | undefined>;
+                          signal?: Signal<string | undefined>;
+                        }
+
+                        export default Mixed;
+                        """,
+                write(entity(SampleEndpoint.Mixed.class)).content());
+    }
+
+    @Test
     public void should_WriteWhatATypeParameterIsBoundToInsteadOfItsName() {
         // The declaration does not keep a parameter bound to something else
         // than an object, so nothing would declare the name it goes by. Of
@@ -503,20 +533,72 @@ public class GeneratedTypeScriptTest {
                         import type Mixed from './Mixed.js';
                         import SampleModel from './SampleModel.js';
 
-                        const MixedModel = m
-                          .object<Mixed>('Mixed')
-                          .property('count', m.meta(NumberModel, { jvmType: 'int' }))
-                          .property('active', m.meta(BooleanModel, { jvmType: 'boolean' }))
-                          .property('tags', m.meta(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))), { jvmType: 'java.util.List' }))
-                          .property('counts', m.meta(m.optional(m.record(m.meta(m.optional(NumberModel), { jvmType: 'java.lang.Integer' }))), { jvmType: 'java.util.Map' }))
-                          .property('kind', m.optional(KindModel))
-                          .property('sample', m.optional(SampleModel))
-                          .property('words', m.meta(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))), { jvmType: 'java.lang.String[]' }))
-                          .property('unique', m.meta(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))), { jvmType: 'java.util.Set' }))
-                          .property('grouped', m.meta(m.optional(m.record(m.meta(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))), { jvmType: 'java.util.List' }))), { jvmType: 'java.util.Map' }))
-                          .property('maybeTags', m.meta(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))), { jvmType: 'java.util.List' }))
-                          .build();
-                        type MixedModel = typeof MixedModel;
+                        class MixedModel<T extends Mixed = Mixed> extends ObjectModel<T> {
+                          static override createEmptyValue = makeObjectEmptyValueCreator(MixedModel);
+
+                          get count(): NumberModel {
+                            return this[_getPropertyModel]('count', (parent, key) =>
+                              new NumberModel(parent, key, false, { meta: { javaType: 'int' } }));
+                          }
+
+                          get active(): BooleanModel {
+                            return this[_getPropertyModel]('active', (parent, key) =>
+                              new BooleanModel(parent, key, false, { meta: { javaType: 'boolean' } }));
+                          }
+
+                          get tags(): ArrayModel<StringModel> {
+                            return this[_getPropertyModel]('tags', (parent, key) =>
+                              new ArrayModel(parent, key, true,
+                                (parent, key) => new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }),
+                                { meta: { javaType: 'java.util.List' } }));
+                          }
+
+                          get counts(): ObjectModel<Record<string, number | undefined>> {
+                            return this[_getPropertyModel]('counts', (parent, key) =>
+                              new ObjectModel(parent, key, true, { meta: { javaType: 'java.util.Map' } }));
+                          }
+
+                          get kind(): KindModel {
+                            return this[_getPropertyModel]('kind', (parent, key) =>
+                              new KindModel(parent, key, true));
+                          }
+
+                          get sample(): SampleModel {
+                            return this[_getPropertyModel]('sample', (parent, key) =>
+                              new SampleModel(parent, key, true));
+                          }
+
+                          get words(): ArrayModel<StringModel> {
+                            return this[_getPropertyModel]('words', (parent, key) =>
+                              new ArrayModel(parent, key, true,
+                                (parent, key) => new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }),
+                                { meta: { javaType: 'java.lang.String[]' } }));
+                          }
+
+                          get unique(): ArrayModel<StringModel> {
+                            return this[_getPropertyModel]('unique', (parent, key) =>
+                              new ArrayModel(parent, key, true,
+                                (parent, key) => new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }),
+                                { meta: { javaType: 'java.util.Set' } }));
+                          }
+
+                          get grouped(): ObjectModel<Record<string, ReadonlyArray<string | undefined> | undefined>> {
+                            return this[_getPropertyModel]('grouped', (parent, key) =>
+                              new ObjectModel(parent, key, true, { meta: { javaType: 'java.util.Map' } }));
+                          }
+
+                          get maybeTags(): ArrayModel<StringModel> {
+                            return this[_getPropertyModel]('maybeTags', (parent, key) =>
+                              new ArrayModel(parent, key, true,
+                                (parent, key) => new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }),
+                                { meta: { javaType: 'java.util.List' } }));
+                          }
+
+                          get signal(): ObjectModel {
+                            return this[_getPropertyModel]('signal', (parent, key) =>
+                              new ObjectModel(parent, key, true));
+                          }
+                        }
 
                         export default MixedModel;
                         """,
