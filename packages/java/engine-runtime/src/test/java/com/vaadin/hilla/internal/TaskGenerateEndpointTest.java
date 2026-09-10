@@ -104,9 +104,9 @@ public class TaskGenerateEndpointTest extends EndpointsTaskTest {
 
         String outputEndpoinTs1 = FileUtils.readFileToString(ts1, "UTF-8");
         String outputEndpoinTs2 = FileUtils.readFileToString(ts2, "UTF-8");
-        assertThat(outputEndpoinTs1, containsString(
-                "import client from \"../connect-client.js\";"));
-        assertThat(outputEndpoinTs2, containsString(
-                "import client from \"../connect-client.js\";"));
+        assertThat(outputEndpoinTs1,
+                containsString("import client from \"../connect-client.js\";"));
+        assertThat(outputEndpoinTs2,
+                containsString("import client from \"../connect-client.js\";"));
     }
 }
