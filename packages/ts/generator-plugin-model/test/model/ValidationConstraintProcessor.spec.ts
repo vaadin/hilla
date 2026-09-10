@@ -167,9 +167,15 @@ describe('ValidationConstraintProcessor', () => {
     expect(isApplicable({ simpleName: 'NotEmpty' }, 'record')).to.be.true;
     // applies to every model
     expect(isApplicable({ simpleName: 'NotNull' }, 'object')).to.be.true;
+    expect(isApplicable({ simpleName: 'NotNull' }, 'unknown')).to.be.true;
     // the binder has no validator for these
     expect(isApplicable({ simpleName: 'PastOrPresent' }, 'string')).to.be.false;
     expect(isApplicable({ simpleName: 'FutureOrPresent' }, 'string')).to.be.false;
+  });
+
+  it('should leave out a constraint the model library does not export', () => {
+    // emitting the name would break the compilation of the generated file
+    expect(isApplicable({ simpleName: 'NotAConstraint' }, 'string')).to.be.false;
   });
 
   it('should detect validations in composed schemas', () => {
