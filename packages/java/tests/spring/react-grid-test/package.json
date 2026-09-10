@@ -28,10 +28,10 @@
     "@babel/preset-react": "7.29.7",
     "@babel/types": "7.29.8",
     "@preact/signals-react-transform": "0.8.2",
-    "@rolldown/plugin-babel": "0.2.3",
+    "@rolldown/plugin-babel": "0.2.4",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.4.0",
-    "@types/node": "26.4.1",
+    "@types/node": "26.5.0",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.7",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
@@ -82,10 +82,10 @@
       "@babel/preset-react": "7.29.7",
       "@babel/types": "7.29.8",
       "@preact/signals-react-transform": "0.8.2",
-      "@rolldown/plugin-babel": "0.2.3",
+      "@rolldown/plugin-babel": "0.2.4",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.4.0",
-      "@types/node": "26.4.1",
+      "@types/node": "26.5.0",
       "@types/react": "19.2.18",
       "@types/react-dom": "19.2.7",
       "@vaadin/hilla-generator-cli": "25.3.0-beta2",
@@ -109,7 +109,7 @@
       "vite": "8.2.2",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "29061677da8e64766aa2371d532296bf7230fd00a36da343de8d4a0101f0c426"
+    "hash": "bdb95197cb2d992ee14a7e4c31c0fe495a509a06f883acff17539d09fc56db21"
   },
   "overrides": {
     "@vaadin/a11y-base": "25.3.0-beta1",
