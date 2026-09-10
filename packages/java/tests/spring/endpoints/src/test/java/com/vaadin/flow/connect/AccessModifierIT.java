@@ -20,13 +20,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.testutil.ChromeBrowserTest;
 import com.vaadin.testbench.TestBenchElement;
 
 /**
  * Class for testing issues in a spring-boot container.
  */
-public class AccessModifierIT extends ChromeBrowserTest {
+public class AccessModifierIT extends AbstractLoginTest {
 
     private void openTestUrl(String url) {
         getDriver().get(getRootURL() + url);
@@ -42,11 +41,7 @@ public class AccessModifierIT extends ChromeBrowserTest {
         open();
         TestBenchElement testComponent = $("test-component").waitForFirst();
         if (testComponent != null) {
-            testComponent.$(TestBenchElement.class).id("username")
-                    .sendKeys("user");
-            testComponent.$(TestBenchElement.class).id("password")
-                    .sendKeys("user");
-            testComponent.$(TestBenchElement.class).id("login").click();
+            login(testComponent, "user");
             open();
         }
         testAccessMod = $("test-access-mod").waitForFirst();
@@ -62,8 +57,13 @@ public class AccessModifierIT extends ChromeBrowserTest {
     public void getEntity() {
         String endpoint = "getEntity";
         exec(endpoint);
-        String actualText = waitUntil(driver -> methods.getText(), 25);
-        Assert.assertNotNull(actualText);
+        // getText() returns an empty string until the endpoint response
+        // arrives, and waitUntil() returns the first non-null value, so the
+        // empty text has to be mapped to null for the wait to happen at all.
+        String actualText = waitUntil(driver -> {
+            String text = methods.getText();
+            return text.isEmpty() ? null : text;
+        }, 25);
         Assert.assertTrue(actualText.contains("publicProp"));
         Assert.assertFalse(actualText.contains("protectedProp"));
         Assert.assertFalse(actualText.contains("packagePrivateProp"));
