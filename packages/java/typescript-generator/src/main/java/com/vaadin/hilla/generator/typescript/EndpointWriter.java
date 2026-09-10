@@ -117,7 +117,7 @@ public final class EndpointWriter {
     private String writeMethod(EndpointModel endpoint, MethodModel method,
             ImportRegistry imports, TypeWriter types, ModelWriter models,
             String client) {
-        var init = initParameter(method);
+        var init = ownName(method, INIT_PARAMETER);
         var declared = declaredParameters(method, init, imports, types);
 
         var written = fill(endpoint, method, String.join(", ", declared), types,
@@ -195,7 +195,7 @@ public final class EndpointWriter {
         }
 
         var value = sharedValue(method);
-        var given = OPTIONS_PARAMETER + "?.defaultValue";
+        var given = ownName(method, OPTIONS_PARAMETER) + "?.defaultValue";
 
         return (value.optional() ? given
                 : given + " ?? " + models.className(value)
@@ -227,19 +227,19 @@ public final class EndpointWriter {
     }
 
     /**
-     * The name the request options go by, which gives way to a parameter of the
-     * method if they happen to have the same name.
+     * A name the generated function needs for itself, which gives way to a
+     * parameter of the method if they happen to be the same.
      */
-    private static String initParameter(MethodModel method) {
+    private static String ownName(MethodModel method, String preferred) {
         var names = method.parameters().stream().map(ParameterModel::name)
                 .toList();
-        var init = INIT_PARAMETER;
+        var name = preferred;
 
-        while (names.contains(init)) {
-            init = "_" + init;
+        while (names.contains(name)) {
+            name = "_" + name;
         }
 
-        return init;
+        return name;
     }
 
     /**
@@ -258,7 +258,8 @@ public final class EndpointWriter {
                 + imports.importNamed(HILLA_FRONTEND, INIT_TYPE, true));
         // The caller of a method sharing a value can say which value to start
         // from, which a number signal decides itself
-        case VALUE_SIGNAL -> declared.add(OPTIONS_PARAMETER + "?: "
+        case VALUE_SIGNAL -> declared.add(ownName(method, OPTIONS_PARAMETER)
+                + "?: "
                 + imports.importNamed(signalsModule(method),
                         SIGNAL_OPTIONS_TYPE, true)
                 + "<" + types.write(sharedValue(method)) + ">");

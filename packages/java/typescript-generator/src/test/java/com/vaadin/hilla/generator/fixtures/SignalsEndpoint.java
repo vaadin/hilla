@@ -41,4 +41,18 @@ public class SignalsEndpoint {
     public SharedListSignal<String> names() {
         return null;
     }
+
+    /**
+     * Shares a value which is always there, so that the signal starts from the
+     * empty value of the type rather than from nothing.
+     */
+    @Nonnull
+    public SharedValueSignal<@Nonnull String> title() {
+        return null;
+    }
+
+    @Nonnull
+    public SharedValueSignal<SampleEndpoint.@Nonnull Sample> current() {
+        return null;
+    }
 }
