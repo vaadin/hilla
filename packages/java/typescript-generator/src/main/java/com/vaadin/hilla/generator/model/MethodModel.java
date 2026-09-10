@@ -20,12 +20,34 @@ import java.util.Objects;
 
 /**
  * A method of a browser callable class.
+ *
+ * @param returnType
+ *            what a call returns, or the values a subscription sends, or the
+ *            signal a value is shared through
  */
 public record MethodModel(String name, List<ParameterModel> parameters,
-        TypeModel returnType, boolean pushes) {
+        TypeModel returnType, Kind kind) {
     public MethodModel {
         Objects.requireNonNull(name);
         Objects.requireNonNull(returnType);
+        Objects.requireNonNull(kind);
         parameters = List.copyOf(parameters);
+    }
+
+    /**
+     * How the client reaches a method: it calls most of them, subscribes to the
+     * ones sending a series of values, and builds a signal of its own for the
+     * ones sharing a value with the server.
+     */
+    public enum Kind {
+        CALLED, SUBSCRIBED, NUMBER_SIGNAL, VALUE_SIGNAL, LIST_SIGNAL;
+
+        /**
+         * Whether the client shares a value with the server through the method
+         * rather than calling or subscribing to it.
+         */
+        public boolean isSignal() {
+            return this != CALLED && this != SUBSCRIBED;
+        }
     }
 }
