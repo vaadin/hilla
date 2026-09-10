@@ -71,6 +71,21 @@ final class ModelWriter {
     }
 
     /**
+     * The class the model of a value is, without what it holds: it is the class
+     * itself which knows the empty value to start from.
+     */
+    String className(TypeModel type) {
+        return switch (type) {
+        case TypeModel.Scalar scalar -> scalarModel(scalar.kind());
+        case TypeModel.ArrayOf array -> arrayModel();
+        case TypeModel.MapOf map -> objectModel();
+        case TypeModel.EntityRef entity -> name(entity);
+        case TypeModel.Provided provided -> objectModel();
+        case TypeModel.TypeVariable variable -> objectModel();
+        };
+    }
+
+    /**
      * How a model of a value is built, which a form model hands to the binding
      * of the property holding it.
      */

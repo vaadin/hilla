@@ -98,6 +98,15 @@ public final class EndpointModelPlugin
                     EndpointModelPlugin::providedType));
 
     /**
+     * The signals a value is shared through, by the name the client knows them
+     * by, since each of them is built in a way of its own.
+     */
+    private static final Map<String, MethodModel.Kind> SIGNAL_KINDS = Map.of(
+            "NumberSignal", MethodModel.Kind.NUMBER_SIGNAL, "ValueSignal",
+            MethodModel.Kind.VALUE_SIGNAL, "ListSignal",
+            MethodModel.Kind.LIST_SIGNAL);
+
+    /**
      * The Java types an endpoint sends a series of values through, which the
      * plugin handling the transfer types has already mapped the ones of the
      * application to.
@@ -223,7 +232,9 @@ public final class EndpointModelPlugin
 
         var method = new MethodModel(node.getSource().getName(),
                 parameters.getOrDefault(node, List.of()),
-                pushed.orElse(returnType), pushed.isPresent());
+                pushed.orElse(returnType),
+                pushed.map(values -> MethodModel.Kind.SUBSCRIBED)
+                        .orElseGet(() -> kindOf(returnType)));
 
         findEndpoint(nodePath).ifPresent(endpoint -> methods
                 .computeIfAbsent(endpoint, key -> new LinkedHashMap<>())
@@ -242,6 +253,17 @@ public final class EndpointModelPlugin
                 && PUSHED_TYPES.contains(array.javaType())
                         ? Optional.of(array.items())
                         : Optional.empty();
+    }
+
+    /**
+     * How the client reaches a method, which is what the type it returns says:
+     * a signal is shared with the server rather than returned.
+     */
+    private static MethodModel.Kind kindOf(TypeModel returnType) {
+        return returnType instanceof TypeModel.Provided provided
+                ? SIGNAL_KINDS.getOrDefault(provided.name(),
+                        MethodModel.Kind.CALLED)
+                : MethodModel.Kind.CALLED;
     }
 
     private void collect(Node<?, ?> parent, TypeModel type) {

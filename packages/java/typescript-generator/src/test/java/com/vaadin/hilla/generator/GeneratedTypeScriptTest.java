@@ -27,6 +27,7 @@ import com.vaadin.hilla.generator.fixtures.ProvidedTypesEndpoint;
 import com.vaadin.hilla.generator.fixtures.PushingEndpoint;
 import com.vaadin.hilla.generator.fixtures.SampleEndpoint;
 import com.vaadin.hilla.generator.fixtures.ShadowingEndpoint;
+import com.vaadin.hilla.generator.fixtures.SignalsEndpoint;
 import com.vaadin.hilla.generator.model.EndpointModel;
 import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.generator.model.UnionModel;
@@ -199,6 +200,60 @@ public class GeneratedTypeScriptTest {
      * the barrel able to name every endpoint; whether the file is worth writing
      * is for the step which puts these writers in the pipeline.
      */
+    @Test
+    public void should_BuildTheSignalAValueIsSharedThrough() {
+        // A signal is not returned by the method: the client builds one and
+        // the two keep the value in step from then on, which is why the method
+        // says which endpoint and method the signal belongs to
+        var endpoint = endpointsOf(SignalsEndpoint.class).get(0);
+
+        assertEquals(
+                """
+                        import type { SignalMethodOptions } from '@vaadin/hilla-react-signals';
+                        import { ListSignal, NumberSignal, ValueSignal } from '@vaadin/hilla-react-signals';
+                        import type Sample from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Sample.js';
+                        import client from './connect-client.default.js';
+
+                        export function counter(): NumberSignal | undefined {
+                          return new NumberSignal(0, {
+                            client: client,
+                            endpoint: 'SignalsEndpoint',
+                            method: 'counter',
+                          });
+                        }
+
+                        export function name(options?: SignalMethodOptions<string | undefined>): ValueSignal<string | undefined> | undefined {
+                          return new ValueSignal(options?.defaultValue, {
+                            client: client,
+                            endpoint: 'SignalsEndpoint',
+                            method: 'name',
+                          });
+                        }
+
+                        export function names(): ListSignal<string | undefined> | undefined {
+                          return new ListSignal({
+                            client: client,
+                            endpoint: 'SignalsEndpoint',
+                            method: 'names',
+                          });
+                        }
+
+                        export function sample(
+                          detailed: boolean,
+                          options?: SignalMethodOptions<Sample | undefined>,
+                        ): ValueSignal<Sample | undefined> | undefined {
+                          return new ValueSignal(options?.defaultValue, {
+                            client: client,
+                            endpoint: 'SignalsEndpoint',
+                            method: 'sample',
+                            params: { detailed },
+                          });
+                        }
+                        """,
+                new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
+                        .write(endpoint).content());
+    }
+
     @Test
     public void should_TakeNoRequestOptionsWhenEveryMethodSendsASeries() {
         // The options are those of a single request, so a file with nothing
