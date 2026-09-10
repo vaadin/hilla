@@ -90,7 +90,7 @@
     "@babel/preset-react": "7.29.7",
     "@babel/types": "7.29.8",
     "@preact/signals-react-transform": "0.8.2",
-    "@rolldown/plugin-babel": "0.2.3",
+    "@rolldown/plugin-babel": "0.2.4",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.4.0",
     "@types/node": "25.9.5",
@@ -204,7 +204,7 @@
       "@babel/preset-react": "7.29.7",
       "@babel/types": "7.29.8",
       "@preact/signals-react-transform": "0.8.2",
-      "@rolldown/plugin-babel": "0.2.3",
+      "@rolldown/plugin-babel": "0.2.4",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.4.0",
       "@types/node": "25.9.5",
@@ -229,7 +229,7 @@
       "vite": "8.0.16",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "acd69fecdb33cfda33207510bfa1dd84491c9d30c311d02b160ac39642a097e8"
+    "hash": "219c1d1287a437a852e8c4da1a5782c29c8d4947e59f5f63038d53fa27c74d29"
   },
   "overrides": {
     "@adobe/lit-mobx": "$@adobe/lit-mobx",

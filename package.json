@@ -47,7 +47,7 @@
     "@nx/js": "20.4.5",
     "@open-wc/testing": "4.0.0",
     "@preact/signals-react-transform": "0.8.2",
-    "@rolldown/plugin-babel": "0.2.3",
+    "@rolldown/plugin-babel": "0.2.4",
     "@testing-library/dom": "10.4.0",
     "@testing-library/react": "16.2.0",
     "@testing-library/user-event": "14.6.1",
