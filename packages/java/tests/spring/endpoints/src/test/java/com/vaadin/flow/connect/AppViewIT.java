@@ -23,13 +23,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
-import com.vaadin.flow.testutil.ChromeBrowserTest;
 import com.vaadin.testbench.TestBenchElement;
 
 /**
  * Class for testing issues in a spring-boot container.
  */
-public class AppViewIT extends ChromeBrowserTest {
+public class AppViewIT extends AbstractLoginTest {
 
     private void openTestUrl(String url) {
         getDriver().get(getRootURL() + url);
@@ -279,9 +278,7 @@ public class AppViewIT extends ChromeBrowserTest {
 
     private void login(String user) {
         // Use form in the test component
-        testComponent.$(TestBenchElement.class).id("username").sendKeys(user);
-        testComponent.$(TestBenchElement.class).id("password").sendKeys(user);
-        testComponent.$(TestBenchElement.class).id("login").click();
+        login(testComponent, user);
         testComponent = $("test-component").first();
         content = testComponent.$(TestBenchElement.class).id("content");
     }

@@ -213,11 +213,11 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            it-modules: group-1
+            it-modules: endpoints
           - os: ubuntu-latest
-            it-modules: group-2
+            it-modules: security
           - os: ubuntu-latest
-            it-modules: some
+            it-modules: react
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -271,16 +271,16 @@ jobs:
     timeout-minutes: 25
     strategy:
       fail-fast: false
-      # The Windows leg takes ~11 minutes while every other validation job is
-      # done in 5, so it alone decides how long a PR waits. It guards
+      # The Windows legs take ~10 and ~6 minutes while every other validation
+      # job is done in 4, so they alone decide how long a PR waits. They guard
       # path-separator and file-locking behaviour, which rarely changes, so run
-      # it on pushes to main and the release branches (i.e. on every merge) and
-      # on workflow_dispatch, but not on pull requests. To get it on a PR, add
-      # the `run-windows-tests` label and then push a commit; `labeled` is not
-      # among the pull_request types above, and re-running an existing run
+      # them on pushes to main and the release branches (i.e. on every merge)
+      # and on workflow_dispatch, but not on pull requests. To get them on a PR,
+      # add the `run-windows-tests` label and then push a commit; `labeled` is
+      # not among the pull_request types above, and re-running an existing run
       # replays the original event payload, so neither picks up a label added
-      # after the fact. Dispatching the workflow manually on the branch runs
-      # both legs too, but it lands in the same concurrency group as the pull
+      # after the fact. Dispatching the workflow manually on the branch runs the
+      # Windows legs too, but it lands in the same concurrency group as the pull
       # request's own runs, so the two cancel each other - prefer the label.
       matrix:
         os: >-
@@ -288,6 +288,12 @@ jobs:
           && !contains(github.event.pull_request.labels.*.name, 'run-windows-tests')
           && '["ubuntu-latest"]'
           || '["ubuntu-latest", "windows-latest"]') }}
+        # The plugin leg (the gradle-plugin functional tests) and the IT leg
+        # (kotlin-gradle-test) are independent once the plugin is in the local
+        # Maven repository, and running them one after the other made this the
+        # longest validation job. Both legs publish the plugin first, which
+        # costs half a minute each, and the tests then run in parallel.
+        task: [plugin, its]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -315,6 +321,7 @@ jobs:
       # downloaded again on every run. Keep the version in sync with
       # TestProject.gradleVersion in TestUtils.kt.
       - name: Cache the Gradle distribution used by TestKit
+        if: ${{ matrix.task == 'plugin' }}
         uses: actions/cache@v5
         with:
           path: ${{ env.GRADLE_USER_HOME || '~/.gradle' }}/wrapper/dists/gradle-8.14-bin
@@ -329,13 +336,15 @@ jobs:
       - name: publish plugin to Maven Local
         run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin build publishToMavenLocal -x functionalTest
       - name: Test gradle-plugin's functional tests
+        if: ${{ matrix.task == 'plugin' }}
         run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin functionalTest
       - name: Gradle ITs
+        if: ${{ matrix.task == 'its' }}
         run: ./packages/java/tests/gradle/kotlin-gradle-test/gradlew --info --stacktrace -p packages/java/tests/gradle/kotlin-gradle-test clean integrationTest
       - uses: actions/upload-artifact@v6
         if: ${{ failure() || success() }}
         with:
-          name: saved-outputs-gradle-${{ matrix.os }}
+          name: saved-outputs-gradle-${{ matrix.os }}-${{ matrix.task }}
           path: |
             packages/java/tests/**/target/*-reports/*
             packages/java/tests/**/error-screenshots/*.png
