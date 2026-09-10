@@ -1,21 +1,12 @@
-import { _getPropertyModel, ArrayModel, makeObjectEmptyValueCreator, ObjectModel, StringModel } from "@vaadin/hilla-lit-form";
+import m, { StringModel } from "@vaadin/hilla-models";
 import type NonNullableModel from "./NonNullableModel.js";
-class NonNullableModelModel<T extends NonNullableModel = NonNullableModel> extends ObjectModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(NonNullableModelModel);
-    get complexTypeField(): ObjectModel<Record<string, ReadonlyArray<NonNullableModel>>> {
-        return this[_getPropertyModel]("complexTypeField", (parent, key) => new ObjectModel(parent, key, false, { meta: { javaType: "java.util.Map" } }));
-    }
-    get nullableField(): StringModel {
-        return this[_getPropertyModel]("nullableField", (parent, key) => new StringModel(parent, key, true, { meta: { javaType: "java.lang.String" } }));
-    }
-    get protectedField(): StringModel {
-        return this[_getPropertyModel]("protectedField", (parent, key) => new StringModel(parent, key, false, { meta: { javaType: "java.lang.String" } }));
-    }
-    get publicField(): StringModel {
-        return this[_getPropertyModel]("publicField", (parent, key) => new StringModel(parent, key, false, { meta: { javaType: "java.lang.String" } }));
-    }
-    get typeWithTypeArgument(): ArrayModel<StringModel> {
-        return this[_getPropertyModel]("typeWithTypeArgument", (parent, key) => new ArrayModel(parent, key, true, (parent, key) => new StringModel(parent, key, false, { meta: { javaType: "java.lang.String" } }), { meta: { javaType: "java.util.List" } }));
-    }
-}
+const NonNullableModelModel = m
+  .object<NonNullableModel>("NonNullableModel")
+  .property("complexTypeField", m.meta(m.record(m.meta(m.array(m.self), { jvmType: "java.util.List" })), { jvmType: "java.util.Map" }))
+  .property("nullableField", m.meta(m.optional(StringModel), { jvmType: "java.lang.String" }))
+  .property("protectedField", m.meta(StringModel, { jvmType: "java.lang.String" }))
+  .property("publicField", m.meta(StringModel, { jvmType: "java.lang.String" }))
+  .property("typeWithTypeArgument", m.meta(m.optional(m.array(m.meta(StringModel, { jvmType: "java.lang.String" }))), { jvmType: "java.util.List" }))
+  .build();
+type NonNullableModelModel = typeof NonNullableModelModel;
 export default NonNullableModelModel;

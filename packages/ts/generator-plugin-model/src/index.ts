@@ -2,6 +2,7 @@ import type { SourceFile } from '@typescript/typescript6';
 import Plugin from '@vaadin/hilla-generator-core/Plugin.js';
 import type { SharedStorage } from '@vaadin/hilla-generator-core/SharedStorage.js';
 import type { OpenAPIV3 } from 'openapi-types';
+import { analyzeCycles } from './cycles.js';
 import { EntityModelProcessor } from './EntityModelProcessor.js';
 import type { Context } from './utils.js';
 
@@ -35,6 +36,7 @@ export default class ModelPlugin extends Plugin {
 
     const ctx: Context = {
       owner: this,
+      cycles: analyzeCycles(schemas),
     };
 
     return Object.entries(schemas).map(([name, component]) => EntityModelProcessor.process(name, component, ctx));

@@ -1,9 +1,8 @@
-import { _getPropertyModel, makeObjectEmptyValueCreator, ObjectModel, StringModel } from "@vaadin/hilla-lit-form";
+import m, { StringModel } from "@vaadin/hilla-models";
 import type T_1 from "./T.js";
-class TModel<T extends T_1 = T_1> extends ObjectModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(TModel);
-    get name(): StringModel {
-        return this[_getPropertyModel]("name", (parent, key) => new StringModel(parent, key, false));
-    }
-}
+const TModel = m
+  .object<T_1>("T")
+  .property("name", StringModel)
+  .build();
+type TModel = typeof TModel;
 export default TModel;
