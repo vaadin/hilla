@@ -379,7 +379,7 @@ public class GeneratedTypeScriptTest {
 
     @Test
     public void should_WriteTheClientOnlyWhenItIsTheGeneratedOne() {
-        var generation = Generation.of(endpoints);
+        var generation = new Generation(endpoints, List.of(), List.of());
 
         assertTrue(
                 pathsOf(new TypeScriptWriter().write(generation))
