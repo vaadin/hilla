@@ -40,14 +40,6 @@ public record MethodModel(String name, List<ParameterModel> parameters,
      * ones sharing a value with the server.
      */
     public enum Kind {
-        CALLED, SUBSCRIBED, NUMBER_SIGNAL, VALUE_SIGNAL, LIST_SIGNAL;
-
-        /**
-         * Whether the client shares a value with the server through the method
-         * rather than calling or subscribing to it.
-         */
-        public boolean isSignal() {
-            return this != CALLED && this != SUBSCRIBED;
-        }
+        CALLED, SUBSCRIBED, NUMBER_SIGNAL, VALUE_SIGNAL, LIST_SIGNAL
     }
 }
