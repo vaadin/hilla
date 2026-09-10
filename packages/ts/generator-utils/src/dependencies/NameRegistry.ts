@@ -1,6 +1,60 @@
 import ts, { type Identifier } from '@typescript/typescript6';
 
 /**
+ * Words that cannot serve as a binding name. Generated files are modules, hence
+ * the strict mode ones are in as well. Contextual keywords (`type`, `as`, `get`,
+ * `string`, ...) are valid identifiers and thus are not listed.
+ */
+const reservedWords = [
+  'await',
+  'break',
+  'case',
+  'catch',
+  'class',
+  'const',
+  'continue',
+  'debugger',
+  'default',
+  'delete',
+  'do',
+  'else',
+  'enum',
+  'export',
+  'extends',
+  'false',
+  'finally',
+  'for',
+  'function',
+  'if',
+  'implements',
+  'import',
+  'in',
+  'instanceof',
+  'interface',
+  'let',
+  'new',
+  'null',
+  'package',
+  'private',
+  'protected',
+  'public',
+  'return',
+  'static',
+  'super',
+  'switch',
+  'this',
+  'throw',
+  'true',
+  'try',
+  'typeof',
+  'var',
+  'void',
+  'while',
+  'with',
+  'yield',
+];
+
+/**
  * Tracks the identifier names taken in a single generated file so that a name
  * is only suffixed when it actually collides.
  *
@@ -9,7 +63,8 @@ import ts, { type Identifier } from '@typescript/typescript6';
  * still collide with a plain declaration in the same file.
  */
 export default class NameRegistry {
-  readonly #used = new Set<string>();
+  // reserved words count as taken, so that a name matching one is suffixed
+  readonly #used = new Set(reservedWords);
 
   /**
    * Marks a name as taken as-is. Used for names the registry does not get to
