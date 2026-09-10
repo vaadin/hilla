@@ -1,9 +1,9 @@
-import { _getPropertyModel, makeObjectEmptyValueCreator, ObjectModel, StringModel } from "@vaadin/hilla-lit-form";
+import m, { StringModel } from "@vaadin/hilla-models";
 import type Notification from "./Notification.js";
-class NotificationModel<T extends Notification = Notification> extends ObjectModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(NotificationModel);
-    get message(): StringModel {
-        return this[_getPropertyModel]("message", (parent, key) => new StringModel(parent, key, true));
-    }
-}
+const NotificationModel = m
+  .object<Notification>("Notification")
+  .property("message", m.optional(StringModel))
+  .property("kind", m.union(m.literal("plain"), m.literal("email"), m.literal("html-email"), m.literal("multipart-sms")))
+  .build();
+type NotificationModel = typeof NotificationModel;
 export default NotificationModel;

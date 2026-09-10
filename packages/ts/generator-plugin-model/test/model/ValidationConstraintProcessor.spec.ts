@@ -1,9 +1,10 @@
-import ts, { type NewExpression } from '@typescript/typescript6';
+import ts, { type CallExpression } from '@typescript/typescript6';
 import type { Schema } from '@vaadin/hilla-generator-core/Schema.js';
 import sinon from 'sinon';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
   hasValidationConstraints,
+  isApplicable,
   type ValidationConstraint,
   ValidationConstraintProcessor,
 } from '../../src/ValidationConstraintProcessor.js';
@@ -14,7 +15,7 @@ type AnnotationPack = Readonly<{
   obj: ValidationConstraint;
 }>;
 
-function assertValidationConstraint(actual: NewExpression, expected: string): void {
+function assertValidationConstraint(actual: CallExpression, expected: string): void {
   const printer = ts.createPrinter();
   let file = ts.createSourceFile('f.ts', '', ts.ScriptTarget.Latest, false, ts.ScriptKind.TS);
   file = ts.factory.updateSourceFile(file, [
@@ -26,7 +27,7 @@ function assertValidationConstraint(actual: NewExpression, expected: string): vo
       ),
     ),
   ]);
-  expect(printer.printFile(file).trim()).to.equal(`const a = new ${expected};`);
+  expect(printer.printFile(file).trim()).to.equal(`const a = ${expected};`);
 }
 
 describe('ValidationConstraintProcessor', () => {
@@ -152,6 +153,29 @@ describe('ValidationConstraintProcessor', () => {
     assertValidationConstraint(processor.process(digits.obj), digits.expected ?? digits.str);
     assertValidationConstraint(processor.process(email.obj), email.expected ?? email.str);
     assertValidationConstraint(processor.process(pattern.obj), pattern.expected ?? pattern.str);
+  });
+
+  it('should only accept constraints the model supports', () => {
+    // `Constraint[$assertSupportedModel]` throws while the generated module is
+    // evaluated, so a constraint the schema cannot satisfy must be left out
+    expect(isApplicable({ simpleName: 'NotBlank' }, 'string')).to.be.true;
+    expect(isApplicable({ simpleName: 'NotBlank' }, 'number')).to.be.false;
+    expect(isApplicable({ simpleName: 'AssertTrue' }, 'boolean')).to.be.true;
+    expect(isApplicable({ simpleName: 'AssertTrue' }, 'string')).to.be.false;
+    expect(isApplicable({ simpleName: 'Size' }, 'array')).to.be.true;
+    expect(isApplicable({ simpleName: 'Size' }, 'record')).to.be.false;
+    expect(isApplicable({ simpleName: 'NotEmpty' }, 'record')).to.be.true;
+    // applies to every model
+    expect(isApplicable({ simpleName: 'NotNull' }, 'object')).to.be.true;
+    expect(isApplicable({ simpleName: 'NotNull' }, 'unknown')).to.be.true;
+    // the binder has no validator for these
+    expect(isApplicable({ simpleName: 'PastOrPresent' }, 'string')).to.be.false;
+    expect(isApplicable({ simpleName: 'FutureOrPresent' }, 'string')).to.be.false;
+  });
+
+  it('should leave out a constraint the model library does not export', () => {
+    // emitting the name would break the compilation of the generated file
+    expect(isApplicable({ simpleName: 'NotAConstraint' }, 'string')).to.be.false;
   });
 
   it('should detect validations in composed schemas', () => {

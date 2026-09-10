@@ -27,6 +27,7 @@
     "./testing/snapshotMatcher.js": "./testing/snapshotMatcher.js",
     "./ast.js": "./ast.js",
     "./createSourceFile.js": "./createSourceFile.js",
+    "./formatMemberChains.js": "./formatMemberChains.js",
     "./memoize.js": "./memoize.js",
     "./LoggerFactory.js": "./LoggerFactory.js",
     "./PluginError.js": "./PluginError.js",

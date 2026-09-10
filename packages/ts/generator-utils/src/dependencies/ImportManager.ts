@@ -247,6 +247,42 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
   }
 }
 
+/**
+ * Combines a default and a named import of the same module into one
+ * declaration, i.e. `import m, { StringModel } from "..."`.
+ *
+ * A type-only default import cannot take named bindings along, so those stay
+ * apart. A named group that is entirely type-only can still be merged, by
+ * marking its specifiers individually instead of the declaration.
+ */
+function mergeDefaultAndNamed(
+  defaultDeclaration: ImportDeclaration,
+  namedDeclaration: ImportDeclaration,
+): ImportDeclaration | undefined {
+  const defaultClause = defaultDeclaration.importClause;
+  const namedClause = namedDeclaration.importClause;
+
+  if (!defaultClause?.name || defaultClause.isTypeOnly || !namedClause?.namedBindings) {
+    return undefined;
+  }
+
+  const bindings = namedClause.namedBindings;
+
+  if (!ts.isNamedImports(bindings)) {
+    return undefined;
+  }
+
+  const elements = namedClause.isTypeOnly
+    ? bindings.elements.map((element) => ts.factory.createImportSpecifier(true, element.propertyName, element.name))
+    : bindings.elements;
+
+  return ts.factory.createImportDeclaration(
+    defaultDeclaration.modifiers,
+    ts.factory.createImportClause(false, defaultClause.name, ts.factory.createNamedImports(elements)),
+    defaultDeclaration.moduleSpecifier,
+  );
+}
+
 export default class ImportManager implements CodeConvertable<readonly Statement[]> {
   readonly collator: Intl.Collator;
   readonly default: DefaultImportManager;
@@ -267,11 +303,21 @@ export default class ImportManager implements CodeConvertable<readonly Statement
   }
 
   toCode(): readonly Statement[] {
-    const records = [
-      ...this.default.statementRecords(),
-      ...this.named.statementRecords(),
-      ...this.namespace.statementRecords(),
-    ];
+    const named = new Map(this.named.statementRecords());
+    const records: Array<StatementRecord<ImportDeclaration>> = [];
+
+    for (const [path, declaration] of this.default.statementRecords()) {
+      const namedDeclaration = named.get(path);
+      const merged = namedDeclaration && mergeDefaultAndNamed(declaration, namedDeclaration);
+
+      if (merged) {
+        named.delete(path);
+      }
+
+      records.push([path, merged ?? declaration]);
+    }
+
+    records.push(...named, ...this.namespace.statementRecords());
     records.sort(createComparator(this.collator));
 
     return records.map(([, statement]) => statement);

@@ -1,16 +1,12 @@
-import { _getPropertyModel, makeObjectEmptyValueCreator, StringModel } from "@vaadin/hilla-lit-form";
+import m, { StringModel } from "@vaadin/hilla-models";
 import AbstractEntityModel from "./AbstractEntityModel.js";
 import type Address from "./Address.js";
-class AddressModel<T extends Address = Address> extends AbstractEntityModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(AddressModel);
-    get street(): StringModel {
-        return this[_getPropertyModel]("street", (parent, key) => new StringModel(parent, key, false, { meta: { javaType: "java.lang.String" } }));
-    }
-    get zipCode(): StringModel {
-        return this[_getPropertyModel]("zipCode", (parent, key) => new StringModel(parent, key, false, { meta: { javaType: "java.lang.String" } }));
-    }
-    get city(): StringModel {
-        return this[_getPropertyModel]("city", (parent, key) => new StringModel(parent, key, true, { meta: { javaType: "java.lang.String" } }));
-    }
-}
+const AddressModel = m
+  .extend(AbstractEntityModel)
+  .object<Address>("Address")
+  .property("street", m.meta(StringModel, { jvmType: "java.lang.String" }))
+  .property("zipCode", m.meta(StringModel, { jvmType: "java.lang.String" }))
+  .property("city", m.meta(m.optional(StringModel), { jvmType: "java.lang.String" }))
+  .build();
+type AddressModel = typeof AddressModel;
 export default AddressModel;
