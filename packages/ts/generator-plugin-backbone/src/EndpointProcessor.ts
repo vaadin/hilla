@@ -1,4 +1,4 @@
-import type { SourceFile, Statement } from '@typescript/typescript6';
+import ts, { type SourceFile, type Statement } from '@typescript/typescript6';
 import type Plugin from '@vaadin/hilla-generator-core/Plugin.js';
 import type { SharedStorage, TransferTypes } from '@vaadin/hilla-generator-core/SharedStorage.js';
 import ClientPlugin from '@vaadin/hilla-generator-plugin-client';
@@ -7,6 +7,7 @@ import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/Depend
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
 import { OpenAPIV3 } from 'openapi-types';
 import EndpointMethodOperationProcessor from './EndpointMethodOperationProcessor.js';
+import { extractRequestBodyParameters } from './EndpointMethodRequestBodyProcessor.js';
 
 export default class EndpointProcessor {
   static async create(
@@ -16,10 +17,24 @@ export default class EndpointProcessor {
     owner: Plugin,
   ): Promise<EndpointProcessor> {
     const endpoint = new EndpointProcessor(name, methods, storage, owner);
-    endpoint.#dependencies.imports.default.add(
-      endpoint.#dependencies.paths.createRelativePath(await ClientPlugin.getClientFileName(storage.outputDir)),
-      'client',
-    );
+    const { exports, imports, names, paths } = endpoint.#dependencies;
+
+    // Claim declared names and parameters before imports. This ensures that
+    // imports are suffixed on collisions and that method identifiers are
+    // preserved as-is.
+    for (const [method, pathItem] of methods) {
+      exports.named.add(method, false, ts.factory.createIdentifier(method));
+
+      for (const [parameter] of extractRequestBodyParameters(
+        pathItem[OpenAPIV3.HttpMethods.POST]!.requestBody,
+        owner.resolver,
+      ) ?? []) {
+        names.claim(parameter);
+      }
+    }
+
+    imports.default.add(paths.createRelativePath(await ClientPlugin.getClientFileName(storage.outputDir)), 'client');
+
     return endpoint;
   }
 
