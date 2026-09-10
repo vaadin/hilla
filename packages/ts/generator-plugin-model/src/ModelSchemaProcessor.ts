@@ -258,8 +258,16 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<Exp
       .map((constraint) => this.#constraints.process(constraint));
   }
 
+  /**
+   * Mirrors the dispatch of {@link ModelSchemaPartProcessor.process}, so that a
+   * constraint is tried against the same kind of model the emitter produces.
+   */
   #modelKind(): ModelKind {
     const schema = this[$schema];
+
+    if (isReferenceSchema(schema)) {
+      return 'object';
+    }
 
     if (isArraySchema(schema)) {
       return 'array';
@@ -281,6 +289,6 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<Exp
       return 'string';
     }
 
-    return 'object';
+    return 'unknown';
   }
 }
