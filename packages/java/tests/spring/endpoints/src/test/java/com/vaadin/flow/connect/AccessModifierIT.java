@@ -64,7 +64,6 @@ public class AccessModifierIT extends AbstractLoginTest {
             String text = methods.getText();
             return text.isEmpty() ? null : text;
         }, 25);
-        Assert.assertNotNull(actualText);
         Assert.assertTrue(actualText.contains("publicProp"));
         Assert.assertFalse(actualText.contains("protectedProp"));
         Assert.assertFalse(actualText.contains("packagePrivateProp"));

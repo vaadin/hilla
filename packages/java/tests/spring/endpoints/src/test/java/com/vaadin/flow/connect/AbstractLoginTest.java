@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.connect;
 
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+
 import com.vaadin.flow.testutil.ChromeBrowserTest;
 import com.vaadin.testbench.TestBenchElement;
 
@@ -27,7 +30,8 @@ public abstract class AbstractLoginTest extends ChromeBrowserTest {
     /**
      * Fills in and submits the login form of the given test component, using
      * the given user as both the user name and the password, and waits until
-     * the browser has landed on the page the login redirects to.
+     * the browser has landed on the page the login redirects to, away from the
+     * login view.
      *
      * @param testComponent
      *            the test component that renders the login form
@@ -37,27 +41,37 @@ public abstract class AbstractLoginTest extends ChromeBrowserTest {
     protected void login(TestBenchElement testComponent, String user) {
         testComponent.$(TestBenchElement.class).id("username").sendKeys(user);
         testComponent.$(TestBenchElement.class).id("password").sendKeys(user);
-        testComponent.$(TestBenchElement.class).id("login").click();
-        waitForLoginRedirect();
+        WebElement submit = testComponent.$(TestBenchElement.class).id("login");
+        submit.click();
+        waitForNavigation(submit);
+
+        // A rejected login lands back on the login view, which renders the
+        // same test component as the page a successful one leads to. Without
+        // this the test would carry on as if it were authenticated and fail
+        // later on with an unexplained 401.
+        waitUntil(driver -> !driver.getCurrentUrl().contains("/login"), 25);
     }
 
     /**
-     * Waits until the login form submission and the Spring Security redirect
-     * away from the login view have both completed.
+     * Waits until the navigation started in the document the given element
+     * belongs to has replaced that document, and the document it navigated to
+     * has finished loading.
      * <p>
-     * Submitting the form navigates the browser, and so does the redirect that
-     * follows it. Anything issued while either navigation is still in flight
-     * races with it - a {@code getDriver().get(...)} in particular, which
-     * chromedriver may then never report as complete, so the test hangs until
-     * the page load timeout instead of failing fast.
+     * Anything issued while a navigation is still in flight races with it - a
+     * {@code getDriver().get(...)} in particular, which chromedriver may then
+     * never report as complete, so the test hangs until the page load timeout
+     * instead of failing fast. The element is the anchor for the wait because
+     * it goes stale exactly when the new document commits; the readiness check
+     * alone would be satisfied by the still-current document and pass before
+     * the navigation had even started.
+     *
+     * @param elementOfPreviousDocument
+     *            an element of the document that started the navigation
      */
-    protected void waitForLoginRedirect() {
-        // Wait for the form submission to complete and page to redirect
+    protected void waitForNavigation(WebElement elementOfPreviousDocument) {
+        waitUntil(ExpectedConditions.stalenessOf(elementOfPreviousDocument),
+                25);
         waitForDocumentReady();
-
-        // Wait for Spring Security redirect to complete (URL should no longer
-        // contain /login)
-        waitUntil(driver -> !driver.getCurrentUrl().contains("/login"));
     }
 
     /**
@@ -67,6 +81,7 @@ public abstract class AbstractLoginTest extends ChromeBrowserTest {
         waitUntil(driver -> Boolean.TRUE
                 .equals(getCommandExecutor().executeScript(
                         "return !window.reloadPending && window.document.readyState "
-                                + "=== 'complete';")));
+                                + "=== 'complete';")),
+                25);
     }
 }
