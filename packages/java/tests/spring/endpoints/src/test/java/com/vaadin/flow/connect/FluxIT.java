@@ -19,13 +19,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.testutil.ChromeBrowserTest;
 import com.vaadin.testbench.TestBenchElement;
 
 /**
  * Class for testing issues in a spring-boot container.
  */
-public class FluxIT extends ChromeBrowserTest {
+public class FluxIT extends AbstractLoginTest {
 
     private void openTestUrl(String url) {
         getDriver().get(getRootURL() + url);
@@ -144,16 +143,7 @@ public class FluxIT extends ChromeBrowserTest {
 
     private void login(String user) {
         // Use form in the test component
-        testFlux.$(TestBenchElement.class).id("username").sendKeys(user);
-        testFlux.$(TestBenchElement.class).id("password").sendKeys(user);
-        testFlux.$(TestBenchElement.class).id("login").click();
-
-        // Wait for the form submission to complete and page to redirect
-        waitForDocumentReady();
-
-        // Wait for Spring Security redirect to complete (URL should no longer
-        // contain /login)
-        waitUntil(driver -> !driver.getCurrentUrl().contains("/login"));
+        login(testFlux, user);
 
         open();
         testFlux = $("test-flux").waitForFirst();
@@ -168,12 +158,5 @@ public class FluxIT extends ChromeBrowserTest {
         waitUntil(driver -> {
             return content.getText().equals(expected);
         }, 25);
-    }
-
-    private void waitForDocumentReady() {
-        waitUntil(driver -> Boolean.TRUE
-                .equals(this.getCommandExecutor().executeScript(
-                        "return !window.reloadPending && window.document.readyState "
-                                + "=== 'complete';")));
     }
 }
