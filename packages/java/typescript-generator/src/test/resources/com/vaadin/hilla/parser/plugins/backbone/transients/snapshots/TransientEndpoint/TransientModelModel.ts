@@ -1,13 +1,10 @@
-import { _getPropertyModel, makeObjectEmptyValueCreator, ObjectModel, StringModel } from "@vaadin/hilla-lit-form";
+import m, { StringModel } from "@vaadin/hilla-models";
 import NonTransientEntityModel from "../NonTransientEntityModel.js";
 import type TransientModel from "./TransientModel.js";
-class TransientModelModel<T extends TransientModel = TransientModel> extends ObjectModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(TransientModelModel);
-    get nonTransientEntity(): NonTransientEntityModel {
-        return this[_getPropertyModel]("nonTransientEntity", (parent, key) => new NonTransientEntityModel(parent, key, true));
-    }
-    get notTransientField(): StringModel {
-        return this[_getPropertyModel]("notTransientField", (parent, key) => new StringModel(parent, key, true, { meta: { javaType: "java.lang.String" } }));
-    }
-}
+const TransientModelModel = m
+  .object<TransientModel>("TransientModel")
+  .property("nonTransientEntity", m.optional(NonTransientEntityModel))
+  .property("notTransientField", m.meta(m.optional(StringModel), { jvmType: "java.lang.String" }))
+  .build();
+type TransientModelModel = typeof TransientModelModel;
 export default TransientModelModel;

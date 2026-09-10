@@ -2,30 +2,37 @@
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import ts from '@typescript/typescript6';
 import Generator from '@vaadin/hilla-generator-core/Generator.js';
 import BackbonePlugin from '@vaadin/hilla-generator-plugin-backbone/index.js';
 import LoggerFactory from '@vaadin/hilla-generator-utils/LoggerFactory.js';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { $defaultValue } from '@vaadin/hilla-models';
+import chaiLike from 'chai-like';
+import { beforeAll, chai, describe, expect, it } from 'vitest';
 import ModelPlugin from '../../src/index.js';
+
+chai.use(chaiLike);
 
 /**
  * The snapshot tests only compare text, so generated code that cannot be
- * evaluated still passes them. Mutually referencing models are the case that
- * matters: they import each other, and reading the other binding while the
+ * evaluated still passes them. Models that refer to one another are the case
+ * that matters: they import each other, and reading the other binding while the
  * module is still evaluating throws. `Model.json` has several such cycles, e.g.
  * `FormEntity` and `FormArrayTypes`.
  *
  * The sources are written into the package so that their imports resolve the
- * way an application's would, and are transformed by Vite on import.
+ * way an application's would, and are pulled in through a single barrel, which
+ * is also how an application loads them: one module graph, resolved statically.
+ * Importing them one by one instead would let the module runner resolve a cycle
+ * in an order no bundler would produce.
  */
 const outputDir = join(import.meta.dirname, '.generated');
-const entityDir = 'com/example/application/endpoints/TsFormEndpoint';
+const barrelName = 'all-models.ts';
 
-function moduleUrl(name: string): string {
-  return pathToFileURL(join(outputDir, name)).href;
-}
+type Model = { readonly [$defaultValue]: unknown };
+type Models = Readonly<Record<string, Model | undefined>>;
 
-async function generate(): Promise<readonly string[]> {
+async function generate(): Promise<Models> {
   const generator = new Generator([BackbonePlugin, ModelPlugin], {
     logger: new LoggerFactory({ name: 'model-plugin-runtime-test', verbose: true }),
   });
@@ -35,7 +42,7 @@ async function generate(): Promise<readonly string[]> {
 
   await rm(outputDir, { force: true, recursive: true });
 
-  return Promise.all(
+  const names = await Promise.all(
     files.map(async (file) => {
       const path = join(outputDir, file.name);
       await mkdir(dirname(path), { recursive: true });
@@ -43,46 +50,79 @@ async function generate(): Promise<readonly string[]> {
       return file.name;
     }),
   );
+
+  const models = names
+    .filter((name) => name.endsWith('Model.ts'))
+    .map((name) => [name.slice(name.lastIndexOf('/') + 1, -'.ts'.length), name.slice(0, -'.ts'.length)] as const);
+
+  expect(models.length, 'generated model files').to.be.greaterThan(0);
+
+  const barrel = [
+    ...models.map(([local, path]) => `import ${local} from './${path}.js';`),
+    `export default { ${models.map(([local]) => local).join(', ')} };`,
+  ].join('\n');
+
+  await writeFile(join(outputDir, barrelName), `${barrel}\n`);
+
+  const module = (await import(pathToFileURL(join(outputDir, barrelName)).href)) as { default: Models };
+
+  return module.default;
+}
+
+/**
+ * Compiles what was written to the output directory. The snapshot tests compare
+ * text and the evaluation tests run it, so neither notices a model the type
+ * checker rejects, which is what an application would hit first.
+ */
+function typeCheck(): readonly string[] {
+  const config = {
+    module: ts.ModuleKind.ESNext,
+    moduleResolution: ts.ModuleResolutionKind.Bundler,
+    noEmit: true,
+    skipLibCheck: true,
+    strict: true,
+    target: ts.ScriptTarget.ES2022,
+  };
+
+  const program = ts.createProgram([join(outputDir, barrelName)], config);
+
+  return ts
+    .getPreEmitDiagnostics(program)
+    .filter((diagnostic) => diagnostic.file?.fileName.includes('/.generated/'))
+    .map(
+      (diagnostic) =>
+        `${diagnostic.file!.fileName.slice(outputDir.length + 1)}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, ' ')}`,
+    );
 }
 
 describe('ModelPlugin', () => {
-  let generated: readonly string[];
+  let models: Models;
 
   beforeAll(async () => {
-    generated = await generate();
+    models = await generate();
   }, 30000);
 
-  it('generates models that can be evaluated', async () => {
-    const modelFiles = generated.filter((name) => name.endsWith('Model.ts'));
-    expect(modelFiles.length, 'generated model files').to.be.greaterThan(0);
+  it('generates models that can be evaluated', () => {
+    const missing = Object.entries(models)
+      .filter(([, model]) => model === undefined)
+      .map(([name]) => name);
 
-    const failures = (
-      await Promise.all(
-        modelFiles.map(async (name) => {
-          try {
-            const module = (await import(moduleUrl(name))) as { default?: unknown };
-            return module.default === undefined ? `${name}: no default export` : undefined;
-          } catch (e: unknown) {
-            return `${name}: ${String(e)}`;
-          }
-        }),
-      )
-    ).filter(Boolean);
+    expect(missing).to.deep.equal([]);
+  });
 
-    expect(failures).to.deep.equal([]);
-  }, 30000);
-
-  it('resolves models that reference each other', async () => {
+  it('resolves models that refer to each other', () => {
     // FormEntity has a FormArrayTypes property and vice versa, so whichever
     // module is evaluated first sees the other one uninitialised
-    const { default: FormEntityModel } = (await import(moduleUrl(`${entityDir}/FormEntityModel.ts`))) as {
-      default: unknown;
-    };
-    const { default: FormArrayTypesModel } = (await import(moduleUrl(`${entityDir}/FormArrayTypesModel.ts`))) as {
-      default: unknown;
-    };
+    expect(models.FormEntityModel, 'FormEntityModel').to.not.be.undefined;
+    expect(models.FormArrayTypesModel, 'FormArrayTypesModel').to.not.be.undefined;
+  });
 
-    expect(FormEntityModel, 'FormEntityModel').to.not.be.undefined;
-    expect(FormArrayTypesModel, 'FormArrayTypesModel').to.not.be.undefined;
-  }, 30000);
+  it('generates models that type check', () => {
+    expect(typeCheck()).to.deep.equal([]);
+  }, 60000);
+
+  it('builds a default value out of the generated models', () => {
+    expect(models.FormEntityIdModel![$defaultValue]).to.have.property('Id').which.is.NaN;
+    expect(models.FormArrayTypesModel![$defaultValue]).to.have.property('stringArray').which.deep.equals([]);
+  });
 });
