@@ -310,8 +310,10 @@ export default class ImportManager implements CodeConvertable<readonly Statement
         if (ts.isNamespaceImport(namedBindings)) {
           this.namespace.add(path, namedBindings.name.text, namedBindings.name);
         } else {
-          for (const { isTypeOnly, name: specifier } of namedBindings.elements) {
-            this.named.add(path, specifier.text, isTypeOnly, specifier);
+          for (const { isTypeOnly, name: local, propertyName } of namedBindings.elements) {
+            // `propertyName` holds the exported name whenever the import is
+            // aliased; the local binding alone would not survive the round trip.
+            this.named.add(path, (propertyName ?? local).text, isTypeOnly, local);
           }
         }
       } else if (name) {
