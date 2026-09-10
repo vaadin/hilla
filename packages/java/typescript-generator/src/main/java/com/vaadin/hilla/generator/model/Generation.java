@@ -36,12 +36,4 @@ public record Generation(List<EndpointModel> endpoints,
         entities = List.copyOf(entities);
         unions = List.copyOf(unions);
     }
-
-    /**
-     * A generation of endpoints alone, which refer to nothing needing a
-     * declaration of its own.
-     */
-    public static Generation of(List<EndpointModel> endpoints) {
-        return new Generation(endpoints, List.of(), List.of());
-    }
 }
