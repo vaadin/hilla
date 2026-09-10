@@ -158,7 +158,6 @@ public abstract class AbstractFullStackTest {
      */
     private static Map<String, String> toSnapshotPaths(
             FullStackGenerator generator, Map<String, String> generated) {
-        var prefix = generator.getSnapshotsPackage().replace('.', '/') + "/";
         var snapshots = new LinkedHashMap<String, String>();
 
         generated.forEach((path, content) -> {
