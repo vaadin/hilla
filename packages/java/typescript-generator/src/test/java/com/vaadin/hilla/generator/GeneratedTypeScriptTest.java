@@ -18,11 +18,13 @@ package com.vaadin.hilla.generator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.hilla.generator.fixtures.EmptyEndpoint;
 import com.vaadin.hilla.generator.fixtures.InheritingEndpoint;
+import com.vaadin.hilla.generator.fixtures.Nonnull;
 import com.vaadin.hilla.generator.fixtures.ProvidedTypesEndpoint;
 import com.vaadin.hilla.generator.fixtures.PushingEndpoint;
 import com.vaadin.hilla.generator.fixtures.SampleEndpoint;
@@ -38,6 +40,10 @@ import com.vaadin.hilla.generator.typescript.EntityWriter;
 import com.vaadin.hilla.generator.typescript.FormModelWriter;
 import com.vaadin.hilla.generator.typescript.GeneratedFile;
 import com.vaadin.hilla.generator.typescript.UnionWriter;
+import com.vaadin.hilla.parser.core.Plugin;
+import com.vaadin.hilla.parser.plugins.nonnull.AnnotationMatcher;
+import com.vaadin.hilla.parser.plugins.nonnull.NonnullPlugin;
+import com.vaadin.hilla.parser.plugins.nonnull.NonnullPluginConfig;
 import com.vaadin.hilla.parser.testutils.FullStackGenerator;
 
 /**
@@ -202,16 +208,20 @@ public class GeneratedTypeScriptTest {
      */
     @Test
     public void should_BuildTheSignalAValueIsSharedThrough() {
-        // A signal is not returned by the method: the client builds one and
-        // the two keep the value in step from then on, which is why the method
-        // says which endpoint and method the signal belongs to
-        var endpoint = endpointsOf(SignalsEndpoint.class).get(0);
+        // A signal is not returned by the method: the client builds one and the
+        // two keep the value in step from then on, which is why the method says
+        // which endpoint and method the signal belongs to. Whether the signal
+        // itself can be absent is what the Java method says, as everywhere
+        // else, while the value it holds decides where it starts from.
+        var endpoint = endpointsOf(SignalsEndpoint.class, alwaysThere()).get(0);
 
         assertEquals(
                 """
+                        import { StringModel } from '@vaadin/hilla-lit-form';
                         import type { SignalMethodOptions } from '@vaadin/hilla-react-signals';
                         import { ListSignal, NumberSignal, ValueSignal } from '@vaadin/hilla-react-signals';
                         import type Sample from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Sample.js';
+                        import SampleModel from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/SampleModel.js';
                         import client from './connect-client.default.js';
 
                         export function counter(): NumberSignal | undefined {
@@ -219,6 +229,14 @@ public class GeneratedTypeScriptTest {
                             client: client,
                             endpoint: 'SignalsEndpoint',
                             method: 'counter',
+                          });
+                        }
+
+                        export function current(options?: SignalMethodOptions<Sample>): ValueSignal<Sample> {
+                          return new ValueSignal(options?.defaultValue ?? SampleModel.createEmptyValue(), {
+                            client: client,
+                            endpoint: 'SignalsEndpoint',
+                            method: 'current',
                           });
                         }
 
@@ -249,9 +267,30 @@ public class GeneratedTypeScriptTest {
                             params: { detailed },
                           });
                         }
+
+                        export function title(options?: SignalMethodOptions<string>): ValueSignal<string> {
+                          return new ValueSignal(options?.defaultValue ?? StringModel.createEmptyValue(), {
+                            client: client,
+                            endpoint: 'SignalsEndpoint',
+                            method: 'title',
+                          });
+                        }
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpoint).content());
+    }
+
+    /**
+     * The annotation the fixtures say with that a value is always there, which
+     * is one of the application rather than one the parser knows by default.
+     */
+    private static NonnullPlugin alwaysThere() {
+        var plugin = new NonnullPlugin();
+        plugin.setConfiguration(new NonnullPluginConfig(Set
+                .of(new AnnotationMatcher(Nonnull.class.getName(), false, 10)),
+                null));
+
+        return plugin;
     }
 
     @Test
@@ -840,5 +879,11 @@ public class GeneratedTypeScriptTest {
     private static List<EndpointModel> endpointsOf(Class<?> endpoint) {
         return new FullStackGenerator(GeneratedTypeScriptTest.class, endpoint)
                 .parseModel();
+    }
+
+    private static List<EndpointModel> endpointsOf(Class<?> endpoint,
+            Plugin configured) {
+        return new FullStackGenerator(GeneratedTypeScriptTest.class, endpoint)
+                .withPlugin(configured).parseModel();
     }
 }
