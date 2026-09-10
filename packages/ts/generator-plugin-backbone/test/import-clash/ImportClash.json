@@ -1,0 +1,152 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Hilla Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Hilla Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "ImportClashEndpoint"
+    }
+  ],
+  "paths": {
+    "/ImportClashEndpoint/getClientParam": {
+      "post": {
+        "tags": ["ImportClashEndpoint"],
+        "operationId": "ImportClashEndpoint_getClientParam_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "client": {
+                    "type": "string",
+                    "nullable": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "nullable": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ImportClashEndpoint/getInitTypeParam": {
+      "post": {
+        "tags": ["ImportClashEndpoint"],
+        "operationId": "ImportClashEndpoint_getInitTypeParam_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "EndpointRequestInit": {
+                    "type": "string",
+                    "nullable": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "nullable": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ImportClashEndpoint/getEntityParam": {
+      "post": {
+        "tags": ["ImportClashEndpoint"],
+        "operationId": "ImportClashEndpoint_getEntityParam_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Entity": {
+                    "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.importclash.Entity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.importclash.Entity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ImportClashEndpoint/client": {
+      "post": {
+        "tags": ["ImportClashEndpoint"],
+        "operationId": "ImportClashEndpoint_client_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "nullable": false
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "com.vaadin.hilla.parser.plugins.backbone.importclash.Entity": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}
