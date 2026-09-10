@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.connect;
 
-import com.vaadin.flow.testutil.ChromeBrowserTest;
 import com.vaadin.testbench.TestBenchElement;
 
 import org.junit.Before;
@@ -18,7 +17,7 @@ import org.openqa.selenium.WebElement;
 /**
  * Class for testing issues in a spring-boot container.
  */
-public class FluxIT extends ChromeBrowserTest {
+public class FluxIT extends AbstractLoginTest {
 
     private void openTestUrl(String url) {
         getDriver().get(getRootURL() + url);
@@ -137,9 +136,8 @@ public class FluxIT extends ChromeBrowserTest {
 
     private void login(String user) {
         // Use form in the test component
-        testFlux.$(TestBenchElement.class).id("username").sendKeys(user);
-        testFlux.$(TestBenchElement.class).id("password").sendKeys(user);
-        testFlux.$(TestBenchElement.class).id("login").click();
+        login(testFlux, user);
+
         open();
         testFlux = $("test-flux").waitForFirst();
         content = testFlux.$(TestBenchElement.class).id("content");
