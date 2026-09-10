@@ -1,7 +1,5 @@
-import { _enum, EnumModel, makeEnumEmptyValueCreator } from "@vaadin/hilla-lit-form";
+import m from "@vaadin/hilla-models";
 import Direction from "./Direction.js";
-class DirectionModel extends EnumModel<typeof Direction> {
-    static override createEmptyValue = makeEnumEmptyValueCreator(DirectionModel);
-    readonly [_enum] = Direction;
-}
+const DirectionModel = m.enum(Direction, "Direction");
+type DirectionModel = typeof DirectionModel;
 export default DirectionModel;

@@ -1,85 +1,33 @@
-import { _getPropertyModel, ArrayModel, AssertFalse, AssertTrue, DecimalMax, DecimalMin, Digits, Email, Future, makeObjectEmptyValueCreator, Max, Min, Negative, NegativeOrZero, NotBlank, NotEmpty, NotNull, Null, NumberModel, ObjectModel, Past, Pattern, Positive, PositiveOrZero, Size, StringModel } from "@vaadin/hilla-lit-form";
+import m, { DecimalMax, DecimalMin, Digits, Email, Future, Max, Min, Negative, NegativeOrZero, NotBlank, NotEmpty, NotNull, Null, NumberModel, Past, Pattern, Positive, PositiveOrZero, Size, StringModel } from "@vaadin/hilla-models";
 import type ValidationData from "./ValidationData.js";
-import ValidationDataModel_1 from "./ValidationDataModel.js";
-class ValidationDataModel<T extends ValidationData = ValidationData> extends ObjectModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(ValidationDataModel);
-    get assertFalse(): StringModel {
-        return this[_getPropertyModel]("assertFalse", (parent, key) => new StringModel(parent, key, true, { validators: [new AssertFalse()], meta: { javaType: "java.lang.String" } }));
-    }
-    get assertTrue(): StringModel {
-        return this[_getPropertyModel]("assertTrue", (parent, key) => new StringModel(parent, key, true, { validators: [new AssertTrue()], meta: { javaType: "java.lang.String" } }));
-    }
-    get decimalMax(): NumberModel {
-        return this[_getPropertyModel]("decimalMax", (parent, key) => new NumberModel(parent, key, false, { validators: [new DecimalMax({ inclusive: false, value: "0.01" })], meta: { javaType: "double" } }));
-    }
-    get decimalMin(): NumberModel {
-        return this[_getPropertyModel]("decimalMin", (parent, key) => new NumberModel(parent, key, false, { validators: [new DecimalMin("0.01")], meta: { javaType: "double" } }));
-    }
-    get digits(): StringModel {
-        return this[_getPropertyModel]("digits", (parent, key) => new StringModel(parent, key, true, { validators: [new Digits({ integer: 5, fraction: 2 })], meta: { javaType: "java.lang.String" } }));
-    }
-    get email(): StringModel {
-        return this[_getPropertyModel]("email", (parent, key) => new StringModel(parent, key, true, { validators: [new Email({ message: "foo" })], meta: { javaType: "java.lang.String" } }));
-    }
-    get future(): StringModel {
-        return this[_getPropertyModel]("future", (parent, key) => new StringModel(parent, key, true, { validators: [new Future()], meta: { javaType: "java.time.LocalDate" } }));
-    }
-    get isNull(): StringModel {
-        return this[_getPropertyModel]("isNull", (parent, key) => new StringModel(parent, key, true, { validators: [new Null()], meta: { javaType: "java.lang.String" } }));
-    }
-    get list(): ArrayModel<StringModel> {
-        return this[_getPropertyModel]("list", (parent, key) => new ArrayModel(parent, key, true, (parent, key) => new StringModel(parent, key, true, { meta: { javaType: "java.lang.String" } }), { validators: [new NotEmpty()], meta: { javaType: "java.util.List" } }));
-    }
-    get max(): NumberModel {
-        return this[_getPropertyModel]("max", (parent, key) => new NumberModel(parent, key, true, { validators: [new Max(2)], meta: { javaType: "java.lang.Integer" } }));
-    }
-    get min(): NumberModel {
-        return this[_getPropertyModel]("min", (parent, key) => new NumberModel(parent, key, true, { validators: [new Min({ message: "foo", value: 1 })], meta: { javaType: "java.lang.Integer" } }));
-    }
-    get negative(): NumberModel {
-        return this[_getPropertyModel]("negative", (parent, key) => new NumberModel(parent, key, false, { validators: [new Negative()], meta: { javaType: "int" } }));
-    }
-    get negativeOrZero(): NumberModel {
-        return this[_getPropertyModel]("negativeOrZero", (parent, key) => new NumberModel(parent, key, false, { validators: [new NegativeOrZero()], meta: { javaType: "int" } }));
-    }
-    get notBlank(): StringModel {
-        return this[_getPropertyModel]("notBlank", (parent, key) => new StringModel(parent, key, true, { validators: [new NotBlank()], meta: { javaType: "java.lang.String" } }));
-    }
-    get notEmpty(): StringModel {
-        return this[_getPropertyModel]("notEmpty", (parent, key) => new StringModel(parent, key, true, { validators: [new NotNull(), new NotEmpty()], meta: { javaType: "java.lang.String" } }));
-    }
-    get notNull(): StringModel {
-        return this[_getPropertyModel]("notNull", (parent, key) => new StringModel(parent, key, true, { validators: [new NotNull()], meta: { javaType: "java.lang.String" } }));
-    }
-    get notNullEntity(): ValidationDataModel_1 {
-        return this[_getPropertyModel]("notNullEntity", (parent, key) => new ValidationDataModel_1(parent, key, true, { validators: [new NotNull()] }));
-    }
-    get past(): StringModel {
-        return this[_getPropertyModel]("past", (parent, key) => new StringModel(parent, key, true, { validators: [new Past()], meta: { javaType: "java.time.LocalDate" } }));
-    }
-    get pattern(): StringModel {
-        return this[_getPropertyModel]("pattern", (parent, key) => new StringModel(parent, key, true, { validators: [new Pattern({ regexp: "\\d+\\..+" })], meta: { javaType: "java.lang.String" } }));
-    }
-    get positive(): NumberModel {
-        return this[_getPropertyModel]("positive", (parent, key) => new NumberModel(parent, key, false, { validators: [new Positive()], meta: { javaType: "int" } }));
-    }
-    get positiveOrZero(): NumberModel {
-        return this[_getPropertyModel]("positiveOrZero", (parent, key) => new NumberModel(parent, key, false, { validators: [new PositiveOrZero()], meta: { javaType: "int" } }));
-    }
-    get size(): StringModel {
-        return this[_getPropertyModel]("size", (parent, key) => new StringModel(parent, key, true, { validators: [new Size()], meta: { javaType: "java.lang.String" } }));
-    }
-    get size1(): StringModel {
-        return this[_getPropertyModel]("size1", (parent, key) => new StringModel(parent, key, true, { validators: [new Size({ min: 1 })], meta: { javaType: "java.lang.String" } }));
-    }
-    get withConstraintsOnSetter(): StringModel {
-        return this[_getPropertyModel]("withConstraintsOnSetter", (parent, key) => new StringModel(parent, key, true, { validators: [new NotNull(), new NotBlank(), new Email()], meta: { javaType: "java.lang.String" } }));
-    }
-    get withGetter(): StringModel {
-        return this[_getPropertyModel]("withGetter", (parent, key) => new StringModel(parent, key, true, { validators: [new NotBlank()], meta: { javaType: "java.lang.String" } }));
-    }
-    get withSetter(): StringModel {
-        return this[_getPropertyModel]("withSetter", (parent, key) => new StringModel(parent, key, true, { validators: [new Email(), new NotBlank()], meta: { javaType: "java.lang.String" } }));
-    }
-}
+const ValidationDataModel = m
+  .object<ValidationData>("ValidationData")
+  .property("assertFalse", m.meta(m.optional(StringModel), { jvmType: "java.lang.String" }))
+  .property("assertTrue", m.meta(m.optional(StringModel), { jvmType: "java.lang.String" }))
+  .property("decimalMax", m.meta(m.constrained(NumberModel, DecimalMax({ inclusive: false, value: "0.01" })), { jvmType: "double" }))
+  .property("decimalMin", m.meta(m.constrained(NumberModel, DecimalMin("0.01")), { jvmType: "double" }))
+  .property("digits", m.meta(m.constrained(m.optional(StringModel), Digits({ integer: 5, fraction: 2 })), { jvmType: "java.lang.String" }))
+  .property("email", m.meta(m.constrained(m.optional(StringModel), Email({ message: "foo" })), { jvmType: "java.lang.String" }))
+  .property("future", m.meta(m.constrained(m.optional(StringModel), Future()), { jvmType: "java.time.LocalDate" }))
+  .property("isNull", m.meta(m.constrained(m.optional(StringModel), Null()), { jvmType: "java.lang.String" }))
+  .property("list", m.meta(m.constrained(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: "java.lang.String" }))), NotEmpty()), { jvmType: "java.util.List" }))
+  .property("max", m.meta(m.constrained(m.optional(NumberModel), Max(2)), { jvmType: "java.lang.Integer" }))
+  .property("min", m.meta(m.constrained(m.optional(NumberModel), Min({ message: "foo", value: 1 })), { jvmType: "java.lang.Integer" }))
+  .property("negative", m.meta(m.constrained(NumberModel, Negative()), { jvmType: "int" }))
+  .property("negativeOrZero", m.meta(m.constrained(NumberModel, NegativeOrZero()), { jvmType: "int" }))
+  .property("notBlank", m.meta(m.constrained(m.optional(StringModel), NotBlank()), { jvmType: "java.lang.String" }))
+  .property("notEmpty", m.meta(m.constrained(m.optional(StringModel), NotNull(), NotEmpty()), { jvmType: "java.lang.String" }))
+  .property("notNull", m.meta(m.constrained(m.optional(StringModel), NotNull()), { jvmType: "java.lang.String" }))
+  .property("notNullEntity", m.constrained(m.optional(m.self), NotNull()))
+  .property("past", m.meta(m.constrained(m.optional(StringModel), Past()), { jvmType: "java.time.LocalDate" }))
+  .property("pattern", m.meta(m.constrained(m.optional(StringModel), Pattern({ regexp: "\\d+\\..+" })), { jvmType: "java.lang.String" }))
+  .property("positive", m.meta(m.constrained(NumberModel, Positive()), { jvmType: "int" }))
+  .property("positiveOrZero", m.meta(m.constrained(NumberModel, PositiveOrZero()), { jvmType: "int" }))
+  .property("size", m.meta(m.constrained(m.optional(StringModel), Size()), { jvmType: "java.lang.String" }))
+  .property("size1", m.meta(m.constrained(m.optional(StringModel), Size({ min: 1 })), { jvmType: "java.lang.String" }))
+  .property("withConstraintsOnSetter", m.meta(m.constrained(m.optional(StringModel), NotNull(), NotBlank(), Email()), { jvmType: "java.lang.String" }))
+  .property("withGetter", m.meta(m.constrained(m.optional(StringModel), NotBlank()), { jvmType: "java.lang.String" }))
+  .property("withSetter", m.meta(m.constrained(m.optional(StringModel), Email(), NotBlank()), { jvmType: "java.lang.String" }))
+  .build();
+type ValidationDataModel = typeof ValidationDataModel;
 export default ValidationDataModel;

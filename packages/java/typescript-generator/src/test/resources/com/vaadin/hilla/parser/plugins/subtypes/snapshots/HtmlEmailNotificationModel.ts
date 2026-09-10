@@ -1,10 +1,11 @@
-import { _getPropertyModel, makeObjectEmptyValueCreator, StringModel } from "@vaadin/hilla-lit-form";
+import m, { StringModel } from "@vaadin/hilla-models";
 import EmailNotificationModel from "./EmailNotificationModel.js";
 import type HtmlEmailNotification from "./HtmlEmailNotification.js";
-class HtmlEmailNotificationModel<T extends HtmlEmailNotification = HtmlEmailNotification> extends EmailNotificationModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(HtmlEmailNotificationModel);
-    get html(): StringModel {
-        return this[_getPropertyModel]("html", (parent, key) => new StringModel(parent, key, true, { meta: { javaType: "java.lang.String" } }));
-    }
-}
+const HtmlEmailNotificationModel = m
+  .extend(EmailNotificationModel)
+  .object<HtmlEmailNotification>("HtmlEmailNotification")
+  .property("html", m.meta(m.optional(StringModel), { jvmType: "java.lang.String" }))
+  .property("kind", m.literal("html-email"))
+  .build();
+type HtmlEmailNotificationModel = typeof HtmlEmailNotificationModel;
 export default HtmlEmailNotificationModel;

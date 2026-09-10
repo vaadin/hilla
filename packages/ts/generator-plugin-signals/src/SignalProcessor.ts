@@ -27,7 +27,7 @@ import ast, { createTransformer } from '@vaadin/hilla-generator-utils/tsc-templa
 import { ARRAY_TYPES, COLLECTION_SIGNALS, GENERIC_SIGNALS } from './utils.js';
 
 const HILLA_REACT_SIGNALS = '@vaadin/hilla-react-signals';
-const HILLA_LIT_FORM = '@vaadin/hilla-lit-form';
+const HILLA_MODELS = '@vaadin/hilla-models';
 
 export default class SignalProcessor {
   readonly #dependencyManager: DependencyManager;
@@ -188,10 +188,22 @@ export default class SignalProcessor {
       defaultValue:
         modelId === SyntaxKind.UndefinedKeyword
           ? (ast`options?.defaultValue`.node as PropertyAccessExpression)
-          : (ast`options?.defaultValue ?? ${modelId}.createEmptyValue()`.node as BinaryExpression),
+          : (ast`options?.defaultValue ?? ${modelId}[${this.#defaultValueId()}]`.node as BinaryExpression),
       defaultValueParameter: ast`function dummy( %{ options?: ${optionsMethodTypeId}<${type}> }% ) {}`
         .node as ParameterDeclaration,
     };
+  }
+
+  /**
+   * The `$defaultValue` symbol, under which a model holds the empty value the
+   * signal starts from.
+   */
+  #defaultValueId() {
+    const { imports } = this.#dependencyManager;
+
+    return (
+      imports.named.getIdentifier(HILLA_MODELS, '$defaultValue') ?? imports.named.add(HILLA_MODELS, '$defaultValue')
+    );
   }
 
   #getModelId(node: Node) {
@@ -199,14 +211,12 @@ export default class SignalProcessor {
 
     if (isIdentifier(node)) {
       // In case the node is an array type defined as `Array<T>` or
-      // `ReadonlyArray<T>`, we need to import the `ArrayModel` class.
+      // `ReadonlyArray<T>`, we need to import the `ArrayModel`.
       if (ARRAY_TYPES.includes(node.text)) {
-        return (
-          imports.named.getIdentifier(HILLA_LIT_FORM, 'ArrayModel') ?? imports.named.add(HILLA_LIT_FORM, 'ArrayModel')
-        );
+        return imports.named.getIdentifier(HILLA_MODELS, 'ArrayModel') ?? imports.named.add(HILLA_MODELS, 'ArrayModel');
       }
 
-      // Otherwise, we calculate and import the model class.
+      // Otherwise, we calculate and import the model.
       const [path] = Iterator.from(imports.default).find(([, id]) => id === node) ?? [];
 
       if (!path) {
@@ -219,7 +229,7 @@ export default class SignalProcessor {
       return imports.default.getIdentifier(modelPath) ?? imports.default.add(modelPath, modelName);
     } else if (isTypeNode(node)) {
       // If the node is a primitive type, we will import the corresponding
-      // model class from `@vaadin/hilla-lit-form`.
+      // model from `@vaadin/hilla-models`.
       let modelName: string | undefined;
 
       switch (node.kind) {
@@ -239,7 +249,7 @@ export default class SignalProcessor {
           return undefined;
       }
 
-      return imports.named.getIdentifier(HILLA_LIT_FORM, modelName) ?? imports.named.add(HILLA_LIT_FORM, modelName);
+      return imports.named.getIdentifier(HILLA_MODELS, modelName) ?? imports.named.add(HILLA_MODELS, modelName);
     }
 
     return undefined;

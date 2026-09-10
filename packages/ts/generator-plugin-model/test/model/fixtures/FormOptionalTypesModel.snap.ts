@@ -1,19 +1,12 @@
-import { _getPropertyModel, ArrayModel, makeObjectEmptyValueCreator, ObjectModel, StringModel } from "@vaadin/hilla-lit-form";
+import m, { ObjectModel, StringModel } from "@vaadin/hilla-models";
 import FormEntityModel from "./FormEntityModel.js";
 import type FormOptionalTypes from "./FormOptionalTypes.js";
-class FormOptionalTypesModel<T extends FormOptionalTypes = FormOptionalTypes> extends ObjectModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(FormOptionalTypesModel);
-    get optionalString(): StringModel {
-        return this[_getPropertyModel]("optionalString", (parent, key) => new StringModel(parent, key, false));
-    }
-    get optionalEntity(): FormEntityModel {
-        return this[_getPropertyModel]("optionalEntity", (parent, key) => new FormEntityModel(parent, key, false));
-    }
-    get optionalList(): ArrayModel<StringModel> {
-        return this[_getPropertyModel]("optionalList", (parent, key) => new ArrayModel(parent, key, false, (parent, key) => new StringModel(parent, key, true)));
-    }
-    get optionalMatrix(): ArrayModel<ArrayModel<StringModel>> {
-        return this[_getPropertyModel]("optionalMatrix", (parent, key) => new ArrayModel(parent, key, false, (parent, key) => new ArrayModel(parent, key, true, (parent, key) => new StringModel(parent, key, true))));
-    }
-}
+const FormOptionalTypesModel: ObjectModel<FormOptionalTypes> = m
+  .object<FormOptionalTypes>("FormOptionalTypes")
+  .property("optionalString", StringModel)
+  .property("optionalEntity", m.lazy(() => FormEntityModel))
+  .property("optionalList", m.array(m.optional(StringModel)))
+  .property("optionalMatrix", m.array(m.optional(m.array(m.optional(StringModel)))))
+  .build();
+type FormOptionalTypesModel = typeof FormOptionalTypesModel;
 export default FormOptionalTypesModel;

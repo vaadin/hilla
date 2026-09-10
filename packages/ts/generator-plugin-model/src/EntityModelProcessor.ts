@@ -1,12 +1,6 @@
 /* eslint-disable symbol-description */
 import { dirname } from 'path/posix';
-import ts, {
-  type ClassDeclaration,
-  type ClassElement,
-  type Identifier,
-  type SourceFile,
-  type Statement,
-} from '@typescript/typescript6';
+import ts, { type Expression, type Identifier, type SourceFile, type Statement } from '@typescript/typescript6';
 import {
   convertFullyQualifiedNameToRelativePath,
   convertReferenceSchemaToPath,
@@ -24,14 +18,15 @@ import {
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
-import { ModelSchemaExpressionProcessor, ModelSchemaTypeProcessor } from './ModelSchemaProcessor.js';
-import { type Context, createEmptyValueMaker, createModelBuildingCallback, importBuiltInFormModel } from './utils.js';
+import { ModelSchemaExpressionProcessor } from './ModelSchemaProcessor.js';
+import { type Context, importM, importModel } from './utils.js';
 
 export type DependencyData = Readonly<{
   id: Identifier;
   path: string;
 }>;
 
+const $declare = Symbol();
 const $dependencies = Symbol();
 const $entity = Symbol();
 const $fullyQualifiedName = Symbol();
@@ -84,44 +79,52 @@ export abstract class EntityModelProcessor {
     const declaration = this[$processDeclaration]();
 
     const { exports, imports } = this[$dependencies];
-    const importStatements = imports.toCode();
-    const exportStatement = exports.toCode();
 
     return createSourceFile(
-      [...importStatements, declaration, ...exportStatement].filter(Boolean) as readonly Statement[],
+      [...imports.toCode(), ...declaration, ...exports.toCode()],
       this.#outputPathManager.createRelativePath(this[$model].path),
     );
   }
 
-  protected abstract [$processDeclaration](): ClassDeclaration | undefined;
+  /**
+   * Declares the model constant together with a type alias of the same name, so
+   * that `export default` carries both meanings and consumers can keep using
+   * the imported name in type and value position alike.
+   */
+  protected [$declare](initializer: Expression, type?: ts.TypeNode): readonly Statement[] {
+    const { id } = this[$model];
+
+    return [
+      ts.factory.createVariableStatement(
+        undefined,
+        ts.factory.createVariableDeclarationList(
+          [ts.factory.createVariableDeclaration(id, undefined, type, initializer)],
+          ts.NodeFlags.Const,
+        ),
+      ),
+      ts.factory.createTypeAliasDeclaration(undefined, id, undefined, ts.factory.createTypeQueryNode(id)),
+    ];
+  }
+
+  protected abstract [$processDeclaration](): readonly Statement[];
 }
 
 export class EntityClassModelProcessor extends EntityModelProcessor {
   readonly #component: Schema;
   readonly #context: Context;
-  readonly #fullyQualifiedName: string;
-  readonly #getPropertyModelSymbol: Identifier;
-  readonly #makeObjectEmptyValueCreator: Identifier;
 
   constructor(name: string, component: Schema, context: Context) {
     super(name, true);
 
     this.#component = component;
     this.#context = context;
-    this.#fullyQualifiedName = name;
-
-    this.#getPropertyModelSymbol = this[$dependencies].imports.named.add('@vaadin/hilla-lit-form', '_getPropertyModel');
-    this.#makeObjectEmptyValueCreator = this[$dependencies].imports.named.add(
-      '@vaadin/hilla-lit-form',
-      'makeObjectEmptyValueCreator',
-    );
   }
 
-  protected [$processDeclaration](): ClassDeclaration | undefined {
+  protected [$processDeclaration](): readonly Statement[] {
     const { logger } = this.#context.owner;
 
     let entitySchema = this.#component;
-    let parent;
+    let builder: Expression | undefined;
 
     if (isComposedSchema(this.#component)) {
       const decomposed = decomposeSchema(this.#component);
@@ -129,87 +132,89 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
       if (decomposed.length > 2) {
         logger.debug(
           this.#component,
-          `The schema for a class component ${this.#fullyQualifiedName} has more than two components. This plugin will ignore it.`,
+          `The schema for a class component ${this[$fullyQualifiedName]} has more than two components. This plugin will ignore it.`,
         );
-        return undefined;
+        return [];
       }
 
       const [parentSchema, childSchema] = decomposed;
 
       if (!isReferenceSchema(parentSchema)) {
         logger.debug(parentSchema, 'Only reference schema allowed for parent class');
-        return undefined;
+        return [];
       }
 
       entitySchema = childSchema;
-      parent = this.#processParentClass(parentSchema);
-    } else {
-      parent = importBuiltInFormModel('ObjectModel', this[$dependencies]);
-    }
-
-    return this.#processModelClass(entitySchema, this[$entity].id, parent);
-  }
-
-  #processClassElements({ properties }: ObjectSchema): readonly ClassElement[] {
-    if (!properties) {
-      return [];
-    }
-
-    return Object.entries(properties).map(([name, schema]) => {
-      const type = new ModelSchemaTypeProcessor(schema, this[$dependencies]).process();
-      const args = new ModelSchemaExpressionProcessor(schema, this[$dependencies]).process();
-
-      return ts.factory.createGetAccessorDeclaration(
+      builder = ts.factory.createCallExpression(
+        ts.factory.createPropertyAccessExpression(importM(this[$dependencies]), 'extend'),
         undefined,
-        ts.factory.createIdentifier(name),
-        [],
-        type,
-        ts.factory.createBlock(
-          [
-            ts.factory.createReturnStatement(
-              ts.factory.createCallExpression(
-                ts.factory.createElementAccessExpression(ts.factory.createThis(), this.#getPropertyModelSymbol),
-                undefined,
-                [ts.factory.createStringLiteral(name), createModelBuildingCallback(type.typeName as Identifier, args)],
-              ),
-            ),
-          ],
-          true,
-        ),
+        [this.#processParentClass(parentSchema)],
       );
-    });
+    }
+
+    return this.#processModelClass(entitySchema, builder);
   }
 
-  #processModelClass(schema: Schema, entity: Identifier, parent: Identifier): ClassDeclaration | undefined {
+  #processModelClass(schema: Schema, base: Expression | undefined): readonly Statement[] {
     const { logger } = this.#context.owner;
 
     if (!isObjectSchema(schema)) {
-      logger.debug(schema, `Component is not an object: ${this.#fullyQualifiedName}`);
-      return undefined;
+      logger.debug(schema, `Component is not an object: ${this[$fullyQualifiedName]}`);
+      return [];
     }
 
-    const typeT = ts.factory.createIdentifier('T');
-    const modelTypeParameters = ts.factory.createTypeParameterDeclaration(
-      undefined,
-      typeT,
-      ts.factory.createTypeReferenceNode(entity),
-      ts.factory.createTypeReferenceNode(entity),
+    const entity = this[$entity].id;
+    const name = simplifyFullyQualifiedName(this[$fullyQualifiedName]);
+
+    // `m.object(name)` starts a model, `m.extend(Parent).object(name)` a model
+    // that inherits the properties of another one
+    let expression: Expression = ts.factory.createCallExpression(
+      ts.factory.createPropertyAccessExpression(base ?? importM(this[$dependencies]), 'object'),
+      [ts.factory.createTypeReferenceNode(entity)],
+      [ts.factory.createStringLiteral(name)],
     );
 
-    return ts.factory.createClassDeclaration(
-      undefined,
-      this[$model].id,
-      [modelTypeParameters],
-      [
-        ts.factory.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, [
-          ts.factory.createExpressionWithTypeArguments(parent, [ts.factory.createTypeReferenceNode(typeT)]),
+    expression = this.#processProperties(schema).reduce(
+      (chain, [property, model]) =>
+        ts.factory.createCallExpression(ts.factory.createPropertyAccessExpression(chain, 'property'), undefined, [
+          ts.factory.createStringLiteral(property),
+          model,
         ]),
-      ],
-      [
-        createEmptyValueMaker(this.#makeObjectEmptyValueCreator, this[$model].id),
-        ...this.#processClassElements(schema),
-      ],
+      expression,
     );
+
+    expression = ts.factory.createCallExpression(
+      ts.factory.createPropertyAccessExpression(expression, 'build'),
+      undefined,
+      [],
+    );
+
+    return this[$declare](expression, this.#createTypeAnnotation(entity));
+  }
+
+  /**
+   * Models that refer to one another cannot have their type inferred, as it
+   * would refer to itself through the other one. Only those get an explicit
+   * annotation, so that every other model keeps its properties navigable.
+   */
+  #createTypeAnnotation(entity: Identifier): ts.TypeNode | undefined {
+    return this.#context.cycles.isMutuallyReferencing(this[$fullyQualifiedName])
+      ? ts.factory.createTypeReferenceNode(importModel('ObjectModel', this[$dependencies]), [
+          ts.factory.createTypeReferenceNode(entity),
+        ])
+      : undefined;
+  }
+
+  #processProperties({ properties }: ObjectSchema): ReadonlyArray<readonly [string, Expression]> {
+    return Object.entries(properties ?? {}).map(([name, schema]) => [
+      name,
+      new ModelSchemaExpressionProcessor(
+        schema,
+        this[$dependencies],
+        this[$fullyQualifiedName],
+        this.#context.cycles,
+      ).process(),
+    ]);
   }
 
   #processParentClass(schema: ReferenceSchema): Identifier {
@@ -220,7 +225,7 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
     const modelPath = paths.createRelativePath(`${path}Model`);
     const modelSpecifier = `${specifier}Model`;
 
-    return imports.default.add(modelPath, modelSpecifier, false);
+    return imports.default.getIdentifier(modelPath) ?? imports.default.add(modelPath, modelSpecifier, false);
   }
 }
 
@@ -229,35 +234,15 @@ export class EntityEnumModelProcessor extends EntityModelProcessor {
     super(name, false);
   }
 
-  protected [$processDeclaration](): ClassDeclaration {
-    const enumModel = importBuiltInFormModel('EnumModel', this[$dependencies]);
-    const enumPropertySymbol = this[$dependencies].imports.named.add('@vaadin/hilla-lit-form', '_enum');
-    const makeEnumEmptyValueCreator = this[$dependencies].imports.named.add(
-      '@vaadin/hilla-lit-form',
-      'makeEnumEmptyValueCreator',
-    );
+  protected [$processDeclaration](): readonly Statement[] {
+    const name = simplifyFullyQualifiedName(this[$fullyQualifiedName]);
 
-    return ts.factory.createClassDeclaration(
-      undefined,
-      this[$model].id,
-      undefined,
-      [
-        ts.factory.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, [
-          ts.factory.createExpressionWithTypeArguments(enumModel, [
-            ts.factory.createTypeQueryNode(this[$entity].id, undefined),
-          ]),
-        ]),
-      ],
-      [
-        createEmptyValueMaker(makeEnumEmptyValueCreator, this[$model].id),
-        ts.factory.createPropertyDeclaration(
-          [ts.factory.createModifier(ts.SyntaxKind.ReadonlyKeyword)],
-          ts.factory.createComputedPropertyName(enumPropertySymbol),
-          undefined,
-          undefined,
-          this[$entity].id,
-        ),
-      ],
+    return this[$declare](
+      ts.factory.createCallExpression(
+        ts.factory.createPropertyAccessExpression(importM(this[$dependencies]), 'enum'),
+        undefined,
+        [this[$entity].id, ts.factory.createStringLiteral(name)],
+      ),
     );
   }
 }

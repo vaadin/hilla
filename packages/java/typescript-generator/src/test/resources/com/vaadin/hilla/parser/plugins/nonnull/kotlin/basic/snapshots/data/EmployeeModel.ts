@@ -1,7 +1,9 @@
-import { _getPropertyModel, makeObjectEmptyValueCreator } from "@vaadin/hilla-lit-form";
+import m, { ObjectModel } from "@vaadin/hilla-models";
 import type Employee from "./Employee.js";
 import PersonModel from "./PersonModel.js";
-class EmployeeModel<T extends Employee = Employee> extends PersonModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(EmployeeModel);
-}
+const EmployeeModel: ObjectModel<Employee> = m
+  .extend(PersonModel)
+  .object<Employee>("Employee")
+  .build();
+type EmployeeModel = typeof EmployeeModel;
 export default EmployeeModel;

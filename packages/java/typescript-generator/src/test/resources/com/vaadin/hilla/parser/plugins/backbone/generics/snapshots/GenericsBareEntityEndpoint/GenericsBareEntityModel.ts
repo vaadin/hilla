@@ -1,9 +1,8 @@
-import { _getPropertyModel, makeObjectEmptyValueCreator, ObjectModel, StringModel } from "@vaadin/hilla-lit-form";
+import m, { StringModel } from "@vaadin/hilla-models";
 import type GenericsBareEntity from "./GenericsBareEntity.js";
-class GenericsBareEntityModel<T extends GenericsBareEntity = GenericsBareEntity> extends ObjectModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(GenericsBareEntityModel);
-    get bareEntityProperty(): StringModel {
-        return this[_getPropertyModel]("bareEntityProperty", (parent, key) => new StringModel(parent, key, true, { meta: { javaType: "java.lang.String" } }));
-    }
-}
+const GenericsBareEntityModel = m
+  .object<GenericsBareEntity>("GenericsBareEntity")
+  .property("bareEntityProperty", m.meta(m.optional(StringModel), { jvmType: "java.lang.String" }))
+  .build();
+type GenericsBareEntityModel = typeof GenericsBareEntityModel;
 export default GenericsBareEntityModel;

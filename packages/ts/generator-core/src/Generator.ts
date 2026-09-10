@@ -1,5 +1,6 @@
 import SwaggerParser from '@apidevtools/swagger-parser';
 import ts from '@typescript/typescript6';
+import formatMemberChains from '@vaadin/hilla-generator-utils/formatMemberChains.js';
 import type LoggerFactory from '@vaadin/hilla-generator-utils/LoggerFactory.js';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { PluginConstructor } from './Plugin.js';
@@ -44,6 +45,8 @@ export default class Generator {
     this.#logger.global.debug('Printing files');
     const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
 
-    return storage.sources.map((file) => new File([printer.printFile(file)], file.fileName));
+    return storage.sources.map(
+      (file) => new File([formatMemberChains(printer.printFile(file), file.fileName)], file.fileName),
+    );
   }
 }

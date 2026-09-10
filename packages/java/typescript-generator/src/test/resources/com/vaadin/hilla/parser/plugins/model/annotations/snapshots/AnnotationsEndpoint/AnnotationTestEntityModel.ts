@@ -1,31 +1,16 @@
-import { _getPropertyModel, ArrayModel, makeObjectEmptyValueCreator, NumberModel, ObjectModel, StringModel } from "@vaadin/hilla-lit-form";
+import m, { NumberModel, StringModel } from "@vaadin/hilla-models";
 import type AnnotationTestEntity from "./AnnotationTestEntity.js";
 import NestedEntityModel from "./NestedEntityModel.js";
-class AnnotationTestEntityModel<T extends AnnotationTestEntity = AnnotationTestEntity> extends ObjectModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(AnnotationTestEntityModel);
-    get id(): NumberModel {
-        return this[_getPropertyModel]("id", (parent, key) => new NumberModel(parent, key, true, { meta: { annotations: [{ name: "jakarta.persistence.Id" }], javaType: "java.lang.Long" } }));
-    }
-    get version(): NumberModel {
-        return this[_getPropertyModel]("version", (parent, key) => new NumberModel(parent, key, true, { meta: { annotations: [{ name: "jakarta.persistence.Version" }], javaType: "int" } }));
-    }
-    get oneToOne(): NestedEntityModel {
-        return this[_getPropertyModel]("oneToOne", (parent, key) => new NestedEntityModel(parent, key, true, { meta: { annotations: [{ name: "jakarta.persistence.OneToOne" }] } }));
-    }
-    get oneToMany(): ArrayModel<NestedEntityModel> {
-        return this[_getPropertyModel]("oneToMany", (parent, key) => new ArrayModel(parent, key, true, (parent, key) => new NestedEntityModel(parent, key, true), { meta: { annotations: [{ name: "jakarta.persistence.OneToMany" }], javaType: "java.util.List" } }));
-    }
-    get manyToOne(): NestedEntityModel {
-        return this[_getPropertyModel]("manyToOne", (parent, key) => new NestedEntityModel(parent, key, true, { meta: { annotations: [{ name: "jakarta.persistence.ManyToOne" }] } }));
-    }
-    get manyToMany(): ArrayModel<NestedEntityModel> {
-        return this[_getPropertyModel]("manyToMany", (parent, key) => new ArrayModel(parent, key, true, (parent, key) => new NestedEntityModel(parent, key, true), { meta: { annotations: [{ name: "jakarta.persistence.ManyToMany" }], javaType: "java.util.List" } }));
-    }
-    get manyToManyWithFetchType(): ArrayModel<NestedEntityModel> {
-        return this[_getPropertyModel]("manyToManyWithFetchType", (parent, key) => new ArrayModel(parent, key, true, (parent, key) => new NestedEntityModel(parent, key, true), { meta: { annotations: [{ name: "jakarta.persistence.ManyToMany" }], javaType: "java.util.List" } }));
-    }
-    get name(): StringModel {
-        return this[_getPropertyModel]("name", (parent, key) => new StringModel(parent, key, true, { meta: { javaType: "java.lang.String" } }));
-    }
-}
+const AnnotationTestEntityModel = m
+  .object<AnnotationTestEntity>("AnnotationTestEntity")
+  .property("id", m.meta(m.optional(NumberModel), { annotations: [{ jvmType: "jakarta.persistence.Id" }], jvmType: "java.lang.Long" }))
+  .property("version", m.meta(m.optional(NumberModel), { annotations: [{ jvmType: "jakarta.persistence.Version" }], jvmType: "int" }))
+  .property("oneToOne", m.meta(m.optional(NestedEntityModel), { annotations: [{ jvmType: "jakarta.persistence.OneToOne" }] }))
+  .property("oneToMany", m.meta(m.optional(m.array(m.optional(NestedEntityModel))), { annotations: [{ jvmType: "jakarta.persistence.OneToMany" }], jvmType: "java.util.List" }))
+  .property("manyToOne", m.meta(m.optional(NestedEntityModel), { annotations: [{ jvmType: "jakarta.persistence.ManyToOne" }] }))
+  .property("manyToMany", m.meta(m.optional(m.array(m.optional(NestedEntityModel))), { annotations: [{ jvmType: "jakarta.persistence.ManyToMany" }], jvmType: "java.util.List" }))
+  .property("manyToManyWithFetchType", m.meta(m.optional(m.array(m.optional(NestedEntityModel))), { annotations: [{ jvmType: "jakarta.persistence.ManyToMany", attributes: { fetch: "EAGER" } }], jvmType: "java.util.List" }))
+  .property("name", m.meta(m.optional(StringModel), { jvmType: "java.lang.String" }))
+  .build();
+type AnnotationTestEntityModel = typeof AnnotationTestEntityModel;
 export default AnnotationTestEntityModel;
