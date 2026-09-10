@@ -258,11 +258,11 @@ public final class EndpointWriter {
                 + imports.importNamed(HILLA_FRONTEND, INIT_TYPE, true));
         // The caller of a method sharing a value can say which value to start
         // from, which a number signal decides itself
-        case VALUE_SIGNAL -> declared.add(ownName(method, OPTIONS_PARAMETER)
-                + "?: "
-                + imports.importNamed(signalsModule(method),
-                        SIGNAL_OPTIONS_TYPE, true)
-                + "<" + types.write(sharedValue(method)) + ">");
+        case VALUE_SIGNAL ->
+            declared.add(ownName(method, OPTIONS_PARAMETER) + "?: "
+                    + imports.importNamed(signalsModule(method),
+                            SIGNAL_OPTIONS_TYPE, true)
+                    + "<" + types.write(sharedValue(method)) + ">");
         default -> {
         }
         }
