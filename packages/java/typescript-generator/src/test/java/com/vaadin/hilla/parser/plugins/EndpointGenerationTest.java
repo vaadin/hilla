@@ -15,6 +15,7 @@
  */
 package com.vaadin.hilla.parser.plugins;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -34,6 +35,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import com.vaadin.hilla.generator.typescript.GeneratedFile;
+import com.vaadin.hilla.generator.typescript.TypeScriptWriter;
 import com.vaadin.hilla.parser.testutils.AbstractFullStackTest;
 import com.vaadin.hilla.parser.testutils.ResourceLoader;
 
@@ -102,6 +105,34 @@ public class EndpointGenerationTest extends AbstractFullStackTest {
                             endpointsOf(testCase, endpoints, withTestClass)))
                     .toList().stream();
         }
+    }
+
+    /**
+     * Verifies that the writers in Java would put the same files in the same
+     * places as the pipeline in use, for every case there is, which is what the
+     * generation has to do before it can replace it.
+     *
+     * <p>
+     * Only the locations are compared here: what is in each file is verified by
+     * the tests of the writers, against the same cases.
+     */
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("should_GenerateTheExpectedTypeScript")
+    public void should_WriteTheSameFilesFromJava(String testCase,
+            List<Class<?>> endpoints) {
+        var generator = generator(endpoints.toArray(Class<?>[]::new))
+                .withSnapshotsIn(testCase);
+
+        var written = new TypeScriptWriter().write(generator.parseGeneration())
+                .stream().map(GeneratedFile::path)
+                // The client is the same for every endpoint, so it is not
+                // among the snapshots of a case
+                .filter(path -> !CLIENT_FILE.equals(path))
+                .map(path -> toSnapshotPath(generator, path)).sorted().toList();
+
+        assertEquals(
+                readSnapshots(generator).keySet().stream().sorted().toList(),
+                written);
     }
 
     /**

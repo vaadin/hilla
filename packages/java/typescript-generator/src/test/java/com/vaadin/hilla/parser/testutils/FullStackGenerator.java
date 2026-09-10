@@ -40,6 +40,7 @@ import com.vaadin.hilla.EndpointSubscription;
 import com.vaadin.hilla.generator.model.EndpointModel;
 import com.vaadin.hilla.generator.model.EndpointModelPlugin;
 import com.vaadin.hilla.generator.model.EntityModel;
+import com.vaadin.hilla.generator.model.Generation;
 import com.vaadin.hilla.generator.model.UnionModel;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.core.Plugin;
@@ -180,6 +181,15 @@ public final class FullStackGenerator {
      */
     public Map<String, String> generate() {
         return generateTypeScript(parse());
+    }
+
+    /**
+     * Runs the Java part of the pipeline and returns everything one generation
+     * of TypeScript is written from.
+     */
+    public Generation parseGeneration() {
+        parse();
+        return modelPlugin.getGeneration();
     }
 
     /**
