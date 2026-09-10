@@ -87,6 +87,19 @@ import * as FooEndpoint from "Frontend/generated/FooEndpoint";`;
       expect(code).to.contain('import { Model as Model_1 } from "bar";');
     });
 
+    it('should keep the exported name of an aliased specifier through a round trip', () => {
+      const code = `import { Model as Model_1 } from "foo";`;
+
+      manager.fromCode(ts.createSourceFile('foo.ts', code, ts.ScriptTarget.ESNext, true, ts.ScriptKind.TS));
+
+      const printer = ts.createPrinter();
+
+      expect(printer.printFile(createSourceFile(manager.toCode(), 'foo.ts'))).to.contain(
+        'import { Model as Model_1 } from "foo";',
+      );
+      expect(manager.named.getIdentifier('foo', 'Model')?.text).to.equal('Model_1');
+    });
+
     it('should not hand out a name that the parsed code already uses', () => {
       const code = `import { Model } from "foo";
 const Sample = 1;`;
