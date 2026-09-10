@@ -10,7 +10,7 @@ interface Person extends AbstractEntity {
     luckyNumber: number;
     addresses: Record<string, Address>;
     profilePicture?: string;
-    age?: number;
     fullName: string;
+    age?: number;
 }
 export default Person;
