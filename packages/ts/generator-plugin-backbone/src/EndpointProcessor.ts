@@ -1,4 +1,4 @@
-import ts, { type SourceFile, type Statement } from '@typescript/typescript6';
+import type { SourceFile, Statement } from '@typescript/typescript6';
 import type Plugin from '@vaadin/hilla-generator-core/Plugin.js';
 import type { SharedStorage, TransferTypes } from '@vaadin/hilla-generator-core/SharedStorage.js';
 import ClientPlugin from '@vaadin/hilla-generator-plugin-client';
@@ -19,12 +19,15 @@ export default class EndpointProcessor {
     const endpoint = new EndpointProcessor(name, methods, storage, owner);
     const { exports, imports, names, paths } = endpoint.#dependencies;
 
-    // Claim declared names and parameters before imports. This ensures that
-    // imports are suffixed on collisions and that method identifiers are
-    // preserved as-is.
-    for (const [method, pathItem] of methods) {
-      exports.named.add(method, false, ts.factory.createIdentifier(method));
+    // Claim declared names and parameters before imports, so that it is an
+    // import that gets suffixed on a collision. The method names go first: the
+    // push and signals plugins look the generated functions up by name, so a
+    // method should not be suffixed because of another method's parameter.
+    for (const method of methods.keys()) {
+      exports.named.add(method);
+    }
 
+    for (const pathItem of methods.values()) {
       // only the names are of interest here, so the schemas are left alone
       const { requestBody } = pathItem[OpenAPIV3.HttpMethods.POST]!;
       const schema = requestBody ? owner.resolver.resolve(requestBody).content[defaultMediaType].schema : undefined;
