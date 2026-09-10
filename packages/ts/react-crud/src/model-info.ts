@@ -10,7 +10,7 @@ import {
   ObjectModel as BinderObjectModel,
   type ProvisionalModel,
 } from '@vaadin/hilla-lit-form';
-import {
+import m, {
   type Annotation,
   type AnnotationValue,
   BooleanModel,
@@ -232,11 +232,13 @@ export function getDefaultProperties(modelInfo: ModelInfo): PropertyInfo[] {
         }
         return prop;
       })
-      // Exclude properties that have an unknown type, or are annotated with id
+      // Exclude properties that have an unknown type, hold a value the user
+      // cannot choose such as a type discriminator, or are annotated with id
       // and version
       .filter(
         (prop) =>
           !!prop.type &&
+          !(prop.model instanceof Model && m.isLiteral(prop.model)) &&
           !(
             hasAnnotation(prop.meta, 'jakarta.persistence.Id') ||
             hasAnnotation(prop.meta, 'jakarta.persistence.Version')

@@ -1,10 +1,4 @@
-import ts, {
-  type Expression,
-  type Identifier,
-  type PropertyAssignment,
-  type TypeNode,
-  type TypeReferenceNode,
-} from '@typescript/typescript6';
+import ts, { type Expression, type TypeNode } from '@typescript/typescript6';
 import {
   type ArraySchema,
   type BooleanSchema,
@@ -28,9 +22,15 @@ import {
   type StringSchema,
 } from '@vaadin/hilla-generator-core/Schema.js';
 import type DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
-import { process } from './MetadataProcessor.js';
-import { createModelBuildingCallback, importBuiltInFormModel } from './utils.js';
-import { hasValidationConstraints, ValidationConstraintProcessor } from './ValidationConstraintProcessor.js';
+import { type Cycles, schemaName } from './cycles.js';
+import { process as processMetadata } from './MetadataProcessor.js';
+import { createModelCall, createModelProvider, importM, importModel } from './utils.js';
+import {
+  hasValidationConstraints,
+  isApplicable,
+  type ModelKind,
+  ValidationConstraintProcessor,
+} from './ValidationConstraintProcessor.js';
 
 const $dependencies = Symbol();
 const $processArray = Symbol();
@@ -99,7 +99,11 @@ function handleNullableInternalType(schema: Schema, typeNode: TypeNode): TypeNod
     : typeNode;
 }
 
-class ModelSchemaInternalTypeProcessor extends ModelSchemaPartProcessor<TypeNode> {
+/**
+ * The raw TypeScript type of a value, needed where the builder cannot infer it
+ * from the model, i.e. the type argument of the object model.
+ */
+export class ModelSchemaInternalTypeProcessor extends ModelSchemaPartProcessor<TypeNode> {
   protected override [$processArray](schema: ArraySchema): TypeNode {
     return ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('ReadonlyArray'), [
       handleNullableInternalType(
@@ -147,159 +151,136 @@ class ModelSchemaInternalTypeProcessor extends ModelSchemaPartProcessor<TypeNode
   }
 }
 
-class ModelSchemaIdentifierProcessor extends ModelSchemaPartProcessor<Identifier> {
-  override [$processArray](_: ArraySchema): Identifier {
-    return importBuiltInFormModel('ArrayModel', this[$dependencies]);
+/**
+ * Builds the model of a property, i.e. the second argument of `.property()`.
+ *
+ * The converters wrap the base model from the inside out: the base is wrapped
+ * by `m.array` or `m.record`, then by `m.optional`, then by `m.constrained` and
+ * finally by `m.meta`.
+ */
+export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<Expression> {
+  readonly #constraints: ValidationConstraintProcessor;
+  readonly #cycles: Cycles;
+  readonly #owner: string;
+
+  constructor(schema: Schema, dependencies: DependencyManager, owner: string, cycles: Cycles) {
+    super(schema, dependencies);
+    this.#owner = owner;
+    this.#cycles = cycles;
+    this.#constraints = new ValidationConstraintProcessor((name) => importModel(name, dependencies));
   }
 
-  override [$processBoolean](_: BooleanSchema): Identifier {
-    return importBuiltInFormModel('BooleanModel', this[$dependencies]);
+  override process(): Expression {
+    const originalSchema = this[$originalSchema];
+    let expression = super.process();
+
+    if (isNullableSchema(originalSchema)) {
+      expression = this.#call('optional', [expression]);
+    }
+
+    const constraints = this.#createConstraints(originalSchema);
+
+    if (constraints.length > 0) {
+      expression = this.#call('constrained', [expression, ...constraints]);
+    }
+
+    const metadata = processMetadata(originalSchema);
+
+    if (metadata) {
+      expression = this.#call('meta', [expression, metadata]);
+    }
+
+    return expression;
   }
 
-  override [$processNumber](_: IntegerSchema | NumberSchema): Identifier {
-    return importBuiltInFormModel('NumberModel', this[$dependencies]);
+  protected override [$processArray](schema: ArraySchema): Expression {
+    return this.#call('array', [this.#nested(schema.items)]);
   }
 
-  override [$processRecord](_: MapSchema): Identifier {
-    return importBuiltInFormModel('ObjectModel', this[$dependencies]);
+  protected override [$processBoolean](_: BooleanSchema): Expression {
+    return importModel('BooleanModel', this[$dependencies]);
   }
 
-  override [$processReference](schema: ReferenceSchema): Identifier {
+  protected override [$processNumber](_: IntegerSchema | NumberSchema): Expression {
+    return importModel('NumberModel', this[$dependencies]);
+  }
+
+  protected override [$processRecord]({ additionalProperties: props }: MapSchema): Expression {
+    const value = typeof props === 'boolean' ? importModel('Model', this[$dependencies]) : this.#nested(props);
+
+    return this.#call('record', [value]);
+  }
+
+  protected override [$processReference](schema: ReferenceSchema): Expression {
     const { imports, paths } = this[$dependencies];
+
+    const target = schemaName(schema);
+
+    // a property of the very type that declares it resolves against the owner
+    // model, which needs no import and, unlike a deferred reference, keeps the
+    // type of the model inferable
+    if (target === this.#owner) {
+      return ts.factory.createPropertyAccessExpression(importM(this[$dependencies]), 'self');
+    }
 
     const name = `${convertReferenceSchemaToSpecifier(schema)}Model`;
     const path = paths.createRelativePath(`${convertReferenceSchemaToPath(schema)}Model`);
+    const model = imports.default.getIdentifier(path) ?? imports.default.add(path, name);
 
-    return imports.default.getIdentifier(path) ?? imports.default.add(path, name);
+    return this.#cycles.isDeferred(this.#owner, target) ? this.#call('lazy', [createModelProvider(model)]) : model;
   }
 
-  override [$processString](_: StringSchema): Identifier {
-    return importBuiltInFormModel('StringModel', this[$dependencies]);
+  protected override [$processString](_: StringSchema): Expression {
+    return importModel('StringModel', this[$dependencies]);
   }
 
-  override [$processUnknown](_: Schema): Identifier {
-    return importBuiltInFormModel('ObjectModel', this[$dependencies]);
-  }
-}
-
-export class ModelSchemaTypeProcessor extends ModelSchemaPartProcessor<TypeReferenceNode> {
-  readonly #id: ModelSchemaIdentifierProcessor;
-
-  constructor(schema: Schema, dependencies: DependencyManager) {
-    super(schema, dependencies);
-    this.#id = new ModelSchemaIdentifierProcessor(schema, dependencies);
+  protected override [$processUnknown](_: Schema): Expression {
+    return importModel('Model', this[$dependencies]);
   }
 
-  protected override [$processArray](schema: ArraySchema): TypeReferenceNode {
-    return ts.factory.createTypeReferenceNode(this.#id[$processArray](schema), [
-      new ModelSchemaTypeProcessor(schema.items, this[$dependencies]).process(),
-    ]);
+  #call(name: string, args: readonly Expression[]): Expression {
+    return createModelCall(this[$dependencies], name, args);
   }
 
-  protected override [$processBoolean](schema: BooleanSchema): TypeReferenceNode {
-    return ts.factory.createTypeReferenceNode(this.#id[$processBoolean](schema));
+  #nested(schema: Schema): Expression {
+    return new ModelSchemaExpressionProcessor(schema, this[$dependencies], this.#owner, this.#cycles).process();
   }
 
-  protected override [$processNumber](schema: IntegerSchema | NumberSchema): TypeReferenceNode {
-    return ts.factory.createTypeReferenceNode(this.#id[$processNumber](schema));
-  }
-
-  protected override [$processRecord](schema: MapSchema): TypeReferenceNode {
-    return ts.factory.createTypeReferenceNode(this.#id[$processRecord](schema), [
-      new ModelSchemaInternalTypeProcessor(schema, this[$dependencies]).process(),
-    ]);
-  }
-
-  protected override [$processReference](schema: ReferenceSchema): TypeReferenceNode {
-    return ts.factory.createTypeReferenceNode(this.#id[$processReference](schema));
-  }
-
-  protected override [$processString](schema: StringSchema): TypeReferenceNode {
-    return ts.factory.createTypeReferenceNode(this.#id[$processString](schema));
-  }
-
-  protected override [$processUnknown](schema: Schema): TypeReferenceNode {
-    return ts.factory.createTypeReferenceNode(this.#id[$processUnknown](schema));
-  }
-}
-
-export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<readonly Expression[]> {
-  readonly #validationConstraintProcessor: ValidationConstraintProcessor;
-
-  constructor(schema: Schema, dependencies: DependencyManager) {
-    super(schema, dependencies);
-    this.#validationConstraintProcessor = new ValidationConstraintProcessor((name) =>
-      importBuiltInFormModel(name, dependencies),
-    );
-  }
-
-  override process(): readonly ts.Expression[] {
-    const originalSchema = this[$originalSchema];
-
-    let result = super.process();
-
-    const modelOptionsProperties = [
-      this.#createValidatorsProperty(originalSchema),
-      ModelSchemaExpressionProcessor.#createMetadataProperty(originalSchema),
-    ].filter(Boolean) as PropertyAssignment[];
-
-    if (modelOptionsProperties.length > 0) {
-      const optionsObject = ts.factory.createObjectLiteralExpression(modelOptionsProperties);
-
-      result = [...result, optionsObject];
-    }
-
-    return [isNullableSchema(originalSchema) ? ts.factory.createTrue() : ts.factory.createFalse(), ...result];
-  }
-
-  protected override [$processArray](schema: ArraySchema): readonly Expression[] {
-    const model = new ModelSchemaIdentifierProcessor(schema.items, this[$dependencies]).process();
-
-    return [
-      createModelBuildingCallback(
-        model,
-        new ModelSchemaExpressionProcessor(schema.items, this[$dependencies]).process(),
-      ),
-    ];
-  }
-
-  protected override [$processBoolean](_: BooleanSchema): readonly Expression[] {
-    return [];
-  }
-
-  protected override [$processNumber](_: IntegerSchema | NumberSchema): readonly Expression[] {
-    return [];
-  }
-
-  protected override [$processRecord](_: MapSchema): readonly Expression[] {
-    return [];
-  }
-
-  protected override [$processReference](_: ReferenceSchema): readonly Expression[] {
-    return [];
-  }
-
-  protected override [$processString](_: StringSchema): readonly Expression[] {
-    return [];
-  }
-
-  protected override [$processUnknown](_: Schema): readonly Expression[] {
-    return [];
-  }
-
-  #createValidatorsProperty(schema: Schema): PropertyAssignment | null {
+  #createConstraints(schema: Schema): readonly Expression[] {
     if (!hasValidationConstraints(schema)) {
-      return null;
+      return [];
     }
 
-    const constraints = schema['x-validation-constraints'].map((constraint) =>
-      this.#validationConstraintProcessor.process(constraint),
-    );
-    return ts.factory.createPropertyAssignment('validators', ts.factory.createArrayLiteralExpression(constraints));
+    const kind = this.#modelKind();
+
+    return schema['x-validation-constraints']
+      .filter((constraint) => isApplicable(constraint, kind))
+      .map((constraint) => this.#constraints.process(constraint));
   }
 
-  static #createMetadataProperty(schema: Schema): PropertyAssignment | null {
-    const metadata = process(schema);
-    return metadata ? ts.factory.createPropertyAssignment('meta', metadata) : null;
+  #modelKind(): ModelKind {
+    const schema = this[$schema];
+
+    if (isArraySchema(schema)) {
+      return 'array';
+    }
+
+    if (isMapSchema(schema)) {
+      return 'record';
+    }
+
+    if (isNumberSchema(schema) || isIntegerSchema(schema)) {
+      return 'number';
+    }
+
+    if (isBooleanSchema(schema)) {
+      return 'boolean';
+    }
+
+    if (isStringSchema(schema)) {
+      return 'string';
+    }
+
+    return 'object';
   }
 }

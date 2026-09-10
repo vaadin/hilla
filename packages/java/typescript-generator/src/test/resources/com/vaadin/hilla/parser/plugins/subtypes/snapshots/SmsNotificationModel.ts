@@ -1,10 +1,10 @@
-import { _getPropertyModel, makeObjectEmptyValueCreator, StringModel } from "@vaadin/hilla-lit-form";
+import m, { StringModel } from "@vaadin/hilla-models";
 import NotificationModel from "./NotificationModel.js";
 import type SmsNotification from "./SmsNotification.js";
-class SmsNotificationModel<T extends SmsNotification = SmsNotification> extends NotificationModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(SmsNotificationModel);
-    get number(): StringModel {
-        return this[_getPropertyModel]("number", (parent, key) => new StringModel(parent, key, true, { meta: { javaType: "java.lang.String" } }));
-    }
-}
+const SmsNotificationModel = m
+  .extend(NotificationModel)
+  .object<SmsNotification>("SmsNotification")
+  .property("number", m.meta(m.optional(StringModel), { jvmType: "java.lang.String" }))
+  .build();
+type SmsNotificationModel = typeof SmsNotificationModel;
 export default SmsNotificationModel;
