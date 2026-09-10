@@ -136,16 +136,11 @@ public final class EndpointModelPlugin
                     .getName());
 
     /**
-     * What has been built below one node, which the node is built from once the
-     * walk leaves it.
+     * Everything the last run of the parser found, which is what one generation
+     * of TypeScript is written from.
      */
-    private record Frame(Node<?, ?> node, List<TypeModel> types,
-            List<ParameterModel> parameters, Map<String, MethodModel> methods,
-            List<PropertyModel> properties) {
-        Frame(Node<?, ?> node) {
-            this(node, new ArrayList<>(), new ArrayList<>(),
-                    new LinkedHashMap<>(), new ArrayList<>());
-        }
+    public Generation getGeneration() {
+        return new Generation(getEndpoints(), getEntities(), getUnions());
     }
 
     /**
