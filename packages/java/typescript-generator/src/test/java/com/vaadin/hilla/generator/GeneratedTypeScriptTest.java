@@ -256,6 +256,14 @@ public class GeneratedTypeScriptTest {
                           });
                         }
 
+                        export function pending(options?: SignalMethodOptions<string | undefined>): ValueSignal<string | undefined> {
+                          return new ValueSignal(options?.defaultValue, {
+                            client: client,
+                            endpoint: 'SignalsEndpoint',
+                            method: 'pending',
+                          });
+                        }
+
                         export function sample(
                           detailed: boolean,
                           options?: SignalMethodOptions<Sample | undefined>,
@@ -278,19 +286,6 @@ public class GeneratedTypeScriptTest {
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpoint).content());
-    }
-
-    /**
-     * The annotation the fixtures say with that a value is always there, which
-     * is one of the application rather than one the parser knows by default.
-     */
-    private static NonnullPlugin alwaysThere() {
-        var plugin = new NonnullPlugin();
-        plugin.setConfiguration(new NonnullPluginConfig(Set
-                .of(new AnnotationMatcher(Nonnull.class.getName(), false, 10)),
-                null));
-
-        return plugin;
     }
 
     @Test
@@ -876,14 +871,34 @@ public class GeneratedTypeScriptTest {
                         "Nothing was generated for " + javaClass));
     }
 
-    private static List<EndpointModel> endpointsOf(Class<?> endpoint) {
-        return new FullStackGenerator(GeneratedTypeScriptTest.class, endpoint)
-                .parseModel();
+    /**
+     * @param configured
+     *            the plugins of the chain which the test configures itself,
+     *            such as the one deciding what is always there
+     */
+    private static List<EndpointModel> endpointsOf(Class<?> endpoint,
+            Plugin... configured) {
+        var generator = new FullStackGenerator(GeneratedTypeScriptTest.class,
+                endpoint);
+
+        for (var plugin : configured) {
+            generator.withPlugin(plugin);
+        }
+
+        return generator.parseModel();
     }
 
-    private static List<EndpointModel> endpointsOf(Class<?> endpoint,
-            Plugin configured) {
-        return new FullStackGenerator(GeneratedTypeScriptTest.class, endpoint)
-                .withPlugin(configured).parseModel();
+    /**
+     * The annotation the fixtures say with that a value is always there, which
+     * is one of the application rather than one the parser knows by default.
+     */
+    private static NonnullPlugin alwaysThere() {
+        var plugin = new NonnullPlugin();
+        plugin.setConfiguration(new NonnullPluginConfig(Set
+                .of(new AnnotationMatcher(Nonnull.class.getName(), false, 10)),
+                null));
+
+        return plugin;
     }
+
 }

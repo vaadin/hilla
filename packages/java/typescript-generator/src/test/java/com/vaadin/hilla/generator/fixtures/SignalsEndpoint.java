@@ -55,4 +55,13 @@ public class SignalsEndpoint {
     public SharedValueSignal<SampleEndpoint.@Nonnull Sample> current() {
         return null;
     }
+
+    /**
+     * A signal which is always there, holding a value which is not: whether the
+     * signal can be absent and whether the value can are two questions.
+     */
+    @Nonnull
+    public SharedValueSignal<String> pending() {
+        return null;
+    }
 }
