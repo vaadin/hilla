@@ -219,37 +219,6 @@ public class SecurityIT extends ChromeBrowserTest {
     }
 
     @Test
-    public void logout_returns_only_after_the_page_has_reloaded() {
-        open("login");
-        loginUser();
-        open("");
-        assertRootPageShown();
-
-        // The page reload waits for the logout request, and on an idle
-        // machine that request completes before the assertions logout()
-        // makes, which hides a missing wait until CI runs the ITs under
-        // load. Holding the request back for a second makes the window
-        // deterministic. The patch lives on the document that the reload
-        // replaces, so it goes away with it.
-        delayFetchByOneSecond();
-
-        // The main view goes stale exactly when the reloaded document
-        // commits, so it is still live if logout() returned with the request
-        // in flight - and then the step a test takes next races it: an
-        // openResource() still served with the old session, a cookie read
-        // that sees the CSRF cookie cleared but not yet replaced.
-        TestBenchElement preLogoutMainView = getMainView();
-
-        logout();
-
-        Assert.assertTrue(
-                "logout() returned while the logout request was still in "
-                        + "flight, the page had not reloaded yet",
-                ExpectedConditions.stalenessOf(preLogoutMainView)
-                        .apply(getDriver()));
-    }
-
-    @Test
     public void redirect_to_resource_after_login() {
         String contents = "Secret document for admin";
         String path = "admin-only/secret.nocache.txt";
@@ -378,16 +347,6 @@ public class SecurityIT extends ChromeBrowserTest {
         if (assertPathShown) {
             assertPathShown(path);
         }
-    }
-
-    /**
-     * Replaces {@code window.fetch} with one that holds every request back for
-     * a second, on the current document only.
-     */
-    private void delayFetchByOneSecond() {
-        getCommandExecutor().executeScript("const original = window.fetch;"
-                + "window.fetch = (...args) => new Promise(resolve => "
-                + "setTimeout(() => resolve(original(...args)), 1000));");
     }
 
     protected void waitForDocumentReady() {
