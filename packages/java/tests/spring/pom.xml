@@ -82,8 +82,8 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>fix-lumo</artifactId>
-            <version>${project.version}</version>
+            <artifactId>vaadin-lumo-theme</artifactId>
+            <version>${vaadin.components.version}</version>
         </dependency>
 
         <dependency>
