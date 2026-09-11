@@ -18,11 +18,18 @@ package com.vaadin.hilla.generator.fixtures;
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 /**
- * Has a method named after a word TypeScript reads as part of the language.
+ * Has a method and a parameter named after a word TypeScript reads as part of
+ * the language, and a method going by the name the first of them would take.
  */
 @Endpoint
 public class ReservedNameEndpoint {
     public void delete(long id) {
+    }
+
+    public void _delete(long id) {
+    }
+
+    public void remove(long delete) {
     }
 
     public long size() {
