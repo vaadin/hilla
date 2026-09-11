@@ -207,4 +207,16 @@ export default class ExportManager implements CodeConvertable<readonly Statement
 
     return result;
   }
+
+  fromCode(source: ts.SourceFile): void {
+    for (const statement of source.statements) {
+      if (ts.isExportDeclaration(statement) && statement.exportClause && ts.isNamedExports(statement.exportClause)) {
+        for (const { isTypeOnly, name, propertyName } of statement.exportClause.elements) {
+          // in an export specifier `propertyName` holds the local binding and
+          // `name` the exported name, the other way around than in an import
+          this.named.add(name.text, isTypeOnly, propertyName ?? name);
+        }
+      }
+    }
+  }
 }
