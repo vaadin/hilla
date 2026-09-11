@@ -26,6 +26,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
@@ -88,8 +89,25 @@ public class SecurityIT extends ChromeBrowserTest {
         assertRootPageShown();
     }
 
+    /**
+     * Clicks the logout button and waits until the page reload that the logout
+     * ends in has replaced the document.
+     * <p>
+     * The wait is anchored on the main view going stale, not on
+     * {@code document.readyState}, because right after the click the old
+     * document still reports {@code complete} and, when the browser already is
+     * on the root page, shows the expected URL and header too. A readiness or
+     * {@link #assertRootPageShown()} check alone is therefore satisfied by the
+     * pre-logout page and returns while the logout request is still in flight,
+     * leaving whatever the test does next - an {@link #openResource(String)}, a
+     * cookie read - to race it. The main view goes stale exactly when the new
+     * document commits.
+     */
     private void clickLogout() {
-        getMainView().$(ButtonElement.class).id("logout").click();
+        TestBenchElement mainView = getMainView();
+        mainView.$(ButtonElement.class).id("logout").click();
+        waitUntil(ExpectedConditions.stalenessOf(mainView), 25);
+        waitForDocumentReady();
     }
 
     /**
@@ -198,6 +216,37 @@ public class SecurityIT extends ChromeBrowserTest {
         navigateTo("private");
         clickLogout();
         assertRootPageShown();
+    }
+
+    @Test
+    public void logout_returns_only_after_the_page_has_reloaded() {
+        open("login");
+        loginUser();
+        open("");
+        assertRootPageShown();
+
+        // The page reload waits for the logout request, and on an idle
+        // machine that request completes before the assertions logout()
+        // makes, which hides a missing wait until CI runs the ITs under
+        // load. Holding the request back for a second makes the window
+        // deterministic. The patch lives on the document that the reload
+        // replaces, so it goes away with it.
+        delayFetchByOneSecond();
+
+        // The main view goes stale exactly when the reloaded document
+        // commits, so it is still live if logout() returned with the request
+        // in flight - and then the step a test takes next races it: an
+        // openResource() still served with the old session, a cookie read
+        // that sees the CSRF cookie cleared but not yet replaced.
+        TestBenchElement preLogoutMainView = getMainView();
+
+        logout();
+
+        Assert.assertTrue(
+                "logout() returned while the logout request was still in "
+                        + "flight, the page had not reloaded yet",
+                ExpectedConditions.stalenessOf(preLogoutMainView)
+                        .apply(getDriver()));
     }
 
     @Test
@@ -329,6 +378,16 @@ public class SecurityIT extends ChromeBrowserTest {
         if (assertPathShown) {
             assertPathShown(path);
         }
+    }
+
+    /**
+     * Replaces {@code window.fetch} with one that holds every request back for
+     * a second, on the current document only.
+     */
+    private void delayFetchByOneSecond() {
+        getCommandExecutor().executeScript("const original = window.fetch;"
+                + "window.fetch = (...args) => new Promise(resolve => "
+                + "setTimeout(() => resolve(original(...args)), 1000));");
     }
 
     protected void waitForDocumentReady() {
