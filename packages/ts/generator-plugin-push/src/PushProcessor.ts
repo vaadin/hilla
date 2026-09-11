@@ -14,6 +14,7 @@ export type EndpointOperations = {
 export class PushProcessor {
   readonly #declaredNames: ReadonlySet<string>;
   readonly #dependencies = new DependencyManager(new PathManager({ extension: '.js' }));
+  readonly #initParameterTypeId: ts.Identifier | undefined;
   readonly #operations: EndpointOperations;
   readonly #source: ts.SourceFile;
   readonly #subscriptionId: () => ts.Identifier;
@@ -29,6 +30,12 @@ export class PushProcessor {
     // a method whose name is a reserved word is declared under a suffixed one
     this.#declaredNames = new Set(
       operations.methodsToPatch.map((method) => exports.named.getIdentifier(method)?.text ?? method),
+    );
+    // the init type is imported under a suffixed name when something else in
+    // the file took the bare one
+    this.#initParameterTypeId = imports.named.getIdentifier(
+      paths.createBareModulePath('@vaadin/hilla-frontend', false),
+      initParameterTypeName,
     );
     this.#subscriptionId = memoize(() =>
       imports.named.add(paths.createBareModulePath('@vaadin/hilla-frontend', false), 'Subscription'),
@@ -80,18 +87,20 @@ export class PushProcessor {
     return createSourceFile(updatedStatements, this.#source.fileName);
   }
 
-  static #doesInitParameterExist(parameters: ts.NodeArray<ts.ParameterDeclaration>): boolean {
+  #doesInitParameterExist(parameters: ts.NodeArray<ts.ParameterDeclaration>): boolean {
     const last = parameters[parameters.length - 1];
     const lastType = last.type as ts.TypeReferenceNode;
-    const lastTypeName = lastType.typeName as ts.Identifier;
 
-    return lastTypeName.text === initParameterTypeName;
+    return lastType.typeName === this.#initParameterTypeId;
   }
 
   static #removeInitImport(importStatement: ts.ImportDeclaration): ts.Statement | undefined {
     const namedImports = importStatement.importClause?.namedBindings;
     if (namedImports && ts.isNamedImports(namedImports)) {
-      const updatedElements = namedImports.elements.filter((element) => element.name.text !== 'EndpointRequestInit');
+      const updatedElements = namedImports.elements.filter(
+        // the local binding may be aliased, so the specifier is what to match
+        (element) => (element.propertyName ?? element.name).text !== initParameterTypeName,
+      );
 
       const updatedImportClause = ts.factory.updateImportClause(
         importStatement.importClause,
@@ -125,7 +134,7 @@ export class PushProcessor {
 
   #updateFunction(declaration: ts.FunctionDeclaration): ts.FunctionDeclaration {
     const { parameters } = declaration;
-    const doesInitParameterExist = PushProcessor.#doesInitParameterExist(parameters);
+    const doesInitParameterExist = this.#doesInitParameterExist(parameters);
 
     return ts.factory.createFunctionDeclaration(
       undefined, // no async

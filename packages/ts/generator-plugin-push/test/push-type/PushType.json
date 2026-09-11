@@ -198,6 +198,9 @@
                 "properties": {
                   "arg": {
                     "type": "string"
+                  },
+                  "EndpointRequestInit": {
+                    "type": "string"
                   }
                 }
               }
