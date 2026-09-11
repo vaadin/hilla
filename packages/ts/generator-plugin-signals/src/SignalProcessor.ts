@@ -1,8 +1,9 @@
-import { dirname, extname } from 'node:path';
+import { basename, dirname, extname } from 'node:path';
 import {
   factory,
   isTypeReferenceNode,
   isIdentifier,
+  type Identifier,
   type ReturnStatement,
   type SourceFile,
   type TypeNode,
@@ -83,7 +84,11 @@ export default class SignalProcessor {
             );
 
             // Calculate the default value for the signal class.
-            const { defaultValue, defaultValueParameter } = this.#createDefaultValue(signalId.text, node.type);
+            const { defaultValue, defaultValueParameter } = this.#createDefaultValue(
+              signalClassName,
+              signalId,
+              node.type,
+            );
 
             // Remove the `async` modifier if present.
             const modifiers = node.modifiers?.filter((m) => m.kind !== SyntaxKind.AsyncKeyword);
@@ -152,18 +157,20 @@ export default class SignalProcessor {
     );
   }
 
-  #createDefaultValue(signalClass: string, returnType?: TypeNode) {
+  // The class name is the one of the signal itself, while the identifier is how
+  // the file refers to it, which carries a suffix on a collision.
+  #createDefaultValue(signalClassName: string, signalId: Identifier, returnType?: TypeNode) {
     const { imports } = this.#dependencyManager;
 
     // If the signal class is a collection signal, we have no default value to
     // generate.
-    if (COLLECTION_SIGNALS.includes(signalClass)) {
+    if (COLLECTION_SIGNALS.includes(signalClassName)) {
       return {};
     }
 
     // If we have the NumberSignal class, we can use `0` as the default.
-    if (!GENERIC_SIGNALS.includes(signalClass)) {
-      return signalClass.startsWith('NumberSignal') ? { defaultValue: '0' } : {};
+    if (!GENERIC_SIGNALS.includes(signalClassName)) {
+      return signalClassName.startsWith('NumberSignal') ? { defaultValue: '0' } : {};
     }
 
     // Extract the generic argument of the signal class to get the default
@@ -171,7 +178,7 @@ export default class SignalProcessor {
     const type = traverse(returnType!, (node) =>
       isTypeReferenceNode(node) &&
       isIdentifier(node.typeName) &&
-      GENERIC_SIGNALS.includes(node.typeName.text) &&
+      node.typeName.text === signalId.text &&
       node.typeArguments
         ? node.typeArguments[0]
         : undefined,
@@ -225,7 +232,9 @@ export default class SignalProcessor {
         throw new Error(`Model not found for ${node.text}`);
       }
 
-      const modelName = `${node.text}Model`;
+      // the path is what the model name comes from: the identifier may carry a
+      // suffix, while the file the entity lives in never does
+      const modelName = `${basename(path, extname(path))}Model`;
       const modelPath = `${dirname(path)}/${modelName}${extname(path)}`;
 
       return imports.default.getIdentifier(modelPath) ?? imports.default.add(modelPath, modelName);
