@@ -12,18 +12,26 @@ import {
   $name,
   type AnyObject,
   type Enum,
+  type Literal,
   $defaultValue,
   $members,
 } from './Model.js';
 import { CoreModelBuilder, ObjectModelBuilder } from './modelBuilders.js';
 import {
   type ArrayModel,
+  BooleanModel,
   EnumModel,
+  type LiteralModel,
+  NumberModel,
   ObjectModel,
+  RecordModel,
+  StringModel,
   type UnionModel,
   $itemModel,
+  $literal,
   type OptionalModel,
   $enum,
+  $valueModel,
 } from './models.js';
 
 const { defineProperty } = Object;
@@ -43,7 +51,48 @@ function getRawValue<T>(model: Model<T>): T | typeof nothing {
   return (model[$owner] as Target<T>).value;
 }
 
-export { self, optional, array, constrained, meta } from './converters.js';
+export { self, optional, array, constrained, meta, lazy } from './converters.js';
+
+/**
+ * Creates a new model of an arbitrary object with string keys, such as a Java
+ * `Map<String, V>`.
+ *
+ * @param valueModel - The model of the record values.
+ */
+export function record<const M extends Model>(this: void, valueModel: M): RecordModel<string, Value<M>, M> {
+  return new CoreModelBuilder<Record<string, Value<M>>>(RecordModel, () => ({}))
+    .name(`Record<string, ${valueModel[$name]}>`)
+    .define($valueModel, { value: valueModel })
+    .build();
+}
+
+/**
+ * Creates a new model pinned to a single value. Use {@link union} to accept
+ * more than one.
+ *
+ * @param value - The only value the model accepts.
+ */
+export function literal<const T extends Literal>(this: void, value: T): LiteralModel<T> {
+  const base = typeof value === 'string' ? StringModel : typeof value === 'number' ? NumberModel : BooleanModel;
+
+  return new CoreModelBuilder<T>(base, () => value).name(JSON.stringify(value)).define($literal, { value }).build();
+}
+
+/**
+ * Checks if the given model accepts a fixed set of values, either because it is
+ * a literal model or a union of them.
+ *
+ * @param model - The model to check.
+ */
+export function isLiteral(this: void, model: Model): boolean {
+  if ($literal in model) {
+    return true;
+  }
+
+  const members = (model as Model<unknown, { readonly [$members]?: readonly Model[] }>)[$members];
+
+  return Array.isArray(members) && members.length > 0 && members.every(isLiteral);
+}
 
 /**
  * Attaches the given model to the target.
