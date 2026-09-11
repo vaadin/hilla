@@ -20,6 +20,11 @@ function personSignalNotNull(options?: SignalMethodOptions<Person>): ValueSignal
     endpoint: "PersonService",
     method: "personSignalNotNull"
 }); }
+function delete_1(options?: SignalMethodOptions<Person | undefined>): ValueSignal<Person | undefined> { return new ValueSignal(options?.defaultValue, {
+    client: client,
+    endpoint: "PersonService",
+    method: "delete"
+}); }
 function personSignalNullable(isAdult: boolean, options?: SignalMethodOptions<Person | undefined>): ValueSignal<Person | undefined> { return new ValueSignal(options?.defaultValue, {
     client: client,
     endpoint: "PersonService",
@@ -38,4 +43,4 @@ function personSignalNonNullWithParams(dummyBoolean: boolean, dummyString: strin
     method: "personSignalNonNullWithParams",
     params: { dummyBoolean, dummyString }
 }); }
-export { getPerson, personArraySignal, personListSignal, personSignalNonNullWithParams, personSignalNotNull, personSignalNullable, personSignalWithParams };
+export { delete_1 as delete, getPerson, personArraySignal, personListSignal, personSignalNonNullWithParams, personSignalNotNull, personSignalNullable, personSignalWithParams };
