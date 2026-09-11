@@ -1,6 +1,6 @@
-import type AbstractEntity_1 from "./AbstractEntity.js";
-import type Address_1 from "./Address.js";
-interface Person extends AbstractEntity_1 {
+import type AbstractEntity from "./AbstractEntity.js";
+import type Address from "./Address.js";
+interface Person extends AbstractEntity {
     id?: number;
     firstName: string;
     lastName: string;
@@ -8,7 +8,7 @@ interface Person extends AbstractEntity_1 {
     phone: string;
     important: boolean;
     luckyNumber: number;
-    addresses: Record<string, Address_1>;
+    addresses: Record<string, Address>;
     profilePicture?: string;
     fullName: string;
     age?: number;

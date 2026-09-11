@@ -1,12 +1,12 @@
-import type NestedEntity_1 from "./NestedEntity.js";
+import type NestedEntity from "./NestedEntity.js";
 interface AnnotationTestEntity {
     id?: number;
     version?: number;
-    oneToOne?: NestedEntity_1;
-    oneToMany?: Array<NestedEntity_1 | undefined>;
-    manyToOne?: NestedEntity_1;
-    manyToMany?: Array<NestedEntity_1 | undefined>;
-    manyToManyWithFetchType?: Array<NestedEntity_1 | undefined>;
+    oneToOne?: NestedEntity;
+    oneToMany?: Array<NestedEntity | undefined>;
+    manyToOne?: NestedEntity;
+    manyToMany?: Array<NestedEntity | undefined>;
+    manyToManyWithFetchType?: Array<NestedEntity | undefined>;
     name?: string;
 }
 export default AnnotationTestEntity;

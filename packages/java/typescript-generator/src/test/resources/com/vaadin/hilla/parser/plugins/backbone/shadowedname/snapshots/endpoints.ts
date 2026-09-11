@@ -1,2 +1,2 @@
-import * as ShadowedNameEndpoint_1 from "./ShadowedNameEndpoint.js";
-export { ShadowedNameEndpoint_1 as ShadowedNameEndpoint };
+import * as ShadowedNameEndpoint from "./ShadowedNameEndpoint.js";
+export { ShadowedNameEndpoint };
