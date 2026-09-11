@@ -383,6 +383,42 @@
         }
       }
     },
+    "/PersonService/delete" : {
+      "post" : {
+        "tags" : [
+          "PersonService"
+        ],
+        "operationId" : "PersonService_delete_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.runtime.transfertypes.ValueSignal"
+                    }
+                  ],
+                  "x-type-arguments" : {
+                    "allOf" : [
+                      {
+                        "nullable" : true,
+                        "anyOf" : [
+                          {
+                            "$ref" : "#/components/schemas/com.github.taefi.data.Person"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/PersonService/personSignalNullable" : {
       "post" : {
         "tags" : [

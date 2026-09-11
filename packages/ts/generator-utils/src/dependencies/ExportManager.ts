@@ -214,7 +214,13 @@ export default class ExportManager implements CodeConvertable<readonly Statement
         for (const { isTypeOnly, name, propertyName } of statement.exportClause.elements) {
           // in an export specifier `propertyName` holds the local binding and
           // `name` the exported name, the other way around than in an import
-          this.named.add(name.text, isTypeOnly, propertyName ?? name);
+          const local = propertyName ?? name;
+
+          // a local binding is always an identifier, unlike an exported name,
+          // which a re-export may spell as a string literal
+          if (ts.isIdentifier(local)) {
+            this.named.add(name.text, isTypeOnly, local);
+          }
         }
       }
     }

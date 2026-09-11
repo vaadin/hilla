@@ -34,6 +34,7 @@ export default class SignalProcessor {
   readonly #owner: Plugin;
   readonly #service: string;
   readonly #methods: Map<string, string>;
+  readonly #methodsByDeclaredName: ReadonlyMap<string, string>;
   readonly #sourceFile: SourceFile;
 
   constructor(service: string, methods: Map<string, string>, sourceFile: SourceFile, owner: Plugin) {
@@ -43,6 +44,13 @@ export default class SignalProcessor {
     this.#owner = owner;
     this.#dependencyManager = new DependencyManager(new PathManager({ extension: '.js' }));
     this.#dependencyManager.imports.fromCode(this.#sourceFile);
+    this.#dependencyManager.exports.fromCode(this.#sourceFile);
+
+    const { exports } = this.#dependencyManager;
+    // a method whose name is a reserved word is declared under a suffixed one
+    this.#methodsByDeclaredName = new Map(
+      Iterator.from(methods.keys()).map((method) => [exports.named.getIdentifier(method)?.text ?? method, method]),
+    );
   }
 
   process(): SourceFile {
@@ -57,10 +65,14 @@ export default class SignalProcessor {
     const [file] = transform(this.#sourceFile, [
       createTransformer((node) => {
         if (isFunctionDeclaration(node)) {
+          // The declared name is not the method name when the latter is a
+          // reserved word.
+          const methodName = node.name && this.#methodsByDeclaredName.get(node.name.text);
+
           // Check if the function is a signal method.
-          if (node.name && this.#methods.has(node.name.text)) {
+          if (methodName) {
             // Get or add the signal class identifier for runtime use.
-            const signalClassName = simplifyFullyQualifiedName(this.#methods.get(node.name.text)!);
+            const signalClassName = simplifyFullyQualifiedName(this.#methods.get(methodName)!);
             const signalId =
               imports.named.getIdentifier(HILLA_REACT_SIGNALS, signalClassName) ??
               imports.named.add(HILLA_REACT_SIGNALS, signalClassName);
@@ -98,7 +110,7 @@ export default class SignalProcessor {
               return new ${signalId}(${defaultValue}${defaultValue ? ',' : ''}{
                 client: ${connectClientId},
                 endpoint: '${this.#service}',
-                method: '${node.name.text}'
+                method: '${methodName}'
                 ${paramNames.length ? `, params: { ${paramNames.join('\n')} }` : ''} });
             }% });`;
 

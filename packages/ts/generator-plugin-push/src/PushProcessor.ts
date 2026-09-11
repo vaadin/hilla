@@ -12,6 +12,7 @@ export type EndpointOperations = {
 };
 
 export class PushProcessor {
+  readonly #declaredNames: ReadonlySet<string>;
   readonly #dependencies = new DependencyManager(new PathManager({ extension: '.js' }));
   readonly #operations: EndpointOperations;
   readonly #source: ts.SourceFile;
@@ -21,9 +22,14 @@ export class PushProcessor {
     this.#operations = operations;
     this.#source = source;
 
-    const { imports, paths } = this.#dependencies;
+    const { exports, imports, paths } = this.#dependencies;
 
     this.#dependencies.imports.fromCode(source);
+    this.#dependencies.exports.fromCode(source);
+    // a method whose name is a reserved word is declared under a suffixed one
+    this.#declaredNames = new Set(
+      operations.methodsToPatch.map((method) => exports.named.getIdentifier(method)?.text ?? method),
+    );
     this.#subscriptionId = memoize(() =>
       imports.named.add(paths.createBareModulePath('@vaadin/hilla-frontend', false), 'Subscription'),
     );
@@ -37,7 +43,7 @@ export class PushProcessor {
           const functionName = statement.name?.text;
 
           // Checks if the method is in the list of methods to patch
-          if (functionName && this.#operations.methodsToPatch.includes(functionName)) {
+          if (functionName && this.#declaredNames.has(functionName)) {
             return this.#updateFunction(statement);
           }
         }
