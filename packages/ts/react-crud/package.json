@@ -57,7 +57,7 @@
     "@vaadin/hilla-frontend": "25.2.9",
     "@vaadin/hilla-lit-form": "25.2.9",
     "@vaadin/hilla-react-form": "25.2.9",
-    "@vaadin/vaadin-lumo-styles": "25.2.11",
+    "@vaadin/vaadin-lumo-styles": "25.2.10",
     "@vaadin/react-components": "25.2.10",
     "type-fest": "4.35.0"
   },
