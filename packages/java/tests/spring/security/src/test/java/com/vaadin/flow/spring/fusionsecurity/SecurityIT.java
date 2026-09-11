@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
@@ -124,25 +125,40 @@ public class SecurityIT extends ChromeBrowserTest {
      * Whether the given element belongs to a document the browser no longer
      * has, which is what the reload the logout ends in leaves behind.
      * <p>
-     * {@link org.openqa.selenium.support.ui.ExpectedConditions#stalenessOf}
-     * is not enough on its own: while the document is being replaced, Chrome
+     * {@link org.openqa.selenium.support.ui.ExpectedConditions#stalenessOf} is
+     * not enough on its own: while the document is being replaced, Chrome
      * answers the lookup of an element of the outgoing one with
      * {@code unhandled inspector error: Node with given id does not belong to
-     * the document} rather than with the stale element error WebDriver
-     * defines, and the wait ends in that error instead of in the reload it is
-     * waiting for. Both answers mean the same thing here.
+     * the document} rather than with the stale element error WebDriver defines,
+     * and the wait ends in that error instead of in the reload it is waiting
+     * for. Both answers mean the same thing here. Anything else the driver says
+     * is thrown on, so that a session which has stopped working ends the wait
+     * with what went wrong rather than with a timeout.
      */
     private static ExpectedCondition<Boolean> replaced(
             TestBenchElement element) {
-        return driver -> {
-            try {
-                element.isEnabled();
-                return false;
-            } catch (StaleElementReferenceException e) {
-                return true;
-            } catch (WebDriverException e) {
-                return e.getMessage() != null
-                        && e.getMessage().contains(REPLACED_DOCUMENT_ERROR);
+        return new ExpectedCondition<>() {
+            @Override
+            public Boolean apply(WebDriver driver) {
+                try {
+                    element.isEnabled();
+                    return false;
+                } catch (StaleElementReferenceException e) {
+                    return true;
+                } catch (WebDriverException e) {
+                    if (e.getMessage() == null || !e.getMessage()
+                            .contains(REPLACED_DOCUMENT_ERROR)) {
+                        throw e;
+                    }
+
+                    return true;
+                }
+            }
+
+            @Override
+            public String toString() {
+                return "element " + element
+                        + " to belong to a document which has been replaced";
             }
         };
     }
