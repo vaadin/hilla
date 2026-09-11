@@ -18,8 +18,6 @@ package com.vaadin.hilla.generator.typescript;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -102,26 +100,17 @@ public final class OutputFolder {
     /**
      * Removes the given files of an earlier run, and every folder they leave
      * empty behind, which is where the types of a package removed since then
-     * were written.
+     * were written: the last file to go takes the folders above it along, as
+     * far up as they are left empty.
      */
     private void remove(List<String> paths) throws IOException {
-        var emptied = new ArrayList<Path>();
-
         for (var path : paths) {
             var file = folder.resolve(path);
 
             if (Files.deleteIfExists(file)) {
                 LOGGER.debug("Removed the generated file {}", file);
-                emptied.add(file.getParent());
+                removeIfEmpty(file.getParent());
             }
-        }
-
-        // The deepest folders first, so that a folder holding nothing but
-        // empty ones goes as well
-        for (var directory : emptied.stream().distinct()
-                .sorted(Comparator.comparingInt(Path::getNameCount).reversed())
-                .toList()) {
-            removeIfEmpty(directory);
         }
     }
 
