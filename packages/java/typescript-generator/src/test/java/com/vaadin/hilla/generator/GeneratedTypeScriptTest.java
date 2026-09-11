@@ -208,23 +208,33 @@ public class GeneratedTypeScriptTest {
     }
 
     @Test
-    public void should_DeclareAMethodNamedAfterAWordOfTheLanguageApart() {
-        // A declaration cannot go by such a name, so the function is named
-        // something else and exported under the name of the method
+    public void should_DeclareWhatIsNamedAfterAWordOfTheLanguageApart() {
+        // Neither a function nor a parameter can go by such a name, so it is
+        // named something nothing else goes by, and the caller still reaches
+        // the method by the name of the Java one while the server is still
+        // told the name of the parameter
         assertEquals(
                 """
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
                         import client from './connect-client.default.js';
 
-                        async function _delete(id: number, init?: EndpointRequestInit): Promise<void> {
+                        export async function _delete(id: number, init?: EndpointRequestInit): Promise<void> {
+                          return client.call('ReservedNameEndpoint', '_delete', { id }, init);
+                        }
+
+                        async function __delete(id: number, init?: EndpointRequestInit): Promise<void> {
                           return client.call('ReservedNameEndpoint', 'delete', { id }, init);
+                        }
+
+                        export async function remove(_delete: number, init?: EndpointRequestInit): Promise<void> {
+                          return client.call('ReservedNameEndpoint', 'remove', { delete: _delete }, init);
                         }
 
                         export async function size(init?: EndpointRequestInit): Promise<number> {
                           return client.call('ReservedNameEndpoint', 'size', {}, init);
                         }
 
-                        export { _delete as delete };
+                        export { __delete as delete };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpointsOf(ReservedNameEndpoint.class).get(0))
