@@ -28,6 +28,8 @@ describe('NameRegistry', () => {
     expect(registry.reserve('delete')).to.equal('delete_1');
     expect(registry.reserve('class')).to.equal('class_1');
     expect(registry.reserve('await')).to.equal('await_1');
+    expect(registry.reserve('eval')).to.equal('eval_1');
+    expect(registry.reserve('arguments')).to.equal('arguments_1');
   });
 
   it('should leave a contextual keyword alone, as it is a valid identifier', () => {
