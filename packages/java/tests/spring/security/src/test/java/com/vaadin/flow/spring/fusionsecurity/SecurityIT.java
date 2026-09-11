@@ -26,6 +26,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
@@ -88,8 +89,25 @@ public class SecurityIT extends ChromeBrowserTest {
         assertRootPageShown();
     }
 
+    /**
+     * Clicks the logout button and waits until the page reload that the logout
+     * ends in has replaced the document.
+     * <p>
+     * The wait is anchored on the main view going stale, not on
+     * {@code document.readyState}, because right after the click the old
+     * document still reports {@code complete} and, when the browser already is
+     * on the root page, shows the expected URL and header too. A readiness or
+     * {@link #assertRootPageShown()} check alone is therefore satisfied by the
+     * pre-logout page and returns while the logout request is still in flight,
+     * leaving whatever the test does next - an {@link #openResource(String)}, a
+     * cookie read - to race it. The main view goes stale exactly when the new
+     * document commits.
+     */
     private void clickLogout() {
-        getMainView().$(ButtonElement.class).id("logout").click();
+        TestBenchElement mainView = getMainView();
+        mainView.$(ButtonElement.class).id("logout").click();
+        waitUntil(ExpectedConditions.stalenessOf(mainView), 25);
+        waitForDocumentReady();
     }
 
     /**
