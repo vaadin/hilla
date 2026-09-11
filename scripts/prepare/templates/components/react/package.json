@@ -10,6 +10,7 @@
   "dependencies": {
     "@vaadin/hilla-frontend": "{{version}}",
     "@vaadin/hilla-lit-form": "{{version}}",
+    "@vaadin/hilla-models": "{{version}}",
     "@vaadin/hilla-react-auth": "{{version}}",
     "@vaadin/hilla-react-crud": "{{version}}",
     "@vaadin/hilla-react-form": "{{version}}",
