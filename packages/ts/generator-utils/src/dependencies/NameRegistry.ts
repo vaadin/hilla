@@ -2,10 +2,12 @@ import ts, { type Identifier } from '@typescript/typescript6';
 
 /**
  * Words that cannot serve as a binding name. Generated files are modules, hence
- * the strict mode ones are in as well. Contextual keywords (`type`, `as`, `get`,
- * `string`, ...) are valid identifiers and thus are not listed.
+ * the strict mode ones are in as well, including `arguments` and `eval`, which
+ * are not keywords but are equally illegal. Contextual keywords (`type`, `as`,
+ * `get`, `string`, ...) are valid identifiers and thus are not listed.
  */
 const reservedWords = [
+  'arguments',
   'await',
   'break',
   'case',
@@ -19,6 +21,7 @@ const reservedWords = [
   'do',
   'else',
   'enum',
+  'eval',
   'export',
   'extends',
   'false',
