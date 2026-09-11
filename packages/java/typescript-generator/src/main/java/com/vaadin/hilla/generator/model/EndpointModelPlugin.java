@@ -442,7 +442,8 @@ public final class EndpointModelPlugin
             return provided(name(signature), referred, optional);
         }
 
-        if (signature.isClassRef() && isEntity(signature)) {
+        if (signature.isClassRef() && isEntity(signature)
+                && !isValue(signature)) {
             return new TypeModel.EntityRef(name(signature), referred, optional);
         }
 
@@ -531,6 +532,21 @@ public final class EndpointModelPlugin
      */
     private static boolean isEntity(SignatureModel signature) {
         return signature.isNonJDKClass();
+    }
+
+    /**
+     * Whether the browser has a value of the type, which a class of the
+     * application can be one of as well: a class extending Date is a date, and
+     * an endpoint sends it as one rather than as a type of its own. The order
+     * is the one the OpenAPI definition of the same walk is built in, so that
+     * both say the same about a type.
+     */
+    private static boolean isValue(SignatureModel signature) {
+        return signature.isString() || signature.isCharacter()
+                || signature.isBoolean() || signature.hasIntegerType()
+                || signature.isBigInteger() || signature.hasFloatType()
+                || signature.isBigDecimal() || signature.isDate()
+                || signature.isDateTime();
     }
 
     private static String name(SignatureModel signature) {
