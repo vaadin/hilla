@@ -134,6 +134,42 @@
           }
         }
       }
+    },
+    "/ImportClashEndpoint/getRecordMap": {
+      "post": {
+        "tags": ["ImportClashEndpoint"],
+        "operationId": "ImportClashEndpoint_getRecordMap_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Record": {
+                    "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.importclash.Record"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.importclash.Record"
+                  },
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -142,6 +178,15 @@
         "type": "object",
         "properties": {
           "name": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "com.vaadin.hilla.parser.plugins.backbone.importclash.Record": {
+        "type": "object",
+        "properties": {
+          "id": {
             "type": "string",
             "nullable": true
           }
