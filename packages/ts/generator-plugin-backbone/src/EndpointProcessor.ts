@@ -23,13 +23,16 @@ export default class EndpointProcessor {
     // import that gets suffixed on a collision. The method names go first: the
     // push and signals plugins look the generated functions up by name, so a
     // method should not be suffixed because of another method's parameter.
-    for (const method of methods.keys()) {
-      exports.named.add(method);
+    for (const [method, pathItem] of methods) {
+      // anything else is reported and skipped by `createProcessor` later on
+      if (pathItem[OpenAPIV3.HttpMethods.POST]) {
+        exports.named.add(method);
+      }
     }
 
     for (const pathItem of methods.values()) {
       // only the names are of interest here, so the schemas are left alone
-      const { requestBody } = pathItem[OpenAPIV3.HttpMethods.POST]!;
+      const { requestBody } = pathItem[OpenAPIV3.HttpMethods.POST] ?? {};
       const schema = requestBody ? owner.resolver.resolve(requestBody).content[defaultMediaType].schema : undefined;
       const properties = schema ? owner.resolver.resolve(schema).properties : undefined;
 
