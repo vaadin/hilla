@@ -58,6 +58,12 @@ const reservedWords = [
 ];
 
 /**
+ * Globals the generated code refers to without importing them, so an import
+ * taking one of these names would shadow the type it refers to.
+ */
+const globalNames = ['Array', 'File', 'Promise', 'ReadonlyArray', 'Record'];
+
+/**
  * Tracks the identifier names taken in a single generated file so that a name
  * is only suffixed when it actually collides.
  *
@@ -66,8 +72,9 @@ const reservedWords = [
  * still collide with a plain declaration in the same file.
  */
 export default class NameRegistry {
-  // reserved words count as taken, so that a name matching one is suffixed
-  readonly #used = new Set(reservedWords);
+  // reserved words and shadowable globals count as taken, so that a name
+  // matching one is suffixed
+  readonly #used = new Set([...reservedWords, ...globalNames]);
 
   /**
    * Marks a name as taken as-is. Used for names the registry does not get to

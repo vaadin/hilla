@@ -32,6 +32,13 @@ describe('NameRegistry', () => {
     expect(registry.reserve('arguments')).to.equal('arguments_1');
   });
 
+  it('should suffix a global the generated code refers to without importing it', () => {
+    expect(registry.reserve('Record')).to.equal('Record_1');
+    expect(registry.reserve('Promise')).to.equal('Promise_1');
+    expect(registry.reserve('File')).to.equal('File_1');
+    expect(registry.reserve('Person')).to.equal('Person');
+  });
+
   it('should leave a contextual keyword alone, as it is a valid identifier', () => {
     expect(registry.reserve('type')).to.equal('type');
     expect(registry.reserve('get')).to.equal('get');
