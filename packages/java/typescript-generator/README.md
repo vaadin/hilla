@@ -35,9 +35,14 @@ value of a polymorphic type is, the methods sending a series of values rather
 than returning one, the types it refers to by name rather than declaring, such
 as a file or a signal, and the signals a value is shared through, which is
 everything the Node generator writes for the endpoints. `TypeScriptWriter`
-turns one whole `Generation` into those files, so what is left before the
-pipeline can run on it is calling that. What is left of the Node generator
-after that is the file router, which the pipeline still runs.
+turns one whole `Generation` into those files, and `OutputFolder` puts them
+where the application reads them, replacing what the run before it wrote and
+leaving alone what it did not. What is left before the pipeline can run on it
+is calling that; what is left of the Node generator after that is the file
+router, which the pipeline still runs.
+
+The TypeScript written for every test case type checks under `tsc --strict`,
+apart from what the Node generator gets wrong in the same way.
 
 ## Architecture
 
