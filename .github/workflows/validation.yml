@@ -115,6 +115,8 @@ jobs:
         run: mvn -B spotless:check
       - name: Lint TypeScript
         run: npm run check
+      - name: Test Prepare Scripts
+        run: npm run test:prepare
 
   test-java:
     needs: init

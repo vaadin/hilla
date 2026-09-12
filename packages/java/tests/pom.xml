@@ -12,9 +12,6 @@
 
     <artifactId>tests</artifactId>
     <name>Hilla Tests</name>
-    <modules>
-        <module>fix-lumo</module>
-    </modules>
     <packaging>pom</packaging>
 
     <properties>

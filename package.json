@@ -29,6 +29,7 @@
     "lint:fix": "nx run-many -p packages/ts/* -t lint:fix --all --output-style stream",
     "test": "nx run-many -p packages/ts/* -t test --all --output-style stream",
     "test:coverage": "nx run-many -p packages/ts/* -t test:coverage --all --output-style stream",
+    "test:prepare": "tsx --test scripts/prepare/*.test.ts",
     "test:react": "nx run-many -p packages/ts/* -t test:react --all --output-style stream",
     "typecheck": "nx run-many -p packages/ts/* -t typecheck --all --output-style stream"
   },
