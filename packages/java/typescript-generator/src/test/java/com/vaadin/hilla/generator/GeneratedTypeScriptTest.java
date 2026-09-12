@@ -770,7 +770,9 @@ public class GeneratedTypeScriptTest {
         // The validators are named after the annotations, and are given what
         // the annotation says: the one value it says when that is all of it,
         // and everything it says otherwise. The values of a collection are
-        // constrained on their own, as the collection is
+        // constrained on their own, as the collection is. What a value is to
+        // the persistence API is written along with its Java type, which is
+        // how a grid tells an id from a value worth showing
         assertEquals(
                 """
                         import {
@@ -789,6 +791,11 @@ public class GeneratedTypeScriptTest {
 
                         class ValidatedModel<T extends Validated = Validated> extends ObjectModel<T> {
                           static override createEmptyValue = makeObjectEmptyValueCreator(ValidatedModel);
+
+                          get id(): NumberModel {
+                            return this[_getPropertyModel]('id', (parent, key) =>
+                              new NumberModel(parent, key, true, { meta: { annotations: [{ name: 'jakarta.persistence.Id' }], javaType: 'long' } }));
+                          }
 
                           get name(): StringModel {
                             return this[_getPropertyModel]('name', (parent, key) =>

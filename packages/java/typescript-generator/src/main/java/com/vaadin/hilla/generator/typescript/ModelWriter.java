@@ -181,8 +181,9 @@ final class ModelWriter {
 
     /**
      * What a model is told about the value it holds: what the value has to
-     * satisfy, and the Java type it comes in, which TypeScript has no way of
-     * telling apart. A model which is told nothing is built without it.
+     * satisfy, the annotations of the value which a form or a grid built from
+     * the model reads, and the Java type it comes in, which TypeScript has no
+     * way of telling apart. A model which is told nothing is built without it.
      *
      * @param javaType
      *            the Java type of the value, or {@code null} for a model which
@@ -197,8 +198,21 @@ final class ModelWriter {
                     + "]");
         }
 
+        var meta = new ArrayList<String>();
+
+        if (!type.annotations().isEmpty()) {
+            meta.add("annotations: [" + type.annotations().stream()
+                    .map(annotation -> "{ name: '" + annotation + "' }")
+                    .collect(Collectors.joining(", ")) + "]");
+        }
+
         if (javaType != null) {
-            written.add("meta: { javaType: '" + javaType + "' }");
+            meta.add("javaType: '" + javaType + "'");
+        }
+
+        if (!meta.isEmpty()) {
+            written.add(meta.stream()
+                    .collect(Collectors.joining(", ", "meta: { ", " }")));
         }
 
         return written.isEmpty() ? ""

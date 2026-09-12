@@ -45,6 +45,7 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
+import com.vaadin.hilla.parser.plugins.model.Annotation;
 import com.vaadin.hilla.parser.plugins.model.ValidationConstraint;
 import com.vaadin.hilla.parser.plugins.subtypes.SubTypesPlugin;
 import com.vaadin.hilla.transfertypes.annotations.FromModule;
@@ -80,6 +81,12 @@ public final class EndpointModelPlugin
      * annotations of the validation API say about a value.
      */
     private static final String VALIDATION_CONSTRAINTS = "x-validation-constraints";
+
+    /**
+     * Where the plugin building the OpenAPI definition leaves the annotations
+     * of a value which a form model is told about.
+     */
+    private static final String ANNOTATIONS = "x-annotations";
 
     private final Map<Node<?, ?>, List<TypeModel>> types = new IdentityHashMap<>();
     private final Map<Node<?, ?>, List<ParameterModel>> parameters = new IdentityHashMap<>();
@@ -415,6 +422,7 @@ public final class EndpointModelPlugin
         var optional = schema != null
                 && Boolean.TRUE.equals(schema.getNullable());
         var constraints = constraintsOf(schema);
+        var annotations = annotationsOf(schema);
 
         // A type parameter bound to something else than an object stands for
         // that bound, which the walk visits below it, since the declaration
@@ -439,12 +447,12 @@ public final class EndpointModelPlugin
 
         if (signature.isArray() || signature.isIterable()) {
             return new TypeModel.ArrayOf(only(referred), optional,
-                    name(signature), constraints);
+                    name(signature), constraints, annotations);
         }
 
         if (signature.isMap()) {
             return new TypeModel.MapOf(only(referred), optional,
-                    name(signature), constraints);
+                    name(signature), constraints, annotations);
         }
 
         if (signature.isClassRef() && isProvided(name(signature))) {
@@ -454,11 +462,11 @@ public final class EndpointModelPlugin
         if (signature.isClassRef() && isEntity(signature)
                 && !isValue(signature)) {
             return new TypeModel.EntityRef(name(signature), referred, optional,
-                    constraints);
+                    constraints, annotations);
         }
 
         return new TypeModel.Scalar(scalarKind(signature), optional,
-                name(signature), constraints);
+                name(signature), constraints, annotations);
     }
 
     private static TypeModel bound(TypeModel type, boolean optional) {
@@ -467,20 +475,23 @@ public final class EndpointModelPlugin
 
     private static TypeModel asOptional(TypeModel type) {
         return switch (type) {
-        case TypeModel.Scalar scalar -> new TypeModel.Scalar(scalar.kind(),
-                true, scalar.javaType(), scalar.constraints());
-        case TypeModel.ArrayOf array -> new TypeModel.ArrayOf(array.items(),
-                true, array.javaType(), array.constraints());
+        case TypeModel.Scalar scalar ->
+            new TypeModel.Scalar(scalar.kind(), true, scalar.javaType(),
+                    scalar.constraints(), scalar.annotations());
+        case TypeModel.ArrayOf array ->
+            new TypeModel.ArrayOf(array.items(), true, array.javaType(),
+                    array.constraints(), array.annotations());
         case TypeModel.MapOf map -> new TypeModel.MapOf(map.values(), true,
-                map.javaType(), map.constraints());
+                map.javaType(), map.constraints(), map.annotations());
         case TypeModel.EntityRef entity ->
             new TypeModel.EntityRef(entity.javaClass(), entity.typeArguments(),
-                    true, entity.constraints());
-        case TypeModel.Provided provided ->
-            new TypeModel.Provided(provided.name(), provided.module(),
-                    provided.typeArguments(), true, provided.constraints());
-        case TypeModel.TypeVariable variable -> new TypeModel.TypeVariable(
-                variable.name(), true, variable.constraints());
+                    true, entity.constraints(), entity.annotations());
+        case TypeModel.Provided provided -> new TypeModel.Provided(
+                provided.name(), provided.module(), provided.typeArguments(),
+                true, provided.constraints(), provided.annotations());
+        case TypeModel.TypeVariable variable ->
+            new TypeModel.TypeVariable(variable.name(), true,
+                    variable.constraints(), variable.annotations());
         };
     }
 
@@ -575,6 +586,25 @@ public final class EndpointModelPlugin
                         constraint.getAttributes() == null ? Map.of()
                                 : constraint.getAttributes()))
                 .toList();
+    }
+
+    /**
+     * The annotations of a value which a form model is told about, which the
+     * plugin building the OpenAPI definition has already picked out of the ones
+     * the property declares.
+     */
+    private static List<String> annotationsOf(Schema<?> schema) {
+        if (schema == null || schema.getExtensions() == null) {
+            return List.of();
+        }
+
+        if (!(schema.getExtensions()
+                .get(ANNOTATIONS) instanceof List<?> annotations)) {
+            return List.of();
+        }
+
+        return annotations.stream().filter(Annotation.class::isInstance)
+                .map(Annotation.class::cast).map(Annotation::getName).toList();
     }
 
     private static boolean isValue(SignatureModel signature) {

@@ -31,7 +31,8 @@ writes it to a file.
 filling in text templates, as nothing needs the TypeScript to be parsed. So far
 it covers the client, the endpoints, the barrel, the types they refer to, the
 models a form binds those types through, with what the annotations of the
-validation API say a value has to satisfy, the unions saying which subtype a
+validation API say a value has to satisfy and what the ones of the persistence
+API say it is, the unions saying which subtype a
 value of a polymorphic type is, the methods sending a series of values rather
 than returning one, the types it refers to by name rather than declaring, such
 as a file or a signal, and the signals a value is shared through, which is

@@ -15,6 +15,7 @@
  */
 package com.vaadin.hilla.generator.fixtures;
 
+import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -26,7 +27,7 @@ import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 /**
  * Takes a type whose values are constrained by the annotations of the
- * validation API.
+ * validation API, and one of which says what it is to the persistence one.
  */
 @Endpoint
 public class ValidatedEndpoint {
@@ -34,6 +35,9 @@ public class ValidatedEndpoint {
     }
 
     public static class Validated {
+        @Id
+        private long id;
+
         @NotBlank
         private String name;
 
@@ -45,6 +49,10 @@ public class ValidatedEndpoint {
 
         @Size(min = 1, max = 10)
         private List<@NotBlank String> tags;
+
+        public long getId() {
+            return id;
+        }
 
         public String getName() {
             return name;
