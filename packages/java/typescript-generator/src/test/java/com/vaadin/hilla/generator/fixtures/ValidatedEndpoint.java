@@ -19,6 +19,7 @@ import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.util.List;
@@ -44,8 +45,14 @@ public class ValidatedEndpoint {
         @Min(1)
         private int count;
 
-        @Email(message = "not an address")
+        @Email(message = "that isn't an address")
         private String address;
+
+        @Pattern(regexp = "[a-z]+", flags = Pattern.Flag.CASE_INSENSITIVE)
+        private String code;
+
+        @Size(min = 1)
+        private String[] codes;
 
         @Size(min = 1, max = 10)
         private List<@NotBlank String> tags;
@@ -64,6 +71,14 @@ public class ValidatedEndpoint {
 
         public String getAddress() {
             return address;
+        }
+
+        public String getCode() {
+            return code;
+        }
+
+        public String[] getCodes() {
+            return codes;
         }
 
         public List<String> getTags() {

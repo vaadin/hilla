@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 
 import com.vaadin.hilla.generator.model.ConstraintModel;
 import com.vaadin.hilla.generator.model.TypeModel;
+import com.vaadin.hilla.parser.models.AnnotationParameterEnumValueModel;
+import com.vaadin.hilla.parser.models.ClassInfoModel;
 
 /**
  * Writes the model of a type: the class a form binds a value of that type
@@ -248,7 +250,8 @@ final class ModelWriter {
     /**
      * A value of an annotation as TypeScript writes it. Anything the language
      * has no literal of goes as the string it reads as, which is what the
-     * validators of the form library are given as well.
+     * validators of the form library are given as well: an enum constant by its
+     * name, and a class by the name of the class.
      */
     private static String value(Object value) {
         if (value instanceof Boolean || value instanceof Number) {
@@ -265,8 +268,24 @@ final class ModelWriter {
                     .collect(Collectors.joining(", ", "[", "]"));
         }
 
-        return "'" + String.valueOf(value).replace("\\", "\\\\").replace("'",
-                "\\'") + "'";
+        if (value instanceof AnnotationParameterEnumValueModel constant) {
+            return string(constant.getValueName());
+        }
+
+        if (value instanceof ClassInfoModel javaClass) {
+            return string(javaClass.getName());
+        }
+
+        return string(String.valueOf(value));
+    }
+
+    /**
+     * A string as TypeScript reads it, with what the language would otherwise
+     * read as the end of it, or as another line, written as it says itself.
+     */
+    private static String string(String value) {
+        return "'" + value.replace("\\", "\\\\").replace("'", "\\'")
+                .replace("\n", "\\n").replace("\r", "\\r") + "'";
     }
 
     private static String instance(String model, boolean optional,

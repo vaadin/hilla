@@ -782,6 +782,7 @@ public class GeneratedTypeScriptTest {
                           NotBlank,
                           NumberModel,
                           ObjectModel,
+                          Pattern,
                           Size,
                           StringModel,
                           _getPropertyModel,
@@ -809,7 +810,19 @@ public class GeneratedTypeScriptTest {
 
                           get address(): StringModel {
                             return this[_getPropertyModel]('address', (parent, key) =>
-                              new StringModel(parent, key, true, { validators: [new Email({ message: 'not an address' })], meta: { javaType: 'java.lang.String' } }));
+                              new StringModel(parent, key, true, { validators: [new Email({ message: 'that isn\\'t an address' })], meta: { javaType: 'java.lang.String' } }));
+                          }
+
+                          get code(): StringModel {
+                            return this[_getPropertyModel]('code', (parent, key) =>
+                              new StringModel(parent, key, true, { validators: [new Pattern({ flags: ['CASE_INSENSITIVE'], regexp: '[a-z]+' })], meta: { javaType: 'java.lang.String' } }));
+                          }
+
+                          get codes(): ArrayModel<StringModel> {
+                            return this[_getPropertyModel]('codes', (parent, key) =>
+                              new ArrayModel(parent, key, true,
+                                (parent, key) => new StringModel(parent, key, true, { validators: [new Size({ min: 1 })], meta: { javaType: 'java.lang.String' } }),
+                                { meta: { javaType: 'java.lang.String[]' } }));
                           }
 
                           get tags(): ArrayModel<StringModel> {

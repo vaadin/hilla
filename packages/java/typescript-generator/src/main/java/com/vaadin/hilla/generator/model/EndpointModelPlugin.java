@@ -32,6 +32,7 @@ import com.vaadin.hilla.parser.core.Node;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.core.RootNode;
+import com.vaadin.hilla.parser.models.ArraySignatureModel;
 import com.vaadin.hilla.parser.models.BaseSignatureModel;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
@@ -429,7 +430,8 @@ public final class EndpointModelPlugin
         // does not keep such a parameter
         if (signature.isTypeVariable() || signature.isTypeParameter()) {
             return referred.isEmpty()
-                    ? new TypeModel.TypeVariable(name(signature), optional)
+                    ? new TypeModel.TypeVariable(name(signature), optional,
+                            constraints, annotations)
                     : bound(only(referred), optional);
         }
 
@@ -456,7 +458,8 @@ public final class EndpointModelPlugin
         }
 
         if (signature.isClassRef() && isProvided(name(signature))) {
-            return provided(name(signature), referred, optional);
+            return provided(name(signature), referred, optional, constraints,
+                    annotations);
         }
 
         if (signature.isClassRef() && isEntity(signature)
@@ -540,11 +543,12 @@ public final class EndpointModelPlugin
      * says of it together with the arguments it is used with.
      */
     private static TypeModel provided(String javaClass,
-            List<TypeModel> typeArguments, boolean optional) {
+            List<TypeModel> typeArguments, boolean optional,
+            List<ConstraintModel> constraints, List<String> annotations) {
         var provided = PROVIDED_TYPES.get(javaClass);
 
         return new TypeModel.Provided(provided.name(), provided.module(),
-                typeArguments, optional);
+                typeArguments, optional, constraints, annotations);
     }
 
     /**
@@ -563,24 +567,22 @@ public final class EndpointModelPlugin
      * is the one the OpenAPI definition of the same walk is built in, so that
      * both say the same about a type.
      */
+    private static boolean isValue(SignatureModel signature) {
+        return signature.isString() || signature.isCharacter()
+                || signature.isBoolean() || signature.hasIntegerType()
+                || signature.isBigInteger() || signature.hasFloatType()
+                || signature.isBigDecimal() || signature.isDate()
+                || signature.isDateTime();
+    }
+
     /**
      * What the annotations of the validation API say about a value, which the
      * plugin building the OpenAPI definition has already read off the walk and
      * left on the schema of the value.
      */
     private static List<ConstraintModel> constraintsOf(Schema<?> schema) {
-        if (schema == null || schema.getExtensions() == null) {
-            return List.of();
-        }
-
-        if (!(schema.getExtensions()
-                .get(VALIDATION_CONSTRAINTS) instanceof List<?> constraints)) {
-            return List.of();
-        }
-
-        return constraints.stream()
-                .filter(ValidationConstraint.class::isInstance)
-                .map(ValidationConstraint.class::cast)
+        return extensions(schema, VALIDATION_CONSTRAINTS,
+                ValidationConstraint.class)
                 .map(constraint -> new ConstraintModel(
                         constraint.getSimpleName(),
                         constraint.getAttributes() == null ? Map.of()
@@ -594,25 +596,23 @@ public final class EndpointModelPlugin
      * the property declares.
      */
     private static List<String> annotationsOf(Schema<?> schema) {
-        if (schema == null || schema.getExtensions() == null) {
-            return List.of();
-        }
-
-        if (!(schema.getExtensions()
-                .get(ANNOTATIONS) instanceof List<?> annotations)) {
-            return List.of();
-        }
-
-        return annotations.stream().filter(Annotation.class::isInstance)
-                .map(Annotation.class::cast).map(Annotation::getName).toList();
+        return extensions(schema, ANNOTATIONS, Annotation.class)
+                .map(Annotation::getName).toList();
     }
 
-    private static boolean isValue(SignatureModel signature) {
-        return signature.isString() || signature.isCharacter()
-                || signature.isBoolean() || signature.hasIntegerType()
-                || signature.isBigInteger() || signature.hasFloatType()
-                || signature.isBigDecimal() || signature.isDate()
-                || signature.isDateTime();
+    /**
+     * What another plugin has left on the schema of a value under the given
+     * name, which is nothing at all where the plugin had nothing to say.
+     */
+    private static <T> Stream<T> extensions(Schema<?> schema, String name,
+            Class<T> type) {
+        var extensions = schema == null ? null : schema.getExtensions();
+
+        return extensions != null
+                && extensions.get(name) instanceof List<?> values
+                        ? values.stream().filter(type::isInstance).map(
+                                type::cast)
+                        : Stream.of();
     }
 
     private static String name(SignatureModel signature) {
@@ -620,11 +620,15 @@ public final class EndpointModelPlugin
             return classRef.getClassInfo().getName();
         }
 
-        // A primitive says its own name, which is all of it: what it is
-        // annotated with belongs to the value rather than to the type, and
-        // reads as part of the name otherwise
+        // A primitive and an array say their own name, which is all of it:
+        // what they are annotated with belongs to the value rather than to the
+        // type, and reads as part of the name otherwise
         if (signature instanceof BaseSignatureModel base) {
             return base.getType().getName();
+        }
+
+        if (signature instanceof ArraySignatureModel array) {
+            return name(array.getNestedType()) + "[]";
         }
 
         return signature.get() == null ? Object.class.getName()
