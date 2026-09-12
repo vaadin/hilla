@@ -101,7 +101,7 @@
       "workbox-routing": "7.4.1",
       "workbox-strategies": "7.4.1"
     },
-    "hash": "e1239510efaa7ac714f9495cab30006c2dcd41afd81766efebce29797f23d76f"
+    "hash": "b8d9ec25a485f749a7958f030a75e77235fc0f30c1a33f1f058b2d1f41db666f"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
