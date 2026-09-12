@@ -38,10 +38,11 @@ public final class GeneratorProcessor {
     public static String GENERATED_FILE_LIST_NAME = "generated-file-list.txt";
 
     /**
-     * The property which makes a run write the TypeScript of the endpoints in
-     * Java instead of running the Node generator over the OpenAPI definition,
-     * while the one is being moved into the other. It goes once the move is
-     * done and the Java writers are all there is.
+     * The property which puts the Node generator back in charge of the
+     * TypeScript of the endpoints, which Java writes otherwise:
+     * {@code -Dhilla.generator.java=false} runs it over the OpenAPI definition
+     * the way every application used to. It goes, along with the Node
+     * generator, once nothing needs the way back.
      */
     public static final String JAVA_TYPESCRIPT_PROPERTY = "hilla.generator.java";
 
@@ -64,15 +65,16 @@ public final class GeneratorProcessor {
     }
 
     /**
-     * Whether the TypeScript of the endpoints is written in Java rather than by
-     * the Node generator, which the caller has to know as well: what the Java
-     * writers need is what the parser found, and only the run which parsed the
-     * classes has it.
+     * Whether the TypeScript of the endpoints is written in Java, which it is
+     * unless a run asks for the Node generator instead. The caller has to know
+     * as well: what the Java writers need is what the parser found, and only
+     * the run which parsed the classes has it.
      *
      * @see #JAVA_TYPESCRIPT_PROPERTY
      */
     public static boolean writesTypeScriptInJava() {
-        return Boolean.getBoolean(JAVA_TYPESCRIPT_PROPERTY);
+        return !"false"
+                .equalsIgnoreCase(System.getProperty(JAVA_TYPESCRIPT_PROPERTY));
     }
 
     /**
