@@ -43,13 +43,13 @@ function getArgValue(argName: string): string | undefined {
 // script at a branch without having to expand the npm build script itself.
 const envBranch = env.PLATFORM_BRANCH?.trim();
 export const platformBranch = getArgValue('platform-branch') ?? (envBranch || branch);
-// The component npm versions come from vaadin/flow-components. Both
-// repositories have a branch per minor version under the same name, `main` or
-// `25.3`, so that name reads the two sides of one release line, which is why
-// the platform branch is followed by default. Only the line is shared: the npm
-// version of the components on a branch differs from the platform version in
-// the last number, which is why it is read from the annotations rather than
-// derived from anything the platform declares.
+// The component npm versions come from vaadin/flow-components, which has a
+// branch for every release line under the same name as the platform, `main`
+// and `25.3` alike, so the platform branch names the branch to read here as
+// well. The name is all the two share: the components on a branch carry a
+// version of their own, which the platform version matches in the first two
+// numbers only, so it is read from the annotations on that branch rather than
+// taken from anything the platform declares.
 const envComponentsBranch = env.FLOW_COMPONENTS_BRANCH?.trim();
 export const flowComponentsBranch = getArgValue('flow-components-branch') ?? (envComponentsBranch || platformBranch);
 
