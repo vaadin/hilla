@@ -21,11 +21,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.hilla.ApplicationContextProvider;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.internal.fixtures.CustomEndpoint;
 import com.vaadin.hilla.internal.fixtures.EndpointNoValue;
 import com.vaadin.hilla.internal.fixtures.MyEndpoint;
@@ -71,6 +73,22 @@ public class TaskGenerateTypeScriptTest extends TaskTest {
                 Files.isRegularFile(
                         output().resolve("connect-client.default.ts")),
                 "The endpoints call the server through the generated client");
+    }
+
+    @Test
+    public void should_WriteTheTypeScriptOfAProductionBuildAsWell()
+            throws Exception {
+        // A production build has no application context to ask, so the
+        // browser callable classes are found by the configuration instead
+        var configuration = new EngineAutoConfiguration.Builder(
+                getEngineConfiguration()).productionMode(true)
+                .browserCallableFinder(conf -> List.of(MyEndpoint.class))
+                .build();
+
+        new TaskGenerateOpenAPIImpl(configuration).execute();
+
+        assertTrue(Files.isRegularFile(output().resolve("MyEndpoint.ts")),
+                "The endpoint of the application is written");
     }
 
     @Test
