@@ -32,6 +32,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
+import com.vaadin.hilla.engine.GeneratorProcessor;
+import com.vaadin.hilla.engine.ParserProcessor;
 
 public class TaskGenerateEndpointTest extends EndpointsTaskTest {
 
@@ -48,6 +50,23 @@ public class TaskGenerateEndpointTest extends EndpointsTaskTest {
         Files.copy(referenceOpenAPIJsonFile, getOpenAPIFile());
         outputDirectory = Files.createDirectory(
                 getTemporaryDirectory().resolve(getOutputDirectory()));
+    }
+
+    @Test
+    public void should_GenerateFromTheOpenAPIDefinitionOfAParserRun()
+            throws Exception {
+        var configuration = getEngineConfiguration();
+
+        // The run of the parser is what the TypeScript is written from once it
+        // is written in Java; until then it is written from the OpenAPI
+        // definition that run left behind, whoever asks for it
+        new GeneratorProcessor(configuration)
+                .process(new ParserProcessor(configuration));
+
+        assertTrue(
+                outputDirectory.resolve("FooBarEndpoint.ts").toFile().exists());
+        assertTrue(
+                outputDirectory.resolve("FooFooEndpoint.ts").toFile().exists());
     }
 
     @Test

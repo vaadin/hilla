@@ -52,10 +52,6 @@ public final class TypeScriptProcessor {
 
     private final Path outputDirectory;
 
-    public TypeScriptProcessor(EngineAutoConfiguration conf) {
-        this(conf.getBaseDir(), conf.getOutputDir());
-    }
-
     /**
      * @param baseDir
      *            the folder of the application, which a relative output folder
