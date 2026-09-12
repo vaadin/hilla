@@ -29,7 +29,7 @@ export interface Transformer {
   transformVersions(versions: Versions, version: string, isPrerelease: boolean): Versions;
 }
 
-const branch = 'main';
+const branch = '25.3';
 
 // Parse CLI arguments for branch parameter
 const args = argv.slice(2);

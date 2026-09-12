@@ -6,16 +6,23 @@ defaults:
 
 on:
   push:
-    branches: [main, '25.2', '25.1', '24.10', '24.9', '2.5', '1.5']
+    branches: [main, '25.3', '25.2', '25.1', '24.10', '24.9', '2.5', '1.5']
     paths-ignore:
       - 'hilla-logo.svg'
       - 'README.md'
       - '.github/ISSUE_TEMPLATE/*'
       - 'packages/**/README.md'
       - 'scripts/generator/templates/**/*.md'
+  # No `branches` filter here: it matches the pull request's base branch, so
+  # listing only the long-lived branches skipped every stacked pull request -
+  # one based on the branch below it in the stack instead of on main. Those
+  # branches are not in the `push` list either, so their code got no
+  # validation at all until the stack was retargeted. Release branches are
+  # unaffected: a pull request runs the workflow file from its own merge
+  # commit, so a pull request against e.g. 24.9 uses that branch version of
+  # this file.
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: [main]
     paths-ignore:
       - 'hilla-logo.svg'
       - 'README.md'

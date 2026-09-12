@@ -2,15 +2,19 @@ name: Validation
 
 on:
   push:
-    branches: [ main, '25.1', '25.0', '24.9', '2.5', '1.5' ]
+    branches: [ main, '25.3', '25.2', '25.1', '24.10', '24.9', '2.5', '1.5' ]
     paths:
       - 'hilla-logo.svg'
       - 'README.md'
       - '.github/ISSUE_TEMPLATE/*'
       - 'packages/**/README.md'
       - 'scripts/generator/templates/**/*.md'
+  # Unfiltered by base branch for the same reason as in validation.yml, so
+  # that a documentation-only stacked pull request also gets the Tests
+  # Summary check it needs to be mergeable. Note that GitHub reads this file
+  # from the base branch for `pull_request_target`, so a stack picks the
+  # change up once the branch below it has it.
   pull_request_target:
-    branches: [main]
     paths:
       - 'hilla-logo.svg'
       - 'README.md'
