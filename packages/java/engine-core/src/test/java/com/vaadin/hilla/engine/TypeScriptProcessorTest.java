@@ -31,6 +31,7 @@ import com.vaadin.hilla.generator.model.EndpointModel;
 import com.vaadin.hilla.generator.model.Generation;
 import com.vaadin.hilla.generator.model.MethodModel;
 import com.vaadin.hilla.generator.model.TypeModel;
+import com.vaadin.hilla.generator.typescript.OutputFolder;
 
 public class TypeScriptProcessorTest {
     private static final Path OUTPUT = Path.of("frontend", "generated");
@@ -99,8 +100,7 @@ public class TypeScriptProcessorTest {
         assertFalse(Files.exists(outputDirectory.resolve("HelloEndpoint.ts")),
                 "There is no endpoint to call any more");
         assertFalse(
-                Files.exists(outputDirectory
-                        .resolve(GeneratorProcessor.GENERATED_FILE_LIST_NAME)),
+                Files.exists(outputDirectory.resolve(OutputFolder.FILE_LIST)),
                 "Nothing in the folder was generated");
     }
 
