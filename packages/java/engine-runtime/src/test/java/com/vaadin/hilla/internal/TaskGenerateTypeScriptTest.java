@@ -16,6 +16,7 @@
 package com.vaadin.hilla.internal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -88,7 +89,11 @@ public class TaskGenerateTypeScriptTest extends TaskTest {
         new TaskGenerateOpenAPIImpl(configuration).execute();
 
         assertTrue(Files.isRegularFile(output().resolve("MyEndpoint.ts")),
-                "The endpoint of the application is written");
+                "The endpoint the configuration found is written");
+        assertFalse(Files.exists(output().resolve("CustomEndpointName.ts")),
+                "The application context is not what a production build asks");
+        assertFalse(Files.exists(output().resolve("WithoutValueEqual.ts")),
+                "The application context is not what a production build asks");
     }
 
     @Test
