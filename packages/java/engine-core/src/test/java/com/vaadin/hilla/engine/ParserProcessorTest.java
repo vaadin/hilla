@@ -20,8 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.nio.file.Path;
 import java.util.List;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -32,16 +30,6 @@ import com.vaadin.hilla.generator.model.EndpointModel;
 public class ParserProcessorTest {
     @TempDir
     private Path buildDir;
-
-    @BeforeEach
-    public void writeTypeScriptInJava() {
-        System.setProperty(GeneratorProcessor.JAVA_TYPESCRIPT_PROPERTY, "true");
-    }
-
-    @AfterEach
-    public void writeTypeScriptWithTheNodeGenerator() {
-        System.clearProperty(GeneratorProcessor.JAVA_TYPESCRIPT_PROPERTY);
-    }
 
     @Test
     public void should_FindWhatTheTypeScriptIsWrittenFrom() {

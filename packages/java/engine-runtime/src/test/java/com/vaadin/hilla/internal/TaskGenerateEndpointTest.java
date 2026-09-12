@@ -28,6 +28,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -39,6 +40,21 @@ public class TaskGenerateEndpointTest extends EndpointsTaskTest {
 
     private Path outputDirectory;
     private TaskGenerateEndpoint taskGenerateEndpoint;
+
+    /**
+     * These are the tests of the Node generator, which writes the TypeScript
+     * for a run which asks for it rather than for every run.
+     */
+    @BeforeEach
+    public void writeTypeScriptWithTheNodeGenerator() {
+        System.setProperty(GeneratorProcessor.JAVA_TYPESCRIPT_PROPERTY,
+                "false");
+    }
+
+    @AfterEach
+    public void writeTypeScriptInJava() {
+        System.clearProperty(GeneratorProcessor.JAVA_TYPESCRIPT_PROPERTY);
+    }
 
     @BeforeEach
     public void setUp() throws IOException, URISyntaxException {

@@ -38,17 +38,17 @@ everything the Node generator writes for the endpoints. `TypeScriptWriter`
 turns one whole `Generation` into those files, and `OutputFolder` puts them
 where the application reads them, replacing what the run before it wrote and
 leaving alone what it did not. What is left before the pipeline can run on it
-is calling that; what is left of the Node generator after that is the file
-router, which the pipeline still runs.
+is calling that, which the engine now does; what is left of the Node generator
+after that is the file router, which the pipeline still runs.
 
-The engine does call it: running a build or a development server with
-`-Dhilla.generator.java=true` writes the TypeScript of the endpoints from the
-classes the parser has just walked, without Node. The default is still the
-Node generator, so nothing changes for an application which does not ask for
-it; the property goes once the move is done. The task which parses the classes
-is the one writing the TypeScript, since only that run has what the writers
-need, and the task which runs the Node generator then has nothing to do: the
-two become one task once there is no OpenAPI definition to write.
+The engine does call it: a build or a development server writes the TypeScript
+of the endpoints from the classes the parser has just walked, without Node.
+`-Dhilla.generator.java=false` puts the Node generator back in charge, which
+is the way back while there is one; it goes along with the generator itself.
+The task which parses the classes is the one writing the TypeScript, since
+only that run has what the writers need, and the task which would run the Node
+generator then has nothing to do: the two become one task once there is no
+OpenAPI definition to write.
 
 The TypeScript written for every test case type checks under `tsc --strict`,
 apart from what the Node generator gets wrong in the same way.

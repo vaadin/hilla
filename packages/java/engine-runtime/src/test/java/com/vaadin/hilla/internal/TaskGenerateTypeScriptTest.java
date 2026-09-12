@@ -22,38 +22,25 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.hilla.ApplicationContextProvider;
-import com.vaadin.hilla.engine.GeneratorProcessor;
 import com.vaadin.hilla.internal.fixtures.CustomEndpoint;
 import com.vaadin.hilla.internal.fixtures.EndpointNoValue;
 import com.vaadin.hilla.internal.fixtures.MyEndpoint;
 
 /**
- * Verifies the tasks when the TypeScript of the endpoints is written in Java,
- * which needs no Node at all: the task which parses the classes writes it,
- * because only that run has what the writers need, and the task which runs the
- * Node generator does nothing.
+ * Verifies the tasks writing the TypeScript of the endpoints, which needs no
+ * Node at all: the task which parses the classes writes it, because only that
+ * run has what the writers need, and the task which would run the Node
+ * generator does nothing.
  */
 // The same classes as the other task tests, which is what has them share one
 // application context: the provider of it is a static one
 @SpringBootTest(classes = { CustomEndpoint.class, EndpointNoValue.class,
         MyEndpoint.class, ApplicationContextProvider.class })
-public class TaskGenerateTypeScriptInJavaTest extends TaskTest {
-    @BeforeEach
-    public void writeTypeScriptInJava() {
-        System.setProperty(GeneratorProcessor.JAVA_TYPESCRIPT_PROPERTY, "true");
-    }
-
-    @AfterEach
-    public void writeTypeScriptWithTheNodeGenerator() {
-        System.clearProperty(GeneratorProcessor.JAVA_TYPESCRIPT_PROPERTY);
-    }
-
+public class TaskGenerateTypeScriptTest extends TaskTest {
     @Test
     public void should_WriteTheTypeScriptOfTheEndpointsFromTheClasses()
             throws Exception {
