@@ -95,7 +95,7 @@
       "vite": "8.3.0",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "912bba4c1896bbbbaded7285fbd639e5b7050314bda631f55910390b1492e6d4"
+    "hash": "43c79553fdb90558bab632a97ee6d8a167fa87eebefd066f7d31d95b33fc634b"
   },
   "overrides": {
     "@adobe/lit-mobx": "$@adobe/lit-mobx",
