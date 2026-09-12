@@ -19,6 +19,7 @@
     "@babel/plugin-transform-react-jsx-development": "7.29.7",
     "@babel/preset-react": "7.29.7",
     "@babel/types": "7.29.8",
+    "@preact/signals-react": "3.12.0",
     "@preact/signals-react-transform": "0.8.2",
     "@rolldown/plugin-babel": "0.2.4",
     "@rollup/plugin-replace": "6.0.3",
@@ -63,6 +64,7 @@
       "@babel/plugin-transform-react-jsx-development": "7.29.7",
       "@babel/preset-react": "7.29.7",
       "@babel/types": "7.29.8",
+      "@preact/signals-react": "3.12.0",
       "@preact/signals-react-transform": "0.8.2",
       "@rolldown/plugin-babel": "0.2.4",
       "@rollup/plugin-replace": "6.0.3",
@@ -89,7 +91,7 @@
       "vite": "8.2.2",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "86e7ce682d0954b9944e06283cee2008d65ca872f55826ea4e6ca836de73f52e"
+    "hash": "f4d6904bb82f5e02e1912d5edfa5f8d366d55c4b7f6e6de24f4da5415ef37273"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
