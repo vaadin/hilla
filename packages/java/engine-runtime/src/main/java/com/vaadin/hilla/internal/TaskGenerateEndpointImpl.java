@@ -57,6 +57,13 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
     }
 
     private void runProcessor() {
+        // The TypeScript is written by the task which parses the classes when
+        // it is written in Java, since that is the run which has what the
+        // writers need
+        if (GeneratorProcessor.writesTypeScriptInJava()) {
+            return;
+        }
+
         var processor = new GeneratorProcessor(getEngineConfiguration());
         processor.process();
     }

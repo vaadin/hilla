@@ -41,6 +41,15 @@ leaving alone what it did not. What is left before the pipeline can run on it
 is calling that; what is left of the Node generator after that is the file
 router, which the pipeline still runs.
 
+The engine does call it: running a build or a development server with
+`-Dhilla.generator.java=true` writes the TypeScript of the endpoints from the
+classes the parser has just walked, without Node. The default is still the
+Node generator, so nothing changes for an application which does not ask for
+it; the property goes once the move is done. The task which parses the classes
+is the one writing the TypeScript, since only that run has what the writers
+need, and the task which runs the Node generator then has nothing to do: the
+two become one task once there is no OpenAPI definition to write.
+
 The TypeScript written for every test case type checks under `tsc --strict`,
 apart from what the Node generator gets wrong in the same way.
 

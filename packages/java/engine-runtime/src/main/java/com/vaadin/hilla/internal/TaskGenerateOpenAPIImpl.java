@@ -22,6 +22,7 @@ import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 import com.vaadin.hilla.ApplicationContextProvider;
 import com.vaadin.hilla.EndpointCodeGenerator;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
+import com.vaadin.hilla.engine.GeneratorProcessor;
 import com.vaadin.hilla.engine.ParserProcessor;
 
 /**
@@ -52,8 +53,7 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
             try {
                 var browserCallables = engineConfiguration
                         .getBrowserCallableFinder().find(engineConfiguration);
-                var processor = new ParserProcessor(engineConfiguration);
-                processor.process(browserCallables);
+                parse(engineConfiguration, browserCallables);
             } catch (Exception e) {
                 throw new ExecutionFailedException(
                         "Failed to generate OpenAPI spec", e);
@@ -63,9 +63,29 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
                 List<Class<?>> browserCallables = EndpointCodeGenerator
                         .findBrowserCallables(engineConfiguration,
                                 applicationContext);
-                var processor = new ParserProcessor(engineConfiguration);
-                processor.process(browserCallables);
+                parse(engineConfiguration, browserCallables);
             });
+        }
+    }
+
+    /**
+     * Runs the parser over the browser callable classes, which writes the
+     * OpenAPI definition.
+     *
+     * <p>
+     * The TypeScript of the endpoints is written here as well while it is being
+     * moved into Java, since the writers need what the parser has just seen and
+     * this is the run which has it; the task which runs the Node generator does
+     * nothing then. The two tasks become one once the move is done and there is
+     * no OpenAPI definition to write.
+     */
+    private static void parse(EngineAutoConfiguration engineConfiguration,
+            List<Class<?>> browserCallables) {
+        var processor = new ParserProcessor(engineConfiguration);
+        processor.process(browserCallables);
+
+        if (GeneratorProcessor.writesTypeScriptInJava()) {
+            new GeneratorProcessor(engineConfiguration).process(processor);
         }
     }
 }
