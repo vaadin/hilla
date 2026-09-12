@@ -37,6 +37,14 @@ import com.vaadin.hilla.parser.core.OpenAPIFileType;
 public final class GeneratorProcessor {
     public static String GENERATED_FILE_LIST_NAME = "generated-file-list.txt";
 
+    /**
+     * The property which makes a run write the TypeScript of the endpoints in
+     * Java instead of running the Node generator over the OpenAPI definition,
+     * while the one is being moved into the other. It goes once the move is
+     * done and the Java writers are all there is.
+     */
+    public static final String JAVA_TYPESCRIPT_PROPERTY = "hilla.generator.java";
+
     private static final Logger logger = LoggerFactory
             .getLogger(GeneratorProcessor.class);
 
@@ -53,6 +61,36 @@ public final class GeneratorProcessor {
         this.outputDirectory = conf.getOutputDir();
         this.nodeCommand = conf.getNodeCommand();
         applyConfiguration(conf.getGenerator());
+    }
+
+    /**
+     * Whether the TypeScript of the endpoints is written in Java rather than by
+     * the Node generator, which the caller has to know as well: what the Java
+     * writers need is what the parser found, and only the run which parsed the
+     * classes has it.
+     *
+     * @see #JAVA_TYPESCRIPT_PROPERTY
+     */
+    public static boolean writesTypeScriptInJava() {
+        return Boolean.getBoolean(JAVA_TYPESCRIPT_PROPERTY);
+    }
+
+    /**
+     * Generates the TypeScript of the endpoints out of what a run of the parser
+     * found, unless the Node generator is still the one writing it, and then
+     * out of the OpenAPI definition that run left behind.
+     *
+     * @param parser
+     *            the run, which has to have happened already
+     */
+    public void process(ParserProcessor parser) throws GeneratorException {
+        if (writesTypeScriptInJava()) {
+            new TypeScriptProcessor(baseDir, outputDirectory)
+                    .process(parser.getGeneration());
+            return;
+        }
+
+        process();
     }
 
     public void process() throws GeneratorException {
