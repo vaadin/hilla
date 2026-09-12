@@ -35,6 +35,14 @@ public sealed interface TypeModel {
     boolean optional();
 
     /**
+     * What a value of the type has to satisfy, which a form model binds as the
+     * validators of the property holding it. The constraints belong to the type
+     * rather than to the property, since the values of a collection can be
+     * constrained as well as the collection itself.
+     */
+    List<ConstraintModel> constraints();
+
+    /**
      * The types which TypeScript expresses without a declaration of their own.
      */
     enum ScalarKind {
@@ -47,11 +55,16 @@ public sealed interface TypeModel {
      *            from, which TypeScript has no way of telling apart: a date and
      *            an instant are both written as a string
      */
-    record Scalar(ScalarKind kind, boolean optional,
-            String javaType) implements TypeModel {
+    record Scalar(ScalarKind kind, boolean optional, String javaType,
+            List<ConstraintModel> constraints) implements TypeModel {
         public Scalar {
             Objects.requireNonNull(kind);
             Objects.requireNonNull(javaType);
+            constraints = List.copyOf(constraints);
+        }
+
+        public Scalar(ScalarKind kind, boolean optional, String javaType) {
+            this(kind, optional, javaType, List.of());
         }
 
         public static Scalar of(ScalarKind kind, String javaType) {
@@ -65,11 +78,16 @@ public sealed interface TypeModel {
      *            which a form model tells its bindings about: an array, a list
      *            and a set are all an array in TypeScript
      */
-    record ArrayOf(TypeModel items, boolean optional,
-            String javaType) implements TypeModel {
+    record ArrayOf(TypeModel items, boolean optional, String javaType,
+            List<ConstraintModel> constraints) implements TypeModel {
         public ArrayOf {
             Objects.requireNonNull(items);
             Objects.requireNonNull(javaType);
+            constraints = List.copyOf(constraints);
+        }
+
+        public ArrayOf(TypeModel items, boolean optional, String javaType) {
+            this(items, optional, javaType, List.of());
         }
     }
 
@@ -78,11 +96,16 @@ public sealed interface TypeModel {
      *            the fully qualified name of the Java type the values come in,
      *            as for an array
      */
-    record MapOf(TypeModel values, boolean optional,
-            String javaType) implements TypeModel {
+    record MapOf(TypeModel values, boolean optional, String javaType,
+            List<ConstraintModel> constraints) implements TypeModel {
         public MapOf {
             Objects.requireNonNull(values);
             Objects.requireNonNull(javaType);
+            constraints = List.copyOf(constraints);
+        }
+
+        public MapOf(TypeModel values, boolean optional, String javaType) {
+            this(values, optional, javaType, List.of());
         }
     }
 
@@ -94,10 +117,17 @@ public sealed interface TypeModel {
      *            the name and the location of the generated file
      */
     record EntityRef(String javaClass, List<TypeModel> typeArguments,
-            boolean optional) implements TypeModel {
+            boolean optional,
+            List<ConstraintModel> constraints) implements TypeModel {
         public EntityRef {
             Objects.requireNonNull(javaClass);
             typeArguments = List.copyOf(typeArguments);
+            constraints = List.copyOf(constraints);
+        }
+
+        public EntityRef(String javaClass, List<TypeModel> typeArguments,
+                boolean optional) {
+            this(javaClass, typeArguments, optional, List.of());
         }
 
         public static EntityRef of(String javaClass) {
@@ -117,11 +147,18 @@ public sealed interface TypeModel {
      *            browser has
      */
     record Provided(String name, String module, List<TypeModel> typeArguments,
-            boolean optional) implements TypeModel {
+            boolean optional,
+            List<ConstraintModel> constraints) implements TypeModel {
         public Provided {
             Objects.requireNonNull(name);
             Objects.requireNonNull(module);
             typeArguments = List.copyOf(typeArguments);
+            constraints = List.copyOf(constraints);
+        }
+
+        public Provided(String name, String module,
+                List<TypeModel> typeArguments, boolean optional) {
+            this(name, module, typeArguments, optional, List.of());
         }
     }
 
@@ -129,9 +166,15 @@ public sealed interface TypeModel {
      * A reference to a type parameter of the declaration being written, which
      * is written as it is.
      */
-    record TypeVariable(String name, boolean optional) implements TypeModel {
+    record TypeVariable(String name, boolean optional,
+            List<ConstraintModel> constraints) implements TypeModel {
         public TypeVariable {
             Objects.requireNonNull(name);
+            constraints = List.copyOf(constraints);
+        }
+
+        public TypeVariable(String name, boolean optional) {
+            this(name, optional, List.of());
         }
 
         public static TypeVariable of(String name) {

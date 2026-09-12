@@ -35,6 +35,7 @@ import com.vaadin.hilla.generator.fixtures.ReservedNameEndpoint;
 import com.vaadin.hilla.generator.fixtures.SampleEndpoint;
 import com.vaadin.hilla.generator.fixtures.ShadowingEndpoint;
 import com.vaadin.hilla.generator.fixtures.SignalsEndpoint;
+import com.vaadin.hilla.generator.fixtures.ValidatedEndpoint;
 import com.vaadin.hilla.generator.model.EndpointModel;
 import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.generator.model.Generation;
@@ -765,6 +766,59 @@ public class GeneratedTypeScriptTest {
     }
 
     @Test
+    public void should_BindWhatTheValuesOfATypeHaveToSatisfy() {
+        // The validators are named after the annotations, and are given what
+        // the annotation says: the one value it says when that is all of it,
+        // and everything it says otherwise. The values of a collection are
+        // constrained on their own, as the collection is
+        assertEquals(
+                """
+                        import {
+                          ArrayModel,
+                          Email,
+                          Min,
+                          NotBlank,
+                          NumberModel,
+                          ObjectModel,
+                          Size,
+                          StringModel,
+                          _getPropertyModel,
+                          makeObjectEmptyValueCreator,
+                        } from '@vaadin/hilla-lit-form';
+                        import type Validated from './Validated.js';
+
+                        class ValidatedModel<T extends Validated = Validated> extends ObjectModel<T> {
+                          static override createEmptyValue = makeObjectEmptyValueCreator(ValidatedModel);
+
+                          get name(): StringModel {
+                            return this[_getPropertyModel]('name', (parent, key) =>
+                              new StringModel(parent, key, true, { validators: [new NotBlank()], meta: { javaType: 'java.lang.String' } }));
+                          }
+
+                          get count(): NumberModel {
+                            return this[_getPropertyModel]('count', (parent, key) =>
+                              new NumberModel(parent, key, false, { validators: [new Min(1)], meta: { javaType: 'int' } }));
+                          }
+
+                          get address(): StringModel {
+                            return this[_getPropertyModel]('address', (parent, key) =>
+                              new StringModel(parent, key, true, { validators: [new Email({ message: 'not an address' })], meta: { javaType: 'java.lang.String' } }));
+                          }
+
+                          get tags(): ArrayModel<StringModel> {
+                            return this[_getPropertyModel]('tags', (parent, key) =>
+                              new ArrayModel(parent, key, true,
+                                (parent, key) => new StringModel(parent, key, true, { validators: [new NotBlank()], meta: { javaType: 'java.lang.String' } }),
+                                { validators: [new Size({ max: 10, min: 1 })], meta: { javaType: 'java.util.List' } }));
+                          }
+                        }
+
+                        export default ValidatedModel;
+                        """,
+                writeModel(validated()).content());
+    }
+
+    @Test
     public void should_WriteTheModelOfATypeInheritingProperties() {
         // Built on the model of the type the properties come from, so that the
         // inherited ones are bound as well
@@ -974,6 +1028,20 @@ public class GeneratedTypeScriptTest {
 
     private static GeneratedFile writeModel(EntityModel entity) {
         return new FormModelWriter().write(entity);
+    }
+
+    /**
+     * The type whose values the annotations of the validation API constrain,
+     * which is generated on its own since nothing else of the fixtures is
+     * constrained.
+     */
+    private static EntityModel validated() {
+        return new FullStackGenerator(GeneratedTypeScriptTest.class,
+                ValidatedEndpoint.class)
+                .parseEntities().stream()
+                .filter(entity -> entity.javaClass()
+                        .equals(ValidatedEndpoint.Validated.class.getName()))
+                .findFirst().orElseThrow();
     }
 
     private static UnionModel union(Class<?> javaClass) {
