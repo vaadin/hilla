@@ -186,14 +186,14 @@ Key points:
 
 ### Adding a New Java Endpoint Feature
 1. Modify/extend classes in `packages/java/endpoint`
-2. Update parser plugins if OpenAPI generation needs changes
+2. Update parser plugins if what the parser has to see changes
 3. Extend the Java TypeScript writers if the generated TypeScript changes
 4. Add integration tests in `packages/java/tests/spring/`
 
 ### Debugging Code Generation
-1. Check OpenAPI output in application's `target/generated-resources/openapi.json`
-2. Check generated TypeScript in `frontend/generated/`
-3. Enable debug logging in EngineConfiguration
+1. Check generated TypeScript in `frontend/generated/`, which
+   `generated-file-list.txt` lists
+2. Enable debug logging in EngineConfiguration
 
 ## Dependencies
 

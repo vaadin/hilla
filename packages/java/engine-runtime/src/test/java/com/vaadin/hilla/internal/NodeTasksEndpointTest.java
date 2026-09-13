@@ -115,8 +115,7 @@ public class NodeTasksEndpointTest extends EndpointsTaskTest {
     }
 
     private void assertEndpointFiles(boolean shouldExist) {
-        Arrays.asList("build/hilla-openapi.json",
-                "api/connect-client.default.ts", "api/MyEndpoint.ts")
+        Arrays.asList("api/connect-client.default.ts", "api/MyEndpoint.ts")
                 .forEach(name -> assertEquals(shouldExist,
                         new File(getTemporaryDirectory().toFile(), name)
                                 .exists(),
@@ -125,8 +124,7 @@ public class NodeTasksEndpointTest extends EndpointsTaskTest {
     }
 
     private void assertEndpointFilesInProductionMode(boolean shouldExist) {
-        Arrays.asList("build/classes/hilla-openapi.json",
-                "api/connect-client.default.ts", "api/MyEndpoint.ts")
+        Arrays.asList("api/connect-client.default.ts", "api/MyEndpoint.ts")
                 .forEach(name -> assertEquals(shouldExist,
                         new File(getTemporaryDirectory().toFile(), name)
                                 .exists(),
