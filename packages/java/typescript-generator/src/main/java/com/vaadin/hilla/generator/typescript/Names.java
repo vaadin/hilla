@@ -15,6 +15,7 @@
  */
 package com.vaadin.hilla.generator.typescript;
 
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -29,7 +30,30 @@ final class Names {
     private static final Pattern IDENTIFIER = Pattern
             .compile("[A-Za-z_$][A-Za-z0-9_$]*");
 
+    /**
+     * The words TypeScript does not accept as the name of a declaration. Only
+     * those which a Java or Kotlin method can also be called are of interest,
+     * but the rest cost nothing and keep the list the list of the language
+     * rather than a selection someone has to keep up to date.
+     */
+    private static final Set<String> RESERVED = Set.of("await", "break", "case",
+            "catch", "class", "const", "continue", "debugger", "default",
+            "delete", "do", "else", "enum", "export", "extends", "false",
+            "finally", "for", "function", "if", "implements", "import", "in",
+            "instanceof", "interface", "let", "new", "null", "package",
+            "private", "protected", "public", "return", "static", "super",
+            "switch", "this", "throw", "true", "try", "typeof", "var", "void",
+            "while", "with", "yield");
+
     private Names() {
+    }
+
+    /**
+     * Whether TypeScript reads the name as a word of the language, and a
+     * declaration going by it therefore has to be named something else.
+     */
+    static boolean isReserved(String name) {
+        return RESERVED.contains(name);
     }
 
     /**

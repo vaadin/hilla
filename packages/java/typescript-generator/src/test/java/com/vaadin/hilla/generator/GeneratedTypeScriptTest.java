@@ -24,11 +24,14 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.hilla.generator.fixtures.CustomDateEndpoint;
 import com.vaadin.hilla.generator.fixtures.EmptyEndpoint;
+import com.vaadin.hilla.generator.fixtures.GenericEndpoint;
 import com.vaadin.hilla.generator.fixtures.InheritingEndpoint;
 import com.vaadin.hilla.generator.fixtures.Nonnull;
 import com.vaadin.hilla.generator.fixtures.ProvidedTypesEndpoint;
 import com.vaadin.hilla.generator.fixtures.PushingEndpoint;
+import com.vaadin.hilla.generator.fixtures.ReservedNameEndpoint;
 import com.vaadin.hilla.generator.fixtures.SampleEndpoint;
 import com.vaadin.hilla.generator.fixtures.ShadowingEndpoint;
 import com.vaadin.hilla.generator.fixtures.SignalsEndpoint;
@@ -202,6 +205,84 @@ public class GeneratedTypeScriptTest {
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpoint).content());
+    }
+
+    @Test
+    public void should_DeclareWhatIsNamedAfterAWordOfTheLanguageApart() {
+        // Neither a function nor a parameter can go by such a name, so it is
+        // named something nothing else goes by, and the caller still reaches
+        // the method by the name of the Java one while the server is still
+        // told the name of the parameter
+        assertEquals(
+                """
+                        import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
+                        import client from './connect-client.default.js';
+
+                        export async function _delete(id: number, init?: EndpointRequestInit): Promise<void> {
+                          return client.call('ReservedNameEndpoint', '_delete', { id }, init);
+                        }
+
+                        async function __delete(id: number, init?: EndpointRequestInit): Promise<void> {
+                          return client.call('ReservedNameEndpoint', 'delete', { id }, init);
+                        }
+
+                        export async function remove(_delete: number, init?: EndpointRequestInit): Promise<void> {
+                          return client.call('ReservedNameEndpoint', 'remove', { delete: _delete }, init);
+                        }
+
+                        export async function size(init?: EndpointRequestInit): Promise<number> {
+                          return client.call('ReservedNameEndpoint', 'size', {}, init);
+                        }
+
+                        export { __delete as delete };
+                        """,
+                new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
+                        .write(endpointsOf(ReservedNameEndpoint.class).get(0))
+                        .content());
+    }
+
+    @Test
+    public void should_WriteAValueOfATypeParameterAsUnknown() {
+        // Neither the class nor the method a type parameter belongs to is
+        // written as a declaration of its own, so there is nothing for the
+        // name to stand for: only the server knows what a value of it is
+        assertEquals(
+                """
+                        import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
+                        import client from './connect-client.default.js';
+
+                        export async function all(value: unknown, init?: EndpointRequestInit): Promise<Array<unknown> | undefined> {
+                          return client.call('GenericEndpoint', 'all', { value }, init);
+                        }
+
+                        export async function of(value: unknown, init?: EndpointRequestInit): Promise<unknown> {
+                          return client.call('GenericEndpoint', 'of', { value }, init);
+                        }
+                        """,
+                new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
+                        .write(endpointsOf(GenericEndpoint.class).get(0))
+                        .content());
+    }
+
+    @Test
+    public void should_SendAClassExtendingADateAsTheDateItIs() {
+        var generator = new FullStackGenerator(GeneratedTypeScriptTest.class,
+                CustomDateEndpoint.class);
+
+        assertEquals(
+                """
+                        import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
+                        import client from './connect-client.default.js';
+
+                        export async function stamped(init?: EndpointRequestInit): Promise<string | undefined> {
+                          return client.call('CustomDateEndpoint', 'stamped', {}, init);
+                        }
+                        """,
+                new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
+                        .write(generator.parseModel().get(0)).content());
+        assertEquals(List.of(), generator.parseEntities(),
+                "A date is sent as a string, so the class declares nothing"
+                        + " the browser needs");
     }
 
     /**
