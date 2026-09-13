@@ -25,8 +25,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import jakarta.servlet.ServletContext;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -48,7 +46,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.hilla.EndpointController;
 import com.vaadin.hilla.EndpointControllerMockBuilder;
-import com.vaadin.hilla.engine.EngineAutoConfiguration;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest
@@ -178,16 +175,5 @@ public class EndpointWithRestControllerTest {
                 context.getAttribute(ApplicationConfiguration.class.getName()))
                 .thenReturn(appConfig);
         return context;
-    }
-
-    private URL getDefaultOpenApiResourcePathInDevMode() {
-        try {
-            return projectFolder.getRoot().toPath()
-                    .resolve(appConfig.getBuildFolder())
-                    .resolve(EngineAutoConfiguration.OPEN_API_PATH).toUri()
-                    .toURL();
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
