@@ -48,7 +48,13 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
 
     @Override
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
-        registerEndpointTypes(hints);
+        try {
+            registerEndpointTypes(hints, classLoader);
+        } catch (RuntimeException e) {
+            // The rest of the hints are worth registering even where the
+            // classes of the endpoints cannot be walked
+            logger.error("Unable to register the types of the endpoints", e);
+        }
 
         hints.resources().registerPattern("file-routes.json");
         hints.reflection().registerType(MenuData.class,
@@ -76,12 +82,13 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
      * They are found by walking the classes the way the generator does, which
      * is what says which types an endpoint exposes.
      */
-    private void registerEndpointTypes(RuntimeHints hints) {
+    private void registerEndpointTypes(RuntimeHints hints,
+            ClassLoader classLoader) {
         var configuration = new EngineAutoConfiguration.Builder()
                 .withDefaultAnnotations().build();
 
         registerEndpointTypes(hints, configuration,
-                browserCallables(configuration));
+                browserCallables(classLoader, configuration));
     }
 
     /**
@@ -92,7 +99,9 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
             EngineAutoConfiguration configuration,
             List<Class<?>> browserCallables) {
         if (browserCallables.isEmpty()) {
-            logger.info("No browser callable class to register types for");
+            // An application without endpoints is unusual enough to say, and
+            // it is also what a scan which found nothing looks like
+            logger.warn("No browser callable class to register types for");
             return;
         }
 
@@ -112,11 +121,21 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
     /**
      * The browser callable classes of the application, which are the ones
      * annotated as such on the classpath being built.
+     *
+     * <p>
+     * They are looked for here rather than through the finder of the
+     * configuration, which neither of the finders it offers can do while a
+     * native image is being built: one asks the running application, which
+     * there is none of, and the other starts a build of its own, which this is
+     * already part of. An application which finds its endpoints its own way
+     * therefore has to say so in a hint of its own as well.
      */
-    private List<Class<?>> browserCallables(
+    List<Class<?>> browserCallables(ClassLoader classLoader,
             EngineAutoConfiguration configuration) {
-        try (var scan = new ClassGraph().enableAnnotationInfo()
-                .enableClassInfo().scan()) {
+        // The classes of the application are the ones the loader given here
+        // has, which are not necessarily the ones the process was started with
+        try (var scan = new ClassGraph().overrideClassLoaders(classLoader)
+                .enableAnnotationInfo().enableClassInfo().scan()) {
             return configuration.getEndpointAnnotations().stream()
                     .map(Class::getName).map(scan::getClassesWithAnnotation)
                     .flatMap(classes -> classes.loadClasses().stream())
