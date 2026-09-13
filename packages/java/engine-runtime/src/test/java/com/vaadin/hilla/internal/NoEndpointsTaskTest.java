@@ -17,7 +17,6 @@ package com.vaadin.hilla.internal;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import jakarta.annotation.Nonnull;
@@ -44,7 +43,7 @@ import com.vaadin.hilla.generator.typescript.OutputFolder;
 @SpringBootTest(classes = {
         NoEndpointsTaskTest.NoopApplicationContextProvider.class })
 public class NoEndpointsTaskTest extends TaskTest {
-    private TaskGenerateOpenAPI taskGenerateOpenApi;
+    private TaskGenerateOpenAPI taskGenerateTypeScript;
 
     @Autowired
     ApplicationContext applicationContext;
@@ -88,20 +87,11 @@ public class NoEndpointsTaskTest extends TaskTest {
             var arbitraryGeneratedFile = outputDirectory.resolve("vaadin.ts");
             Files.createFile(arbitraryGeneratedFile);
 
-            taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
+            taskGenerateTypeScript = new TaskGenerateTypeScriptImpl(
                     getEngineConfiguration());
 
-            assertDoesNotThrow(taskGenerateOpenApi::execute,
+            assertDoesNotThrow(taskGenerateTypeScript::execute,
                     "Expected to not fail without npm dependencies");
-
-            var generatedOpenAPI = getGeneratedOpenAPI();
-
-            assertNull(generatedOpenAPI.getTags(),
-                    "Expected OpenAPI tags to be null");
-            assertTrue(generatedOpenAPI.getPaths().isEmpty(),
-                    "Expected OpenAPI paths to be empty");
-            assertNull(generatedOpenAPI.getComponents(),
-                    "Expected OpenAPI schemas to be null");
 
             assertFalse(generatedFileListPath.toFile().exists(),
                     "Expected file list to be deleted");

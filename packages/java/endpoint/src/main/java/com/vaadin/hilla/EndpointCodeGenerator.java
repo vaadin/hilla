@@ -115,10 +115,8 @@ public class EndpointCodeGenerator {
                         return null;
                     })).filter(Objects::nonNull).distinct().toList();
 
-            ParserProcessor parser = new ParserProcessor(engineConfiguration);
-            parser.process(browserCallables);
-
-            var generation = parser.getGeneration();
+            var generation = new ParserProcessor(engineConfiguration)
+                    .parse(browserCallables);
 
             TypeScriptProcessor generator = new TypeScriptProcessor(
                     engineConfiguration);
