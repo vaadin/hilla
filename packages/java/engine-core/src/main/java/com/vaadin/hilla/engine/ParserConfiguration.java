@@ -41,7 +41,6 @@ public final class ParserConfiguration {
     private List<Class<? extends Annotation>> endpointAnnotations = List.of();
     private List<Class<? extends Annotation>> endpointExposedAnnotations = List
             .of();
-    private String openAPIBasePath;
     private Plugins plugins;
 
     public List<Class<? extends Annotation>> getEndpointAnnotations() {
@@ -50,10 +49,6 @@ public final class ParserConfiguration {
 
     public List<Class<? extends Annotation>> getEndpointExposedAnnotations() {
         return endpointExposedAnnotations;
-    }
-
-    public Optional<String> getOpenAPIBasePath() {
-        return Optional.ofNullable(openAPIBasePath);
     }
 
     public Optional<Plugins> getPlugins() {
@@ -68,10 +63,6 @@ public final class ParserConfiguration {
     public void setEndpointExposedAnnotations(
             @NonNull List<Class<? extends Annotation>> endpointExposedAnnotations) {
         this.endpointExposedAnnotations = endpointExposedAnnotations;
-    }
-
-    void setOpenAPIBasePath(String openAPIBasePath) {
-        this.openAPIBasePath = openAPIBasePath;
     }
 
     void setPlugins(Plugins plugins) {

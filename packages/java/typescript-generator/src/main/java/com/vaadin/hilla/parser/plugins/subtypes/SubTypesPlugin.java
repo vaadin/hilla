@@ -28,7 +28,6 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Discriminator;
 import io.swagger.v3.oas.models.media.ObjectSchema;
@@ -46,7 +45,6 @@ import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
-import com.vaadin.hilla.parser.plugins.backbone.EntityPlugin;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 
@@ -87,11 +85,6 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                         .ifPresent(property -> schema.setDiscriminator(
                                 new Discriminator().propertyName(property)));
             }
-
-            // attach the schema to the openapi
-            EntityPlugin.attachSchemaWithNameToOpenApi(unionNode.getTarget(),
-                    cls.getName() + "Union",
-                    (OpenAPI) nodePath.getParentPath().getNode().getTarget());
         }
 
         // entity nodes mentioned in a @JsonSubTypes annotation found anywhere
