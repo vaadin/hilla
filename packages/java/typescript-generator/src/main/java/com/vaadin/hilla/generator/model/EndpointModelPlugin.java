@@ -253,8 +253,8 @@ public final class EndpointModelPlugin
             entities.add(buildEntity(entity, List.copyOf(own.properties())));
         } else if (own.node() instanceof SubTypesPlugin.UnionNode union) {
             unions.put(union.getSource().getName(), subTypesOf(union));
-        } else if (own.node() instanceof EndpointNode endpoint) {
-            var name = endpoint.getTarget().getName();
+        } else if (node instanceof EndpointNode endpoint) {
+            var name = endpoint.getTarget();
 
             endpoints.put(name,
                     new EndpointModel(name, endpoint.getSource().getName(),

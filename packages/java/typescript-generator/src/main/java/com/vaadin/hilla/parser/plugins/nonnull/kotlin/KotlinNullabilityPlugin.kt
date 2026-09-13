@@ -226,7 +226,6 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
             is KEndpointNode -> {
                 KMethodNode(
                     node.source,
-                    node.target,
                     parentNode.kClass.memberFunctions.first { it.name == node.source.name }
                 )
             }
@@ -238,7 +237,7 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
                 kClass.memberFunctions
                     .find { it.name == methodName }
                     ?.let { kFunction ->
-                        KMethodNode(node.source, node.target, kFunction)
+                        KMethodNode(node.source, kFunction)
                     } ?: error("Defining public class properties in BrowserCallable class body is not supported. " +
                         "Consider marking '${kClass.qualifiedName} -> " +
                         "${methodName.substring(3).lowercase()}' as either private or protected")
