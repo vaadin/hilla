@@ -15,21 +15,20 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.nodes;
 
-import io.swagger.v3.oas.models.media.ObjectSchema;
-import io.swagger.v3.oas.models.media.Schema;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
+import com.vaadin.hilla.parser.plugins.backbone.EntityFacts;
 
-public class EntityNode extends AbstractNode<ClassInfoModel, Schema<?>> {
+public class EntityNode extends AbstractNode<ClassInfoModel, EntityFacts> {
     protected EntityNode(@NonNull ClassInfoModel source,
-            @NonNull ObjectSchema target) {
+            @NonNull EntityFacts target) {
         super(source, target);
     }
 
     @NonNull
     static public EntityNode of(@NonNull ClassInfoModel model) {
-        return new EntityNode(model, new ObjectSchema());
+        return new EntityNode(model, new EntityFacts());
     }
 }

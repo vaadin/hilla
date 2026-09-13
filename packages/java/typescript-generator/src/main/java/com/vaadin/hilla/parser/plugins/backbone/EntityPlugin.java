@@ -15,52 +15,18 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone;
 
-import java.util.Objects;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.swagger.v3.oas.models.media.ObjectSchema;
-import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.media.StringSchema;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodeDependencies;
-import com.vaadin.hilla.parser.core.NodePath;
-import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
-import com.vaadin.hilla.parser.models.FieldInfoModel;
-import com.vaadin.hilla.parser.models.SpecializedModel;
-import com.vaadin.hilla.parser.models.TypeParameterModel;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 
 public final class EntityPlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
-    @Override
-    public void enter(NodePath<?> nodePath) {
-        if (nodePath.getNode() instanceof EntityNode) {
-            var entityNode = (EntityNode) nodePath.getNode();
-            var cls = entityNode.getSource();
-            Schema<?> schema = cls.isEnum() ? enumSchema(cls)
-                    : new ObjectSchema();
-            entityNode.setTarget(schema);
-
-            // Create an array of schemas for the type parameters
-            var generics = entityNode.getSource().getTypeParameters().stream()
-                    .filter(tp -> tp.getBounds().stream()
-                            .filter(Objects::nonNull)
-                            .noneMatch(Predicate
-                                    .not(SpecializedModel::isNativeObject)))
-                    .map(TypeParameterModel::getName).toList();
-
-            if (!generics.isEmpty()) {
-                schema.addExtension("x-type-parameters", generics);
-            }
-        }
-    }
-
     @NonNull
     @Override
     public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
@@ -82,13 +48,4 @@ public final class EntityPlugin
                 Stream.of(EntityNode.of(ref.getClassInfo())));
     }
 
-    private Schema<?> enumSchema(ClassInfoModel entity) {
-        var schema = new StringSchema();
-
-        schema.setEnum(entity.getFields().stream()
-                .filter(FieldInfoModel::isPublic).map(FieldInfoModel::getName)
-                .collect(Collectors.toList()));
-
-        return schema;
-    }
 }
