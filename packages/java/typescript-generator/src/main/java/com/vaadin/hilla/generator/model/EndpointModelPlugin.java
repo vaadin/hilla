@@ -25,8 +25,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import io.swagger.v3.oas.models.media.Schema;
-
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
 import com.vaadin.hilla.parser.core.NodePath;
@@ -40,6 +38,7 @@ import com.vaadin.hilla.parser.models.FieldInfoModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.models.SpecializedModel;
 import com.vaadin.hilla.parser.models.TypeParameterModel;
+import com.vaadin.hilla.parser.plugins.backbone.EntityFacts;
 import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
@@ -236,7 +235,7 @@ public final class EndpointModelPlugin
             entities.add(buildEntity(entity,
                     properties.getOrDefault(node, List.of())));
         } else if (node instanceof SubTypesPlugin.UnionNode union) {
-            unions.put(union.getSource().getName(), subTypesOf(union));
+            unions.put(union.getSource().getName(), union.getTarget());
         } else if (node instanceof EndpointNode endpoint) {
             var name = endpoint.getTarget();
 
@@ -348,53 +347,14 @@ public final class EndpointModelPlugin
     }
 
     /**
-     * The types a value of a polymorphic type can be, which the walk carries as
-     * a node of its own next to the type itself.
-     */
-    private static List<String> subTypesOf(SubTypesPlugin.UnionNode node) {
-        var members = node.getTarget().getOneOf();
-
-        return members == null ? List.of()
-                : members.stream().map(Schema::get$ref).filter(Objects::nonNull)
-                        .map(EndpointModelPlugin::classOfRef).toList();
-    }
-
-    /**
      * The property saying which subtype a value is, which the plugin handling
-     * the subtypes adds to the schema of every type of the hierarchy: it is the
-     * only property whose schema holds the values it accepts.
+     * the subtypes says about every type of such a hierarchy.
      */
     private static Optional<EntityModel.Discriminator> discriminator(
-            Schema<?> schema) {
-        return schemasOf(schema)
-                .flatMap(member -> member.getProperties() == null
-                        ? Stream.<Map.Entry<String, Schema>> of()
-                        : member.getProperties().entrySet().stream())
-                .filter(property -> property.getValue().getEnum() != null
-                        && !property.getValue().getEnum().isEmpty())
-                .findFirst()
-                .map(property -> new EntityModel.Discriminator(
-                        property.getKey(), property.getValue().getEnum()
-                                .stream().map(String::valueOf).toList()));
-    }
-
-    /**
-     * The schema itself and the ones it is composed of, since the properties a
-     * subtype declares itself are in a member of its own.
-     */
-    private static Stream<Schema<?>> schemasOf(Schema<?> schema) {
-        if (schema == null) {
-            return Stream.of();
-        }
-
-        var members = schema.getAnyOf() == null ? Stream.<Schema<?>> of()
-                : schema.getAnyOf().stream().map(member -> (Schema<?>) member);
-
-        return Stream.concat(Stream.of(schema), members);
-    }
-
-    private static String classOfRef(String ref) {
-        return ref.substring(ref.lastIndexOf('/') + 1);
+            EntityFacts entity) {
+        return entity.getDiscriminator()
+                .map(discriminator -> new EntityModel.Discriminator(
+                        discriminator.name(), discriminator.acceptedValues()));
     }
 
     /**
