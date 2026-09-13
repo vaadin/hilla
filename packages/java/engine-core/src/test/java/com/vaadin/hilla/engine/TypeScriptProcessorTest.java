@@ -104,6 +104,19 @@ public class TypeScriptProcessorTest {
                 "Nothing in the folder was generated");
     }
 
+    @Test
+    public void should_WriteWhereTheConfigurationOfTheApplicationSays()
+            throws IOException {
+        new TypeScriptProcessor(new EngineAutoConfiguration.Builder()
+                .baseDir(baseDir).outputDir(OUTPUT).build())
+                .process(GENERATION);
+
+        assertTrue(
+                Files.isRegularFile(
+                        outputDirectory.resolve("HelloEndpoint.ts")),
+                "The endpoint is written into the folder of the output");
+    }
+
     private void process(Generation generation) {
         new TypeScriptProcessor(baseDir, OUTPUT).process(generation);
     }
