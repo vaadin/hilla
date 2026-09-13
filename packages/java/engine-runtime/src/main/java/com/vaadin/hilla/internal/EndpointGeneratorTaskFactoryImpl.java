@@ -50,16 +50,14 @@ public class EndpointGeneratorTaskFactoryImpl
         return new FrontendTools(settings);
     }
 
+    /**
+     * The TypeScript of the endpoints is written by the task which parses the
+     * browser callable classes, since that is the run which has what the
+     * writers need, so there is nothing left for this one to do.
+     */
     @Override
     public TaskGenerateEndpoint createTaskGenerateEndpoint(Options options) {
-        if (!options.isRunNpmInstall() && !options.isDevBundleBuild()
-                && !options.isProductionMode()) {
-            // Skip for prepare-frontend phase and in production server
-            return new SkipTaskGenerateEndpoint();
-        }
-
-        var engineConfiguration = configureFromOptions(options);
-        return new TaskGenerateEndpointImpl(engineConfiguration);
+        return new SkipTaskGenerateEndpoint();
     }
 
     @Override
@@ -78,7 +76,8 @@ public class EndpointGeneratorTaskFactoryImpl
             implements TaskGenerateEndpoint {
         @Override
         public void execute() {
-            LOGGER.debug("Skipping generating TypeScript endpoints");
+            LOGGER.debug("The TypeScript of the endpoints is written along"
+                    + " with the OpenAPI definition");
         }
     }
 

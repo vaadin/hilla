@@ -1,8 +1,0 @@
-{
-  "extends": "../../../tsconfig.json",
-  "compilerOptions": {
-    "isolatedDeclarations": true
-  },
-  "include": ["src", "test"],
-  "exclude": ["test/**/*.snap.ts"]
-}

@@ -164,8 +164,8 @@ public final class FullStackGenerator {
     public Map<String, String> generate() {
         var files = new LinkedHashMap<String, String>();
 
-        new TypeScriptWriter().write(parseGeneration()).forEach(
-                file -> files.put(file.path(), file.content()));
+        new TypeScriptWriter().write(parseGeneration())
+                .forEach(file -> files.put(file.path(), file.content()));
 
         return files;
     }
@@ -246,10 +246,6 @@ public final class FullStackGenerator {
 
         return plugins;
     }
-
-
-
-
 
     /**
      * Returns the module folder, which is the parent of the build folder.
