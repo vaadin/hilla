@@ -32,9 +32,9 @@ filling in text templates, as nothing needs the TypeScript to be parsed. So far
 it covers the client, the endpoints, the barrel, the types they refer to, the
 models a form binds those types through, the unions saying which subtype a
 value of a polymorphic type is, the methods sending a series of values rather
-than returning one and the types it refers to by name rather than declaring,
-such as a file or a signal; what an endpoint does with a signal still comes
-from the Node generator, which is what the pipeline runs.
+than returning one, the types it refers to by name rather than declaring, such
+as a file or a signal, and the signals a value is shared through. What is left
+of the Node generator is the file router, which the pipeline still runs.
 
 ## Architecture
 
