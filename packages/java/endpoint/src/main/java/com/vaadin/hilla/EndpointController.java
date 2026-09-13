@@ -126,7 +126,7 @@ public class EndpointController {
 
     /**
      * Initializes the controller by registering all endpoints found in the
-     * OpenApi definition or, as a fallback, in the Spring context.
+     * Spring context.
      */
     public void registerEndpoints() {
         // Spring returns bean names in lower camel case, while Hilla names
