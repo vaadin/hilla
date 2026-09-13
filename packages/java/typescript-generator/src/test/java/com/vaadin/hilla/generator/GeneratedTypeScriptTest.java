@@ -16,6 +16,8 @@
 package com.vaadin.hilla.generator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Set;
@@ -32,6 +34,7 @@ import com.vaadin.hilla.generator.fixtures.ShadowingEndpoint;
 import com.vaadin.hilla.generator.fixtures.SignalsEndpoint;
 import com.vaadin.hilla.generator.model.EndpointModel;
 import com.vaadin.hilla.generator.model.EntityModel;
+import com.vaadin.hilla.generator.model.Generation;
 import com.vaadin.hilla.generator.model.UnionModel;
 import com.vaadin.hilla.generator.typescript.BarrelWriter;
 import com.vaadin.hilla.generator.typescript.ClientWriter;
@@ -39,6 +42,7 @@ import com.vaadin.hilla.generator.typescript.EndpointWriter;
 import com.vaadin.hilla.generator.typescript.EntityWriter;
 import com.vaadin.hilla.generator.typescript.FormModelWriter;
 import com.vaadin.hilla.generator.typescript.GeneratedFile;
+import com.vaadin.hilla.generator.typescript.TypeScriptWriter;
 import com.vaadin.hilla.generator.typescript.UnionWriter;
 import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.plugins.nonnull.AnnotationMatcher;
@@ -371,6 +375,28 @@ public class GeneratedTypeScriptTest {
 
                 export default client;
                 """, new ClientWriter().write().content());
+    }
+
+    @Test
+    public void should_WriteTheClientOnlyWhenItIsTheGeneratedOne() {
+        var generation = new Generation(endpoints, List.of(), List.of());
+
+        assertTrue(
+                pathsOf(new TypeScriptWriter().write(generation))
+                        .contains("connect-client.default.ts"),
+                "The endpoints have no client to call the server with"
+                        + " otherwise");
+
+        var files = new TypeScriptWriter("../custom-client.js")
+                .write(generation);
+
+        assertFalse(pathsOf(files).contains("connect-client.default.ts"),
+                "The application has a client of its own");
+        assertTrue(
+                content(files, "SampleEndpoint.ts")
+                        .contains("import client from '../custom-client.js';"),
+                "The endpoints call the server with the client of the"
+                        + " application");
     }
 
     @Test
@@ -847,6 +873,18 @@ public class GeneratedTypeScriptTest {
 
                 export default Pale;
                 """, write(entity(SampleEndpoint.Shaded.Pale.class)).content());
+    }
+
+    private static List<String> pathsOf(List<GeneratedFile> files) {
+        return files.stream().map(GeneratedFile::path).toList();
+    }
+
+    private static String content(List<GeneratedFile> files, String path) {
+        return files.stream().filter(file -> file.path().equals(path))
+                .findFirst()
+                .orElseThrow(
+                        () -> new AssertionError(path + " was not written"))
+                .content();
     }
 
     private static GeneratedFile write(EntityModel entity) {

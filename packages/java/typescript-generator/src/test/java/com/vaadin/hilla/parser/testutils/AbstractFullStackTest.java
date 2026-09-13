@@ -82,7 +82,7 @@ public abstract class AbstractFullStackTest {
      *
      * @see FullStackGenerator#withClientFile()
      */
-    private static final String CLIENT_FILE = "connect-client.default.ts";
+    protected static final String CLIENT_FILE = "connect-client.default.ts";
 
     private static final String UPDATE_SNAPSHOTS_PROPERTY = "hilla.test.updateSnapshots";
 
@@ -158,13 +158,10 @@ public abstract class AbstractFullStackTest {
      */
     private static Map<String, String> toSnapshotPaths(
             FullStackGenerator generator, Map<String, String> generated) {
-        var prefix = generator.getSnapshotsPackage().replace('.', '/') + "/";
         var snapshots = new LinkedHashMap<String, String>();
 
         generated.forEach((path, content) -> {
-            var snapshotPath = path.startsWith(prefix)
-                    ? path.substring(prefix.length())
-                    : path;
+            var snapshotPath = toSnapshotPath(generator, path);
 
             if (snapshots.containsKey(snapshotPath)) {
                 throw new IllegalStateException(
@@ -178,12 +175,27 @@ public abstract class AbstractFullStackTest {
         return snapshots;
     }
 
+    /**
+     * Where a generated file belongs among the snapshots of a case.
+     *
+     * @see #toSnapshotPaths(FullStackGenerator, Map)
+     */
+    protected static String toSnapshotPath(FullStackGenerator generator,
+            String path) {
+        var prefix = generator.getSnapshotsPackage().replace('.', '/') + "/";
+
+        return path.startsWith(prefix) ? path.substring(prefix.length()) : path;
+    }
+
     private static boolean isUpdatingSnapshots() {
         var value = System.getProperty(UPDATE_SNAPSHOTS_PROPERTY);
         return value != null && !"false".equalsIgnoreCase(value);
     }
 
-    private static Map<String, String> readSnapshots(
+    /**
+     * The files a case expects, keyed by their place in the snapshots folder.
+     */
+    protected static Map<String, String> readSnapshots(
             FullStackGenerator generator) {
         var snapshotsDir = getSnapshotsDir(generator);
 
