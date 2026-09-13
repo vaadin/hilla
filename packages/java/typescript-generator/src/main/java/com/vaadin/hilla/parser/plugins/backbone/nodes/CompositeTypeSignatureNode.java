@@ -20,34 +20,34 @@ import java.util.List;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-import io.swagger.v3.oas.models.media.Schema;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.AnnotatedModel;
 import com.vaadin.hilla.parser.models.AnnotationInfoModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
+import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 
 public final class CompositeTypeSignatureNode extends
-        AbstractNode<List<SignatureModel>, Schema<?>> implements TypedNode {
+        AbstractNode<List<SignatureModel>, TypeFacts> implements TypedNode {
 
     private final List<AnnotationInfoModel> annotations;
 
     private CompositeTypeSignatureNode(@NonNull List<SignatureModel> source,
-            @NonNull Schema<?> target, List<AnnotationInfoModel> annotations) {
+            @NonNull TypeFacts target, List<AnnotationInfoModel> annotations) {
         super(source, target);
         this.annotations = annotations;
     }
 
     private CompositeTypeSignatureNode(@NonNull List<SignatureModel> source,
-            @NonNull Schema<?> target) {
+            @NonNull TypeFacts target) {
         this(source, target, extractAnnotations(source));
     }
 
     @NonNull
     static public CompositeTypeSignatureNode of(
             @NonNull List<SignatureModel> source) {
-        return new CompositeTypeSignatureNode(source, new Schema<>());
+        return new CompositeTypeSignatureNode(source, TypeFacts.unknown());
     }
 
     @Override
