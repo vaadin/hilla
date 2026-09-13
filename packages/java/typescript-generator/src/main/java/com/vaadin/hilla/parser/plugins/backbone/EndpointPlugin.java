@@ -60,10 +60,6 @@ public final class EndpointPlugin
         }
     }
 
-    @Override
-    public void exit(NodePath<?> nodePath) {
-    }
-
     @NonNull
     @Override
     public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
