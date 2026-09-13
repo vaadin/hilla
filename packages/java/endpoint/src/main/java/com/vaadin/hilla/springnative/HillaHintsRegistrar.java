@@ -15,16 +15,13 @@
  */
 package com.vaadin.hilla.springnative;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
+import io.github.classgraph.ClassGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aot.hint.MemberCategory;
@@ -34,8 +31,10 @@ import org.springframework.aot.hint.TypeReference;
 
 import com.vaadin.flow.router.MenuData;
 import com.vaadin.flow.server.menu.AvailableViewInfo;
-import com.vaadin.hilla.OpenAPIUtil;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
+import com.vaadin.hilla.engine.ParserProcessor;
+import com.vaadin.hilla.generator.model.EndpointModel;
+import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.push.PushEndpoint;
 import com.vaadin.hilla.push.messages.fromclient.AbstractServerMessage;
 import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
@@ -45,8 +44,6 @@ import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
  */
 public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
 
-    private static final String openApiResourceName = "/"
-            + EngineAutoConfiguration.OPEN_API_PATH;
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
@@ -70,34 +67,61 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
         }
     }
 
+    /**
+     * Registers the classes the browser reaches: the browser callable ones and
+     * the types their methods send and take, which are what the values are
+     * serialized from and into at runtime.
+     *
+     * <p>
+     * They are found by walking the classes the way the generator does, which
+     * is what says which types an endpoint exposes.
+     */
     private void registerEndpointTypes(RuntimeHints hints) {
-        try {
-            var resource = getClass().getResource(openApiResourceName);
-            if (resource == null) {
-                logger.error("Resource {} is not available",
-                        openApiResourceName);
-                return;
-            } else {
-                logger.info(
-                        "Resource {} is being used for registering endpoint types",
-                        openApiResourceName);
-            }
+        var configuration = new EngineAutoConfiguration.Builder()
+                .withDefaultAnnotations().build();
 
-            var reader = new BufferedReader(
-                    new InputStreamReader(resource.openStream()));
-            String openApiAsText = reader.lines()
-                    .collect(Collectors.joining("\n"));
-            Set<String> types = OpenAPIUtil.findOpenApiClasses(openApiAsText);
-            for (String type : types) {
-                hints.reflection().registerType(TypeReference.of(type),
-                        MemberCategory.values());
-            }
-        } catch (IOException e) {
-            logger.error("Error while scanning and registering endpoint types",
-                    e);
+        registerEndpointTypes(hints, configuration,
+                browserCallables(configuration));
+    }
+
+    /**
+     * Registers the types the given browser callable classes expose, which is
+     * what walking them says.
+     */
+    void registerEndpointTypes(RuntimeHints hints,
+            EngineAutoConfiguration configuration,
+            List<Class<?>> browserCallables) {
+        if (browserCallables.isEmpty()) {
+            logger.info("No browser callable class to register types for");
+            return;
         }
-        hints.resources()
-                .registerPattern(EngineAutoConfiguration.OPEN_API_PATH);
+
+        logger.info("Registering the types of {} browser callable classes",
+                browserCallables.size());
+
+        var generation = new ParserProcessor(configuration)
+                .parse(browserCallables);
+
+        Stream.concat(
+                generation.endpoints().stream().map(EndpointModel::javaClass),
+                generation.entities().stream().map(EntityModel::javaClass))
+                .distinct().forEach(type -> hints.reflection().registerType(
+                        TypeReference.of(type), MemberCategory.values()));
+    }
+
+    /**
+     * The browser callable classes of the application, which are the ones
+     * annotated as such on the classpath being built.
+     */
+    private List<Class<?>> browserCallables(
+            EngineAutoConfiguration configuration) {
+        try (var scan = new ClassGraph().enableAnnotationInfo()
+                .enableClassInfo().scan()) {
+            return configuration.getEndpointAnnotations().stream()
+                    .map(Class::getName).map(scan::getClassesWithAnnotation)
+                    .flatMap(classes -> classes.loadClasses().stream())
+                    .distinct().toList();
+        }
     }
 
     private Collection<Class<?>> getMessageTypes(Class<?> cls) {
