@@ -37,6 +37,15 @@ import com.vaadin.hilla.parser.core.OpenAPIFileType;
 public final class GeneratorProcessor {
     public static String GENERATED_FILE_LIST_NAME = "generated-file-list.txt";
 
+    /**
+     * The property which puts the Node generator back in charge of the
+     * TypeScript of the endpoints, which Java writes otherwise:
+     * {@code -Dhilla.generator.java=false} runs it over the OpenAPI definition
+     * the way every application used to. It goes, along with the Node
+     * generator, once nothing needs the way back.
+     */
+    public static final String JAVA_TYPESCRIPT_PROPERTY = "hilla.generator.java";
+
     private static final Logger logger = LoggerFactory
             .getLogger(GeneratorProcessor.class);
 
@@ -53,6 +62,37 @@ public final class GeneratorProcessor {
         this.outputDirectory = conf.getOutputDir();
         this.nodeCommand = conf.getNodeCommand();
         applyConfiguration(conf.getGenerator());
+    }
+
+    /**
+     * Whether the TypeScript of the endpoints is written in Java, which it is
+     * unless a run asks for the Node generator instead. The caller has to know
+     * as well: what the Java writers need is what the parser found, and only
+     * the run which parsed the classes has it.
+     *
+     * @see #JAVA_TYPESCRIPT_PROPERTY
+     */
+    public static boolean writesTypeScriptInJava() {
+        return !"false"
+                .equalsIgnoreCase(System.getProperty(JAVA_TYPESCRIPT_PROPERTY));
+    }
+
+    /**
+     * Generates the TypeScript of the endpoints out of what a run of the parser
+     * found, unless the Node generator is still the one writing it, and then
+     * out of the OpenAPI definition that run left behind.
+     *
+     * @param parser
+     *            the run, which has to have happened already
+     */
+    public void process(ParserProcessor parser) throws GeneratorException {
+        if (writesTypeScriptInJava()) {
+            new TypeScriptProcessor(baseDir, outputDirectory)
+                    .process(parser.getGeneration());
+            return;
+        }
+
+        process();
     }
 
     public void process() throws GeneratorException {
