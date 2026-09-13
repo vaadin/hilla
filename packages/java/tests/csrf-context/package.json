@@ -6,10 +6,10 @@
     "@vaadin/common-frontend": "0.0.24",
     "@vaadin/hilla-frontend": "file:../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../ts/lit-form",
-    "@vaadin/icon": "25.2.10",
-    "@vaadin/icons": "25.2.10",
+    "@vaadin/icon": "25.2.11",
+    "@vaadin/icons": "25.2.11",
     "@vaadin/router": "2.0.1",
-    "@vaadin/tooltip": "25.2.10",
+    "@vaadin/tooltip": "25.2.11",
     "@vaadin/vaadin-lumo-styles": "25.2.10",
     "@vaadin/vaadin-themable-mixin": "25.2.10",
     "lit": "3.3.3"
@@ -24,7 +24,7 @@
     "@rolldown/plugin-babel": "0.2.4",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.4.0",
-    "@types/node": "25.9.5",
+    "@types/node": "25.9.6",
     "@vaadin/hilla-generator-cli": "file:../../../ts/generator-cli",
     "@vaadin/hilla-generator-core": "file:../../../ts/generator-core",
     "@vaadin/hilla-generator-plugin-backbone": "file:../../../ts/generator-plugin-backbone",
@@ -51,10 +51,10 @@
       "@vaadin/common-frontend": "0.0.24",
       "@vaadin/hilla-frontend": "25.2.9",
       "@vaadin/hilla-lit-form": "25.2.9",
-      "@vaadin/icon": "25.2.10",
-      "@vaadin/icons": "25.2.10",
+      "@vaadin/icon": "25.2.11",
+      "@vaadin/icons": "25.2.11",
       "@vaadin/router": "2.0.1",
-      "@vaadin/tooltip": "25.2.10",
+      "@vaadin/tooltip": "25.2.11",
       "@vaadin/vaadin-lumo-styles": "25.2.10",
       "@vaadin/vaadin-themable-mixin": "25.2.10",
       "lit": "3.3.3"
@@ -69,7 +69,7 @@
       "@rolldown/plugin-babel": "0.2.4",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.4.0",
-      "@types/node": "25.9.5",
+      "@types/node": "25.9.6",
       "@vaadin/hilla-generator-cli": "25.2.9",
       "@vaadin/hilla-generator-core": "25.2.9",
       "@vaadin/hilla-generator-plugin-backbone": "25.2.9",
@@ -91,7 +91,7 @@
       "vite": "8.0.16",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "1df4a90742c249ec3f21e5d7d8f444fb507ab816815ef944a3b3193662b471cd"
+    "hash": "9197832f9431cb2c99fdea791a052f9d264795723a0f97b7e3e508596bfaa902"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
