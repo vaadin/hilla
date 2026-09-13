@@ -90,6 +90,24 @@ public final class ParserProcessor {
         return modelPlugin.getGeneration();
     }
 
+    /**
+     * Runs the parser over the browser callable classes and returns everything
+     * the TypeScript of them is written from, without writing anything.
+     *
+     * @param endpoints
+     *            the browser callable classes
+     */
+    public Generation parse(List<Class<?>> endpoints) throws ParserException {
+        try {
+            createOpenAPI(endpoints);
+        } catch (IOException e) {
+            throw new ParserException(
+                    "Unable to walk the browser callable" + " classes", e);
+        }
+
+        return getGeneration();
+    }
+
     public void process(List<Class<?>> endpoints) throws ParserException {
         String openAPIString;
 
