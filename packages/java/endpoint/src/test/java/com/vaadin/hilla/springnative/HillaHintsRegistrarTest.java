@@ -64,6 +64,46 @@ public class HillaHintsRegistrarTest {
                 "The endpoint sends a value of the type: " + registered);
     }
 
+    @Test
+    public void should_FindTheBrowserCallableClassesTheLoaderHas() {
+        var found = new HillaHintsRegistrar().browserCallables(
+                getClass().getClassLoader(),
+                new EngineAutoConfiguration.Builder().withDefaultAnnotations()
+                        .build());
+
+        assertTrue(found.contains(HintedEndpoint.class),
+                "The endpoint is annotated as browser callable");
+    }
+
+    @Test
+    public void should_RegisterNothingWithoutABrowserCallableClass() {
+        var hints = new RuntimeHints();
+
+        new HillaHintsRegistrar().registerEndpointTypes(hints,
+                new EngineAutoConfiguration.Builder().withDefaultAnnotations()
+                        .build(),
+                List.of());
+
+        assertTrue(registeredTypes(hints).isEmpty(),
+                "There is nothing the browser reaches");
+    }
+
+    @Test
+    public void should_RegisterTheRestWhenTheClassesCannotBeWalked() {
+        var hints = new RuntimeHints();
+
+        // Everything the classpath of the tests holds, which includes classes
+        // the parser rejects on purpose
+        new HillaHintsRegistrar().registerHints(hints,
+                getClass().getClassLoader());
+
+        assertTrue(
+                registeredTypes(hints)
+                        .contains("com.vaadin.hilla.push.PushEndpoint"),
+                "What the browser talks to the server through is registered"
+                        + " whether the endpoints can be walked or not");
+    }
+
     private static List<String> registeredTypes(RuntimeHints hints) {
         return hints.reflection().typeHints()
                 .map(hint -> hint.getType().getName())

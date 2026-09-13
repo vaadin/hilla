@@ -16,7 +16,9 @@
 package com.vaadin.hilla.engine;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -30,6 +32,23 @@ import com.vaadin.hilla.generator.model.EndpointModel;
 public class ParserProcessorTest {
     @TempDir
     private Path buildDir;
+
+    @Test
+    public void should_WalkTheClassesWithoutWritingTheOpenAPIDefinition() {
+        var configuration = new EngineAutoConfiguration.Builder()
+                .parser(new ParserConfiguration()).buildDir(buildDir)
+                .endpointAnnotations(Endpoint.class).build();
+
+        var generation = new ParserProcessor(configuration)
+                .parse(List.of(TestEndpoint.class));
+
+        assertEquals(
+                List.of("TestEndpoint"), generation.endpoints().stream()
+                        .map(EndpointModel::name).toList(),
+                "The classes are walked all the same");
+        assertFalse(Files.exists(configuration.getOpenAPIFile()),
+                "Nothing asked for the OpenAPI definition");
+    }
 
     @Test
     public void should_FindWhatTheTypeScriptIsWrittenFrom() {
