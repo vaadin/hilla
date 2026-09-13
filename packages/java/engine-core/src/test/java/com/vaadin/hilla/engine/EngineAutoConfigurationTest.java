@@ -230,7 +230,6 @@ public class EngineAutoConfigurationTest {
         var mainClass = "com.example.Main";
         var sourceClasses = List.of("com.example.Config");
         var productionMode = true;
-        var nodeCommand = "node-custom";
         var classFinder = mock(ClassFinder.class);
         var classLoader = mock(ClassLoader.class);
         // when(classFinder.getClassLoader()).thenReturn(classLoader);
@@ -244,8 +243,7 @@ public class EngineAutoConfigurationTest {
                 .classpath(classpathStrings).parser(parser).outputDir(outputDir)
                 .groupId(groupId).artifactId(artifactId).mainClass(mainClass)
                 .sourceClasses(sourceClasses).productionMode(productionMode)
-                .nodeCommand(nodeCommand).classFinder(classFinder)
-                .classLoader(classLoader)
+                .classFinder(classFinder).classLoader(classLoader)
                 .browserCallableFinder(browserCallableFinder)
                 .endpointAnnotations(endpointAnnotation)
                 .endpointExposedAnnotations(endpointExposedAnnotation).build();
@@ -264,7 +262,6 @@ public class EngineAutoConfigurationTest {
         assertEquals(mainClass, config.getMainClass());
         assertEquals(sourceClasses, config.getSourceClasses());
         assertTrue(config.isProductionMode());
-        assertEquals(nodeCommand, config.getNodeCommand());
         assertSame(classFinder, config.getClassFinder());
         assertSame(classLoader, config.getClassLoader());
         assertSame(browserCallableFinder, config.getBrowserCallableFinder());

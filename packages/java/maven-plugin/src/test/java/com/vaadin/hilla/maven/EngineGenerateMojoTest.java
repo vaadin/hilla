@@ -27,8 +27,15 @@ import org.mockito.Mockito;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.engine.ParserProcessor;
 import com.vaadin.hilla.engine.TypeScriptProcessor;
+import com.vaadin.hilla.generator.model.Generation;
 
 public class EngineGenerateMojoTest extends AbstractMojoTest {
+    /**
+     * What a run of the parser is made to return, which is what the mojo has to
+     * hand the writers.
+     */
+    private static final Generation GENERATION = new Generation(List.of(),
+            List.of(), List.of());
 
     @Test
     public void should_RunParserAndGenerator() throws Exception {
@@ -44,6 +51,10 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                     var conf = (EngineAutoConfiguration) context.arguments()
                             .getFirst();
                     assertEquals(conf.getBaseDir(), getTemporaryDirectory());
+
+                    // What the parser found, so that the test says which
+                    // generation the writers are handed rather than none
+                    Mockito.doReturn(GENERATION).when(mock).getGeneration();
                 });
                 var mockedConstructionGenerator = Mockito.mockConstruction(
                         TypeScriptProcessor.class, Mockito.withSettings()
@@ -81,8 +92,7 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
             inOrder.verify(parserProcessor).process(List.of());
             // The writers are handed what the parser found, which is what the
             // TypeScript of the endpoints is written from
-            inOrder.verify(typeScriptProcessor)
-                    .process(parserProcessor.getGeneration());
+            inOrder.verify(typeScriptProcessor).process(GENERATION);
         }
     }
 
