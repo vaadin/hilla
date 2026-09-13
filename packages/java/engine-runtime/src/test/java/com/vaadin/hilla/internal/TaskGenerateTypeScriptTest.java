@@ -25,8 +25,11 @@ import java.nio.file.Path;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.vaadin.flow.di.Lookup;
+import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.hilla.ApplicationContextProvider;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.internal.fixtures.CustomEndpoint;
@@ -94,6 +97,20 @@ public class TaskGenerateTypeScriptTest extends TaskTest {
                 "The application context is not what a production build asks");
         assertFalse(Files.exists(output().resolve("WithoutValueEqual.ts")),
                 "The application context is not what a production build asks");
+    }
+
+    @Test
+    public void should_LeaveTheTaskOfTheEndpointsWithNothingToDo()
+            throws Exception {
+        var task = new EndpointGeneratorTaskFactoryImpl()
+                .createTaskGenerateEndpoint(
+                        new Options(Mockito.mock(Lookup.class),
+                                getTemporaryDirectory().toFile()));
+
+        task.execute();
+
+        assertFalse(Files.exists(output()),
+                "The task which parses the classes is what writes them");
     }
 
     private Path output() {
