@@ -27,7 +27,6 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CompileClasspath
@@ -35,7 +34,6 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
@@ -88,7 +86,6 @@ public abstract class EngineGenerateTask : DefaultTask() {
         effectiveConfig.set(PluginEffectiveConfiguration.get(project))
         classpath.from(engineConfig.classpath.map { it.toFile() })
 
-        openApiFile.set(engineConfig.openAPIFile.toFile())
         outputDir.set(engineConfig.outputDir.toFile())
     }
 
@@ -113,10 +110,6 @@ public abstract class EngineGenerateTask : DefaultTask() {
 
     @get:CompileClasspath
     internal abstract val classpath : ConfigurableFileCollection
-
-    @get:Optional
-    @get:OutputFile
-    internal abstract val openApiFile: RegularFileProperty
 
     @get:OutputDirectory
     internal abstract val outputDir: DirectoryProperty

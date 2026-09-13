@@ -17,8 +17,6 @@
 package com.vaadin.hilla.gradle.plugin
 
 import com.vaadin.flow.internal.FrontendUtils
-import io.swagger.v3.core.util.Json
-import io.swagger.v3.oas.models.OpenAPI
 import org.gradle.testkit.runner.BuildResult
 import org.junit.Test
 import java.io.File
@@ -33,7 +31,7 @@ import org.gradle.testkit.runner.TaskOutcome
 class SingleModuleTest : AbstractGradleTest() {
 
     @Test
-    fun `endpoints ts and openapi json are generated after hillaGenerate task executed in dev mode`() {
+    fun `endpoints ts is generated after hillaGenerate task executed in dev mode`() {
         createProject(withNpmInstall = true)
 
         addHelloReactEndpoint()
@@ -43,12 +41,11 @@ class SingleModuleTest : AbstractGradleTest() {
 
         buildResult.expectTaskSucceded("hillaGenerate")
 
-        verifyOpenApiJsonFileGeneratedProperly()
         verifyEndpointsTsFileGeneratedProperly()
     }
 
     @Test
-    fun `endpoints ts and openapi json are generated after hillaGenerate task executed in prod mode`() {
+    fun `endpoints ts is generated after hillaGenerate task executed in prod mode`() {
         createProject(withNpmInstall = true, productionMode = true)
 
         addHelloReactEndpoint()
@@ -58,7 +55,6 @@ class SingleModuleTest : AbstractGradleTest() {
 
         buildResult.expectTaskSucceded("hillaGenerate")
 
-        verifyOpenApiJsonFileGeneratedProperly()
         verifyEndpointsTsFileGeneratedProperly()
     }
 
@@ -144,7 +140,6 @@ class SingleModuleTest : AbstractGradleTest() {
 
         buildResult.expectTaskSucceded("hillaGenerate")
 
-        verifyOpenApiJsonFileGeneratedProperly()
         verifyEndpointsTsFileGeneratedProperly()
 
         // shorthand version
@@ -157,7 +152,6 @@ class SingleModuleTest : AbstractGradleTest() {
 
         buildResult.expectTaskSucceded("hillaGenerate")
 
-        verifyOpenApiJsonFileGeneratedProperly()
         verifyEndpointsTsFileGeneratedProperly()
     }
 
@@ -176,22 +170,7 @@ class SingleModuleTest : AbstractGradleTest() {
 
         buildResult.expectTaskSucceded("hillaGenerate")
 
-        verifyOpenApiJsonFileGeneratedProperly()
         verifyEndpointsTsFileGeneratedProperly()
-    }
-
-    private fun verifyOpenApiJsonFileGeneratedProperly() {
-        val openApiJsonFileName = "classes/hilla-openapi.json"
-        val openApiJsonFile = testProject.folder("build").resolve(openApiJsonFileName)
-
-        expect(true, "hilla-openapi.json should be created after executing hillaGenerate task!") {
-            openApiJsonFile.exists()
-        }
-
-        val openApi = Json.mapper().readValue(openApiJsonFile, OpenAPI::class.java)
-        expect(true, "Generated hilla-openapi.json file should contain paths for existing endpoints!") {
-            openApi.paths.contains("/HelloReactEndpoint/sayHello")
-        }
     }
 
     private fun verifyEndpointsTsFileGeneratedProperly() {
