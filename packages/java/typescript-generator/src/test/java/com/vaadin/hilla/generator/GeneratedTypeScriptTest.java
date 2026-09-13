@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import com.vaadin.hilla.generator.fixtures.EmptyEndpoint;
 import com.vaadin.hilla.generator.fixtures.InheritingEndpoint;
+import com.vaadin.hilla.generator.fixtures.ProvidedTypesEndpoint;
 import com.vaadin.hilla.generator.fixtures.PushingEndpoint;
 import com.vaadin.hilla.generator.fixtures.SampleEndpoint;
 import com.vaadin.hilla.generator.fixtures.ShadowingEndpoint;
@@ -247,6 +248,32 @@ public class GeneratedTypeScriptTest {
     }
 
     @Test
+    public void should_ReferToATypeItDoesNotDeclareByName() {
+        // The browser has a file, and a module of the framework exports the
+        // signals, so nothing is generated for either of them
+        var generator = new FullStackGenerator(GeneratedTypeScriptTest.class,
+                ProvidedTypesEndpoint.class);
+
+        assertEquals(
+                """
+                        import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
+                        import type { Signal } from '@vaadin/hilla-react-signals';
+                        import client from './connect-client.default.js';
+
+                        export async function signal(init?: EndpointRequestInit): Promise<Signal<string | undefined> | undefined> {
+                          return client.call('ProvidedTypesEndpoint', 'signal', {}, init);
+                        }
+
+                        export async function upload(file: File | undefined, init?: EndpointRequestInit): Promise<void> {
+                          return client.call('ProvidedTypesEndpoint', 'upload', { file }, init);
+                        }
+                        """,
+                new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
+                        .write(generator.parseModel().get(0)).content());
+        assertEquals(List.of(), generator.parseEntities());
+    }
+
+    @Test
     public void should_WriteTheClient() {
         assertEquals("""
                 import { ConnectClient } from '@vaadin/hilla-frontend';
@@ -340,6 +367,36 @@ public class GeneratedTypeScriptTest {
 
                 export default Wrapper;
                 """, write(entity(SampleEndpoint.Wrapper.class)).content());
+    }
+
+    @Test
+    public void should_WriteAPropertyOfEveryKind() {
+        // A property of a type which is not generated is referred to by name,
+        // as everywhere else, and the model of it is the one of an object: the
+        // module exporting the type is what makes a value of it
+        assertEquals(
+                """
+                        import type { Signal } from '@vaadin/hilla-react-signals';
+                        import type Kind from './Kind.js';
+                        import type Sample from './Sample.js';
+
+                        interface Mixed {
+                          count: number;
+                          active: boolean;
+                          tags?: Array<string | undefined>;
+                          counts?: Record<string, number | undefined>;
+                          kind?: Kind;
+                          sample?: Sample;
+                          words?: Array<string | undefined>;
+                          unique?: Array<string | undefined>;
+                          grouped?: Record<string, Array<string | undefined> | undefined>;
+                          maybeTags?: Array<string | undefined>;
+                          signal?: Signal<string | undefined>;
+                        }
+
+                        export default Mixed;
+                        """,
+                write(entity(SampleEndpoint.Mixed.class)).content());
     }
 
     @Test
@@ -498,6 +555,11 @@ public class GeneratedTypeScriptTest {
                               new ArrayModel(parent, key, true,
                                 (parent, key) => new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }),
                                 { meta: { javaType: 'java.util.List' } }));
+                          }
+
+                          get signal(): ObjectModel {
+                            return this[_getPropertyModel]('signal', (parent, key) =>
+                              new ObjectModel(parent, key, true));
                           }
                         }
 
