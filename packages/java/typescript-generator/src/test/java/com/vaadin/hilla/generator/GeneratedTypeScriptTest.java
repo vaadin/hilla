@@ -510,6 +510,27 @@ public class GeneratedTypeScriptTest {
     }
 
     @Test
+    public void should_NameAnEndpointOnceHoweverManyClassesGoByIt() {
+        // Two classes of the same name, in packages of their own, are one
+        // endpoint as far as the browser is concerned: the server answers
+        // calls of that name with one of them, and the barrel would otherwise
+        // export the name twice, which TypeScript reads as two declarations
+        var generation = new FullStackGenerator(GeneratedTypeScriptTest.class,
+                EmptyEndpoint.class,
+                com.vaadin.hilla.generator.fixtures.other.EmptyEndpoint.class)
+                .parseGeneration();
+
+        assertEquals(List.of("EmptyEndpoint"), generation.endpoints().stream()
+                .map(EndpointModel::name).toList());
+        assertEquals("""
+                import * as EmptyEndpoint from './EmptyEndpoint.js';
+
+                export { EmptyEndpoint };
+                """,
+                new BarrelWriter().write(generation.endpoints()).content());
+    }
+
+    @Test
     public void should_WriteTheBarrel() {
         assertEquals("""
                 import * as SampleEndpoint from './SampleEndpoint.js';
