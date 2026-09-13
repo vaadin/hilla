@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
@@ -28,6 +29,11 @@ public class JacksonEndpoint {
         return new Sample();
     }
 
+    // Which properties a class has is what this case is about, not the order
+    // they come in, which follows the order the class declares them in: some
+    // JDKs hand back the declared methods in another order, and a snapshot
+    // written from them would only hold on the JDK which wrote it
+    @JsonPropertyOrder(alphabetic = true)
     @JsonIgnoreProperties({ "publicPropWithJsonIgnoreProperties",
             "privatePropWithJsonIgnoreProperties" })
     static final class Sample extends SampleParent {
