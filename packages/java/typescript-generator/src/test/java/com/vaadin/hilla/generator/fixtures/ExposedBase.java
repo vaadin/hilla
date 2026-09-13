@@ -15,21 +15,15 @@
  */
 package com.vaadin.hilla.generator.fixtures;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 
 /**
- * Has parameters named after what the generated file needs for itself.
+ * Declares a method an endpoint of its own can override, which the walk then
+ * carries twice.
  */
-@Endpoint
-public class ShadowingEndpoint {
-    public String echo(String client, String init) {
-        return client + init;
-    }
-
-    /**
-     * Named after the client the generated file calls the server with.
-     */
-    public String client() {
+@EndpointExposed
+public abstract class ExposedBase {
+    public String shared() {
         return "";
     }
 }
