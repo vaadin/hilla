@@ -19,7 +19,7 @@ import java.io.IOException
 import com.vaadin.flow.gradle.PluginEffectiveConfiguration
 import com.vaadin.flow.gradle.VaadinFlowPluginExtension
 import com.vaadin.hilla.engine.GeneratorException
-import com.vaadin.hilla.engine.GeneratorProcessor
+import com.vaadin.hilla.engine.TypeScriptProcessor
 import com.vaadin.hilla.engine.ParserException
 import com.vaadin.hilla.engine.ParserProcessor
 import org.gradle.api.DefaultTask
@@ -130,11 +130,11 @@ public abstract class EngineGenerateTask : DefaultTask() {
             val conf = engineConfigurationSettings.get().toEngineConfiguration()
 
             val parserProcessor = ParserProcessor(conf)
-            val generatorProcessor = GeneratorProcessor(conf)
+            val typeScriptProcessor = TypeScriptProcessor(conf)
 
             val endpoints = conf.browserCallableFinder.find(conf);
             parserProcessor.process(endpoints)
-            generatorProcessor.process()
+            typeScriptProcessor.process(parserProcessor.generation)
         } catch (e: IOException) {
             throw GradleException("Endpoint collection failed", e)
         } catch (e: InterruptedException) {

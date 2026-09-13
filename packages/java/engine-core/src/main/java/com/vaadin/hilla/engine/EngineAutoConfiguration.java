@@ -60,7 +60,6 @@ public class EngineAutoConfiguration {
     private Path buildDir;
     private Path baseDir;
     private List<Path> classesDirs;
-    private GeneratorConfiguration generator;
     private Path outputDir;
     private ParserConfiguration parser;
     private BrowserCallableFinder browserCallableFinder;
@@ -73,7 +72,6 @@ public class EngineAutoConfiguration {
     private EngineAutoConfiguration() {
         baseDir = Path.of(System.getProperty("user.dir"));
         buildDir = baseDir.resolve("target");
-        generator = new GeneratorConfiguration();
         parser = new ParserConfiguration();
 
         var legacyFrontendDir = baseDir.resolve("frontend");
@@ -116,10 +114,6 @@ public class EngineAutoConfiguration {
     public List<Path> getClassesDirs() {
         return classesDirs == null ? List.of(buildDir.resolve("classes"))
                 : classesDirs;
-    }
-
-    public GeneratorConfiguration getGenerator() {
-        return generator;
     }
 
     public Path getOutputDir() {
@@ -282,7 +276,6 @@ public class EngineAutoConfiguration {
             this.configuration.buildDir = configuration.buildDir;
             this.configuration.classesDirs = configuration.classesDirs;
             this.configuration.classpath = configuration.classpath;
-            this.configuration.generator = configuration.generator;
             this.configuration.parser = configuration.parser;
             this.configuration.outputDir = configuration.outputDir;
             this.configuration.groupId = configuration.groupId;
@@ -328,11 +321,6 @@ public class EngineAutoConfiguration {
 
         public EngineAutoConfiguration build() {
             return configuration;
-        }
-
-        public Builder generator(GeneratorConfiguration value) {
-            configuration.generator = value;
-            return this;
         }
 
         public Builder outputDir(String value) {

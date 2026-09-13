@@ -79,6 +79,8 @@ repositories {
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     implementation("com.vaadin:hilla-engine-core:$version")
+    // The task hands the writers what the parser found
+    implementation("com.vaadin:hilla-typescript-generator:$version")
     implementation("com.vaadin:flow-gradle-plugin:$flowVersion")
     implementation("com.vaadin:flow-plugin-base:$flowVersion")
     implementation("org.springframework.boot:spring-boot-loader-tools:$springBootVersion")
