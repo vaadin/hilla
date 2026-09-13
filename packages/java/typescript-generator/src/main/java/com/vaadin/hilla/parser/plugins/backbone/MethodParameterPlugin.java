@@ -24,20 +24,11 @@ import org.jspecify.annotations.NonNull;
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
 import com.vaadin.hilla.parser.core.NodeDependencies;
-import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
 
 public final class MethodParameterPlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
-
-    @Override
-    public void enter(NodePath<?> nodePath) {
-    }
-
-    @Override
-    public void exit(NodePath<?> nodePath) {
-    }
 
     @NonNull
     @Override
