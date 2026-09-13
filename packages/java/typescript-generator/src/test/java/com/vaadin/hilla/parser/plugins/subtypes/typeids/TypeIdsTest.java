@@ -21,22 +21,22 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.media.Schema;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.json.JsonMapper;
 
+import com.vaadin.hilla.generator.model.EntityModel;
+import com.vaadin.hilla.generator.model.Generation;
 import com.vaadin.hilla.parser.testutils.AbstractFullStackTest;
 
 /**
  * Verifies the type ids that the generator gives to the subtypes of a
  * polymorphic type. Which value ends up in the generated TypeScript is decided
- * by the parser, so these hierarchies are verified in the parsed document,
- * except for the one that must get no property at all: how a discriminator is
- * rendered is covered by the snapshots of the surrounding package.
+ * by the parser, so these hierarchies are verified in what it hands the
+ * writers, except for the one that must get no property at all: how a
+ * discriminator is rendered is covered by the snapshots of the surrounding
+ * package.
  */
 public class TypeIdsTest extends AbstractFullStackTest {
     /**
@@ -73,7 +73,7 @@ public class TypeIdsTest extends AbstractFullStackTest {
      */
     @Test
     public void should_DeclareTheTypeIdsThatJacksonSends() {
-        var openApi = generator(TypeIdsEndpoint.class).parse();
+        var generation = generator(TypeIdsEndpoint.class).parseGeneration();
         var mapper = new JsonMapper();
         var generated = new LinkedHashMap<String, String>();
         var serialized = new LinkedHashMap<String, String>();
@@ -81,11 +81,11 @@ public class TypeIdsTest extends AbstractFullStackTest {
         SUBTYPES.forEach(instance -> {
             var cls = instance.getClass();
 
-            discriminatorProperty(openApi, cls).ifPresent(property -> {
-                generated.put(nameOf(cls),
-                        property + "="
-                                + discriminatorValue(openApi, cls, property)
-                                        .orElse(null));
+            discriminatorOf(generation, cls).ifPresent(discriminator -> {
+                var property = discriminator.name();
+
+                generated.put(nameOf(cls), property + "=" + discriminator
+                        .acceptedValues().stream().findFirst().orElse(null));
 
                 var json = mapper.readTree(mapper.writeValueAsString(instance));
                 serialized.put(nameOf(cls),
@@ -96,7 +96,7 @@ public class TypeIdsTest extends AbstractFullStackTest {
 
         assertEquals(WITHOUT_DISCRIMINATOR, SUBTYPES.stream()
                 .map(Object::getClass)
-                .filter(cls -> discriminatorProperty(openApi, cls).isEmpty())
+                .filter(cls -> discriminatorOf(generation, cls).isEmpty())
                 .map(TypeIdsTest::nameOf).toList(),
                 "Another set of subtypes than the expected one is left without"
                         + " a discriminator");
@@ -124,62 +124,18 @@ public class TypeIdsTest extends AbstractFullStackTest {
     }
 
     /**
-     * The name of the discriminator property of the given class, which the
-     * parser publishes in the union schema of the type that declares the
-     * subtypes, or an empty optional if no discriminator is generated for it.
+     * The discriminator the generated declaration of the given class has: the
+     * property saying which subtype a value is, and the values it holds, which
+     * are the own value of the type followed by the values of the subtypes
+     * below it. An empty optional means no discriminator is generated for it.
      */
-    private static Optional<String> discriminatorProperty(OpenAPI openApi,
-            Class<?> cls) {
-        var ref = "#/components/schemas/" + cls.getName();
-
-        for (Schema<?> schema : schemasOf(openApi).values()) {
-            var discriminator = schema.getDiscriminator();
-
-            if (discriminator == null || schema.getOneOf() == null) {
-                continue;
-            }
-
-            for (Object item : schema.getOneOf()) {
-                if (ref.equals(((Schema<?>) item).get$ref())) {
-                    return Optional.of(discriminator.getPropertyName());
-                }
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    /**
-     * The value that the generated discriminator property of the given class
-     * holds: the parser stores the own value of the type first, followed by the
-     * values of the subtypes below it.
-     */
-    private static Optional<String> discriminatorValue(OpenAPI openApi,
-            Class<?> cls, String property) {
-        Schema<?> schema = schemasOf(openApi).get(cls.getName());
-        List<?> ownSchemas = schema.getAnyOf() != null ? schema.getAnyOf()
-                : List.of(schema);
-
-        for (Object own : ownSchemas) {
-            var properties = ((Schema<?>) own).getProperties();
-
-            if (properties == null) {
-                continue;
-            }
-
-            var item = (Schema<?>) properties.get(property);
-
-            if (item != null && item.getEnum() != null
-                    && !item.getEnum().isEmpty()) {
-                return Optional.of(String.valueOf(item.getEnum().get(0)));
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    private static Map<String, Schema> schemasOf(OpenAPI openApi) {
-        return openApi.getComponents().getSchemas();
+    private static Optional<EntityModel.Discriminator> discriminatorOf(
+            Generation generation, Class<?> cls) {
+        return generation.entities().stream()
+                .filter(entity -> entity.javaClass().equals(cls.getName()))
+                .filter(EntityModel.Bean.class::isInstance)
+                .map(EntityModel.Bean.class::cast).findFirst()
+                .flatMap(EntityModel.Bean::discriminator);
     }
 
     /**

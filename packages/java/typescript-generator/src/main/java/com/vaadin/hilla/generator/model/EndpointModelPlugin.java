@@ -237,7 +237,7 @@ public final class EndpointModelPlugin
         } else if (node instanceof SubTypesPlugin.UnionNode union) {
             unions.put(union.getSource().getName(), subTypesOf(union));
         } else if (node instanceof EndpointNode endpoint) {
-            var name = endpoint.getTarget().getName();
+            var name = endpoint.getTarget();
 
             endpoints.put(name, new EndpointModel(name,
                     endpoint.getSource().getName(), List.copyOf(

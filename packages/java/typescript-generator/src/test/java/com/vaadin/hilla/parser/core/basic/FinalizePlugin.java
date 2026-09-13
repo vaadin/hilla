@@ -24,7 +24,6 @@ import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
-import com.vaadin.hilla.parser.core.RootNode;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.Model;
 import com.vaadin.hilla.parser.models.NamedModel;
@@ -50,14 +49,20 @@ final class FinalizePlugin extends AbstractPlugin<PluginConfiguration> {
     @Override
     public void exit(NodePath<?> nodePath) {
         footsteps.add(String.format("<- %s", nodePath.toString()));
-        if (nodePath.getNode() instanceof RootNode) {
-            var rootNode = (RootNode) nodePath.getNode();
-            var openApi = rootNode.getTarget();
-            openApi.addExtension(BasicPlugin.STORAGE_KEY,
-                    String.join(", ", members));
-            openApi.addExtension(BasicPlugin.FOOTSTEPS_STORAGE_KEY,
-                    String.join("\n", footsteps));
-        }
+    }
+
+    /**
+     * Every step of the walk, one per line, in the order it took them.
+     */
+    String getFootsteps() {
+        return String.join("\n", footsteps);
+    }
+
+    /**
+     * The named members the walk reached, in the order it reached them.
+     */
+    String getMembers() {
+        return String.join(", ", members);
     }
 
     @NonNull
