@@ -22,9 +22,20 @@ import org.jspecify.annotations.NonNull;
 
 public interface Plugin {
 
-    void enter(NodePath<?> nodePath);
+    /**
+     * Called on the way into a node, before the nodes below it are walked. A
+     * plugin which only says which nodes there are to walk has nothing to do
+     * here.
+     */
+    default void enter(NodePath<?> nodePath) {
+    }
 
-    void exit(NodePath<?> nodePath);
+    /**
+     * Called on the way out of a node, once the nodes below it have been
+     * walked.
+     */
+    default void exit(NodePath<?> nodePath) {
+    }
 
     PluginConfiguration getConfiguration();
 

@@ -15,20 +15,18 @@
  */
 package com.vaadin.hilla.parser.test.nodes;
 
-import io.swagger.v3.oas.models.PathItem;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.MethodInfoModel;
 
-public final class MethodNode extends AbstractNode<MethodInfoModel, PathItem> {
-    private MethodNode(@NonNull MethodInfoModel source,
-            @NonNull PathItem target) {
-        super(source, target);
+public final class MethodNode extends AbstractNode<MethodInfoModel, Void> {
+    private MethodNode(@NonNull MethodInfoModel source) {
+        super(source, null);
     }
 
     @NonNull
     static public MethodNode of(@NonNull MethodInfoModel model) {
-        return new MethodNode(model, new PathItem());
+        return new MethodNode(model);
     }
 }

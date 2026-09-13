@@ -61,10 +61,6 @@ public final class EntityPlugin
         }
     }
 
-    @Override
-    public void exit(NodePath<?> nodePath) {
-    }
-
     @NonNull
     @Override
     public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
