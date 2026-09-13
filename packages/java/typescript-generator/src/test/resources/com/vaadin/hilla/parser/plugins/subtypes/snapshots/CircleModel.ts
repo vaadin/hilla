@@ -1,9 +1,13 @@
-import m, { NumberModel } from "@vaadin/hilla-models";
-import type Circle from "./Circle.js";
-const CircleModel = m
-  .object<Circle>("Circle")
-  .property("radius", m.meta(NumberModel, { jvmType: "double" }))
-  .property("shape", m.literal("circle"))
-  .build();
-type CircleModel = typeof CircleModel;
+import { NumberModel, ObjectModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import type Circle from './Circle.js';
+
+class CircleModel<T extends Circle = Circle> extends ObjectModel<T> {
+  static override createEmptyValue = makeObjectEmptyValueCreator(CircleModel);
+
+  get radius(): NumberModel {
+    return this[_getPropertyModel]('radius', (parent, key) =>
+      new NumberModel(parent, key, false, { meta: { javaType: 'double' } }));
+  }
+}
+
 export default CircleModel;

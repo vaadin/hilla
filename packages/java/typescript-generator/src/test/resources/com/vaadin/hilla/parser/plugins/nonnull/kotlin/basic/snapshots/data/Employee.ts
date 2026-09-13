@@ -1,4 +1,5 @@
-import type Person from "./Person.js";
-interface Employee extends Person {
-}
+import type Person from './Person.js';
+
+interface Employee extends Person {}
+
 export default Employee;

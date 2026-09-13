@@ -1,2 +1,3 @@
-import * as JavaTypeEndpoint from "./JavaTypeEndpoint.js";
+import * as JavaTypeEndpoint from './JavaTypeEndpoint.js';
+
 export { JavaTypeEndpoint };

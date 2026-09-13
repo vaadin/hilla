@@ -1,4 +1,5 @@
 interface Foo {
-    bar?: string;
+  bar?: string;
 }
+
 export default Foo;

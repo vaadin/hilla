@@ -1,6 +1,8 @@
-import type NonTransientEntity from "../NonTransientEntity.js";
+import type NonTransientEntity from '../NonTransientEntity.js';
+
 interface TransientModel {
-    nonTransientEntity?: NonTransientEntity;
-    notTransientField?: string;
+  nonTransientEntity?: NonTransientEntity;
+  notTransientField?: string;
 }
+
 export default TransientModel;

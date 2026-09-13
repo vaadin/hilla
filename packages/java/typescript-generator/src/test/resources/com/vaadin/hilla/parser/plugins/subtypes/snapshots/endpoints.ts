@@ -1,2 +1,3 @@
-import * as SubTypesEndpoint from "./SubTypesEndpoint.js";
+import * as SubTypesEndpoint from './SubTypesEndpoint.js';
+
 export { SubTypesEndpoint };

@@ -1,9 +1,18 @@
-import m, { NumberModel } from "@vaadin/hilla-models";
-import type AbstractEntity from "./AbstractEntity.js";
-const AbstractEntityModel = m
-  .object<AbstractEntity>("AbstractEntity")
-  .property("version", m.meta(NumberModel, { annotations: [{ jvmType: "jakarta.persistence.Version" }], jvmType: "int" }))
-  .property("id", m.meta(m.optional(NumberModel), { annotations: [{ jvmType: "jakarta.persistence.Id" }], jvmType: "java.lang.Long" }))
-  .build();
-type AbstractEntityModel = typeof AbstractEntityModel;
+import { NumberModel, ObjectModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import type AbstractEntity from './AbstractEntity.js';
+
+class AbstractEntityModel<T extends AbstractEntity = AbstractEntity> extends ObjectModel<T> {
+  static override createEmptyValue = makeObjectEmptyValueCreator(AbstractEntityModel);
+
+  get version(): NumberModel {
+    return this[_getPropertyModel]('version', (parent, key) =>
+      new NumberModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.Version' }], javaType: 'int' } }));
+  }
+
+  get id(): NumberModel {
+    return this[_getPropertyModel]('id', (parent, key) =>
+      new NumberModel(parent, key, true, { meta: { annotations: [{ name: 'jakarta.persistence.Id' }], javaType: 'java.lang.Long' } }));
+  }
+}
+
 export default AbstractEntityModel;

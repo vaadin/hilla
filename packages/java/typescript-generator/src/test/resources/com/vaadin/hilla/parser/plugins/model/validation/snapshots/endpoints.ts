@@ -1,3 +1,3 @@
-import * as ValidatedEndpoint from "./ValidatedEndpoint.js";
-import * as ValidationEndpoint from "./ValidationEndpoint.js";
-export { ValidatedEndpoint, ValidationEndpoint };
+import * as ValidationEndpoint from './ValidationEndpoint.js';
+
+export { ValidationEndpoint };

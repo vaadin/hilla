@@ -1,2 +1,3 @@
-import * as EnumTypeEndpoint from "./EnumTypeEndpoint.js";
+import * as EnumTypeEndpoint from './EnumTypeEndpoint.js';
+
 export { EnumTypeEndpoint };
