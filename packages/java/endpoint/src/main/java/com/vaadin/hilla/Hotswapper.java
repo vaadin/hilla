@@ -55,17 +55,23 @@ public class Hotswapper implements VaadinHotswapper {
      *            the classes that have been added or modified
      */
     public static void onHotswap(Boolean redefined, String[] changedClasses) {
-        if (isIgnoredClasses(changedClasses)) {
-            return;
-        }
-        if (affectsEndpoints(changedClasses)) {
-            if (getLogger().isDebugEnabled()) {
-                String changed = List.of(changedClasses).toString();
-                String operation = redefined ? "updated" : "added";
-                getLogger().debug("Regenerating endpoints because " + changed
-                        + " were " + operation);
+        try {
+            if (isIgnoredClasses(changedClasses)) {
+                return;
             }
-            EndpointCodeGenerator.getInstance().update(changedClasses);
+            if (affectsEndpoints(changedClasses)) {
+                if (getLogger().isDebugEnabled()) {
+                    String changed = List.of(changedClasses).toString();
+                    String operation = redefined ? "updated" : "added";
+                    getLogger().debug("Regenerating endpoints because "
+                            + changed + " were " + operation);
+                }
+                EndpointCodeGenerator.getInstance().update(changedClasses);
+            }
+        } catch (RuntimeException e) {
+            // A class which cannot be walked is something the developer is in
+            // the middle of writing, which the next change is another chance at
+            getLogger().error("Failed to regenerate the TypeScript code", e);
         }
     }
 

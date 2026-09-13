@@ -16,6 +16,7 @@
 package com.vaadin.hilla;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -25,6 +26,7 @@ import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;
 
@@ -57,40 +59,16 @@ public class EndpointCodeGeneratorTest {
 
     @Test
     public void should_KnowTheClassesTheEndpointsAreWrittenFrom() {
-        var configuration = Mockito.mock(ApplicationConfiguration.class);
-        Mockito.doReturn(projectFolder).when(configuration).getProjectFolder();
-        Mockito.doReturn("build").when(configuration).getBuildFolder();
-        Mockito.doReturn(new File(projectFolder, "frontend"))
-                .when(configuration).getFrontendFolder();
+        var applicationContext = mockApplicationContext();
 
-        var applicationContext = Mockito.mock(ApplicationContext.class);
-        Mockito.doReturn(Map.of("endpoint", new ChangedEndpoint()))
-                .when(applicationContext)
-                .getBeansWithAnnotation(BrowserCallable.class);
-        Mockito.doReturn(Map.of()).when(applicationContext)
-                .getBeansWithAnnotation(Endpoint.class);
-
-        try (var applicationConfiguration = Mockito
-                .mockStatic(ApplicationConfiguration.class);
+        try (var applicationConfiguration = mockApplicationConfiguration();
                 var contextProvider = Mockito
                         .mockStatic(ApplicationContextProvider.class)) {
-            applicationConfiguration
-                    .when(() -> ApplicationConfiguration
-                            .get(Mockito.any(VaadinContext.class)))
-                    .thenReturn(configuration);
             contextProvider
-                    .when(() -> ApplicationContextProvider
-                            .runOnContext(Mockito.any()))
-                    .thenAnswer(invocation -> {
-                        invocation.<Consumer<ApplicationContext>> getArgument(0)
-                                .accept(applicationContext);
-                        return null;
-                    });
+                    .when(ApplicationContextProvider::getApplicationContext)
+                    .thenReturn(applicationContext);
 
-            var classes = new EndpointCodeGenerator(
-                    Mockito.mock(VaadinContext.class),
-                    Mockito.mock(EndpointController.class))
-                    .getClassesUsedInEndpoints();
+            var classes = endpointCodeGenerator().getClassesUsedInEndpoints();
 
             assertTrue(classes.isPresent(),
                     "The browser callable classes have been walked");
@@ -101,5 +79,89 @@ public class EndpointCodeGeneratorTest {
                     "The endpoint and what it sends are what a change has to"
                             + " touch");
         }
+    }
+
+    @Test
+    public void should_KnowNothingUntilThereIsAnApplicationContext() {
+        try (var applicationConfiguration = mockApplicationConfiguration();
+                var contextProvider = Mockito
+                        .mockStatic(ApplicationContextProvider.class)) {
+            contextProvider
+                    .when(ApplicationContextProvider::getApplicationContext)
+                    .thenReturn(null);
+
+            assertFalse(
+                    endpointCodeGenerator().getClassesUsedInEndpoints()
+                            .isPresent(),
+                    "There is nothing to compare a change against before the"
+                            + " browser callable classes can be found");
+        }
+    }
+
+    @Test
+    public void should_KnowTheClassesAgainAfterWritingTheTypeScript() {
+        var applicationContext = mockApplicationContext();
+
+        try (var applicationConfiguration = mockApplicationConfiguration();
+                var contextProvider = Mockito
+                        .mockStatic(ApplicationContextProvider.class)) {
+            contextProvider
+                    .when(() -> ApplicationContextProvider
+                            .runOnContext(Mockito.any()))
+                    .thenAnswer(invocation -> {
+                        invocation.<Consumer<ApplicationContext>> getArgument(0)
+                                .accept(applicationContext);
+                        return null;
+                    });
+            // Nothing to ask a context for: what is known has to come from the
+            // TypeScript having just been written
+            contextProvider
+                    .when(ApplicationContextProvider::getApplicationContext)
+                    .thenReturn(null);
+
+            var endpointCodeGenerator = endpointCodeGenerator();
+            endpointCodeGenerator.update();
+
+            assertEquals(
+                    Set.of(ChangedEndpoint.class.getName(),
+                            Changed.class.getName()),
+                    endpointCodeGenerator.getClassesUsedInEndpoints()
+                            .orElse(Set.of()),
+                    "Writing the TypeScript says anew what a change has to"
+                            + " touch");
+        }
+    }
+
+    private EndpointCodeGenerator endpointCodeGenerator() {
+        return new EndpointCodeGenerator(Mockito.mock(VaadinContext.class),
+                Mockito.mock(EndpointController.class));
+    }
+
+    private MockedStatic<ApplicationConfiguration> mockApplicationConfiguration() {
+        var configuration = Mockito.mock(ApplicationConfiguration.class);
+        Mockito.doReturn(projectFolder).when(configuration).getProjectFolder();
+        Mockito.doReturn("build").when(configuration).getBuildFolder();
+        Mockito.doReturn(new File(projectFolder, "frontend"))
+                .when(configuration).getFrontendFolder();
+
+        var applicationConfiguration = Mockito
+                .mockStatic(ApplicationConfiguration.class);
+        applicationConfiguration
+                .when(() -> ApplicationConfiguration
+                        .get(Mockito.any(VaadinContext.class)))
+                .thenReturn(configuration);
+
+        return applicationConfiguration;
+    }
+
+    private ApplicationContext mockApplicationContext() {
+        var applicationContext = Mockito.mock(ApplicationContext.class);
+        Mockito.doReturn(Map.of("endpoint", new ChangedEndpoint()))
+                .when(applicationContext)
+                .getBeansWithAnnotation(BrowserCallable.class);
+        Mockito.doReturn(Map.of()).when(applicationContext)
+                .getBeansWithAnnotation(Endpoint.class);
+
+        return applicationContext;
     }
 }
