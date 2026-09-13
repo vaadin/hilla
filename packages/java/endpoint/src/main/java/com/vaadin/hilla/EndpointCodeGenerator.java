@@ -179,18 +179,23 @@ public class EndpointCodeGenerator {
         if (classesUsedInEndpoints == null) {
             initIfNeeded();
 
-            ApplicationContextProvider.runOnContext(applicationContext -> {
-                var parser = new ParserProcessor(engineConfiguration);
+            // Asked for rather than queued: the walk is only worth doing where
+            // there is a context to find the browser callable classes in, and
+            // queueing one for later would pile up a walk per question
+            var applicationContext = ApplicationContextProvider
+                    .getApplicationContext();
 
-                classesUsedInEndpoints = classesUsedIn(
-                        parser.parse(findBrowserCallables(engineConfiguration,
-                                applicationContext)));
-            });
+            if (applicationContext == null) {
+                LOGGER.debug("There is no application context to find the"
+                        + " browser callable classes in yet");
 
-            if (classesUsedInEndpoints == null) {
-                LOGGER.debug("The browser callable classes have not been"
-                        + " walked yet");
+                return Optional.empty();
             }
+
+            classesUsedInEndpoints = classesUsedIn(
+                    new ParserProcessor(engineConfiguration)
+                            .parse(findBrowserCallables(engineConfiguration,
+                                    applicationContext)));
         }
 
         return Optional.ofNullable(classesUsedInEndpoints);
