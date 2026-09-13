@@ -123,21 +123,11 @@ Generates OpenAPI 3 specification from Java classes.
 
 ### TypeScript Frontend Architecture
 
-#### Generator Core (`packages/ts/generator-core`)
-- **Generator**: Main orchestrator that processes OpenAPI and runs plugins
-- **PluginManager**: Manages plugin lifecycle and execution order
-- **ReferenceResolver**: Resolves OpenAPI `$ref` references
-- Plugin-based architecture - all code generation happens via plugins
-
-#### Generator Plugins (`packages/ts/generator-plugin-*`)
-Each plugin extends the base Plugin class and generates specific code:
-- **backbone**: Base file structure and utilities
-- **model**: TypeScript interfaces from OpenAPI schemas
-- **client**: Endpoint client methods
-- **barrel**: Index files for clean imports
-- **push**: Server-push/Flux support
-- **signals**: React Signals integration
-- **subtypes**: Polymorphic type guards
+#### Generating the endpoint TypeScript
+The TypeScript of the endpoints is written in Java, by
+`packages/java/typescript-generator`: see its README. The generator which
+used to do it in Node is gone, along with its packages; `generator-utils`
+stays, since the file router writes its routes with it.
 
 #### Frontend Utilities
 - **frontend** (`packages/ts/frontend`): Core utilities (Authentication, Connect client, Cookie management)
@@ -187,16 +177,17 @@ Key points:
 
 ## Common Workflows
 
-### Adding a New Generator Plugin
-1. Create new package in `packages/ts/generator-plugin-{name}/`
-2. Extend `Plugin` class from `@vaadin/hilla-generator-core`
-3. Implement `execute(storage: SharedStorage): Promise<void>`
-4. Register in generator configuration
+### Writing Something New in the Generated TypeScript
+1. Add what the writers need to the model in
+   `packages/java/typescript-generator/src/main/java/com/vaadin/hilla/generator/model`
+2. Collect it in `EndpointModelPlugin` while the parser walks the classes
+3. Write it in the matching writer under `.../generator/typescript`
+4. Add a test case, and run the tests once with `-Dhilla.test.updateSnapshots`
 
 ### Adding a New Java Endpoint Feature
 1. Modify/extend classes in `packages/java/endpoint`
 2. Update parser plugins if OpenAPI generation needs changes
-3. Add corresponding generator plugin if TypeScript generation needs changes
+3. Extend the Java TypeScript writers if the generated TypeScript changes
 4. Add integration tests in `packages/java/tests/spring/`
 
 ### Debugging Code Generation

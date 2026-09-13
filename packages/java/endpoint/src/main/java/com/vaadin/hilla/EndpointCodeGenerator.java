@@ -38,8 +38,8 @@ import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.frontend.FrontendTools;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
-import com.vaadin.hilla.engine.GeneratorProcessor;
 import com.vaadin.hilla.engine.ParserProcessor;
+import com.vaadin.hilla.engine.TypeScriptProcessor;
 
 /**
  * Handles (re)generation of the TypeScript code.
@@ -118,9 +118,9 @@ public class EndpointCodeGenerator {
             ParserProcessor parser = new ParserProcessor(engineConfiguration);
             parser.process(browserCallables);
 
-            GeneratorProcessor generator = new GeneratorProcessor(
+            TypeScriptProcessor generator = new TypeScriptProcessor(
                     engineConfiguration);
-            generator.process(parser);
+            generator.process(parser.getGeneration());
             this.endpointController.registerEndpoints();
         });
     }
