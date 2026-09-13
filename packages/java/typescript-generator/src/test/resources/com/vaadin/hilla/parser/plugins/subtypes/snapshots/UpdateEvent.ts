@@ -1,7 +1,9 @@
-import type BaseEvent_1 from "./BaseEvent.js";
-interface UpdateEvent extends BaseEvent_1 {
-    oldItem?: string;
-    newItem?: string;
-    "@type": "update";
+import type BaseEvent from './BaseEvent.js';
+
+interface UpdateEvent extends BaseEvent {
+  oldItem?: string;
+  newItem?: string;
+  '@type': 'update';
 }
+
 export default UpdateEvent;

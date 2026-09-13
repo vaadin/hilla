@@ -1,5 +1,7 @@
-import type Notification_1 from "./Notification.js";
-interface SmsNotification extends Notification_1 {
-    number?: string;
+import type Notification from './Notification.js';
+
+interface SmsNotification extends Notification {
+  number?: string;
 }
+
 export default SmsNotification;
