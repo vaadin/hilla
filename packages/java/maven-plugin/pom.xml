@@ -93,11 +93,12 @@
       <artifactId>mockito-inline</artifactId>
       <scope>test</scope>
     </dependency>
+    <!-- The mojo hands the generator what the parser found, so it is needed
+         where the mojo is compiled as well -->
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>hilla-typescript-generator</artifactId>
       <version>${project.version}</version>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 

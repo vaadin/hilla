@@ -47,8 +47,8 @@ public final class ParserProcessor {
 
     /**
      * Builds what the TypeScript of a run is written from while the parser
-     * walks the classes, where that is what it is written from. It only
-     * collects: the OpenAPI definition is what it would be without it.
+     * walks the classes. It only collects: the OpenAPI definition is what it
+     * would be without it.
      */
     private final EndpointModelPlugin modelPlugin = new EndpointModelPlugin();
     private List<Class<? extends Annotation>> endpointAnnotations = List.of();
@@ -84,10 +84,7 @@ public final class ParserProcessor {
 
     /**
      * Everything the last run of the parser found, which is what the TypeScript
-     * of the endpoints is written from. There is nothing to find unless that is
-     * where it is written, since building it is work for nothing then.
-     *
-     * @see GeneratorProcessor#writesTypeScriptInJava()
+     * of the endpoints is written from.
      */
     public Generation getGeneration() {
         return modelPlugin.getGeneration();
@@ -179,14 +176,11 @@ public final class ParserProcessor {
                 .map((plugin) -> PluginManager.load(plugin.getName(),
                         plugin.getConfiguration()));
 
-        // The plugin building the model only runs where the model is what the
-        // TypeScript is written from. It belongs first: a composite plugin
+        // The plugin building the model belongs first: a composite plugin
         // exits its plugins in the opposite order, so the first one is the
         // last to see a node, once the others have said everything about it
-        var loadedPlugins = GeneratorProcessor.writesTypeScriptInJava()
-                ? Stream.concat(Stream.of(modelPlugin), configuredPlugins)
-                        .toList()
-                : configuredPlugins.toList();
+        var loadedPlugins = Stream
+                .concat(Stream.of(modelPlugin), configuredPlugins).toList();
 
         parser.plugins(loadedPlugins);
     }
