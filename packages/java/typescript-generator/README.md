@@ -6,7 +6,7 @@ This module consolidates the Java-to-TypeScript code generation functionality fo
 
 This module consolidates the following previously separate modules:
 
-- **parser-jvm-core** - Core parsing infrastructure using JavaParser and ClassGraph
+- **parser-jvm-core** - Core parsing infrastructure using ClassGraph
 - **parser-jvm-utils** - Jackson and reflection utilities
 - **parser-jvm-test-utils** - Shared testing utilities
 - **parser-jvm-plugin-backbone** - The walk over the endpoints, their methods and the types they send

@@ -207,9 +207,9 @@ Key points:
 - **Maven**: >= 3
 
 ### Key Java Dependencies
-- Spring Boot 4.0.0-M3
-- Jackson 3.0.0-rc9
-- Vaadin Flow 25.3-SNAPSHOT
+- Spring Boot 4.1.1
+- Jackson 3.1.5
+- Vaadin Flow 25.4-SNAPSHOT
 
 ### Key TypeScript Dependencies
 - TypeScript 5.9.3
