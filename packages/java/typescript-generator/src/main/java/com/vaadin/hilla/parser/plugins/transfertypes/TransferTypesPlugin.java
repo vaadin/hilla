@@ -78,17 +78,11 @@ public final class TransferTypesPlugin
     }
 
     @Override
-    public void enter(NodePath<?> nodePath) {
-    }
-
-    @Override
     public void exit(NodePath<?> nodePath) {
         if (nodePath.getNode() instanceof EntityNode entityNode && nodePath
                 .getParentPath().getNode() instanceof RootNode rootNode) {
             var cls = entityNode.getSource();
             if (classMap.containsValue((Class<?>) cls.get())) {
-                var schema = entityNode.getTarget();
-
                 cls.getAnnotations().stream()
                         .filter((model) -> model.getName()
                                 .equals(FromModule.class.getName()))
@@ -105,18 +99,6 @@ public final class TransferTypesPlugin
                                                 cls.getName()));
                             }
 
-                            var fromModule = new HashMap<String, Object>();
-                            fromModule.put("module", annotation.module());
-
-                            if (!namedSpecifier.isBlank()) {
-                                fromModule.put("named", namedSpecifier);
-                            }
-
-                            if (!defaultSpecifier.isBlank()) {
-                                fromModule.put("default", defaultSpecifier);
-                            }
-
-                            schema.addExtension("x-from-module", fromModule);
                         });
             }
         }

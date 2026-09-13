@@ -42,6 +42,7 @@ import com.vaadin.hilla.parser.models.FieldInfoModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.models.SpecializedModel;
 import com.vaadin.hilla.parser.models.TypeParameterModel;
+import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
@@ -425,11 +426,10 @@ public final class EndpointModelPlugin
      */
     private TypeModel buildType(TypedNode node, List<TypeModel> referred) {
         var signature = node.getType();
-        var schema = node.getTarget();
-        var optional = schema != null
-                && Boolean.TRUE.equals(schema.getNullable());
-        var constraints = constraintsOf(schema);
-        var annotations = annotationsOf(schema);
+        var type = node.getTarget();
+        var optional = type != null && type.isOptional();
+        var constraints = constraintsOf(type);
+        var annotations = annotationsOf(type);
 
         // A type variable or parameter of an entity is declared by it, so it
         // is written as its name, unless it is bound to something else than
@@ -560,12 +560,10 @@ public final class EndpointModelPlugin
 
     /**
      * What the annotations of the validation API say about a value, which the
-     * plugin building the OpenAPI definition has already read off the walk and
-     * left on the schema of the value.
+     * plugin reading them off the walk has already noted on the type of it.
      */
-    private static List<ConstraintModel> constraintsOf(Schema<?> schema) {
-        return extensions(schema, VALIDATION_CONSTRAINTS,
-                ValidationConstraint.class)
+    private static List<ConstraintModel> constraintsOf(TypeFacts type) {
+        return notes(type, VALIDATION_CONSTRAINTS, ValidationConstraint.class)
                 .map(constraint -> new ConstraintModel(
                         constraint.getSimpleName(),
                         attributesOf(constraint.getAttributes())))
@@ -574,63 +572,21 @@ public final class EndpointModelPlugin
 
     /**
      * The annotations of a value which a form model is told about, which the
-     * plugin building the OpenAPI definition has already picked out of the ones
-     * the property declares.
+     * plugin picking them out of the ones the property declares has already
+     * noted on the type of it.
      */
-    private static List<AnnotationModel> annotationsOf(Schema<?> schema) {
-        return extensions(schema, ANNOTATIONS, Annotation.class)
-                .map(annotation -> new AnnotationModel(annotation.getName(),
-                        attributesOf(annotation.getAttributes())))
-                .toList();
+    private static List<String> annotationsOf(TypeFacts type) {
+        return notes(type, ANNOTATIONS, Annotation.class)
+                .map(Annotation::getName).toList();
     }
 
     /**
-     * The attributes of an annotation as plain values, so that what writes them
-     * only meets strings, numbers, booleans, lists and maps: a class an
-     * attribute holds is the map naming it which the model library reads.
-     */
-    private static Map<String, Object> attributesOf(
-            Map<String, Object> attributes) {
-        if (attributes == null) {
-            return Map.of();
-        }
-
-        var plain = new LinkedHashMap<String, Object>();
-        attributes.forEach((name, value) -> plain.put(name, plain(value)));
-        return plain;
-    }
-
-    private static Object plain(Object value) {
-        if (value instanceof JvmTypeRef type) {
-            return Map.of("jvmType", type.getJvmType());
-        }
-
-        if (value instanceof Collection<?> values) {
-            return values.stream().map(EndpointModelPlugin::plain).toList();
-        }
-
-        if (value instanceof Map<?, ?> map) {
-            var plain = new LinkedHashMap<Object, Object>();
-            map.forEach((key, item) -> plain.put(key, plain(item)));
-            return plain;
-        }
-
-        return value;
-    }
-
-    /**
-     * What another plugin has left on the schema of a value under the given
+     * What another plugin has said about the type of a value under the given
      * name, which is nothing at all where the plugin had nothing to say.
      */
-    private static <T> Stream<T> extensions(Schema<?> schema, String name,
-            Class<T> type) {
-        var extensions = schema == null ? null : schema.getExtensions();
-
-        return extensions != null
-                && extensions.get(name) instanceof List<?> values
-                        ? values.stream().filter(type::isInstance).map(
-                                type::cast)
-                        : Stream.of();
+    private static <T> Stream<T> notes(TypeFacts type, String name,
+            Class<T> valueType) {
+        return type == null ? Stream.of() : type.notes(name, valueType);
     }
 
     /**
