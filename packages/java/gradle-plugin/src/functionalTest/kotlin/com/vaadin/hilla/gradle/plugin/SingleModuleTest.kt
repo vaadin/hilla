@@ -150,8 +150,10 @@ class SingleModuleTest : AbstractGradleTest() {
         testProject.build("clean")
         // The TypeScript is written into the project rather than the build
         // folder, so cleaning leaves it in place and the task has nothing left
-        // to do: asking for it again is a matter of taking it away
-        generatedFolder().deleteRecursively()
+        // to do: taking the barrel of the endpoints away asks for it again,
+        // and fails loudly rather than leaving the task up to date if it
+        // cannot be deleted
+        Files.delete(endpointsTsFile().toPath())
         buildResult = testProject.build("hillaGenerate", checkTasksSuccessful = true)
 
         buildResult.expectTaskSucceded("hillaGenerate")
@@ -177,11 +179,12 @@ class SingleModuleTest : AbstractGradleTest() {
         verifyEndpointsTsFileGeneratedProperly()
     }
 
-    private fun generatedFolder(): File =
-        testProject.dir.resolve(FrontendUtils.DEFAULT_PROJECT_FRONTEND_GENERATED_DIR)
+    private fun endpointsTsFile(): File = testProject.dir
+        .resolve(FrontendUtils.DEFAULT_PROJECT_FRONTEND_GENERATED_DIR)
+        .resolve("endpoints.ts")
 
     private fun verifyEndpointsTsFileGeneratedProperly() {
-        val endpointsTsFile = generatedFolder().resolve("endpoints.ts")
+        val endpointsTsFile = endpointsTsFile()
         expect(true, "Generated endpoints.ts file should exist!") {
             endpointsTsFile.exists()
         }
