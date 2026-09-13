@@ -50,7 +50,7 @@ public class TaskGenerateTypeScriptTest extends TaskTest {
     @Test
     public void should_WriteTheTypeScriptOfTheEndpointsFromTheClasses()
             throws Exception {
-        new TaskGenerateOpenAPIImpl(getEngineConfiguration()).execute();
+        new TaskGenerateTypeScriptImpl(getEngineConfiguration()).execute();
 
         assertEquals(
                 """
@@ -89,7 +89,7 @@ public class TaskGenerateTypeScriptTest extends TaskTest {
                 .browserCallableFinder(conf -> List.of(MyEndpoint.class))
                 .build();
 
-        new TaskGenerateOpenAPIImpl(configuration).execute();
+        new TaskGenerateTypeScriptImpl(configuration).execute();
 
         assertTrue(Files.isRegularFile(output().resolve("MyEndpoint.ts")),
                 "The endpoint the configuration found is written");
