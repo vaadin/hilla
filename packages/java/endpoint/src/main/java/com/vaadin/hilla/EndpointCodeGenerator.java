@@ -35,7 +35,6 @@ import org.springframework.stereotype.Component;
 
 import com.vaadin.flow.internal.FrontendUtils;
 import com.vaadin.flow.server.VaadinContext;
-import com.vaadin.flow.server.frontend.FrontendTools;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.engine.ParserProcessor;
@@ -152,8 +151,6 @@ public class EndpointCodeGenerator {
         if (configuration == null) {
             configuration = ApplicationConfiguration.get(context);
 
-            var frontendTools = new FrontendTools(configuration,
-                    configuration.getProjectFolder());
             engineConfiguration = new EngineAutoConfiguration.Builder()
                     .baseDir(configuration.getProjectFolder().toPath())
                     .buildDir(configuration.getBuildFolder())
@@ -162,8 +159,7 @@ public class EndpointCodeGenerator {
                                     .getFrontendGeneratedFolder(
                                             configuration.getFrontendFolder())
                                     .toPath())
-                    .productionMode(false).withDefaultAnnotations()
-                    .nodeCommand(frontendTools.getNodeBinary()).build();
+                    .productionMode(false).withDefaultAnnotations().build();
         }
     }
 
