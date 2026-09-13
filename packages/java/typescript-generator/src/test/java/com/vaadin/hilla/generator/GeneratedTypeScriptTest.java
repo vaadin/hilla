@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import com.vaadin.hilla.generator.fixtures.EmptyEndpoint;
 import com.vaadin.hilla.generator.fixtures.InheritingEndpoint;
+import com.vaadin.hilla.generator.fixtures.PushingEndpoint;
 import com.vaadin.hilla.generator.fixtures.SampleEndpoint;
 import com.vaadin.hilla.generator.fixtures.ShadowingEndpoint;
 import com.vaadin.hilla.generator.model.EndpointModel;
@@ -58,7 +59,7 @@ public class GeneratedTypeScriptTest {
         assertEquals("SampleEndpoint.ts", file.path());
         assertEquals(
                 """
-                        import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
+                        import type { EndpointRequestInit, Subscription } from '@vaadin/hilla-frontend';
                         import type Bounded from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Bounded.js';
                         import type Detailed from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Detailed.js';
                         import type Figure from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Figure.js';
@@ -151,6 +152,14 @@ public class GeneratedTypeScriptTest {
                           return client.call('SampleEndpoint', 'shaded', {}, init);
                         }
 
+                        export function stream(count: number): Subscription<string | undefined> {
+                          return client.subscribe('SampleEndpoint', 'stream', { count });
+                        }
+
+                        export function watch(): Subscription<Sample | undefined> {
+                          return client.subscribe('SampleEndpoint', 'watch', {});
+                        }
+
                         export async function wrapped(init?: EndpointRequestInit): Promise<Wrapper<Sample | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'wrapped', {}, init);
                         }
@@ -189,6 +198,23 @@ public class GeneratedTypeScriptTest {
      * the barrel able to name every endpoint; whether the file is worth writing
      * is for the step which puts these writers in the pipeline.
      */
+    @Test
+    public void should_TakeNoRequestOptionsWhenEveryMethodSendsASeries() {
+        // The options are those of a single request, so a file with nothing
+        // but subscriptions in it has no use for the type of them either
+        var endpoint = endpointsOf(PushingEndpoint.class).get(0);
+
+        assertEquals("""
+                import type { Subscription } from '@vaadin/hilla-frontend';
+                import client from './connect-client.default.js';
+
+                export function messages(): Subscription<string | undefined> {
+                  return client.subscribe('PushingEndpoint', 'messages', {});
+                }
+                """, new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
+                .write(endpoint).content());
+    }
+
     @Test
     public void should_WriteAModuleForAnEndpointWithoutMethods() {
         var endpoint = endpointsOf(EmptyEndpoint.class).get(0);

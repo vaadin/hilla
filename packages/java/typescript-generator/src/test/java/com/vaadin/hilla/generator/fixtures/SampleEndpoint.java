@@ -25,7 +25,9 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import reactor.core.publisher.Flux;
 
+import com.vaadin.hilla.EndpointSubscription;
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
@@ -114,6 +116,18 @@ public class SampleEndpoint {
     }
 
     public Shaded shaded() {
+        return null;
+    }
+
+    /**
+     * Sends a series of values rather than returning one, which the client
+     * subscribes to instead of calling.
+     */
+    public Flux<String> stream(int count) {
+        return null;
+    }
+
+    public EndpointSubscription<Sample> watch() {
         return null;
     }
 
