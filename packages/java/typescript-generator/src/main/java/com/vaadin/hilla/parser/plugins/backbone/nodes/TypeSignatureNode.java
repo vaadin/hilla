@@ -19,26 +19,26 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
 
-import io.swagger.v3.oas.models.media.Schema;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.AnnotationInfoModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
+import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 
-public class TypeSignatureNode extends AbstractNode<SignatureModel, Schema<?>>
+public class TypeSignatureNode extends AbstractNode<SignatureModel, TypeFacts>
         implements TypedNode {
     private final List<AnnotationInfoModel> annotations;
     private final Integer position;
 
-    protected TypeSignatureNode(SignatureModel source, Schema<?> target,
+    protected TypeSignatureNode(SignatureModel source, TypeFacts target,
             List<AnnotationInfoModel> annotations, Integer position) {
         super(source, target);
         this.annotations = annotations;
         this.position = position;
     }
 
-    protected TypeSignatureNode(SignatureModel source, Schema<?> target,
+    protected TypeSignatureNode(SignatureModel source, TypeFacts target,
             Integer position) {
         this(source, target, source.getAnnotations(), position);
     }
@@ -68,13 +68,13 @@ public class TypeSignatureNode extends AbstractNode<SignatureModel, Schema<?>>
 
     @NonNull
     static public TypeSignatureNode of(@NonNull SignatureModel source) {
-        return new TypeSignatureNode(source, new Schema<>(), null);
+        return new TypeSignatureNode(source, TypeFacts.unknown(), null);
     }
 
     @NonNull
     static public TypeSignatureNode of(@NonNull SignatureModel source,
             int position) {
-        return new TypeSignatureNode(source, new Schema<>(), position);
+        return new TypeSignatureNode(source, TypeFacts.unknown(), position);
     }
 
     @Override

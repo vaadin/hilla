@@ -17,18 +17,18 @@ package com.vaadin.hilla.parser.plugins.backbone.nodes;
 
 import java.util.function.UnaryOperator;
 
-import io.swagger.v3.oas.models.media.Schema;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.models.SignatureModel;
+import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 
 public interface TypedNode extends AnnotatedNode {
     @NonNull
     SignatureModel getType();
 
-    Schema<?> getTarget();
+    TypeFacts getTarget();
 
-    void setTarget(Schema<?> target);
+    void setTarget(TypeFacts target);
 
     @NonNull
     TypedNode processType(@NonNull UnaryOperator<SignatureModel> typeProcessor);

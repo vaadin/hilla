@@ -25,7 +25,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.swagger.v3.oas.models.media.Schema;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
@@ -40,6 +39,7 @@ import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.PackageInfoModel;
 import com.vaadin.hilla.parser.models.SpecializedModel;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
+import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.AnnotatedNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
@@ -61,21 +61,16 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
     }
 
     @Override
-    public void enter(NodePath<?> nodePath) {
-    }
-
-    @Override
     public void exit(NodePath<?> nodePath) {
         var node = nodePath.getNode();
 
-        if (node.getTarget() instanceof Schema) {
-            var schema = (Schema<?>) node.getTarget();
+        if (node.getTarget() instanceof TypeFacts type) {
             var nodeSource = node.getSource();
 
             if ((nodeSource instanceof SpecializedModel)
                     && ((SpecializedModel) nodeSource).isOptional()) {
                 // Optional is always nullable, regardless of annotations
-                schema.setNullable(true);
+                type.setOptional(true);
             } else {
                 // Apply annotations from package (NonNullApi)
                 var annotations = getPackageAnnotationsStream(nodePath);
@@ -89,8 +84,8 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                 annotations = considerAscendantAnnotations(annotations,
                         nodePath);
 
-                computeNullabilityFromAnnotations(annotations).ifPresent(
-                        nullable -> schema.setNullable(nullable ? true : null));
+                computeNullabilityFromAnnotations(annotations)
+                        .ifPresent(type::setOptional);
 
                 // For type arguments, it is necessary to apply the same
                 // processing
@@ -98,34 +93,27 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                     var args = ((ClassRefSignatureModel) nodeSource)
                             .getTypeArguments();
 
-                    if (!args.isEmpty()) {
-                        Optional.ofNullable(schema.getExtensions())
-                                .map(ext -> ext.get("x-type-arguments"))
-                                .map(ext -> (Schema<?>) ext)
-                                .map(Schema::getAllOf).ifPresent(schemas -> {
-                                    if (schemas.size() != args.size()) {
-                                        throw new IllegalStateException(
-                                                "Number of parameters mismatch for "
-                                                        + nodePath);
-                                    }
+                    if (!args.isEmpty() && type.collectsTypeArguments()) {
+                        var argumentTypes = type.getTypeArguments();
 
-                                    var nullables = args.stream()
-                                            .map(param -> Stream.concat(
-                                                    getPackageAnnotationsStream(
-                                                            nodePath),
-                                                    param.getAnnotations()
-                                                            .stream()))
-                                            .map(this::computeNullabilityFromAnnotations)
-                                            .toList();
+                        if (argumentTypes.size() != args.size()) {
+                            throw new IllegalStateException(
+                                    "Number of parameters mismatch for "
+                                            + nodePath);
+                        }
 
-                                    for (var i = 0; i < nullables.size(); i++) {
-                                        var sch = schemas.get(i);
-                                        nullables.get(i).ifPresent(
-                                                nullable -> sch.setNullable(
-                                                        nullable ? true
-                                                                : null));
-                                    }
-                                });
+                        var nullables = args.stream()
+                                .map(param -> Stream.concat(
+                                        getPackageAnnotationsStream(nodePath),
+                                        param.getAnnotations().stream()))
+                                .map(this::computeNullabilityFromAnnotations)
+                                .toList();
+
+                        for (var i = 0; i < nullables.size(); i++) {
+                            var argumentType = argumentTypes.get(i);
+                            nullables.get(i)
+                                    .ifPresent(argumentType::setOptional);
+                        }
                     }
                 }
             }
