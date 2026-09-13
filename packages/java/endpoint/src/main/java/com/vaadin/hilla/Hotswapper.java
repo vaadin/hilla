@@ -15,7 +15,6 @@
  */
 package com.vaadin.hilla;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -56,21 +55,17 @@ public class Hotswapper implements VaadinHotswapper {
      *            the classes that have been added or modified
      */
     public static void onHotswap(Boolean redefined, String[] changedClasses) {
-        try {
-            if (isIgnoredClasses(changedClasses)) {
-                return;
+        if (isIgnoredClasses(changedClasses)) {
+            return;
+        }
+        if (affectsEndpoints(changedClasses)) {
+            if (getLogger().isDebugEnabled()) {
+                String changed = List.of(changedClasses).toString();
+                String operation = redefined ? "updated" : "added";
+                getLogger().debug("Regenerating endpoints because " + changed
+                        + " were " + operation);
             }
-            if (affectsEndpoints(changedClasses)) {
-                if (getLogger().isDebugEnabled()) {
-                    String changed = List.of(changedClasses).toString();
-                    String operation = redefined ? "updated" : "added";
-                    getLogger().debug("Regenerating endpoints because "
-                            + changed + " were " + operation);
-                }
-                EndpointCodeGenerator.getInstance().update(changedClasses);
-            }
-        } catch (IOException e) {
-            getLogger().error("Failed to re-generated TypeScript code");
+            EndpointCodeGenerator.getInstance().update(changedClasses);
         }
     }
 
@@ -121,13 +116,11 @@ public class Hotswapper implements VaadinHotswapper {
      *            the changed classes
      * @return {@code true} if the classes can affect endpoint generation,
      *         {@code false} otherwise
-     * @throws IOException
      */
-    private static boolean affectsEndpoints(String[] changedClasses)
-            throws IOException {
+    private static boolean affectsEndpoints(String[] changedClasses) {
         Set<String> changedClassesSet = Set.of(changedClasses);
         Set<String> classesUsedInEndpoints = EndpointCodeGenerator.getInstance()
-                .getClassesUsedInOpenApi().orElse(Set.of());
+                .getClassesUsedInEndpoints().orElse(Set.of());
         for (String classUsedInEndpoints : classesUsedInEndpoints) {
             if (changedClassesSet.contains(classUsedInEndpoints)) {
                 getLogger().debug("The changed class " + classUsedInEndpoints
