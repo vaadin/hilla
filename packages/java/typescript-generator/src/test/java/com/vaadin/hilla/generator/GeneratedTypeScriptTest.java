@@ -34,6 +34,7 @@ import com.vaadin.hilla.generator.fixtures.PushingEndpoint;
 import com.vaadin.hilla.generator.fixtures.ReservedNameEndpoint;
 import com.vaadin.hilla.generator.fixtures.SampleEndpoint;
 import com.vaadin.hilla.generator.fixtures.ShadowingEndpoint;
+import com.vaadin.hilla.generator.fixtures.ShadowingProvidedEndpoint;
 import com.vaadin.hilla.generator.fixtures.SignalsEndpoint;
 import com.vaadin.hilla.generator.fixtures.ValidatedEndpoint;
 import com.vaadin.hilla.generator.model.EndpointModel;
@@ -59,18 +60,18 @@ import com.vaadin.hilla.parser.testutils.FullStackGenerator;
  * from the class itself.
  */
 public class GeneratedTypeScriptTest {
-    private static final List<EndpointModel> endpoints = endpointsOf(
-            SampleEndpoint.class);
-    private static final List<EntityModel> entities = new FullStackGenerator(
+    /**
+     * One run of the parser over the endpoint of the fixtures, which is
+     * everything the writers are handed here.
+     */
+    private static final Generation generation = new FullStackGenerator(
             GeneratedTypeScriptTest.class, SampleEndpoint.class)
-            .parseEntities();
-    private static final List<UnionModel> unions = new FullStackGenerator(
-            GeneratedTypeScriptTest.class, SampleEndpoint.class).parseUnions();
+            .parseGeneration();
 
     @Test
     public void should_WriteTheEndpoint() {
         var file = new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
-                .write(endpoints.get(0));
+                .write(generation.endpoints().get(0));
 
         assertEquals("SampleEndpoint.ts", file.path());
         assertEquals(
@@ -461,16 +462,17 @@ public class GeneratedTypeScriptTest {
 
     @Test
     public void should_WriteTheClientOnlyWhenItIsTheGeneratedOne() {
-        var generation = new Generation(endpoints, List.of(), List.of());
+        var endpointsOnly = new Generation(generation.endpoints(), List.of(),
+                List.of());
 
         assertTrue(
-                pathsOf(new TypeScriptWriter().write(generation))
+                pathsOf(new TypeScriptWriter().write(endpointsOnly))
                         .contains("connect-client.default.ts"),
                 "The endpoints have no client to call the server with"
                         + " otherwise");
 
         var files = new TypeScriptWriter("../custom-client.js")
-                .write(generation);
+                .write(endpointsOnly);
 
         assertFalse(pathsOf(files).contains("connect-client.default.ts"),
                 "The application has a client of its own");
@@ -479,6 +481,26 @@ public class GeneratedTypeScriptTest {
                         .contains("import client from '../custom-client.js';"),
                 "The endpoints call the server with the client of the"
                         + " application");
+    }
+
+    @Test
+    public void should_LetTheBrowserKeepTheNameOfATypeItHas() {
+        // The name a type the browser has is written by is not the generated
+        // file's to give away: it is the type of the application which is
+        // imported under another name
+        assertEquals(
+                """
+                        import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
+                        import type File_1 from './com/vaadin/hilla/generator/fixtures/ShadowingProvidedEndpoint/File.js';
+                        import client from './connect-client.default.js';
+
+                        export async function describe(file: File | undefined, init?: EndpointRequestInit): Promise<File_1 | undefined> {
+                          return client.call('ShadowingProvidedEndpoint', 'describe', { file }, init);
+                        }
+                        """,
+                new EndpointWriter(ClientWriter.MODULE_SPECIFIER).write(
+                        endpointsOf(ShadowingProvidedEndpoint.class).get(0))
+                        .content());
     }
 
     @Test
@@ -493,15 +515,17 @@ public class GeneratedTypeScriptTest {
                 import * as SampleEndpoint from './SampleEndpoint.js';
 
                 export { SampleEndpoint };
-                """, new BarrelWriter().write(endpoints).content());
+                """,
+                new BarrelWriter().write(generation.endpoints()).content());
     }
 
     @Test
     public void should_ReExportEveryEndpointInTheSameOrderWhicheverItIsGiven() {
         // Given the other way around than they are written, so that the order
         // is the one the barrel decides rather than the one it was handed
-        var written = new BarrelWriter().write(List.of(
-                endpointsOf(ShadowingEndpoint.class).get(0), endpoints.get(0)));
+        var written = new BarrelWriter()
+                .write(List.of(endpointsOf(ShadowingEndpoint.class).get(0),
+                        generation.endpoints().get(0)));
 
         assertEquals("""
                 import * as SampleEndpoint from './SampleEndpoint.js';
@@ -1065,14 +1089,14 @@ public class GeneratedTypeScriptTest {
     }
 
     private static UnionModel union(Class<?> javaClass) {
-        return unions.stream()
+        return generation.unions().stream()
                 .filter(union -> union.javaClass().equals(javaClass.getName()))
                 .findFirst().orElseThrow(() -> new AssertionError(
                         "Nothing was generated for " + javaClass));
     }
 
     private static EntityModel entity(Class<?> javaClass) {
-        return entities.stream().filter(
+        return generation.entities().stream().filter(
                 entity -> entity.javaClass().equals(javaClass.getName()))
                 .findFirst().orElseThrow(() -> new AssertionError(
                         "Nothing was generated for " + javaClass));
