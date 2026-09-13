@@ -1,4 +1,5 @@
 interface NonNullableFieldModel {
-    stringList: Array<string>;
+  stringList: Array<string>;
 }
+
 export default NonNullableFieldModel;

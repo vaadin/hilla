@@ -1,5 +1,6 @@
 interface AbstractEntity<ID = unknown> {
-    version: number;
-    id: ID;
+  version: number;
+  id?: ID;
 }
+
 export default AbstractEntity;

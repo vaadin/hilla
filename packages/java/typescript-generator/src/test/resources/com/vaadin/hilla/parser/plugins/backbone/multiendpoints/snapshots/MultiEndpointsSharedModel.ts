@@ -1,4 +1,5 @@
 interface MultiEndpointsSharedModel {
-    id?: string;
+  id?: string;
 }
+
 export default MultiEndpointsSharedModel;

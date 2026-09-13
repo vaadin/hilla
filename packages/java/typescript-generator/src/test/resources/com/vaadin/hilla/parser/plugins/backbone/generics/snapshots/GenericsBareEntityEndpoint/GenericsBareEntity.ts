@@ -1,4 +1,5 @@
 interface GenericsBareEntity {
-    bareEntityProperty?: string;
+  bareEntityProperty?: string;
 }
+
 export default GenericsBareEntity;
