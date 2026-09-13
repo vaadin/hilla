@@ -100,6 +100,8 @@ public class JacksonEndpoint {
         }
     }
 
+    // Its own order, for the reason the class it is the parent of has one
+    @JsonPropertyOrder(alphabetic = true)
     static class SampleParent {
         public String publicParentProperty;
         private String privateParentProperty;
