@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import io.swagger.v3.oas.models.OpenAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
@@ -201,7 +200,7 @@ public final class FullStackGenerator {
      * Runs only the Java part of the pipeline. Available for the few tests
      * which assert on things that are not visible in the generated TypeScript.
      */
-    public OpenAPI parse() {
+    public void parse() {
         try {
             var classPath = ResourceLoader.getClasspath(SCANNED_TYPES.stream()
                     .map(ResourceLoader::new).collect(Collectors.toList()));
@@ -209,14 +208,14 @@ public final class FullStackGenerator {
                     .classPath(classPath.split(File.pathSeparator))
                     .endpointAnnotations(ENDPOINT_ANNOTATIONS)
                     .endpointExposedAnnotations(ENDPOINT_EXPOSED_ANNOTATIONS);
-            // Collects the model while the other plugins build the OpenAPI
-            // definition, without changing anything they produce. It goes
-            // first so that it is the last to exit a node, by which time the
-            // plugins deciding whether a value can be absent have run
+            // Collects what the TypeScript is written from while the other
+            // plugins walk the classes, without changing anything they do. It
+            // goes first so that it is the last to exit a node, by which time
+            // the plugins deciding whether a value can be absent have run
             parser.addPlugin(modelPlugin);
             plugins.forEach(parser::addPlugin);
 
-            return parser.execute(endpointClasses);
+            parser.execute(endpointClasses);
         } catch (URISyntaxException e) {
             throw new IllegalStateException("Unable to build the classpath", e);
         }

@@ -20,7 +20,6 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -31,12 +30,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Paths;
-import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.servers.Server;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,7 +60,6 @@ public class ParserConfigTests {
     private Set<String> defaultClassPathElements;
     private List<Class<? extends Annotation>> defaultEndpointAnnotations;
     private List<Class<? extends Annotation>> defaultEndpointExposedAnnotations;
-    private OpenAPI defaultOpenAPI;
     private Parser parser;
     private Path targetDir;
 
@@ -78,12 +71,6 @@ public class ParserConfigTests {
         targetDir = resourceLoader.findTargetDirPath();
         defaultClassPathElements = Set.of(targetDir.toString());
         defaultEndpointExposedAnnotations = List.of(EndpointExposed.class);
-        defaultOpenAPI = new OpenAPI()
-                .info(new Info().title("Hilla Application").version("1.0.0"))
-                .servers(List
-                        .of(new Server().url("http://localhost:8080/connect")
-                                .description("Hilla Backend")))
-                .paths(new Paths());
         parser = new Parser().classPath(defaultClassPathElements)
                 .endpointAnnotations(defaultEndpointAnnotations)
                 .endpointExposedAnnotations(defaultEndpointExposedAnnotations);
@@ -127,16 +114,6 @@ public class ParserConfigTests {
     }
 
     @Test
-    public void should_AllowAdjustingOpenAPI() {
-        Consumer<OpenAPI> adjuster = openAPI -> openAPI.getInfo()
-                .setTitle("My Application");
-        var config = parser.adjustOpenAPI(adjuster).getConfig();
-        adjuster.accept(defaultOpenAPI);
-
-        assertEquals(defaultOpenAPI, config.getOpenAPI());
-    }
-
-    @Test
     public void should_AllowPreservingAlreadySetProperties() {
         var config = parser.classPath(List.of("somepath"), false)
                 .endpointAnnotations(List.of(Endpoint.class), false)
@@ -154,20 +131,7 @@ public class ParserConfigTests {
                 config.getEndpointAnnotations());
         assertEquals(defaultEndpointExposedAnnotations,
                 config.getEndpointExposedAnnotations());
-        assertEquals(defaultOpenAPI, config.getOpenAPI());
         assertEquals(List.of(), new ArrayList<>(config.getPlugins()));
-    }
-
-    @Test
-    public void should_ParseJSONOpenAPISource()
-            throws URISyntaxException, IOException {
-        testOpenAPISourceFile("openapi-base.json", OpenAPIFileType.JSON);
-    }
-
-    @Test
-    public void should_ParseYAMLOpenAPISource()
-            throws URISyntaxException, IOException {
-        testOpenAPISourceFile("openapi-base.yml", OpenAPIFileType.YAML);
     }
 
     @Test
@@ -195,15 +159,6 @@ public class ParserConfigTests {
                         }));
         assertThat(e.getMessage(), startsWith("Requires instance of class "
                 + BazPluginConfig.class.getName()));
-    }
-
-    private void testOpenAPISourceFile(String fileName, OpenAPIFileType type)
-            throws URISyntaxException, IOException {
-        var openAPISource = resourceLoader.readToString(fileName);
-        var config = parser.openAPISource(openAPISource, type).getConfig();
-        var expected = type.getMapper().readValue(openAPISource, OpenAPI.class);
-
-        assertEquals(expected, config.getOpenAPI());
     }
 
     private static class BarPlugin extends AbstractPlugin<PluginConfiguration> {

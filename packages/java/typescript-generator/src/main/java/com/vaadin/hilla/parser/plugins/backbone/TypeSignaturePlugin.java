@@ -26,10 +26,7 @@ import java.util.stream.Stream;
 
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MapSchema;
-import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import org.jspecify.annotations.NonNull;
 
@@ -106,14 +103,7 @@ public final class TypeSignaturePlugin
         var parentNode = nodePath.getParentPath().getNode();
         var grandParentNode = nodePath.getParentPath().getParentPath()
                 .getNode();
-        if (parentNode instanceof MethodNode) {
-            attachSchemaToMethod(schema, (MethodNode) parentNode);
-        } else if (parentNode instanceof MethodParameterNode
-                && grandParentNode instanceof MethodNode) {
-            attachSchemaToParameterOfMethod(schema,
-                    ((MethodParameterNode) parentNode),
-                    ((MethodNode) grandParentNode));
-        } else if (parentNode instanceof EntityNode
+        if (parentNode instanceof EntityNode
                 && schema instanceof ComposedSchema) {
             attachSchemaToEntitySubclass((ComposedSchema) schema,
                     (EntityNode) parentNode);
@@ -159,12 +149,6 @@ public final class TypeSignaturePlugin
         entityNode.setTarget(schema);
     }
 
-    private void attachSchemaToMethod(Schema<?> schema, MethodNode methodNode) {
-        methodNode.getTarget().getPost().getResponses().get("200")
-                .setContent(new Content().addMediaType(MethodPlugin.MEDIA_TYPE,
-                        new MediaType().schema(schema)));
-    }
-
     private void attachSchemaToNestingParentSignature(Schema<?> schema,
             TypedNode parentNode) {
         var parentSchema = parentNode.getTarget();
@@ -182,14 +166,6 @@ public final class TypeSignaturePlugin
             // parameter, type variable, and optional signatures
             parentNode.setTarget(schema);
         }
-    }
-
-    private void attachSchemaToParameterOfMethod(Schema<?> schema,
-            MethodParameterNode methodParameterNode, MethodNode methodNode) {
-        var requestMap = (ObjectSchema) methodNode.getTarget().getPost()
-                .getRequestBody().getContent().get(MethodPlugin.MEDIA_TYPE)
-                .getSchema();
-        requestMap.addProperties(methodParameterNode.getTarget(), schema);
     }
 
     private void attachSchemaToPropertyOfEntity(Schema<?> schema,
