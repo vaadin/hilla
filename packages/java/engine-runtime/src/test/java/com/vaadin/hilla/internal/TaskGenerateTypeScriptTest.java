@@ -96,18 +96,6 @@ public class TaskGenerateTypeScriptTest extends TaskTest {
                 "The application context is not what a production build asks");
     }
 
-    @Test
-    public void should_LeaveTheTaskRunningTheNodeGeneratorWithNothingToDo()
-            throws Exception {
-        new TaskGenerateOpenAPIImpl(getEngineConfiguration()).execute();
-        var written = read("MyEndpoint.ts");
-
-        new TaskGenerateEndpointImpl(getEngineConfiguration()).execute();
-
-        assertEquals(written, read("MyEndpoint.ts"),
-                "The TypeScript was written once, in Java");
-    }
-
     private Path output() {
         return getTemporaryDirectory().resolve(getOutputDirectory());
     }

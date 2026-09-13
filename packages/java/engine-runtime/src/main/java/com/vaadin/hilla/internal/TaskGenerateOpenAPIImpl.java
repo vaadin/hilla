@@ -22,8 +22,8 @@ import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 import com.vaadin.hilla.ApplicationContextProvider;
 import com.vaadin.hilla.EndpointCodeGenerator;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
-import com.vaadin.hilla.engine.GeneratorProcessor;
 import com.vaadin.hilla.engine.ParserProcessor;
+import com.vaadin.hilla.engine.TypeScriptProcessor;
 
 /**
  * Generate OpenAPI json file for Vaadin Endpoints.
@@ -70,22 +70,21 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
 
     /**
      * Runs the parser over the browser callable classes, which writes the
-     * OpenAPI definition.
+     * OpenAPI definition, and writes the TypeScript of the endpoints out of
+     * what the parser found.
      *
      * <p>
-     * The TypeScript of the endpoints is written here as well while it is being
-     * moved into Java, since the writers need what the parser has just seen and
-     * this is the run which has it; the task which runs the Node generator does
-     * nothing then. The two tasks become one once the move is done and there is
-     * no OpenAPI definition to write.
+     * Both are written here because the writers need what the parser has just
+     * seen, and this is the run which has it. The task which used to generate
+     * the TypeScript has nothing left to do, and the two become one once there
+     * is no OpenAPI definition to write either.
      */
     private static void parse(EngineAutoConfiguration engineConfiguration,
             List<Class<?>> browserCallables) {
         var processor = new ParserProcessor(engineConfiguration);
         processor.process(browserCallables);
 
-        if (GeneratorProcessor.writesTypeScriptInJava()) {
-            new GeneratorProcessor(engineConfiguration).process(processor);
-        }
+        new TypeScriptProcessor(engineConfiguration)
+                .process(processor.getGeneration());
     }
 }
