@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.io.FileUtils;
@@ -35,6 +36,7 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 import com.vaadin.hilla.engine.GeneratorProcessor;
 import com.vaadin.hilla.engine.ParserProcessor;
+import com.vaadin.hilla.internal.fixtures.MyEndpoint;
 
 public class TaskGenerateEndpointTest extends EndpointsTaskTest {
 
@@ -72,17 +74,15 @@ public class TaskGenerateEndpointTest extends EndpointsTaskTest {
     public void should_GenerateFromTheOpenAPIDefinitionOfAParserRun()
             throws Exception {
         var configuration = getEngineConfiguration();
+        var parser = new ParserProcessor(configuration);
+        parser.process(List.of(MyEndpoint.class));
 
-        // The run of the parser is what the TypeScript is written from once it
-        // is written in Java; until then it is written from the OpenAPI
-        // definition that run left behind, whoever asks for it
-        new GeneratorProcessor(configuration)
-                .process(new ParserProcessor(configuration));
+        // What a run of the parser leaves behind is what the Node generator
+        // writes the TypeScript from, whoever hands it the run
+        new GeneratorProcessor(configuration).process(parser);
 
-        assertTrue(
-                outputDirectory.resolve("FooBarEndpoint.ts").toFile().exists());
-        assertTrue(
-                outputDirectory.resolve("FooFooEndpoint.ts").toFile().exists());
+        assertTrue(outputDirectory.resolve("MyEndpoint.ts").toFile().exists(),
+                "The endpoint the parser walked is written");
     }
 
     @Test
