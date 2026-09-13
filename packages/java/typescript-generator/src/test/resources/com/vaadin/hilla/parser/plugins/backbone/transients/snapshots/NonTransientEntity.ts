@@ -1,5 +1,6 @@
 interface NonTransientEntity {
-    entityField?: string;
-    transientWithGetter?: string;
+  entityField?: string;
+  transientWithGetter?: string;
 }
+
 export default NonTransientEntity;

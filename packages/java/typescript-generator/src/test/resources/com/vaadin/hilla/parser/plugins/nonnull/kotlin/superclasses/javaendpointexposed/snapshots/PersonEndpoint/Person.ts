@@ -1,4 +1,5 @@
 interface Person {
-    name?: string;
+  name?: string;
 }
+
 export default Person;

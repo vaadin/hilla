@@ -1,3 +1,3 @@
-interface ExposedSuperclassEntity {
-}
+interface ExposedSuperclassEntity {}
+
 export default ExposedSuperclassEntity;
