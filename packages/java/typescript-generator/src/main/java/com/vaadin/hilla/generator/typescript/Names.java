@@ -58,24 +58,20 @@ final class Names {
     }
 
     /**
-     * The given name, or the first one free of it with underscores in front,
-     * which is how a generated name gives way to one that is taken.
+     * The name of a property as it is written in a type or an object, written
+     * as a string when it is not a name TypeScript accepts as it is.
      */
-    static String free(String name, Predicate<String> taken) {
-        var free = name;
-
-        while (taken.test(free)) {
-            free = "_" + free;
-        }
-
-        return free;
+    static String property(String name) {
+        return IDENTIFIER.matcher(name).matches() ? name : string(name);
     }
 
     /**
-     * The name of a property as it is written in a type or an object, quoted
-     * when it is not a name TypeScript accepts as it is.
+     * A value as TypeScript reads it as a string, with what the language would
+     * otherwise read as the end of it, or as another line, written as it says
+     * itself.
      */
-    static String property(String name) {
-        return IDENTIFIER.matcher(name).matches() ? name : "'" + name + "'";
+    static String string(String value) {
+        return "'" + value.replace("\\", "\\\\").replace("'", "\\'")
+                .replace("\n", "\\n").replace("\r", "\\r") + "'";
     }
 }

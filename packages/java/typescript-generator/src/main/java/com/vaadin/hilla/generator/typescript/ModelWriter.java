@@ -318,27 +318,20 @@ final class ModelWriter {
                     .collect(Collectors.joining(", ", "[", "]"));
         }
 
-        if (value instanceof Map<?, ?> attributes) {
-            return attributes.entrySet().stream()
-                    .map(attribute -> key(String.valueOf(attribute.getKey()))
-                            + ": " + value(attribute.getValue()))
-                    .collect(Collectors.joining(", ", "{ ", " }"));
+        if (value instanceof Object[] values) {
+            return Arrays.stream(values).map(ModelWriter::value)
+                    .collect(Collectors.joining(", ", "[", "]"));
         }
 
-        return string(String.valueOf(value));
-    }
+        if (value instanceof AnnotationParameterEnumValueModel constant) {
+            return Names.string(constant.getValueName());
+        }
 
-    private static String key(String name) {
-        return IDENTIFIER.matcher(name).matches() ? name : string(name);
-    }
+        if (value instanceof ClassInfoModel javaClass) {
+            return Names.string(javaClass.getName());
+        }
 
-    /**
-     * A string as TypeScript reads it, with what the language would otherwise
-     * read as the end of it, or as another line, written as it says itself.
-     */
-    static String string(String value) {
-        return "'" + value.replace("\\", "\\\\").replace("'", "\\'")
-                .replace("\n", "\\n").replace("\r", "\\r") + "'";
+        return Names.string(String.valueOf(value));
     }
 
     private String call(String converter, String... arguments) {

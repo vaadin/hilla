@@ -114,9 +114,8 @@ public final class EntityWriter {
      */
     private static String writeDiscriminator(
             EntityModel.Discriminator discriminator) {
-        return Names.property(discriminator.name()) + ": "
-                + discriminator.acceptedValues().stream()
-                        .map(value -> "'" + value + "'")
+        return "  " + Names.property(discriminator.name()) + ": "
+                + discriminator.acceptedValues().stream().map(Names::string)
                         .collect(Collectors.joining(" | "))
                 + ";";
     }

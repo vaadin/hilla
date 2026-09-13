@@ -68,8 +68,9 @@ public final class UnionWriter {
 
         return member.narrowedTo()
                 .map(discriminator -> "(" + written + " & { "
-                        + Names.property(discriminator.name()) + ": '"
-                        + discriminator.acceptedValues().get(0) + "' })")
+                        + Names.property(discriminator.name()) + ": "
+                        + Names.string(discriminator.acceptedValues().get(0))
+                        + " })")
                 .orElse(written);
     }
 
