@@ -57,11 +57,10 @@ import com.vaadin.hilla.transfertypes.annotations.FromModule;
  *
  * <p>
  * The model is assembled from the Java signatures the walk carries, so it keeps
- * the type each value comes from, which the OpenAPI representation of the same
- * walk cannot: a date, an instant and a plain string are all a string there.
- * Whether a value can be absent is the one thing taken from that
- * representation, since resolving it from the annotations, the Kotlin metadata
- * and the defaults of the project is the work of the other plugins.
+ * the type each value comes from. Whether a value can be absent is the one
+ * thing taken from what the other plugins say about it, since resolving it from
+ * the annotations, the Kotlin metadata and the defaults of the project is their
+ * work.
  *
  * <p>
  * That is why the plugin belongs <em>first</em> in the chain, although it reads
@@ -72,23 +71,11 @@ import com.vaadin.hilla.transfertypes.annotations.FromModule;
  * written as one which can be absent.
  *
  * <p>
- * The plugin only collects: it changes nothing the other plugins produce, so
- * the OpenAPI definition is exactly what it would be without it.
+ * The plugin only collects: every other plugin sees the walk as it would
+ * without it.
  */
 public final class EndpointModelPlugin
         extends AbstractPlugin<PluginConfiguration> {
-    /**
-     * Where the plugin building the OpenAPI definition leaves what the
-     * annotations of the validation API say about a value.
-     */
-    private static final String VALIDATION_CONSTRAINTS = "x-validation-constraints";
-
-    /**
-     * Where the plugin building the OpenAPI definition leaves the annotations
-     * of a value which a form model is told about.
-     */
-    private static final String ANNOTATIONS = "x-annotations";
-
     private final Map<Node<?, ?>, List<TypeModel>> types = new IdentityHashMap<>();
     private final Map<Node<?, ?>, List<ParameterModel>> parameters = new IdentityHashMap<>();
     private final Map<Node<?, ?>, Map<String, MethodModel>> methods = new IdentityHashMap<>();
@@ -276,9 +263,8 @@ public final class EndpointModelPlugin
     /**
      * The type of the values a method pushes, if it pushes them rather than
      * returning one: the types the endpoint sends values through are carried as
-     * the collection of what they hold, since that is what the walk which
-     * builds the OpenAPI needs, and the name of the Java type is what tells one
-     * of them from an ordinary collection.
+     * the collection of what they hold, and the name of the Java type is what
+     * tells one of them from an ordinary collection.
      */
     private static Optional<TypeModel> pushedValue(TypeModel returnType) {
         return returnType instanceof TypeModel.ArrayOf array
@@ -533,7 +519,7 @@ public final class EndpointModelPlugin
      * plugin reading them off the walk has already noted on the type of it.
      */
     private static List<ConstraintModel> constraintsOf(TypeFacts type) {
-        return notes(type, VALIDATION_CONSTRAINTS, ValidationConstraint.class)
+        return notes(type, TypeFacts.CONSTRAINTS, ValidationConstraint.class)
                 .map(constraint -> new ConstraintModel(
                         constraint.getSimpleName(),
                         constraint.getAttributes() == null ? Map.of()
@@ -547,7 +533,7 @@ public final class EndpointModelPlugin
      * noted on the type of it.
      */
     private static List<String> annotationsOf(TypeFacts type) {
-        return notes(type, ANNOTATIONS, Annotation.class)
+        return notes(type, TypeFacts.ANNOTATIONS, Annotation.class)
                 .map(Annotation::getName).toList();
     }
 
@@ -564,7 +550,7 @@ public final class EndpointModelPlugin
      * Whether the browser has a value of the type, which a class of the
      * application can be one of as well: a class extending Date is a date, and
      * an endpoint sends it as one rather than as a type of its own. The order
-     * is the one the OpenAPI definition of the same walk is built in, so that
+     * is the one the walk decides whether a value can be absent in, so that
      * both say the same about a type.
      */
     private static boolean isValue(SignatureModel signature) {

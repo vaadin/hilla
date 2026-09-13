@@ -56,8 +56,9 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
             var unionNode = (UnionNode) nodePath.getNode();
             var cls = (Class<?>) unionNode.getSource().get();
 
-            // verify that the class has a @JsonTypeInfo annotation
-            // and then add all the @JsonSubTypes to the schema as a `oneOf`
+            // verify that the class has a @JsonTypeInfo annotation, and then
+            // say that a value is of one of the classes the @JsonSubTypes
+            // annotation names
             if (cls.getAnnotationsByType(JsonTypeInfo.class).length > 0) {
                 unionNode.setTarget(
                         getJsonSubTypes(cls).map(JsonSubTypes.Type::value)
@@ -276,10 +277,6 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
         }
     }
 
-    /**
-     * A node that represents the union of all the mentioned subclasses of a
-     * class annotated with {@code @JsonSubTypes}.
-     */
     /**
      * A type whose values are of one of the types it declares, which carries
      * the names of those classes.
