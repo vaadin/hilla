@@ -104,8 +104,8 @@ public final class GeneratorProcessor {
      * application gets, whoever writes the TypeScript otherwise.
      */
     private boolean hasConfiguredPlugins() {
-        var plugins = generatorConfiguration == null ? Optional
-                .<GeneratorConfiguration.Plugins> empty()
+        var plugins = generatorConfiguration == null
+                ? Optional.<GeneratorConfiguration.Plugins> empty()
                 : generatorConfiguration.getPlugins();
 
         if (plugins.isEmpty()) {
