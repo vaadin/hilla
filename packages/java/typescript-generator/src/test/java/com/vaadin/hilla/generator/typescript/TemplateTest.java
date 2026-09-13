@@ -49,6 +49,38 @@ public class TemplateTest {
     }
 
     @Test
+    public void should_LineUpTheLinesOfAValueUnderTheHole() {
+        assertEquals("""
+                class Person {
+                  get name() {
+                    return 'name';
+                  }
+                }""", Template.of("""
+                class Person {
+                  {{body}}
+                }""").with("body", """
+                get name() {
+                  return 'name';
+                }""").fill());
+    }
+
+    @Test
+    public void should_LeaveAValueStartingOnALineOfItsOwnAsItIs() {
+        // Such a value says where its own lines go, as the parameters of a
+        // method too wide for one line do
+        assertEquals("""
+                call(
+                  first,
+                  second,
+                );""",
+                Template.of("call({{parameters}});").with("parameters", """
+
+                          first,
+                          second,
+                        """).fill());
+    }
+
+    @Test
     public void should_RefuseAHoleWithoutAValue() {
         var template = Template.of("{{known}} and {{forgotten}}").with("known",
                 "one");
