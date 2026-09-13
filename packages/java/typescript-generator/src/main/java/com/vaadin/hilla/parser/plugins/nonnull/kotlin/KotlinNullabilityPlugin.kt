@@ -43,7 +43,6 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode
-import io.swagger.v3.oas.models.media.ObjectSchema
 import java.lang.reflect.Method
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.memberFunctions
@@ -117,7 +116,7 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
                         .first { it.kind == KParameter.Kind.VALUE && it.name == node.source.name })
             is TypedNode -> resolveTypedNode(node, parentPath)
             is EntityNode ->
-                KEntityNode(node.source, node.target as ObjectSchema, (node.source.get() as Class<*>).kotlin)
+                KEntityNode(node.source, node.target, (node.source.get() as Class<*>).kotlin)
             is PropertyNode -> {
                 val kProperty = (parentPath.node as? KEntityNode)?.kClass?.memberProperties
                     ?.firstOrNull { it.name == node.source.name }
