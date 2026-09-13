@@ -1,7 +1,9 @@
-import type Sort from "./Sort.js";
+import type Sort from './Sort.js';
+
 interface Pageable {
-    pageNumber: number;
-    pageSize: number;
-    sort: Sort;
+  pageNumber: number;
+  pageSize: number;
+  sort: Sort;
 }
+
 export default Pageable;

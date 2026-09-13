@@ -1,4 +1,5 @@
 interface Generic<T = unknown> {
-    genericField: T;
+  genericField: T;
 }
+
 export default Generic;

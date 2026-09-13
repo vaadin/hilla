@@ -1,9 +1,24 @@
-import m, { NumberModel, StringModel } from "@vaadin/hilla-models";
-import type User from "./User.js";
-const UserModel = m
-  .object<User>("User")
-  .property("name", m.meta(m.optional(StringModel), { jvmType: "java.lang.String" }))
-  .property("age", m.meta(NumberModel, { jvmType: "int" }))
-  .build();
-type UserModel = typeof UserModel;
+import {
+  NumberModel,
+  ObjectModel,
+  StringModel,
+  _getPropertyModel,
+  makeObjectEmptyValueCreator,
+} from '@vaadin/hilla-lit-form';
+import type User from './User.js';
+
+class UserModel<T extends User = User> extends ObjectModel<T> {
+  static override createEmptyValue = makeObjectEmptyValueCreator(UserModel);
+
+  get name(): StringModel {
+    return this[_getPropertyModel]('name', (parent, key) =>
+      new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }));
+  }
+
+  get age(): NumberModel {
+    return this[_getPropertyModel]('age', (parent, key) =>
+      new NumberModel(parent, key, false, { meta: { javaType: 'int' } }));
+  }
+}
+
 export default UserModel;

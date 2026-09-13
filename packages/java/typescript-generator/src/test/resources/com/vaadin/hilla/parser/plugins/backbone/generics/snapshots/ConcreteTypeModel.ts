@@ -1,5 +1,8 @@
-import m from "@vaadin/hilla-models";
-import type ConcreteType from "./ConcreteType.js";
-const ConcreteTypeModel = m.object<ConcreteType>("ConcreteType").build();
-type ConcreteTypeModel = typeof ConcreteTypeModel;
+import { ObjectModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import type ConcreteType from './ConcreteType.js';
+
+class ConcreteTypeModel<T extends ConcreteType = ConcreteType> extends ObjectModel<T> {
+  static override createEmptyValue = makeObjectEmptyValueCreator(ConcreteTypeModel);
+}
+
 export default ConcreteTypeModel;
