@@ -55,10 +55,6 @@ public class TaskTest {
         return "build";
     }
 
-    protected String getClassesDirectory() {
-        return "build/classes";
-    }
-
     protected String getFrontendDirectory() {
         return "frontend";
     }
