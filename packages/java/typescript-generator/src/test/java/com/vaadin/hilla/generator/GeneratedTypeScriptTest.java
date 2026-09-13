@@ -40,6 +40,7 @@ import com.vaadin.hilla.generator.fixtures.ValidatedEndpoint;
 import com.vaadin.hilla.generator.model.EndpointModel;
 import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.generator.model.Generation;
+import com.vaadin.hilla.generator.model.MethodModel;
 import com.vaadin.hilla.generator.model.UnionModel;
 import com.vaadin.hilla.generator.typescript.BarrelWriter;
 import com.vaadin.hilla.generator.typescript.ClientWriter;
@@ -522,12 +523,17 @@ public class GeneratedTypeScriptTest {
 
         assertEquals(List.of("EmptyEndpoint"), generation.endpoints().stream()
                 .map(EndpointModel::name).toList());
-        assertEquals("""
-                import * as EmptyEndpoint from './EmptyEndpoint.js';
 
-                export { EmptyEndpoint };
-                """,
-                new BarrelWriter().write(generation.endpoints()).content());
+        var endpoint = generation.endpoints().get(0);
+
+        assertEquals(
+                com.vaadin.hilla.generator.fixtures.other.EmptyEndpoint.class
+                        .getName(),
+                endpoint.javaClass(),
+                "The last class of the name is the one the server answers with");
+        assertEquals(List.of("describe"),
+                endpoint.methods().stream().map(MethodModel::name).toList(),
+                "Which is the class the methods are written from");
     }
 
     @Test
