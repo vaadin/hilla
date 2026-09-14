@@ -386,13 +386,13 @@ public final class EndpointModelPlugin
             return referred.isEmpty()
                     ? new TypeModel.TypeVariable(name(signature), optional,
                             constraints, annotations)
-                    : bound(only(referred), optional);
+                    : asAbsent(only(referred), optional);
         }
 
         // A type argument, such as the String of a List<String>, stands for the
         // type it is bound to, which the walk visits below it
         if (signature.isTypeArgument()) {
-            return optional ? asOptional(only(referred)) : only(referred);
+            return asAbsent(only(referred), optional);
         }
 
         // An Optional is written as the type it holds, which can be absent:
@@ -426,30 +426,36 @@ public final class EndpointModelPlugin
                 name(signature), constraints, annotations);
     }
 
-    private static TypeModel bound(TypeModel type, boolean optional) {
-        return optional ? asOptional(type) : type;
-    }
-
-    private static TypeModel asOptional(TypeModel type) {
+    /**
+     * The type a signature standing for another one is written as: what the
+     * walk says about the standing signature decides whether a value of it can
+     * be absent, since that is where an annotation on a type argument, a
+     * wildcard or a type parameter belongs.
+     */
+    private static TypeModel asAbsent(TypeModel type, boolean optional) {
         return switch (type) {
         case TypeModel.Scalar scalar ->
-            new TypeModel.Scalar(scalar.kind(), true, scalar.javaType(),
+            new TypeModel.Scalar(scalar.kind(), optional, scalar.javaType(),
                     scalar.constraints(), scalar.annotations());
         case TypeModel.ArrayOf array ->
-            new TypeModel.ArrayOf(array.items(), true, array.javaType(),
+            new TypeModel.ArrayOf(array.items(), optional, array.javaType(),
                     array.constraints(), array.annotations());
-        case TypeModel.MapOf map -> new TypeModel.MapOf(map.values(), true,
+        case TypeModel.MapOf map -> new TypeModel.MapOf(map.values(), optional,
                 map.javaType(), map.constraints(), map.annotations());
         case TypeModel.EntityRef entity ->
             new TypeModel.EntityRef(entity.javaClass(), entity.typeArguments(),
-                    true, entity.constraints(), entity.annotations());
+                    optional, entity.constraints(), entity.annotations());
         case TypeModel.Provided provided -> new TypeModel.Provided(
                 provided.name(), provided.module(), provided.typeArguments(),
-                true, provided.constraints(), provided.annotations());
+                optional, provided.constraints(), provided.annotations());
         case TypeModel.TypeVariable variable ->
-            new TypeModel.TypeVariable(variable.name(), true,
+            new TypeModel.TypeVariable(variable.name(), optional,
                     variable.constraints(), variable.annotations());
         };
+    }
+
+    private static TypeModel asOptional(TypeModel type) {
+        return asAbsent(type, true);
     }
 
     private static TypeModel.ScalarKind scalarKind(SignatureModel signature) {
