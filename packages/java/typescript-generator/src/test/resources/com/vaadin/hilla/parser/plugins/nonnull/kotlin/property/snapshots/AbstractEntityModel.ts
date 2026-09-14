@@ -11,7 +11,7 @@ class AbstractEntityModel<T extends AbstractEntity = AbstractEntity> extends Obj
 
   get id(): ObjectModel {
     return this[_getPropertyModel]('id', (parent, key) =>
-      new ObjectModel(parent, key, false));
+      new ObjectModel(parent, key, true));
   }
 }
 
