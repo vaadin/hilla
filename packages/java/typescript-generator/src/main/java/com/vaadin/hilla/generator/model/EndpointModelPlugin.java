@@ -38,6 +38,7 @@ import com.vaadin.hilla.parser.models.FieldInfoModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.models.SpecializedModel;
 import com.vaadin.hilla.parser.models.TypeParameterModel;
+import com.vaadin.hilla.parser.models.jackson.JacksonPropertyModel;
 import com.vaadin.hilla.parser.plugins.backbone.EntityFacts;
 import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointNode;
@@ -307,13 +308,26 @@ public final class EndpointModelPlugin
         // type variable is left as absent as the type it stands for says,
         // since a declaration extending this one gives that type and is free
         // to say that the value is always there
-        var absent = valueType == null ? type.optional()
-                : valueType.isOptional();
+        // A property holding an optional is written as a value which can be
+        // absent whatever a declaration says about the property itself, since
+        // an empty optional is what the server leaves out
+        var absent = isOptional(node.getSource())
+                || (valueType == null ? type.optional()
+                        : valueType.isOptional());
 
         properties.computeIfAbsent(parent, key -> new ArrayList<>())
                 .add(new PropertyModel(node.getTarget(),
                         type instanceof TypeModel.TypeVariable && !absent ? type
                                 : asAbsent(type, absent)));
+    }
+
+    /**
+     * Whether the value a property holds is an optional, which the type of the
+     * member it is written as says.
+     */
+    private static boolean isOptional(JacksonPropertyModel property) {
+        return property.getAssociatedTypes().stream().findFirst()
+                .filter(SignatureModel::isOptional).isPresent();
     }
 
     /**

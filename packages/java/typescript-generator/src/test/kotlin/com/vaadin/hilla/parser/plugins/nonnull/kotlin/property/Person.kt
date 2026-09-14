@@ -3,6 +3,7 @@ package com.vaadin.hilla.parser.plugins.nonnull.kotlin.property
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import java.time.LocalDate
+import java.util.Optional
 import kotlin.properties.Delegates
 
 open class Person(
@@ -27,6 +28,9 @@ open class Person(
         firstName = parts[0]
         lastName = parts[1]
     }
+    // Declared as always there, and empty all the same when the server sends
+    // nothing for it
+    fun getNickname(): Optional<String> = Optional.ofNullable(null)
     var luckyNumber by Delegates.notNull<Int>()
     lateinit var addresses: Map<String, Address>
     val profilePicture: String? by lazy {
