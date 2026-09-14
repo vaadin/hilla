@@ -300,20 +300,17 @@ public final class EndpointModelPlugin
     private void collect(Node<?, ?> parent, PropertyNode node,
             List<TypeModel> ownTypes) {
         var type = only(ownTypes);
-        var valueType = node.getValueType();
 
         // Whether the value of a property can be absent is not settled until
         // the property itself is left: the nullability a Kotlin declaration
-        // keeps on the member it is written as is decided there. A value of a
-        // type variable is left as absent as the type it stands for says,
-        // since a declaration extending this one gives that type and is free
-        // to say that the value is always there
-        // A property holding an optional is written as a value which can be
-        // absent whatever a declaration says about the property itself, since
-        // an empty optional is what the server leaves out
+        // keeps on the member it is written as is decided there. A property
+        // holding an optional is one which can be absent whatever such a
+        // declaration says, since an empty optional is what the server leaves
+        // out. A value of a type variable is left as absent as the type it
+        // stands for says, since a declaration extending this one gives that
+        // type and is free to say that the value is always there
         var absent = isOptional(node.getSource())
-                || (valueType == null ? type.optional()
-                        : valueType.isOptional());
+                || node.getValueType().isOptional();
 
         properties.computeIfAbsent(parent, key -> new ArrayList<>())
                 .add(new PropertyModel(node.getTarget(),
