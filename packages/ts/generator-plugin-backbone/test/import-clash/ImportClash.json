@@ -191,6 +191,19 @@
             "nullable": true
           }
         }
+      },
+      "com.vaadin.hilla.parser.plugins.backbone.importclash.Container": {
+        "type": "object",
+        "x-type-parameters": ["Entity"],
+        "properties": {
+          "item": {
+            "type": "object",
+            "x-type-variable": "Entity"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.importclash.Entity"
+          }
+        }
       }
     }
   }

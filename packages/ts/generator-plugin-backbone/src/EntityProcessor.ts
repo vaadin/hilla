@@ -96,7 +96,7 @@ export class EntityProcessor {
     return ts.factory.createInterfaceDeclaration(
       undefined,
       this.#id,
-      EntityProcessor.#processTypeParameters(schema),
+      this.#processTypeParameters(schema),
       undefined,
       this.#processTypeElements(schema),
     );
@@ -176,16 +176,20 @@ export class EntityProcessor {
     });
   }
 
-  static #processTypeParameters(schema: Schema): readonly TypeParameterDeclaration[] | undefined {
+  #processTypeParameters(schema: Schema): readonly TypeParameterDeclaration[] | undefined {
     return findTypeParameters(schema)
       ?.map(String)
-      .map((name) =>
-        ts.factory.createTypeParameterDeclaration(
+      .map((name) => {
+        // claimed so that an import of the same name is the one to be suffixed:
+        // a type parameter would capture it otherwise
+        this.#dependencies.names.claim(name);
+
+        return ts.factory.createTypeParameterDeclaration(
           undefined,
           name,
           undefined,
           ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword),
-        ),
-      );
+        );
+      });
   }
 }

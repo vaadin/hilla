@@ -19,5 +19,14 @@ describe('BackbonePlugin', () => {
       await expect(await endpointFile.text()).toMatchFileSnapshot(`fixtures/${sectionName}Endpoint.snap.ts`);
       expect(endpointFile.name).to.equal(`${sectionName}Endpoint.ts`);
     });
+
+    it('suffixes the import instead of the type parameter', async () => {
+      const generator = createGenerator([BackbonePlugin]);
+      const input = await loadInput(sectionName, import.meta.url);
+      const files = await generator.process(input);
+
+      const containerFile = files.find((f) => f.name.endsWith('/Container.ts'))!;
+      await expect(await containerFile.text()).toMatchFileSnapshot('fixtures/Container.entity.snap.ts');
+    });
   });
 });
