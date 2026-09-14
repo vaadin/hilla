@@ -15,7 +15,6 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +44,6 @@ public final class TypeFacts {
      */
     public static final String ANNOTATIONS = "annotations";
 
-    private final List<TypeFacts> typeArguments = new ArrayList<>();
     private final Map<String, List<?>> notes = new LinkedHashMap<>();
     private final boolean collectsTypeArguments;
     private boolean optional;
@@ -87,13 +85,6 @@ public final class TypeFacts {
      */
     public boolean collectsTypeArguments() {
         return collectsTypeArguments;
-    }
-
-    /**
-     * The types this one is given, in the order it takes them.
-     */
-    public List<TypeFacts> getTypeArguments() {
-        return typeArguments;
     }
 
     /**
