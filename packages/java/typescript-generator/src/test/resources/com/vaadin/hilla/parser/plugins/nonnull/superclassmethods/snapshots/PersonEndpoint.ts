@@ -17,9 +17,9 @@ export async function update(entity: Person | undefined, init?: EndpointRequestI
 export async function getNonNullablePage(
   pageSize: number,
   pageNumber: number,
-  parameters: Record<string, Person | undefined> | undefined,
+  parameters: Record<string, Person> | undefined,
   init?: EndpointRequestInit,
-): Promise<Array<Person | undefined> | undefined> {
+): Promise<Array<Person> | undefined> {
   return client.call('PersonEndpoint', 'getNonNullablePage', { pageSize, pageNumber, parameters }, init);
 }
 
