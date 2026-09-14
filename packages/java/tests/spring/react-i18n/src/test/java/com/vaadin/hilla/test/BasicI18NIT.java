@@ -37,7 +37,10 @@ public class BasicI18NIT extends ChromeBrowserTest {
     public void setup() throws Exception {
         super.setup();
         getDriver().get(getRootURL() + "/basic-i18n");
-        waitUntil(driver -> $(TextFieldElement.class).all().size() == 3);
+        // The view is asked for while the application is still starting, and
+        // the translations it waits for come from the server: the ten seconds
+        // of the default are not always enough for the first of the tests
+        waitUntil(driver -> $(TextFieldElement.class).all().size() == 3, 25);
         nameField = $(TextFieldElement.class).id("name");
         addressField = $(TextFieldElement.class).id("address");
         languageField = $(TextFieldElement.class).id("language");
