@@ -21,8 +21,13 @@ on:
   # unaffected: a pull request runs the workflow file from its own merge
   # commit, so a pull request against e.g. 24.9 uses that branch version of
   # this file.
+  # `labeled` is here for the two labels that ask for a job the other events
+  # leave out - `run-windows-tests` and `run-native-build` - so that adding
+  # one starts that job on a pull request that is already open, without a
+  # commit to push. A run started by a label runs only what the label asks
+  # for: every other job checks `github.event.action` and skips.
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, labeled]
     paths-ignore:
       - 'hilla-logo.svg'
       - 'README.md'
@@ -33,7 +38,13 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: ${{ github.head_ref || github.ref_name }}
+  # A run a label started gets a group of its own, one per label, so that it
+  # neither cancels the runs of the pull request itself nor is cancelled by
+  # them.
+  group: >-
+    ${{ github.event.action == 'labeled'
+    && format('{0}-{1}', github.head_ref, github.event.label.name)
+    || github.head_ref || github.ref_name }}
   cancel-in-progress: true
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -44,6 +55,12 @@ env:
 jobs:
   init:
     name: Build Java and TypeScript for other tasks
+    # Every job below needs this one, so a label that asks for nothing here
+    # leaves the whole run empty.
+    if: >-
+      ${{ github.event.action != 'labeled'
+      || github.event.label.name == 'run-windows-tests'
+      || github.event.label.name == 'run-native-build' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -92,6 +109,7 @@ jobs:
   check-style:
     needs: init
     name: Check style
+    if: ${{ github.event.action != 'labeled' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -121,6 +139,7 @@ jobs:
   test-java:
     needs: init
     name: Test Java
+    if: ${{ github.event.action != 'labeled' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -163,6 +182,7 @@ jobs:
   test-typescript:
     needs: init
     name: Test TypeScript
+    if: ${{ github.event.action != 'labeled' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -207,7 +227,9 @@ jobs:
   test-it:
     needs:
       - init
-    if: ${{ !github.event.pull_request.head.repo.fork }}
+    if: >-
+      ${{ !github.event.pull_request.head.repo.fork
+      && github.event.action != 'labeled' }}
     name: ITs
     timeout-minutes: 25
     strategy:
@@ -268,7 +290,10 @@ jobs:
   test-gradle:
     needs:
       - init
-    if: ${{ !github.event.pull_request.head.repo.fork }}
+    if: >-
+      ${{ !github.event.pull_request.head.repo.fork
+      && (github.event.action != 'labeled'
+      || github.event.label.name == 'run-windows-tests') }}
     name: Gradle tests
     timeout-minutes: 25
     strategy:
@@ -277,13 +302,10 @@ jobs:
       # job is done in 4, so they alone decide how long a PR waits. They guard
       # path-separator and file-locking behaviour, which rarely changes, so run
       # them on pushes to main and the release branches (i.e. on every merge)
-      # and on workflow_dispatch, but not on pull requests. To get them on a PR,
-      # add the `run-windows-tests` label and then push a commit; `labeled` is
-      # not among the pull_request types above, and re-running an existing run
-      # replays the original event payload, so neither picks up a label added
-      # after the fact. Dispatching the workflow manually on the branch runs the
-      # Windows legs too, but it lands in the same concurrency group as the pull
-      # request's own runs, so the two cancel each other - prefer the label.
+      # and on workflow_dispatch, but not on pull requests. To get them on a
+      # PR, add the `run-windows-tests` label: that starts a run of this job
+      # alone. Re-running an existing run does not pick the label up, because
+      # it replays the original event payload.
       matrix:
         os: >-
           ${{ fromJSON(github.event_name == 'pull_request'
@@ -360,16 +382,18 @@ jobs:
     # Building the test application into a GraalVM native image takes minutes
     # and needs a GraalVM JDK, so this runs like the Windows Gradle legs: on
     # pushes to main and the release branches, on workflow_dispatch, and on a
-    # pull request that asks for it with the `run-native-build` label. The
-    # label is separate from `run-windows-tests`, so that a pull request can
-    # ask for the native build without the Windows legs and the other way
-    # around. As with the Windows legs, `labeled` is not among the
-    # pull_request types of this workflow and a re-run replays the original
-    # event payload, so push a commit after adding the label.
+    # pull request that asks for it with the `run-native-build` label, which
+    # starts a run of its own when it is added. The label is separate from
+    # `run-windows-tests`, so that a pull request can ask for the native
+    # build without the Windows legs and the other way around - hence the
+    # second condition, which keeps adding the other label from building the
+    # image again.
     if: >-
       ${{ !github.event.pull_request.head.repo.fork
       && (github.event_name != 'pull_request'
-      || contains(github.event.pull_request.labels.*.name, 'run-native-build')) }}
+      || contains(github.event.pull_request.labels.*.name, 'run-native-build'))
+      && (github.event.action != 'labeled'
+      || github.event.label.name == 'run-native-build') }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
@@ -436,6 +460,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ always() }}
     needs:
+      - init
       - check-style
       - test-java
       - test-typescript
@@ -448,6 +473,12 @@ jobs:
         with:
           name: saved-outputs
           pattern: saved-outputs-*
+      # A skipped job is not a failure: which jobs run depends on the event,
+      # on the labels of the pull request and on whether it comes from a
+      # fork. A job that failed takes the rest of the run with it, and so
+      # does `init`, whose failure leaves everything after it skipped.
       - name: Fail if test jobs did not succeed
-        if: ${{ needs.check-style.result != 'success' || needs.test-java.result != 'success' || needs.test-typescript.result != 'success' || (needs.test-it.result != 'success' && needs.test-it.result != 'skipped') || (needs.test-gradle.result != 'success' && needs.test-gradle.result != 'skipped') || (needs.test-native.result != 'success' && needs.test-native.result != 'skipped') }}
+        if: >-
+          ${{ contains(needs.*.result, 'failure')
+          || contains(needs.*.result, 'cancelled') }}
         run: exit 1
