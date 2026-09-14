@@ -32,6 +32,21 @@ import org.mockito.Mockito;
 public class HotswapperTest {
     private static final String PERSON = "com.example.Person";
 
+    /**
+     * A class the browser reaches which the endpoints have not been written
+     * from yet, which is what a browser callable class added while the
+     * application runs looks like.
+     */
+    @BrowserCallable
+    public static class AddedEndpoint {
+    }
+
+    /**
+     * A class of the application which the browser does not reach.
+     */
+    public static class NotAnEndpoint {
+    }
+
     @Test
     public void should_WriteTheTypeScriptAgainWhenAChangeTouchesAnEndpoint() {
         var generator = generatorUsing(PERSON);
@@ -49,10 +64,39 @@ public class HotswapperTest {
 
         try (var generators = mockGetInstance(generator)) {
             Hotswapper.onHotswap(true,
-                    new String[] { "com.example.SomethingElse" });
+                    new String[] { NotAnEndpoint.class.getName() });
         }
 
         Mockito.verify(generator, Mockito.never()).update(Mockito.any());
+    }
+
+    @Test
+    public void should_WriteTheTypeScriptAgainForAClassWhichBecameAnEndpoint() {
+        // The endpoints have not been written from it yet, which is what the
+        // annotation of the class says instead
+        var generator = generatorUsing(PERSON);
+
+        try (var generators = mockGetInstance(generator)) {
+            Hotswapper.onHotswap(false,
+                    new String[] { AddedEndpoint.class.getName() });
+        }
+
+        Mockito.verify(generator).update(AddedEndpoint.class.getName());
+    }
+
+    @Test
+    public void should_AskNothingAboutAChangeToTheFrameworkItself() {
+        // Asking would walk the browser callable classes of the application,
+        // which is work a class of Spring or of the JDK cannot be worth
+        var generator = Mockito.mock(EndpointCodeGenerator.class);
+
+        try (var generators = mockGetInstance(generator)) {
+            Hotswapper.onHotswap(true,
+                    new String[] { "org.springframework.boot.SpringApplication",
+                            "java.lang.String" });
+        }
+
+        Mockito.verifyNoInteractions(generator);
     }
 
     @Test
