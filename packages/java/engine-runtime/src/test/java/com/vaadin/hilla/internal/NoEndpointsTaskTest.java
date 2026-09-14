@@ -37,16 +37,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
 import com.vaadin.flow.server.frontend.ExecutionFailedException;
-import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 import com.vaadin.hilla.ApplicationContextProvider;
-import com.vaadin.hilla.engine.GeneratorProcessor;
+import com.vaadin.hilla.generator.typescript.OutputFolder;
 
 @SpringBootTest(classes = {
         NoEndpointsTaskTest.NoopApplicationContextProvider.class })
 public class NoEndpointsTaskTest extends TaskTest {
     private TaskGenerateOpenAPI taskGenerateOpenApi;
-    private TaskGenerateEndpoint taskGenerateEndpoint;
 
     @Autowired
     ApplicationContext applicationContext;
@@ -75,10 +73,10 @@ public class NoEndpointsTaskTest extends TaskTest {
             var outputDirectory = Files.createDirectory(
                     getTemporaryDirectory().resolve(getOutputDirectory()));
             var generatedFileListPath = outputDirectory
-                    .resolve(GeneratorProcessor.GENERATED_FILE_LIST_NAME);
+                    .resolve(OutputFolder.FILE_LIST);
             var referenceFileListPath = Path.of(Objects
-                    .requireNonNull(getClass().getResource(
-                            GeneratorProcessor.GENERATED_FILE_LIST_NAME))
+                    .requireNonNull(
+                            getClass().getResource(OutputFolder.FILE_LIST))
                     .toURI());
             Files.copy(referenceFileListPath, generatedFileListPath);
             var referenceFileList = Files.readAllLines(referenceFileListPath);
@@ -92,10 +90,9 @@ public class NoEndpointsTaskTest extends TaskTest {
 
             taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
                     getEngineConfiguration());
-            taskGenerateEndpoint = new TaskGenerateEndpointImpl(
-                    getEngineConfiguration());
 
-            taskGenerateOpenApi.execute();
+            assertDoesNotThrow(taskGenerateOpenApi::execute,
+                    "Expected to not fail without npm dependencies");
 
             var generatedOpenAPI = getGeneratedOpenAPI();
 
@@ -105,9 +102,6 @@ public class NoEndpointsTaskTest extends TaskTest {
                     "Expected OpenAPI paths to be empty");
             assertNull(generatedOpenAPI.getComponents(),
                     "Expected OpenAPI schemas to be null");
-
-            assertDoesNotThrow(taskGenerateEndpoint::execute,
-                    "Expected to not fail without npm dependencies");
 
             assertFalse(generatedFileListPath.toFile().exists(),
                     "Expected file list to be deleted");

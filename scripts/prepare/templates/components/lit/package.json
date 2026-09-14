@@ -12,16 +12,6 @@
     "@vaadin/hilla-lit-form": "{{version}}"
   },
   "devDependencies": {
-    "@vaadin/hilla-generator-core": "{{version}}",
-    "@vaadin/hilla-generator-utils": "{{version}}",
-    "@vaadin/hilla-generator-cli": "{{version}}",
-    "@vaadin/hilla-generator-plugin-client": "{{version}}",
-    "@vaadin/hilla-generator-plugin-backbone": "{{version}}",
-    "@vaadin/hilla-generator-plugin-barrel": "{{version}}",
-    "@vaadin/hilla-generator-plugin-model": "{{version}}",
-    "@vaadin/hilla-generator-plugin-push": "{{version}}",
-    "@vaadin/hilla-generator-plugin-signals": "{{version}}",
-    "@vaadin/hilla-generator-plugin-subtypes": "{{version}}",
-    "@vaadin/hilla-generator-plugin-transfertypes": "{{version}}"
+    "@vaadin/hilla-generator-utils": "{{version}}"
   }
 }

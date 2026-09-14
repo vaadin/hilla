@@ -25,8 +25,11 @@ import java.nio.file.Path;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.vaadin.flow.di.Lookup;
+import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.hilla.ApplicationContextProvider;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.internal.fixtures.CustomEndpoint;
@@ -97,15 +100,19 @@ public class TaskGenerateTypeScriptTest extends TaskTest {
     }
 
     @Test
-    public void should_LeaveTheTaskRunningTheNodeGeneratorWithNothingToDo()
+    public void should_LeaveTheTaskOfTheEndpointsWithNothingToDo()
             throws Exception {
-        new TaskGenerateOpenAPIImpl(getEngineConfiguration()).execute();
-        var written = read("MyEndpoint.ts");
+        // The folder the task would write into, so that what is asserted
+        // empty is where its own output would go
+        var options = new Options(Mockito.mock(Lookup.class),
+                getTemporaryDirectory().toFile())
+                .withFrontendGeneratedFolder(output().toFile());
 
-        new TaskGenerateEndpointImpl(getEngineConfiguration()).execute();
+        new EndpointGeneratorTaskFactoryImpl()
+                .createTaskGenerateEndpoint(options).execute();
 
-        assertEquals(written, read("MyEndpoint.ts"),
-                "The TypeScript was written once, in Java");
+        assertFalse(Files.exists(output()),
+                "The task which parses the classes is what writes them");
     }
 
     private Path output() {

@@ -1,2 +1,3 @@
-import * as DateTimeEndpoint_1 from "./DateTimeEndpoint.js";
-export { DateTimeEndpoint_1 as DateTimeEndpoint };
+import * as DateTimeEndpoint from './DateTimeEndpoint.js';
+
+export { DateTimeEndpoint };

@@ -30,9 +30,9 @@ import org.apache.maven.project.MavenProject;
 import com.vaadin.flow.plugin.maven.FlowModeAbstractMojo;
 import com.vaadin.hilla.engine.BrowserCallableFinderException;
 import com.vaadin.hilla.engine.GeneratorException;
-import com.vaadin.hilla.engine.GeneratorProcessor;
 import com.vaadin.hilla.engine.ParserException;
 import com.vaadin.hilla.engine.ParserProcessor;
+import com.vaadin.hilla.engine.TypeScriptProcessor;
 
 /**
  * Maven Plugin for Hilla. Handles parsing Java bytecode and generating
@@ -77,11 +77,11 @@ public final class EngineGenerateMojo extends AbstractMojo
         try {
             var conf = configure();
             var parserProcessor = new ParserProcessor(conf);
-            var generatorProcessor = new GeneratorProcessor(conf);
+            var typeScriptProcessor = new TypeScriptProcessor(conf);
 
             var browserCallables = conf.getBrowserCallableFinder().find(conf);
             parserProcessor.process(browserCallables);
-            generatorProcessor.process(parserProcessor);
+            typeScriptProcessor.process(parserProcessor.getGeneration());
         } catch (GeneratorException | ParserException
                 | BrowserCallableFinderException
                 | DependencyResolutionRequiredException e) {

@@ -223,7 +223,6 @@ public class EngineAutoConfigurationTest {
         var classesDirs = List.of(Path.of("/tmp/classes1"),
                 Path.of("/tmp/classes2"));
         var classpathStrings = Set.of("/tmp/cp1", "/tmp/cp2");
-        var generator = new GeneratorConfiguration();
         var parser = new ParserConfiguration();
         var outputDir = Path.of("/tmp/output");
         var groupId = "test.group";
@@ -231,7 +230,6 @@ public class EngineAutoConfigurationTest {
         var mainClass = "com.example.Main";
         var sourceClasses = List.of("com.example.Config");
         var productionMode = true;
-        var nodeCommand = "node-custom";
         var classFinder = mock(ClassFinder.class);
         var classLoader = mock(ClassLoader.class);
         // when(classFinder.getClassLoader()).thenReturn(classLoader);
@@ -242,10 +240,9 @@ public class EngineAutoConfigurationTest {
 
         var config = new EngineAutoConfiguration.Builder().baseDir(baseDir)
                 .buildDir(buildDir).classesDirs(classesDirs)
-                .classpath(classpathStrings).generator(generator).parser(parser)
-                .outputDir(outputDir).groupId(groupId).artifactId(artifactId)
-                .mainClass(mainClass).sourceClasses(sourceClasses)
-                .productionMode(productionMode).nodeCommand(nodeCommand)
+                .classpath(classpathStrings).parser(parser).outputDir(outputDir)
+                .groupId(groupId).artifactId(artifactId).mainClass(mainClass)
+                .sourceClasses(sourceClasses).productionMode(productionMode)
                 .classFinder(classFinder).classLoader(classLoader)
                 .browserCallableFinder(browserCallableFinder)
                 .endpointAnnotations(endpointAnnotation)
@@ -258,7 +255,6 @@ public class EngineAutoConfigurationTest {
                 classpathStrings.stream().map(Path::of)
                         .collect(java.util.stream.Collectors.toSet()),
                 config.getClasspath());
-        assertSame(generator, config.getGenerator());
         assertSame(parser, config.getParser());
         assertEquals(outputDir, config.getOutputDir());
         assertEquals(groupId, config.getGroupId());
@@ -266,7 +262,6 @@ public class EngineAutoConfigurationTest {
         assertEquals(mainClass, config.getMainClass());
         assertEquals(sourceClasses, config.getSourceClasses());
         assertTrue(config.isProductionMode());
-        assertEquals(nodeCommand, config.getNodeCommand());
         assertSame(classFinder, config.getClassFinder());
         assertSame(classLoader, config.getClassLoader());
         assertSame(browserCallableFinder, config.getBrowserCallableFinder());
