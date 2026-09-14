@@ -40,6 +40,7 @@ import com.vaadin.hilla.generator.fixtures.ValidatedEndpoint;
 import com.vaadin.hilla.generator.model.EndpointModel;
 import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.generator.model.Generation;
+import com.vaadin.hilla.generator.model.MethodModel;
 import com.vaadin.hilla.generator.model.UnionModel;
 import com.vaadin.hilla.generator.typescript.BarrelWriter;
 import com.vaadin.hilla.generator.typescript.ClientWriter;
@@ -507,6 +508,32 @@ public class GeneratedTypeScriptTest {
     public void should_WriteAnEmptyBarrelWithoutEndpoints() {
         assertEquals("export {};\n",
                 new BarrelWriter().write(List.of()).content());
+    }
+
+    @Test
+    public void should_NameAnEndpointOnceHoweverManyClassesGoByIt() {
+        // Two classes of the same name, in packages of their own, are one
+        // endpoint as far as the browser is concerned: the server answers
+        // calls of that name with one of them, and the barrel would otherwise
+        // export the name twice, which TypeScript reads as two declarations
+        var generation = new FullStackGenerator(GeneratedTypeScriptTest.class,
+                EmptyEndpoint.class,
+                com.vaadin.hilla.generator.fixtures.other.EmptyEndpoint.class)
+                .parseGeneration();
+
+        assertEquals(List.of("EmptyEndpoint"), generation.endpoints().stream()
+                .map(EndpointModel::name).toList());
+
+        var endpoint = generation.endpoints().get(0);
+
+        assertEquals(
+                com.vaadin.hilla.generator.fixtures.other.EmptyEndpoint.class
+                        .getName(),
+                endpoint.javaClass(),
+                "The last class of the name is the one the server answers with");
+        assertEquals(List.of("describe"),
+                endpoint.methods().stream().map(MethodModel::name).toList(),
+                "Which is the class the methods are written from");
     }
 
     @Test
