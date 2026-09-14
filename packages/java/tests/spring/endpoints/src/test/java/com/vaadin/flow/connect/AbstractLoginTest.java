@@ -51,15 +51,13 @@ public abstract class AbstractLoginTest extends ChromeBrowserTest {
         // this the test would carry on as if it were authenticated and fail
         // later on with an unexplained 401.
         //
-        // The wait is a generous one: the first login of a run is served
-        // while the application is still warming up, and the tests of the
-        // suite log in and out of the same application at the same time. What
-        // it says when it gives up is where the browser ended up, since a
-        // login which was rejected and one which is still on its way look the
-        // same from here.
+        // The document the browser is on is the one the login led to by the
+        // time this runs, so the view it is on is the answer of the server
+        // rather than a question of time: what this says when it gives up is
+        // where the browser ended up, since that is the only thing which
+        // tells a rejected login from one the server never answered.
         try {
-            waitUntil(driver -> !driver.getCurrentUrl().contains("/login"),
-                    60);
+            waitUntil(driver -> !driver.getCurrentUrl().contains("/login"), 25);
         } catch (TimeoutException e) {
             throw new AssertionError("The login of " + user + " did not leave"
                     + " the login view, which is where a rejected login lands"
@@ -81,23 +79,31 @@ public abstract class AbstractLoginTest extends ChromeBrowserTest {
      * alone would be satisfied by the still-current document and pass before
      * the navigation had even started.
      *
+     * <p>
+     * This is the wait which has to allow for an application which is still
+     * warming up: the first login of a run is served while it is, and these
+     * tests navigate with the driver itself rather than through the method
+     * which waits for the development server.
+     *
      * @param elementOfPreviousDocument
      *            an element of the document that started the navigation
      */
     protected void waitForNavigation(WebElement elementOfPreviousDocument) {
         waitUntil(ExpectedConditions.stalenessOf(elementOfPreviousDocument),
-                25);
+                60);
         waitForDocumentReady();
     }
 
     /**
-     * Waits until the document has finished loading and no reload is pending.
+     * Waits until the document has finished loading and no reload is pending,
+     * which the document a login led to takes as long about as the application
+     * serving it needs.
      */
     protected void waitForDocumentReady() {
         waitUntil(driver -> Boolean.TRUE
                 .equals(getCommandExecutor().executeScript(
                         "return !window.reloadPending && window.document.readyState "
                                 + "=== 'complete';")),
-                25);
+                60);
     }
 }
