@@ -386,7 +386,7 @@ public final class EndpointModelPlugin
             return referred.isEmpty()
                     ? new TypeModel.TypeVariable(name(signature), optional,
                             constraints, annotations)
-                    : asAbsent(only(referred), optional);
+                    : optional ? asOptional(only(referred)) : only(referred);
         }
 
         // A type argument, such as the String of a List<String>, stands for the
