@@ -14,7 +14,12 @@ async function update(entity: Person | undefined, init?: EndpointRequestInit): P
   return client.call('PersonEndpoint', 'update', { entity }, init);
 }
 
-async function getNonNullablePage(pageSize: number, pageNumber: number, parameters: Record<string, Person> | undefined, init?: EndpointRequestInit): Promise<Array<Person> | undefined> {
+export async function getNonNullablePage(
+  pageSize: number,
+  pageNumber: number,
+  parameters: Record<string, Person> | undefined,
+  init?: EndpointRequestInit,
+): Promise<Array<Person> | undefined> {
   return client.call('PersonEndpoint', 'getNonNullablePage', { pageSize, pageNumber, parameters }, init);
 }
 
