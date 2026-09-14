@@ -18,16 +18,10 @@ package com.vaadin.hilla;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ArrayNode;
-import tools.jackson.databind.node.ObjectNode;
 
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
 
@@ -81,45 +75,4 @@ public class OpenAPIUtil {
         return Optional.of(engineConfiguration.getOpenAPIFile());
     }
 
-    /**
-     * Parses the given open api and finds all used classes.
-     *
-     * @param openApiAsText
-     *            the open api JSON as text
-     * @return a set of classes used
-     * @throws IOException
-     *             if parsing fails
-     */
-    public static Set<String> findOpenApiClasses(String openApiAsText)
-            throws IOException {
-        JsonNode openApi = new ObjectMapper().readTree(openApiAsText);
-
-        Set<String> types = new HashSet<>();
-
-        // Endpoints
-        if (openApi.has("tags")) {
-            ArrayNode tags = (ArrayNode) openApi.get("tags");
-
-            if (tags != null) {
-                tags.forEach(nameAndClass -> {
-                    types.add(nameAndClass.get("x-class-name").asText());
-                });
-            }
-        }
-
-        // Parameters and return types
-        if (openApi.has("components")) {
-            var components = openApi.get("components");
-            if (components != null && components.has("schemas")) {
-                var schemasNode = components.get("schemas");
-                if (schemasNode instanceof ObjectNode schemas) {
-                    for (String type : schemas.propertyNames()) {
-                        types.add(type);
-                    }
-                }
-            }
-        }
-        return types;
-
-    }
 }

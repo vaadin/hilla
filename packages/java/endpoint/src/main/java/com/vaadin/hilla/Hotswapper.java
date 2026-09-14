@@ -15,7 +15,6 @@
  */
 package com.vaadin.hilla;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -69,8 +68,10 @@ public class Hotswapper implements VaadinHotswapper {
                 }
                 EndpointCodeGenerator.getInstance().update(changedClasses);
             }
-        } catch (IOException e) {
-            getLogger().error("Failed to re-generated TypeScript code");
+        } catch (RuntimeException e) {
+            // A class which cannot be walked is something the developer is in
+            // the middle of writing, which the next change is another chance at
+            getLogger().error("Failed to regenerate the TypeScript code", e);
         }
     }
 
@@ -121,13 +122,11 @@ public class Hotswapper implements VaadinHotswapper {
      *            the changed classes
      * @return {@code true} if the classes can affect endpoint generation,
      *         {@code false} otherwise
-     * @throws IOException
      */
-    private static boolean affectsEndpoints(String[] changedClasses)
-            throws IOException {
+    private static boolean affectsEndpoints(String[] changedClasses) {
         Set<String> changedClassesSet = Set.of(changedClasses);
         Set<String> classesUsedInEndpoints = EndpointCodeGenerator.getInstance()
-                .getClassesUsedInOpenApi().orElse(Set.of());
+                .getClassesUsedInEndpoints().orElse(Set.of());
         for (String classUsedInEndpoints : classesUsedInEndpoints) {
             if (changedClassesSet.contains(classUsedInEndpoints)) {
                 getLogger().debug("The changed class " + classUsedInEndpoints
