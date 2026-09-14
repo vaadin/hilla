@@ -57,6 +57,40 @@ public class ImportRegistryTest {
     }
 
     @Test
+    public void should_ImportOneNamePerLineWhenTheyDoNotFitOnOne() {
+        var module = "@vaadin/hilla-lit-form";
+
+        imports.importNamed(module, "ArrayModel", false);
+        imports.importNamed(module, "BooleanModel", false);
+        imports.importNamed(module, "NumberModel", false);
+        imports.importNamed(module, "ObjectModel", false);
+        imports.importNamed(module, "StringModel", false);
+        imports.importNamed(module, "_getPropertyModel", false);
+        imports.importNamed(module, "makeObjectEmptyValueCreator", false);
+
+        assertEquals(List.of("""
+                import {
+                  ArrayModel,
+                  BooleanModel,
+                  NumberModel,
+                  ObjectModel,
+                  StringModel,
+                  _getPropertyModel,
+                  makeObjectEmptyValueCreator,
+                } from '@vaadin/hilla-lit-form';"""), imports.write());
+    }
+
+    @Test
+    public void should_ImportAsOneLineWhatFitsOnOne() {
+        imports.importNamed("@vaadin/hilla-lit-form", "ObjectModel", false);
+        imports.importNamed("@vaadin/hilla-lit-form", "StringModel", false);
+
+        assertEquals(List.of(
+                "import { ObjectModel, StringModel } from '@vaadin/hilla-lit-form';"),
+                imports.write());
+    }
+
+    @Test
     public void should_WriteBareModulesBeforeRelativeOnes() {
         imports.importDefault("./client.js", "client", false);
         imports.importNamed("@vaadin/hilla-frontend", "EndpointRequestInit",
