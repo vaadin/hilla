@@ -11,8 +11,11 @@ export default function EndpointAccessView(): React.JSX.Element {
   const [result, setResult] = useState('');
 
   // The message is fixed instead of read from the error, because the class
-  // names the client throws are mangled in a production bundle.
+  // names the client throws are mangled in a production bundle. The result is
+  // cleared first, so that what it reads afterwards is the answer to this
+  // call and not the one before it.
   async function call(callEndpoint: () => Promise<string | undefined>) {
+    setResult('');
     try {
       setResult((await callEndpoint()) ?? '');
     } catch {

@@ -21,6 +21,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.testbench.TestBenchElement;
 
 /**
@@ -53,6 +54,22 @@ public class MenuIT extends AbstractNativeIT {
 
         Assert.assertEquals(List.of("Chat", "Endpoint access", "Form", "Grid",
                 "Home", "I18n"), menuTitles());
+    }
+
+    @Test
+    public void menuDropsTheViewThatNeedsALoginAfterLoggingOut() {
+        login("user1");
+        open("/");
+        waitUntil(driver -> menuTitles().contains("Chat"));
+
+        $(ButtonElement.class).id("logout").click();
+
+        // Logging out invalidates the session and fetches a new CSRF token,
+        // and the views the user may open are read again
+        waitUntil(driver -> "anonymous".equals($("*").id("user").getText()));
+        Assert.assertEquals(
+                List.of("Endpoint access", "Form", "Grid", "Home", "I18n"),
+                menuTitles());
     }
 
     @Test

@@ -15,7 +15,6 @@
  */
 package com.example.application;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
@@ -28,13 +27,6 @@ import com.vaadin.flow.component.button.testbench.ButtonElement;
  */
 public class EndpointAccessIT extends AbstractNativeIT {
 
-    @Override
-    @Before
-    public void setup() throws Exception {
-        super.setup();
-        openView();
-    }
-
     @Test
     public void anonymousUserMayCallTheAnonymousMethodOnly() {
         assertResult("anonymous", "anyone");
@@ -45,7 +37,6 @@ public class EndpointAccessIT extends AbstractNativeIT {
     @Test
     public void userMayNotCallTheAdminMethod() {
         login("user1");
-        openView();
 
         assertResult("authenticated", "any user");
         assertResult("admin", "denied");
@@ -54,20 +45,22 @@ public class EndpointAccessIT extends AbstractNativeIT {
     @Test
     public void adminMayCallEveryMethod() {
         login("admin");
-        openView();
 
         assertResult("anonymous", "anyone");
         assertResult("authenticated", "any user");
         assertResult("admin", "admin");
     }
 
-    private void openView() {
-        open("/endpoint-access");
-        waitUntil(driver -> !$(ButtonElement.class).withAttribute("id", "admin")
-                .all().isEmpty());
-    }
-
+    /**
+     * Opens the view before every call, because a view that has just been
+     * opened shows no result yet: whatever is read afterwards is the answer to
+     * this call, and not the one a call before it happened to leave behind.
+     */
     private void assertResult(String button, String expected) {
+        open("/endpoint-access");
+        waitUntil(driver -> !$(ButtonElement.class).withAttribute("id", button)
+                .all().isEmpty());
+
         $(ButtonElement.class).id(button).click();
         waitUntil(driver -> expected.equals($("*").id("result").getText()));
     }
