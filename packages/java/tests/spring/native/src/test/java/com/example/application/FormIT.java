@@ -32,8 +32,6 @@ import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
  */
 public class FormIT extends AbstractNativeIT {
 
-    private static final String RESERVED_NAME = NotReserved.RESERVED_NAME;
-
     @Override
     @Before
     public void setup() throws Exception {
@@ -52,6 +50,19 @@ public class FormIT extends AbstractNativeIT {
     }
 
     /**
+     * The attribute of the constraint has to reach the generated model as well,
+     * so this is the one that covers a constraint that carries a value.
+     */
+    @Test
+    public void constraintWithAnAttributeIsReported() {
+        field("lastName").setValue("Young-Young-Young-Young");
+        submit();
+
+        Assert.assertEquals("size must be between 0 and 20",
+                field("lastName").getPropertyString("errorMessage"));
+    }
+
+    /**
      * The generator does not know the constraint of this application, so the
      * browser submits the value and the rejection can only come from the
      * validation in the running application.
@@ -59,12 +70,13 @@ public class FormIT extends AbstractNativeIT {
      * The text of the violation is deliberately not asserted: a native image
      * reports it as <code>undefined</code>, because the data the endpoint
      * writes the validation error from serializes to an empty object there.
-     * What the image does get right, and what this pins, is that the value is
-     * rejected as invalid and never reaches the database.
+     * Registering that data for reflection, on its own or as a binding hint,
+     * does not change it. What the image does get right, and what this pins, is
+     * that the value is rejected as invalid and never reaches the database.
      */
     @Test
     public void constraintOnlyTheApplicationKnowsIsReported() {
-        field("lastName").setValue(RESERVED_NAME);
+        field("lastName").setValue(NotReserved.RESERVED_NAME);
         submit();
 
         waitUntil(driver -> pageText().contains("Validation errors"));
@@ -74,7 +86,8 @@ public class FormIT extends AbstractNativeIT {
         // The rejected value is not in the database either
         open("/form");
         waitUntil(driver -> !field("lastName").getValue().isEmpty());
-        Assert.assertNotEquals(RESERVED_NAME, field("lastName").getValue());
+        Assert.assertNotEquals(NotReserved.RESERVED_NAME,
+                field("lastName").getValue());
     }
 
     @Test

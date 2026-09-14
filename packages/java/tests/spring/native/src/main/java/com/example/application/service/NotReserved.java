@@ -40,9 +40,7 @@ public @interface NotReserved {
 
     String RESERVED_NAME = "Reserved";
 
-    String MESSAGE = "must not be the reserved name";
-
-    String message() default MESSAGE;
+    String message() default "must not be the reserved name";
 
     Class<?>[] groups() default {};
 

@@ -15,6 +15,9 @@
  */
 package com.example.application;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.time.Duration;
 
 import org.junit.Before;
@@ -29,34 +32,23 @@ public abstract class AbstractNativeIT extends ChromeBrowserTest {
 
     private static final Duration STARTUP_TIMEOUT = Duration.ofMinutes(2);
 
+    private static final int CONNECT_TIMEOUT_MILLIS = 1000;
+
+    private static volatile boolean applicationAnswered;
+
     /**
      * The binary is started asynchronously by the exec plugin, so unlike the
      * other test applications there is nothing that waits for the server before
-     * the tests run. The check of the base class, which is what fails first on
-     * a server that is not up yet, is therefore retried here until the
-     * application answers. It records its own success, so this happens once per
-     * test run.
+     * the tests run. The check of the base class is what fails on a server that
+     * is not up yet, and it runs before anything a test declares itself, so the
+     * wait belongs in front of it. Once a test has seen the application answer,
+     * the rest go straight to the check.
      */
     @Override
     @Before
     public void checkIfServerAvailable() {
-        var deadline = System.nanoTime() + STARTUP_TIMEOUT.toNanos();
-
-        while (true) {
-            try {
-                super.checkIfServerAvailable();
-                return;
-            } catch (IllegalStateException e) {
-                if (System.nanoTime() > deadline) {
-                    throw new IllegalStateException(
-                            "The application did not answer within "
-                                    + STARTUP_TIMEOUT
-                                    + ". Check the output of the binary.",
-                            e);
-                }
-                sleep();
-            }
-        }
+        waitForApplication();
+        super.checkIfServerAvailable();
     }
 
     /**
@@ -86,6 +78,35 @@ public abstract class AbstractNativeIT extends ChromeBrowserTest {
         // layout shows who is logged in
         waitUntil(driver -> !driver.getCurrentUrl().endsWith("/login"));
         waitUntil(driver -> username.equals($("*").id("user").getText()));
+    }
+
+    private void waitForApplication() {
+        if (applicationAnswered) {
+            return;
+        }
+
+        var address = new InetSocketAddress(getDeploymentHostname(),
+                getDeploymentPort());
+        var deadline = System.nanoTime() + STARTUP_TIMEOUT.toNanos();
+
+        while (true) {
+            // The connection of the check in the base class has no timeout of
+            // its own, so the one that bounds the wait is made here
+            try (var socket = new Socket()) {
+                socket.connect(address, CONNECT_TIMEOUT_MILLIS);
+                applicationAnswered = true;
+                return;
+            } catch (IOException e) {
+                if (System.nanoTime() > deadline) {
+                    throw new IllegalStateException(
+                            address + " did not accept a connection within "
+                                    + STARTUP_TIMEOUT
+                                    + ". Check the output of the binary.",
+                            e);
+                }
+                sleep();
+            }
+        }
     }
 
     private static void sleep() {
