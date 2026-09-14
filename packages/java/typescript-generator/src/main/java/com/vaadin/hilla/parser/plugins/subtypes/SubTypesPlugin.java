@@ -28,11 +28,6 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.media.Discriminator;
-import io.swagger.v3.oas.models.media.ObjectSchema;
-import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.media.StringSchema;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
@@ -45,6 +40,7 @@ import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
+import com.vaadin.hilla.parser.plugins.backbone.EntityFacts;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 
@@ -53,10 +49,6 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
  */
 public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
     @Override
-    public void enter(NodePath<?> nodePath) {
-    }
-
-    @Override
     public void exit(NodePath<?> nodePath) {
         // deal with the union nodes, which does not correspond to an existing
         // class, but express the union of all the @JsonSubTypes
@@ -64,26 +56,13 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
             var unionNode = (UnionNode) nodePath.getNode();
             var cls = (Class<?>) unionNode.getSource().get();
 
-            // verify that the class has a @JsonTypeInfo annotation
-            // and then add all the @JsonSubTypes to the schema as a `oneOf`
+            // verify that the class has a @JsonTypeInfo annotation, and then
+            // say that a value is of one of the classes the @JsonSubTypes
+            // annotation names
             if (cls.getAnnotationsByType(JsonTypeInfo.class).length > 0) {
-                var schema = (Schema<?>) unionNode.getTarget();
-                getJsonSubTypes(cls).map(JsonSubTypes.Type::value)
-                        .forEach(c -> {
-                            schema.addOneOfItem(new Schema<Object>() {
-                                {
-                                    set$ref("#/components/schemas/"
-                                            + c.getName());
-                                }
-                            });
-                        });
-
-                // expose the name of the discriminator property, so that the
-                // TypeScript generator does not have to guess it
-                findSubTypesInfo(cls)
-                        .flatMap(SubTypesInfo::discriminatorProperty)
-                        .ifPresent(property -> schema.setDiscriminator(
-                                new Discriminator().propertyName(property)));
+                unionNode.setTarget(
+                        getJsonSubTypes(cls).map(JsonSubTypes.Type::value)
+                                .map(Class::getName).toList());
             }
         }
 
@@ -100,8 +79,8 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                     .orElseGet(List::of);
 
             if (property.isPresent() && !values.isEmpty()) {
-                addDiscriminatorProperty(entityNode.getTarget(), property.get(),
-                        values);
+                entityNode.getTarget().setDiscriminator(
+                        new EntityFacts.Discriminator(property.get(), values));
             }
         }
     }
@@ -191,35 +170,6 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
         }
 
         collectHierarchy(cls.getSuperclass(), hierarchy);
-    }
-
-    private static void addDiscriminatorProperty(Schema<?> schema,
-            String property, List<String> values) {
-        // a subtype is rendered as a composed schema, where the properties of
-        // the subtype itself are in the object schema of the `anyOf` list,
-        // while a class that declares the subtypes is a plain object schema
-        if (schema instanceof ComposedSchema composedSchema
-                && composedSchema.getAnyOf() != null) {
-            composedSchema.getAnyOf().stream()
-                    .filter(ObjectSchema.class::isInstance)
-                    .map(ObjectSchema.class::cast)
-                    .forEach(s -> s.addProperty(property,
-                            discriminatorSchema(values)));
-        } else {
-            schema.addProperty(property, discriminatorSchema(values));
-        }
-    }
-
-    /**
-     * The schema of the discriminator property: it accepts the value of the
-     * type itself, which comes first and is kept as the example, along with the
-     * values of the subtypes below it.
-     */
-    private static StringSchema discriminatorSchema(List<String> values) {
-        var schema = new StringSchema();
-        schema.setExample(values.get(0));
-        values.forEach(schema::addEnumItem);
-        return schema;
     }
 
     /**
@@ -328,19 +278,19 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
     }
 
     /**
-     * A node that represents the union of all the mentioned subclasses of a
-     * class annotated with {@code @JsonSubTypes}.
+     * A type whose values are of one of the types it declares, which carries
+     * the names of those classes.
      */
     public static class UnionNode
-            extends AbstractNode<ClassInfoModel, Schema<?>> {
+            extends AbstractNode<ClassInfoModel, List<String>> {
         private UnionNode(@NonNull ClassInfoModel source,
-                @NonNull ObjectSchema target) {
+                @NonNull List<String> target) {
             super(source, target);
         }
 
         @NonNull
         static public UnionNode of(@NonNull ClassInfoModel model) {
-            return new UnionNode(model, new ObjectSchema());
+            return new UnionNode(model, List.of());
         }
     }
 }

@@ -95,7 +95,6 @@ public class Hotswapper implements VaadinHotswapper {
                 || changedClass.startsWith("com.vaadin.base.")
                 || changedClass.startsWith("org.jsoup.")
                 || changedClass.startsWith("io.github.classgraph.")
-                || changedClass.startsWith("io.swagger.")
                 || changedClass.startsWith("com.fasterxml.jackson.")
                 || changedClass.startsWith("elemental.json.")
                 || changedClass.startsWith("org.springframework.")

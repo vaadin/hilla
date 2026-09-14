@@ -74,8 +74,6 @@
     <gentyref.version>1.2.0.vaadin1</gentyref.version>
     <jsr305.version>3.0.2</jsr305.version>
     <jna.version>5.14.0</jna.version>
-    <swagger.core.version>2.2.52</swagger.core.version>
-    <swagger.models.version>2.2.52</swagger.models.version>
     <jackson2.version>2.22.1</jackson2.version>
     <jackson-annotations.version>2.22</jackson-annotations.version>
     <jackson.version>3.1.5</jackson.version>

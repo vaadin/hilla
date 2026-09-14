@@ -39,8 +39,6 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 
 public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
-    private static final String VALIDATION_CONSTRAINTS_KEY = "x-validation-constraints";
-    private static final String ANNOTATIONS_KEY = "x-annotations";
     private static final String VALIDATION_CONSTRAINTS_PACKAGE_NAME = "jakarta.validation.constraints";
 
     // Include-list of annotations that should be added to the schema
@@ -132,7 +130,7 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
                 .collect(Collectors.toList());
 
         if (!constraints.isEmpty()) {
-            type.note(VALIDATION_CONSTRAINTS_KEY, constraints);
+            type.note(TypeFacts.CONSTRAINTS, constraints);
         }
     }
 
@@ -144,7 +142,7 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
                 .collect(Collectors.toList());
 
         if (!annotations.isEmpty()) {
-            type.note(ANNOTATIONS_KEY, annotations);
+            type.note(TypeFacts.ANNOTATIONS, annotations);
         }
     }
 
