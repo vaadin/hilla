@@ -13,6 +13,7 @@ interface Person extends AbstractEntity {
   profilePicture?: string;
   fullName: string;
   age?: number;
+  nickname?: string;
 }
 
 export default Person;
