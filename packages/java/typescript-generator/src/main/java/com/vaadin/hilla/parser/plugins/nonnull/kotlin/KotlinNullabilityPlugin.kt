@@ -44,7 +44,6 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode
 import io.swagger.v3.oas.models.media.ObjectSchema
-import io.swagger.v3.oas.models.media.Schema
 import java.lang.reflect.Method
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.memberFunctions
@@ -188,20 +187,14 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
     override fun exit(nodePath: NodePath<*>?) {
         when (val node = nodePath!!.node) {
             is KTypeSignatureNode -> {
-                if (node.target is Schema<*>) {
-                    val schema = node.target as Schema<*>
-                    schema.nullable = if (node.kType.isMarkedNullable) true else null
-                }
+                node.target?.isOptional = node.kType.isMarkedNullable
             }
             is KPropertyNode -> {
-                val entityNode = nodePath.parentPath.node as KEntityNode
-                val propertySchema = entityNode.target.properties[node.target]
-                propertySchema?.nullable = if (node.kProperty.returnType.isMarkedNullable) true else null
+                node.valueType?.isOptional = node.kProperty.returnType.isMarkedNullable
             }
             is PropertyNode -> {
                 if (nodePath.parentPath.node is KEntityNode) {
                     val entityNode = nodePath.parentPath.node as KEntityNode
-                    val propertySchema = entityNode.target.properties[node.target]
                     val member = node.source.primaryMember.get()
                     if (member is Method) {
                         val kMember = entityNode.kClass.memberFunctions.firstOrNull { it.javaMethod == member }
@@ -209,10 +202,10 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
                             // Check if the member is a getter or setter
                             when (member) {
                                 node.source.get().getter.member ->
-                                    propertySchema?.nullable = if (kMember.returnType.isMarkedNullable) true else null
+                                    node.valueType?.isOptional = kMember.returnType.isMarkedNullable
                                 node.source.get().setter.member ->
-                                    propertySchema?.nullable =
-                                        if (kMember.parameters.first().type.isMarkedNullable) true else null
+                                    node.valueType?.isOptional =
+                                        kMember.parameters.first().type.isMarkedNullable
                             }
                         }
                     }
@@ -226,7 +219,6 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
             is KEndpointNode -> {
                 KMethodNode(
                     node.source,
-                    node.target,
                     parentNode.kClass.memberFunctions.first { it.name == node.source.name }
                 )
             }
@@ -238,7 +230,7 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
                 kClass.memberFunctions
                     .find { it.name == methodName }
                     ?.let { kFunction ->
-                        KMethodNode(node.source, node.target, kFunction)
+                        KMethodNode(node.source, kFunction)
                     } ?: error("Defining public class properties in BrowserCallable class body is not supported. " +
                         "Consider marking '${kClass.qualifiedName} -> " +
                         "${methodName.substring(3).lowercase()}' as either private or protected")

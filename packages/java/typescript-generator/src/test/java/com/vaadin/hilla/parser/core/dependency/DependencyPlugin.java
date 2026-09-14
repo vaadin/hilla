@@ -40,9 +40,6 @@ import com.vaadin.hilla.parser.test.nodes.MethodParameterNode;
 import com.vaadin.hilla.parser.test.nodes.TypeSignatureNode;
 
 final class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
-    public static final String DEPS_MEMBERS_STORAGE_KEY = "x-dependency-entity-members";
-    public static final String ENDPOINTS_DIRECT_DEPS_STORAGE_KEY = "x-dependency-endpoints";
-    public static final String ENTITY_DEPS_STORAGE_KEY = "x-dependency-entities";
     private final List<String> dependencyMembers = new ArrayList<>();
     private final List<String> endpointDependencies = new ArrayList<>();
     private final List<String> entityDependencies = new ArrayList<>();
@@ -69,13 +66,29 @@ final class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
             var model = (NamedModel) nodePath.getNode().getSource();
             endpointDependencies.add(model.getName());
         }
-        if (nodePath.getNode() instanceof RootNode) {
-            var openApi = ((RootNode) nodePath.getNode()).getTarget();
-            openApi.addExtension(ENTITY_DEPS_STORAGE_KEY, entityDependencies);
-            openApi.addExtension(DEPS_MEMBERS_STORAGE_KEY, dependencyMembers);
-            openApi.addExtension(ENDPOINTS_DIRECT_DEPS_STORAGE_KEY,
-                    endpointDependencies);
-        }
+    }
+
+    /**
+     * The members of the entities the walk reached, in the order it reached
+     * them.
+     */
+    List<String> getDependencyMembers() {
+        return dependencyMembers;
+    }
+
+    /**
+     * The methods of the endpoints the walk reached, in the order it reached
+     * them.
+     */
+    List<String> getEndpointDependencies() {
+        return endpointDependencies;
+    }
+
+    /**
+     * The entities the walk reached, in the order it reached them.
+     */
+    List<String> getEntityDependencies() {
+        return entityDependencies;
     }
 
     @NonNull

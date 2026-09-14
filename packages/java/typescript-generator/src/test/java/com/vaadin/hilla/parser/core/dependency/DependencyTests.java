@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import io.swagger.v3.oas.models.OpenAPI;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +37,7 @@ public class DependencyTests {
             DependencyTests.class);
     private static final List<Class<?>> endpoints = List
             .of(DependencyEndpoint.class);
-    private static OpenAPI openApi;
+    private static DependencyPlugin plugin;
 
     static {
         try {
@@ -50,10 +49,12 @@ public class DependencyTests {
 
     @BeforeAll
     public static void setUp() {
-        openApi = new Parser().classPath(classPath)
+        plugin = new DependencyPlugin();
+
+        new Parser().classPath(classPath)
                 .endpointAnnotations(List.of(Endpoint.class))
                 .endpointExposedAnnotations(List.of(EndpointExposed.class))
-                .addPlugin(new DependencyPlugin()).execute(endpoints);
+                .addPlugin(plugin).execute(endpoints);
     }
 
     @Test
@@ -63,8 +64,7 @@ public class DependencyTests {
                 "com.vaadin.hilla.parser.core.dependency.DependencyEntityTwo",
                 "com.vaadin.hilla.parser.core.dependency.DependencyEntityThree");
 
-        var actual = openApi.getExtensions()
-                .get(DependencyPlugin.ENTITY_DEPS_STORAGE_KEY);
+        var actual = plugin.getEntityDependencies();
 
         assertEquals(expected, actual);
     }
@@ -73,8 +73,7 @@ public class DependencyTests {
     public void should_ResolveDependenciesCorrectly_When_ResolvingMethods() {
         var expected = List.of("getEntityOne", "getEntityTwo");
 
-        var actual = openApi.getExtensions()
-                .get(DependencyPlugin.ENDPOINTS_DIRECT_DEPS_STORAGE_KEY);
+        var actual = plugin.getEndpointDependencies();
 
         assertEquals(expected, actual);
     }
@@ -84,8 +83,7 @@ public class DependencyTests {
         var expected = Set.of("bar", "dependencyEntityThree", "foo", "foo2",
                 "foo3");
 
-        Collection<String> actual = (Collection<String>) openApi.getExtensions()
-                .get(DependencyPlugin.DEPS_MEMBERS_STORAGE_KEY);
+        Collection<String> actual = plugin.getDependencyMembers();
 
         assertEquals(expected, new HashSet<>(actual));
     }

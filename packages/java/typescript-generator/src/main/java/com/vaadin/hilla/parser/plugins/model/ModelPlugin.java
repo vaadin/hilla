@@ -15,14 +15,12 @@
  */
 package com.vaadin.hilla.parser.plugins.model;
 
-import java.lang.reflect.AnnotatedArrayType;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import io.swagger.v3.oas.models.media.Schema;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
@@ -33,11 +31,9 @@ import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.models.AnnotatedModel;
 import com.vaadin.hilla.parser.models.AnnotationInfoModel;
 import com.vaadin.hilla.parser.models.AnnotationParameterModel;
-import com.vaadin.hilla.parser.models.ArraySignatureModel;
-import com.vaadin.hilla.parser.models.BaseSignatureModel;
-import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
+import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.AnnotatedNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
@@ -45,7 +41,6 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
     private static final String VALIDATION_CONSTRAINTS_KEY = "x-validation-constraints";
     private static final String ANNOTATIONS_KEY = "x-annotations";
-    private static final String JAVA_TYPE_KEY = "x-java-type";
     private static final String VALIDATION_CONSTRAINTS_PACKAGE_NAME = "jakarta.validation.constraints";
 
     // Include-list of annotations that should be added to the schema
@@ -103,15 +98,14 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
             return;
         }
 
-        var schema = typedNode.getTarget();
-        addConstraintsToSchema(typedNode, schema);
-        addJavaTypeToSchema(typedNode, schema);
+        var type = typedNode.getTarget();
+        noteConstraints(typedNode, type);
 
-        // Add annotations from parent property model to schema
+        // The annotations of the property the value belongs to are told to the
+        // form model of it as well
         if (nodePath.getParentPath() != null && nodePath.getParentPath()
                 .getNode() instanceof PropertyNode propertyNode) {
-            var propertyModel = propertyNode.getSource();
-            addAnnotationsToSchema(propertyModel, schema);
+            noteAnnotations(propertyNode.getSource(), type);
         }
     }
 
@@ -131,73 +125,27 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
         return nodeDependencies;
     }
 
-    private void addConstraintsToSchema(AnnotatedNode annotatedNode,
-            Schema<?> schema) {
+    private void noteConstraints(AnnotatedNode annotatedNode, TypeFacts type) {
         var constraints = annotatedNode.getAnnotations().stream()
                 .filter(ModelPlugin::isValidationConstraintAnnotation)
                 .map(ModelPlugin::convertValidationConstraintAnnotation)
                 .collect(Collectors.toList());
 
         if (!constraints.isEmpty()) {
-            schema.addExtension(VALIDATION_CONSTRAINTS_KEY, constraints);
+            type.note(VALIDATION_CONSTRAINTS_KEY, constraints);
         }
     }
 
-    private void addAnnotationsToSchema(AnnotatedModel annotatedModel,
-            Schema<?> schema) {
+    private void noteAnnotations(AnnotatedModel annotatedModel,
+            TypeFacts type) {
         var annotations = annotatedModel.getAnnotations().stream()
                 .filter(ModelPlugin::isIncludedAnnotation)
                 .map(ModelPlugin::convertAnnotation)
                 .collect(Collectors.toList());
 
         if (!annotations.isEmpty()) {
-            schema.addExtension(ANNOTATIONS_KEY, annotations);
+            type.note(ANNOTATIONS_KEY, annotations);
         }
     }
 
-    private void addJavaTypeToSchema(TypedNode typedNode, Schema<?> schema) {
-        var signature = (SignatureModel) typedNode.getType();
-        String typeName = null;
-
-        if (signature instanceof BaseSignatureModel baseSignatureModel) {
-            typeName = baseSignatureModel.getType().getName();
-        } else if (signature instanceof ClassRefSignatureModel classRefSignatureModel) {
-            typeName = classRefSignatureModel.getName();
-        } else if (signature instanceof ArraySignatureModel arraySignatureModel) {
-            AnnotatedArrayType o = (AnnotatedArrayType) arraySignatureModel
-                    .get();
-            typeName = o.toString();
-        }
-
-        if (includeJavaType(typeName)) {
-            schema.addExtension(JAVA_TYPE_KEY, typeName);
-        }
-    }
-
-    private boolean includeJavaType(String typeName) {
-        if (typeName == null) {
-            return false;
-        }
-
-        // Handle array types just the same
-        if (typeName.endsWith("[]")) {
-            typeName = typeName.substring(0, typeName.length() - 2);
-        }
-
-        // Include all primitive types
-        if (typeName.equals("boolean") || typeName.equals("byte")
-                || typeName.equals("char") || typeName.equals("double")
-                || typeName.equals("float") || typeName.equals("int")
-                || typeName.equals("long") || typeName.equals("short")) {
-            return true;
-        }
-
-        // Include all types from java package
-        if (typeName.startsWith("java.")) {
-            return true;
-        }
-
-        // Otherwise don't include
-        return false;
-    }
 }

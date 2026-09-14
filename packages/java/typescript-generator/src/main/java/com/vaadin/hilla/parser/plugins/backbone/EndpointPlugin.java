@@ -19,7 +19,6 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Optional;
 
-import io.swagger.v3.oas.models.tags.Tag;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,18 +56,7 @@ public final class EndpointPlugin
     public void enter(NodePath<?> nodePath) {
         if (nodePath.getNode() instanceof EndpointNode) {
             var endpointNode = (EndpointNode) nodePath.getNode();
-            var name = getEndpointName(endpointNode.getSource());
-            endpointNode.setTarget(new Tag().name(name));
-        }
-    }
-
-    @Override
-    public void exit(NodePath<?> nodePath) {
-        var node = nodePath.getNode();
-        var parentNode = nodePath.getParentPath().getNode();
-        if (node instanceof EndpointNode && parentNode instanceof RootNode) {
-            ((RootNode) parentNode).getTarget()
-                    .addTagsItem(((EndpointNode) node).getTarget());
+            endpointNode.setTarget(getEndpointName(endpointNode.getSource()));
         }
     }
 
