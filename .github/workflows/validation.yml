@@ -358,14 +358,18 @@ jobs:
       - init
     name: Native build
     # Building the test application into a GraalVM native image takes minutes
-    # and needs a GraalVM JDK, so this runs where the Windows Gradle legs run:
-    # on pushes to main and the release branches, on workflow_dispatch, and on
-    # a pull request that carries the `run-windows-tests` label. See the
-    # comment on test-gradle for why the label needs a commit pushed after it.
+    # and needs a GraalVM JDK, so this runs like the Windows Gradle legs: on
+    # pushes to main and the release branches, on workflow_dispatch, and on a
+    # pull request that asks for it with the `run-native-build` label. The
+    # label is separate from `run-windows-tests`, so that a pull request can
+    # ask for the native build without the Windows legs and the other way
+    # around. As with the Windows legs, `labeled` is not among the
+    # pull_request types of this workflow and a re-run replays the original
+    # event payload, so push a commit after adding the label.
     if: >-
       ${{ !github.event.pull_request.head.repo.fork
       && (github.event_name != 'pull_request'
-      || contains(github.event.pull_request.labels.*.name, 'run-windows-tests')) }}
+      || contains(github.event.pull_request.labels.*.name, 'run-native-build')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
@@ -379,7 +383,7 @@ jobs:
         uses: ./.github/actions/setup
       # Replaces the JDK of the setup action with one that has native-image.
       - name: Setup GraalVM
-        uses: graalvm/setup-graalvm@v1
+        uses: graalvm/setup-graalvm@0426e2e191540e8514dff98dc52a5f5146a2a276 # v1.6.6
         with:
           distribution: graalvm
           java-version: '21'
@@ -392,11 +396,14 @@ jobs:
           set -x
           tar xf workspace.tar
           tar cf - .m2 | (cd ~ && tar xf -)
+      # The license is read from the environment rather than expanded into the
+      # script, so that it does not end up in the command the runner logs.
       - name: Set TB License
+        env:
+          TB_LICENSE: ${{ secrets.TB_LICENSE }}
         run: |
-          TB_LICENSE=${{secrets.TB_LICENSE}}
           mkdir -p ~/.vaadin/
-          echo '{"username":"'`echo $TB_LICENSE | cut -d / -f1`'","proKey":"'`echo $TB_LICENSE | cut -d / -f2`'"}' > ~/.vaadin/proKey
+          echo '{"username":"'"$(echo "$TB_LICENSE" | cut -d / -f1)"'","proKey":"'"$(echo "$TB_LICENSE" | cut -d / -f2)"'"}' > ~/.vaadin/proKey
       # The `native` profile puts the module in the reactor, compiles the
       # application to a native binary and starts that binary for the ITs.
       # `production` is what builds the frontend bundle the binary serves.
