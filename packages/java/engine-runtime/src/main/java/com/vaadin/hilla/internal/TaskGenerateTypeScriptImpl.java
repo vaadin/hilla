@@ -26,23 +26,30 @@ import com.vaadin.hilla.engine.ParserProcessor;
 import com.vaadin.hilla.engine.TypeScriptProcessor;
 
 /**
- * Generate OpenAPI json file for Vaadin Endpoints.
+ * Writes the TypeScript the browser calls the endpoints of the application
+ * through.
+ *
+ * <p>
+ * It is the {@link TaskGenerateOpenAPI} of the build because that is the task
+ * which runs while the browser callable classes are walked, which is when the
+ * writers have what they need. The task of the endpoints is left with nothing
+ * to do.
  */
-public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
+public class TaskGenerateTypeScriptImpl extends AbstractTaskEndpointGenerator
         implements TaskGenerateOpenAPI {
 
     /**
-     * Create a task for generating OpenAPI spec.
+     * Create a task for writing the TypeScript of the endpoints.
      *
      * @param engineConfiguration
      *            Hilla engine configuration instance
      */
-    TaskGenerateOpenAPIImpl(EngineAutoConfiguration engineConfiguration) {
+    TaskGenerateTypeScriptImpl(EngineAutoConfiguration engineConfiguration) {
         super(engineConfiguration);
     }
 
     /**
-     * Run Java class parser.
+     * Walks the browser callable classes and writes the TypeScript of them.
      *
      * @throws ExecutionFailedException
      */
@@ -53,38 +60,30 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
             try {
                 var browserCallables = engineConfiguration
                         .getBrowserCallableFinder().find(engineConfiguration);
-                parse(engineConfiguration, browserCallables);
+                write(engineConfiguration, browserCallables);
             } catch (Exception e) {
                 throw new ExecutionFailedException(
-                        "Failed to generate OpenAPI spec", e);
+                        "Failed to write the TypeScript of the endpoints", e);
             }
         } else {
             ApplicationContextProvider.runOnContext(applicationContext -> {
                 List<Class<?>> browserCallables = EndpointCodeGenerator
                         .findBrowserCallables(engineConfiguration,
                                 applicationContext);
-                parse(engineConfiguration, browserCallables);
+                write(engineConfiguration, browserCallables);
             });
         }
     }
 
     /**
-     * Runs the parser over the browser callable classes, which writes the
-     * OpenAPI definition, and writes the TypeScript of the endpoints out of
-     * what the parser found.
-     *
-     * <p>
-     * Both are written here because the writers need what the parser has just
-     * seen, and this is the run which has it. The task which used to generate
-     * the TypeScript has nothing left to do, and the two become one once there
-     * is no OpenAPI definition to write either.
+     * Runs the parser over the browser callable classes and writes the
+     * TypeScript of the endpoints out of what it found.
      */
-    private static void parse(EngineAutoConfiguration engineConfiguration,
+    private static void write(EngineAutoConfiguration engineConfiguration,
             List<Class<?>> browserCallables) {
-        var processor = new ParserProcessor(engineConfiguration);
-        processor.process(browserCallables);
+        var generation = new ParserProcessor(engineConfiguration)
+                .parse(browserCallables);
 
-        new TypeScriptProcessor(engineConfiguration)
-                .process(processor.getGeneration());
+        new TypeScriptProcessor(engineConfiguration).process(generation);
     }
 }

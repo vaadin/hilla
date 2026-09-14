@@ -35,7 +35,7 @@ public class EndpointGeneratorTaskFactoryImpl
             .getLogger(ParserProcessor.class);
 
     /**
-     * The TypeScript of the endpoints is written by the task which parses the
+     * The TypeScript of the endpoints is written by the task which walks the
      * browser callable classes, since that is the run which has what the
      * writers need, so there is nothing left for this one to do.
      */
@@ -49,27 +49,27 @@ public class EndpointGeneratorTaskFactoryImpl
         if (!options.isRunNpmInstall() && !options.isDevBundleBuild()
                 && !options.isProductionMode()) {
             // Skip for prepare-frontend phase and in production server
-            return new SkipTaskGenerateOpenAPI();
+            return new SkipTaskGenerateTypeScript();
         }
 
         var engineConfiguration = configureFromOptions(options);
-        return new TaskGenerateOpenAPIImpl(engineConfiguration);
+        return new TaskGenerateTypeScriptImpl(engineConfiguration);
     }
 
     private static class SkipTaskGenerateEndpoint
             implements TaskGenerateEndpoint {
         @Override
         public void execute() {
-            LOGGER.debug("The TypeScript of the endpoints is written along"
-                    + " with the OpenAPI definition");
+            LOGGER.debug("The TypeScript of the endpoints is written while"
+                    + " the browser callable classes are walked");
         }
     }
 
-    private static class SkipTaskGenerateOpenAPI
+    private static class SkipTaskGenerateTypeScript
             implements TaskGenerateOpenAPI {
         @Override
         public void execute() {
-            LOGGER.debug("Skipping generating OpenAPI spec");
+            LOGGER.debug("Skipping writing the TypeScript of the endpoints");
         }
     }
 

@@ -80,8 +80,8 @@ public final class EngineGenerateMojo extends AbstractMojo
             var typeScriptProcessor = new TypeScriptProcessor(conf);
 
             var browserCallables = conf.getBrowserCallableFinder().find(conf);
-            parserProcessor.process(browserCallables);
-            typeScriptProcessor.process(parserProcessor.getGeneration());
+            typeScriptProcessor
+                    .process(parserProcessor.parse(browserCallables));
         } catch (GeneratorException | ParserException
                 | BrowserCallableFinderException
                 | DependencyResolutionRequiredException e) {

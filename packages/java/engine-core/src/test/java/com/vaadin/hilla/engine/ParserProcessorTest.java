@@ -16,8 +16,8 @@
 package com.vaadin.hilla.engine;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -34,24 +34,7 @@ public class ParserProcessorTest {
     private Path buildDir;
 
     @Test
-    public void should_WalkTheClassesWithoutWritingTheOpenAPIDefinition() {
-        var configuration = new EngineAutoConfiguration.Builder()
-                .parser(new ParserConfiguration()).buildDir(buildDir)
-                .endpointAnnotations(Endpoint.class).build();
-
-        var generation = new ParserProcessor(configuration)
-                .parse(List.of(TestEndpoint.class));
-
-        assertEquals(
-                List.of("TestEndpoint"), generation.endpoints().stream()
-                        .map(EndpointModel::name).toList(),
-                "The classes are walked all the same");
-        assertFalse(Files.exists(configuration.getOpenAPIFile()),
-                "Nothing asked for the OpenAPI definition");
-    }
-
-    @Test
-    public void should_FindWhatTheTypeScriptIsWrittenFrom() {
+    public void should_FindWhatTheTypeScriptIsWrittenFrom() throws IOException {
         var processor = new ParserProcessor(
                 // A configuration of its own to say the annotations of the
                 // fixtures with, which the default one is shared through
@@ -59,12 +42,15 @@ public class ParserProcessorTest {
                         .parser(new ParserConfiguration()).buildDir(buildDir)
                         .endpointAnnotations(Endpoint.class).build());
 
-        processor.process(List.of(TestEndpoint.class));
+        var generation = processor.parse(List.of(TestEndpoint.class));
 
         assertEquals(List.of("TestEndpoint"),
-                processor.getGeneration().endpoints().stream()
-                        .map(EndpointModel::name).toList(),
+                generation.endpoints().stream().map(EndpointModel::name)
+                        .toList(),
                 "The classes the parser walked are what the TypeScript is"
                         + " written from");
+        assertEquals(List.of(),
+                Files.walk(buildDir).filter(Files::isRegularFile).toList(),
+                "The walk is all there is to it");
     }
 }
