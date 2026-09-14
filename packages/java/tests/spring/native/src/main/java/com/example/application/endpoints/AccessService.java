@@ -13,14 +13,35 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.example.application.service;
+package com.example.application.endpoints;
+
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.BrowserCallable;
-import com.vaadin.hilla.crud.CrudRepositoryService;
 
+/**
+ * Covers the three access annotations in one endpoint. The checks read the
+ * annotations reflectively, so a native image needs the hints for this class to
+ * reject and accept the same calls as the application on the JVM.
+ */
 @BrowserCallable
-@AnonymousAllowed
-public class PersonService
-        extends CrudRepositoryService<Person, Long, PersonRepository> {
+public class AccessService {
+
+    @AnonymousAllowed
+    public String forAnyone() {
+        return "anyone";
+    }
+
+    @PermitAll
+    public String forAnyUser() {
+        return "any user";
+    }
+
+    @RolesAllowed("ADMIN")
+    public String forAdmin() {
+        return "admin";
+    }
+
 }

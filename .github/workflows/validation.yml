@@ -353,6 +353,71 @@ jobs:
             packages/java/gradle-plugin/build/test-results/*
             packages/java/gradle-plugin/build/reports/*
 
+  test-native:
+    needs:
+      - init
+    name: Native build
+    # Building the test application into a GraalVM native image takes minutes
+    # and needs a GraalVM JDK, so this runs where the Windows Gradle legs run:
+    # on pushes to main and the release branches, on workflow_dispatch, and on
+    # a pull request that carries the `run-windows-tests` label. See the
+    # comment on test-gradle for why the label needs a commit pushed after it.
+    if: >-
+      ${{ !github.event.pull_request.head.repo.fork
+      && (github.event_name != 'pull_request'
+      || contains(github.event.pull_request.labels.*.name, 'run-windows-tests')) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout Project Code
+        uses: actions/checkout@v5
+        with:
+          ref: ${{env._HEAD_SHA}}
+          fetch-depth: 0
+      - name: Setup
+        uses: ./.github/actions/setup
+      # Replaces the JDK of the setup action with one that has native-image.
+      - name: Setup GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          distribution: graalvm
+          java-version: '21'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v7
+        with:
+          name: saved-workspace
+      - name: Restore Workspace
+        run: |
+          set -x
+          tar xf workspace.tar
+          tar cf - .m2 | (cd ~ && tar xf -)
+      - name: Set TB License
+        run: |
+          TB_LICENSE=${{secrets.TB_LICENSE}}
+          mkdir -p ~/.vaadin/
+          echo '{"username":"'`echo $TB_LICENSE | cut -d / -f1`'","proKey":"'`echo $TB_LICENSE | cut -d / -f2`'"}' > ~/.vaadin/proKey
+      # The `native` profile puts the module in the reactor, compiles the
+      # application to a native binary and starts that binary for the ITs.
+      # `production` is what builds the frontend bundle the binary serves.
+      - name: Build the native image and verify
+        run: |
+          mvn -B -ntp \
+            -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \
+            -Dmaven.wagon.http.retryHandler.count=3 \
+            -pl packages/java/tests/spring/native \
+            -Pnative \
+            -Pproduction \
+            verify
+      - uses: actions/upload-artifact@v6
+        if: ${{ failure() || success() }}
+        with:
+          name: saved-outputs-native
+          path: |
+            packages/java/tests/spring/native/target/*-reports/*
+            packages/java/tests/spring/native/target/*.txt
+            packages/java/tests/spring/native/error-screenshots/*.png
+
   test-all:
     name: Tests Summary
     runs-on: ubuntu-latest
@@ -363,6 +428,7 @@ jobs:
       - test-typescript
       - test-it
       - test-gradle
+      - test-native
     steps:
       - name: Merge Artifacts
         uses: actions/upload-artifact/merge@v6
@@ -370,5 +436,5 @@ jobs:
           name: saved-outputs
           pattern: saved-outputs-*
       - name: Fail if test jobs did not succeed
-        if: ${{ needs.check-style.result != 'success' || needs.test-java.result != 'success' || needs.test-typescript.result != 'success' || (needs.test-it.result != 'success' && needs.test-it.result != 'skipped') || (needs.test-gradle.result != 'success' && needs.test-gradle.result != 'skipped') }}
+        if: ${{ needs.check-style.result != 'success' || needs.test-java.result != 'success' || needs.test-typescript.result != 'success' || (needs.test-it.result != 'success' && needs.test-it.result != 'skipped') || (needs.test-gradle.result != 'success' && needs.test-gradle.result != 'skipped') || (needs.test-native.result != 'success' && needs.test-native.result != 'skipped') }}
         run: exit 1

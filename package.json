@@ -13,7 +13,6 @@
     "packages/java/tests/*",
     "packages/java/tests/gradle/*",
     "packages/java/tests/spring/*",
-    "!packages/java/tests/spring/native",
     "!packages/java/tests/spring/endpoints-maven-engine"
   ],
   "scripts": {
