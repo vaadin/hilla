@@ -25,7 +25,8 @@ on:
   # leave out - `run-windows-tests` and `run-native-build` - so that adding
   # one starts that job on a pull request that is already open, without a
   # commit to push. A run started by a label runs only what the label asks
-  # for: every other job checks `github.event.action` and skips.
+  # for: what that is, the init job below works out once and the jobs after
+  # it read from its outputs.
   pull_request:
     types: [opened, synchronize, reopened, labeled]
     paths-ignore:
@@ -55,8 +56,8 @@ env:
 jobs:
   init:
     name: Build Java and TypeScript for other tasks
-    # Every job below needs this one, and the summary skips as well, so a
-    # label that asks for neither job leaves the run empty.
+    # Every job below needs this one, so a label that asks for neither of the
+    # jobs a label can ask for leaves the run empty.
     if: >-
       ${{ github.event.action != 'labeled'
       || github.event.label.name == 'run-windows-tests'
@@ -65,6 +66,17 @@ jobs:
     timeout-minutes: 10
     env:
       NX_SKIP_NX_CACHE: true
+    # What a run started by a label asks for, read once here and by the jobs
+    # below as `needs.init.outputs`, rather than repeated in every condition.
+    # A run any other event started asks for everything.
+    outputs:
+      everything: ${{ github.event.action != 'labeled' }}
+      windows_tests: >-
+        ${{ github.event.action != 'labeled'
+        || github.event.label.name == 'run-windows-tests' }}
+      native_build: >-
+        ${{ github.event.action != 'labeled'
+        || github.event.label.name == 'run-native-build' }}
 
     steps:
       - name: Check secrets
@@ -109,7 +121,7 @@ jobs:
   check-style:
     needs: init
     name: Check style
-    if: ${{ github.event.action != 'labeled' }}
+    if: ${{ needs.init.outputs.everything == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -139,7 +151,7 @@ jobs:
   test-java:
     needs: init
     name: Test Java
-    if: ${{ github.event.action != 'labeled' }}
+    if: ${{ needs.init.outputs.everything == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -182,7 +194,7 @@ jobs:
   test-typescript:
     needs: init
     name: Test TypeScript
-    if: ${{ github.event.action != 'labeled' }}
+    if: ${{ needs.init.outputs.everything == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -229,7 +241,7 @@ jobs:
       - init
     if: >-
       ${{ !github.event.pull_request.head.repo.fork
-      && github.event.action != 'labeled' }}
+      && needs.init.outputs.everything == 'true' }}
     name: ITs
     timeout-minutes: 25
     strategy:
@@ -292,8 +304,7 @@ jobs:
       - init
     if: >-
       ${{ !github.event.pull_request.head.repo.fork
-      && (github.event.action != 'labeled'
-      || github.event.label.name == 'run-windows-tests') }}
+      && needs.init.outputs.windows_tests == 'true' }}
     name: Gradle tests
     timeout-minutes: 25
     strategy:
@@ -395,8 +406,7 @@ jobs:
       ${{ !github.event.pull_request.head.repo.fork
       && (github.event_name != 'pull_request'
       || contains(github.event.pull_request.labels.*.name, 'run-native-build'))
-      && (github.event.action != 'labeled'
-      || github.event.label.name == 'run-native-build') }}
+      && needs.init.outputs.native_build == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
@@ -467,13 +477,9 @@ jobs:
       || 'Tests Summary' }}
     runs-on: ubuntu-latest
     # Without a job to summarise there is also no artifact to merge, which the
-    # merge below reports as an error, so a label neither job asks for leaves
-    # this out as well.
-    if: >-
-      ${{ always()
-      && (github.event.action != 'labeled'
-      || github.event.label.name == 'run-windows-tests'
-      || github.event.label.name == 'run-native-build') }}
+    # merge below reports as an error, so this stays out of a run that asked
+    # for nothing - the one where init itself is skipped.
+    if: ${{ always() && needs.init.result != 'skipped' }}
     needs:
       - init
       - check-style
