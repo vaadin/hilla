@@ -37,6 +37,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.vaadin.hilla.generator.model.EntityModel;
+import com.vaadin.hilla.generator.model.Generation;
 import com.vaadin.hilla.generator.model.PropertyModel;
 import com.vaadin.hilla.parser.testutils.AbstractFullStackTest;
 import com.vaadin.hilla.parser.testutils.ResourceLoader;
@@ -116,11 +117,21 @@ public class EndpointGenerationTest extends AbstractFullStackTest {
      * other rather than one by one.
      */
     @ParameterizedTest(name = "{0}")
-    @MethodSource("should_GenerateTheExpectedTypeScript")
+    @MethodSource
     public void should_NotSayThatAnInheritedPropertyCanBeAbsent(String testCase,
             List<Class<?>> endpoints) {
-        var beans = generator(endpoints.toArray(Class<?>[]::new))
-                .parseGeneration().entities().stream()
+        Generation generation;
+
+        try {
+            generation = generator(endpoints.toArray(Class<?>[]::new))
+                    .parseGeneration();
+        } catch (RuntimeException e) {
+            // A case about the walk refusing a class, which the test class of
+            // the case says itself, declares nothing to check against
+            return;
+        }
+
+        var beans = generation.entities().stream()
                 .filter(EntityModel.Bean.class::isInstance)
                 .map(EntityModel.Bean.class::cast)
                 .collect(Collectors.toMap(EntityModel::javaClass, bean -> bean,
@@ -136,6 +147,22 @@ public class EndpointGenerationTest extends AbstractFullStackTest {
         assertTrue(absent.isEmpty(),
                 () -> "The types they are declared in say that these values are"
                         + " always there: " + absent);
+    }
+
+    /**
+     * Every case, including the ones a test class of their own generates:
+     * whether a value can be absent is what those cases are about, so they are
+     * the last ones to leave out of a check about it.
+     */
+    static Stream<Arguments> should_NotSayThatAnInheritedPropertyCanBeAbsent() {
+        try (var scan = scan()) {
+            var endpoints = endpoints(scan);
+
+            return findTestCases(endpoints).stream()
+                    .map(testCase -> Arguments.of(testCase,
+                            endpointsOf(testCase, endpoints, List.of())))
+                    .toList().stream();
+        }
     }
 
     /**

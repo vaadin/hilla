@@ -84,10 +84,6 @@ public class MultipartFileCheckerPlugin
     }
 
     @Override
-    public void exit(NodePath<?> nodePath) {
-    }
-
-    @Override
     @NonNull
     public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         return nodeDependencies;

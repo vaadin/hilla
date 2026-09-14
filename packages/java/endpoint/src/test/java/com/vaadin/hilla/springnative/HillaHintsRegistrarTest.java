@@ -97,11 +97,17 @@ public class HillaHintsRegistrarTest {
         new HillaHintsRegistrar().registerHints(hints,
                 getClass().getClassLoader());
 
-        assertTrue(
-                registeredTypes(hints)
-                        .contains("com.vaadin.hilla.push.PushEndpoint"),
+        var registered = registeredTypes(hints);
+
+        assertTrue(registered.contains("com.vaadin.hilla.push.PushEndpoint"),
                 "What the browser talks to the server through is registered"
                         + " whether the endpoints can be walked or not");
+        assertTrue(registered.contains(HintedEndpoint.class.getName()),
+                "A class the parser refuses says nothing about the endpoints"
+                        + " it can walk: " + registered);
+        assertTrue(registered.contains(Hinted.class.getName()),
+                "The types those endpoints send are registered as well: "
+                        + registered);
     }
 
     private static List<String> registeredTypes(RuntimeHints hints) {

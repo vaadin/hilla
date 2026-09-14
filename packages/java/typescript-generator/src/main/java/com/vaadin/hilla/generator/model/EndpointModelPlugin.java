@@ -516,11 +516,19 @@ public final class EndpointModelPlugin
     private static TypeModel.Provided providedType(Class<?> javaClass) {
         var fromModule = javaClass.getAnnotation(FromModule.class);
 
-        return fromModule == null
-                ? new TypeModel.Provided(javaClass.getSimpleName(), "",
-                        List.of(), false)
-                : new TypeModel.Provided(fromModule.namedSpecifier(),
-                        fromModule.module(), List.of(), false);
+        if (fromModule == null) {
+            return new TypeModel.Provided(javaClass.getSimpleName(), "",
+                    List.of(), false);
+        }
+
+        if (fromModule.namedSpecifier().isBlank()) {
+            throw new IllegalStateException(javaClass.getName()
+                    + " says which module it comes from without saying the"
+                    + " name it is exported under");
+        }
+
+        return new TypeModel.Provided(fromModule.namedSpecifier(),
+                fromModule.module(), List.of(), false);
     }
 
     /**

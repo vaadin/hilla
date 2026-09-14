@@ -92,8 +92,6 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
         return (fields + getters + setters).distinct()
     }
 
-    override fun enter(nodePath: NodePath<*>?) = Unit
-
     override fun resolve(node: Node<*, *>, parentPath: NodePath<*>): Node<*, *> {
         // If node is already a Kotlin node, nothing to do.
         if (node is KNode) return node
