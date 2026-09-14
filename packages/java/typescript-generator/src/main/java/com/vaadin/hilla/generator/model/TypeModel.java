@@ -151,6 +151,34 @@ public sealed interface TypeModel {
     }
 
     /**
+     * A type the generated TypeScript refers to by name rather than by
+     * declaring it: one the browser has, such as a file, or one a module of the
+     * framework exports, such as a signal.
+     *
+     * @param name
+     *            the name the type goes by in TypeScript
+     * @param module
+     *            the module exporting it under that name, or empty for one the
+     *            browser has
+     */
+    record Provided(String name, String module, List<TypeModel> typeArguments,
+            boolean optional, List<ConstraintModel> constraints,
+            List<String> annotations) implements TypeModel {
+        public Provided {
+            Objects.requireNonNull(name);
+            Objects.requireNonNull(module);
+            typeArguments = List.copyOf(typeArguments);
+            constraints = List.copyOf(constraints);
+            annotations = List.copyOf(annotations);
+        }
+
+        public Provided(String name, String module,
+                List<TypeModel> typeArguments, boolean optional) {
+            this(name, module, typeArguments, optional, List.of(), List.of());
+        }
+    }
+
+    /**
      * A reference to a type parameter of the declaration being written, which
      * is written as it is.
      */
