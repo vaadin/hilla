@@ -39,14 +39,6 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 
 public final class EndpointExposedPlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
-    @Override
-    public void enter(NodePath<?> nodePath) {
-    }
-
-    @Override
-    public void exit(NodePath<?> nodePath) {
-    }
-
     @NonNull
     @Override
     public Node<?, ?> resolve(@NonNull Node<?, ?> node,
