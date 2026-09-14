@@ -12,7 +12,7 @@
 
   <artifactId>hilla-typescript-generator</artifactId>
   <name>Hilla TypeScript Generator</name>
-  <description>Generates TypeScript from Java endpoints via OpenAPI</description>
+  <description>Generates TypeScript from Java endpoints</description>
   <url>https://vaadin.com/hilla</url>
   <packaging>jar</packaging>
 
