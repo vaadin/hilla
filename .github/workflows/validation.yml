@@ -68,7 +68,10 @@ jobs:
       NX_SKIP_NX_CACHE: true
     # What a run started by a label asks for, read once here and by the jobs
     # below as `needs.init.outputs`, rather than repeated in every condition.
-    # A run any other event started asks for everything.
+    # A run any other event started asks for everything. The conditions read
+    # these as "not false", so that a job runs rather than skips if it ever
+    # sees no answer at all - re-running the failed jobs of a run does not
+    # run this one again.
     outputs:
       everything: ${{ github.event.action != 'labeled' }}
       windows_tests: >-
@@ -121,7 +124,7 @@ jobs:
   check-style:
     needs: init
     name: Check style
-    if: ${{ needs.init.outputs.everything == 'true' }}
+    if: ${{ needs.init.outputs.everything != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -151,7 +154,7 @@ jobs:
   test-java:
     needs: init
     name: Test Java
-    if: ${{ needs.init.outputs.everything == 'true' }}
+    if: ${{ needs.init.outputs.everything != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -194,7 +197,7 @@ jobs:
   test-typescript:
     needs: init
     name: Test TypeScript
-    if: ${{ needs.init.outputs.everything == 'true' }}
+    if: ${{ needs.init.outputs.everything != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -241,7 +244,7 @@ jobs:
       - init
     if: >-
       ${{ !github.event.pull_request.head.repo.fork
-      && needs.init.outputs.everything == 'true' }}
+      && needs.init.outputs.everything != 'false' }}
     name: ITs
     timeout-minutes: 25
     strategy:
@@ -304,7 +307,7 @@ jobs:
       - init
     if: >-
       ${{ !github.event.pull_request.head.repo.fork
-      && needs.init.outputs.windows_tests == 'true' }}
+      && needs.init.outputs.windows_tests != 'false' }}
     name: Gradle tests
     timeout-minutes: 25
     strategy:
@@ -406,7 +409,7 @@ jobs:
       ${{ !github.event.pull_request.head.repo.fork
       && (github.event_name != 'pull_request'
       || contains(github.event.pull_request.labels.*.name, 'run-native-build'))
-      && needs.init.outputs.native_build == 'true' }}
+      && needs.init.outputs.native_build != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
