@@ -26,6 +26,4 @@ public @interface FromModule {
     String module();
 
     String namedSpecifier() default "";
-
-    String defaultSpecifier() default "";
 }
