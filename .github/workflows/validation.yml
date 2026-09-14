@@ -55,8 +55,8 @@ env:
 jobs:
   init:
     name: Build Java and TypeScript for other tasks
-    # Every job below needs this one, so a label that asks for nothing here
-    # leaves the whole run empty.
+    # Every job below needs this one, and the summary skips as well, so a
+    # label that asks for neither job leaves the run empty.
     if: >-
       ${{ github.event.action != 'labeled'
       || github.event.label.name == 'run-windows-tests'
@@ -303,14 +303,17 @@ jobs:
       # path-separator and file-locking behaviour, which rarely changes, so run
       # them on pushes to main and the release branches (i.e. on every merge)
       # and on workflow_dispatch, but not on pull requests. To get them on a
-      # PR, add the `run-windows-tests` label: that starts a run of this job
-      # alone. Re-running an existing run does not pick the label up, because
-      # it replays the original event payload.
+      # PR, add the `run-windows-tests` label: that starts a run of the
+      # Windows legs alone, since the Ubuntu ones have already run with the
+      # rest of the validation. Re-running an existing run does not pick the
+      # label up, because it replays the original event payload.
       matrix:
         os: >-
-          ${{ fromJSON(github.event_name == 'pull_request'
+          ${{ fromJSON(github.event.action == 'labeled'
+          && '["windows-latest"]'
+          || (github.event_name == 'pull_request'
           && !contains(github.event.pull_request.labels.*.name, 'run-windows-tests')
-          && '["ubuntu-latest"]'
+          && '["ubuntu-latest"]')
           || '["ubuntu-latest", "windows-latest"]') }}
         # The plugin leg (the gradle-plugin functional tests) and the IT leg
         # (kotlin-gradle-test) are independent once the plugin is in the local
@@ -456,9 +459,21 @@ jobs:
             packages/java/tests/spring/native/error-screenshots/*.png
 
   test-all:
-    name: Tests Summary
+    # A run a label started summarises only the job the label asked for, so it
+    # reports under a name of its own: the summary of the run that validated
+    # the commit is what the pull request keeps.
+    name: >-
+      ${{ github.event.action == 'labeled' && 'Label Summary'
+      || 'Tests Summary' }}
     runs-on: ubuntu-latest
-    if: ${{ always() }}
+    # Without a job to summarise there is also no artifact to merge, which the
+    # merge below reports as an error, so a label neither job asks for leaves
+    # this out as well.
+    if: >-
+      ${{ always()
+      && (github.event.action != 'labeled'
+      || github.event.label.name == 'run-windows-tests'
+      || github.event.label.name == 'run-native-build') }}
     needs:
       - init
       - check-style
