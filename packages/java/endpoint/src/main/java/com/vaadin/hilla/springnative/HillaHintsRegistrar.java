@@ -35,6 +35,8 @@ import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.engine.ParserProcessor;
 import com.vaadin.hilla.generator.model.EndpointModel;
 import com.vaadin.hilla.generator.model.EntityModel;
+import com.vaadin.hilla.generator.model.Generation;
+import com.vaadin.hilla.generator.model.UnionModel;
 import com.vaadin.hilla.push.PushEndpoint;
 import com.vaadin.hilla.push.messages.fromclient.AbstractServerMessage;
 import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
@@ -108,14 +110,48 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
         logger.info("Registering the types of {} browser callable classes",
                 browserCallables.size());
 
-        var generation = new ParserProcessor(configuration)
-                .parse(browserCallables);
+        var generation = walk(configuration, browserCallables);
 
         Stream.concat(
                 generation.endpoints().stream().map(EndpointModel::javaClass),
                 generation.entities().stream().map(EntityModel::javaClass))
                 .distinct().forEach(type -> hints.reflection().registerType(
                         TypeReference.of(type), MemberCategory.values()));
+    }
+
+    /**
+     * What the walk finds about the browser callable classes, which is what it
+     * finds about each of them on its own where the classpath holds one the
+     * parser refuses: such a class says nothing about the others, and the types
+     * of the rest are worth registering all the same.
+     */
+    private Generation walk(EngineAutoConfiguration configuration,
+            List<Class<?>> browserCallables) {
+        try {
+            return new ParserProcessor(configuration).parse(browserCallables);
+        } catch (RuntimeException e) {
+            logger.warn("Unable to walk the browser callable classes together,"
+                    + " walking them one by one", e);
+        }
+
+        var endpoints = new ArrayList<EndpointModel>();
+        var entities = new ArrayList<EntityModel>();
+        var unions = new ArrayList<UnionModel>();
+
+        for (var browserCallable : browserCallables) {
+            try {
+                var walked = new ParserProcessor(configuration)
+                        .parse(List.of(browserCallable));
+
+                endpoints.addAll(walked.endpoints());
+                entities.addAll(walked.entities());
+                unions.addAll(walked.unions());
+            } catch (RuntimeException e) {
+                logger.error("Unable to walk {}", browserCallable.getName(), e);
+            }
+        }
+
+        return new Generation(endpoints, entities, unions);
     }
 
     /**

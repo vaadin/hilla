@@ -115,8 +115,8 @@ public final class TypeSignaturePlugin
     /**
      * Says what the walk found about a type below one which is written from it:
      * the items of an array and the values of a map are the type itself, the
-     * types a class is given are the ones it takes, and a type argument, a type
-     * variable or an optional is written as the type it stands for.
+     * types a class is given belong to it, and a type argument, a type variable
+     * or an optional is written as the type it stands for.
      */
     private void attachToNestingParentSignature(TypeFacts type,
             TypedNode parentNode) {
@@ -127,9 +127,7 @@ public final class TypeSignaturePlugin
             return;
         }
 
-        if (parentNode.getTarget().collectsTypeArguments()) {
-            parentNode.getTarget().getTypeArguments().add(type);
-        } else {
+        if (!parentNode.getTarget().collectsTypeArguments()) {
             parentNode.setTarget(type);
         }
     }
