@@ -15,20 +15,24 @@
  */
 package com.example.application;
 
+import com.example.application.service.NotReserved;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 
 /**
  * The auto form is built from the model the generator writes from the Bean
- * Validation constraints of the entity, and the value it submits is validated
- * against those same constraints on the server. Both read annotations
- * reflectively, which a native image needs hints for.
+ * Validation constraints of the entity, and what it submits is validated
+ * against the constraints of the entity again in the running application. Both
+ * read annotations reflectively, which a native image needs hints for.
  */
 public class FormIT extends AbstractNativeIT {
+
+    private static final String RESERVED_NAME = NotReserved.RESERVED_NAME;
 
     @Override
     @Before
@@ -39,7 +43,7 @@ public class FormIT extends AbstractNativeIT {
     }
 
     @Test
-    public void constraintOfTheEntityIsReported() {
+    public void constraintTheGeneratedModelCarriesIsReported() {
         field("firstName").setValue("");
         submit();
 
@@ -47,13 +51,30 @@ public class FormIT extends AbstractNativeIT {
                 field("firstName").getPropertyString("errorMessage"));
     }
 
+    /**
+     * The generator does not know the constraint of this application, so the
+     * browser submits the value and the rejection can only come from the
+     * validation in the running application.
+     *
+     * The text of the violation is deliberately not asserted: a native image
+     * reports it as <code>undefined</code>, because the data the endpoint
+     * writes the validation error from serializes to an empty object there.
+     * What the image does get right, and what this pins, is that the value is
+     * rejected as invalid and never reaches the database.
+     */
     @Test
-    public void sizeConstraintOfTheEntityIsReported() {
-        field("lastName").setValue("Young-Young-Young-Young");
+    public void constraintOnlyTheApplicationKnowsIsReported() {
+        field("lastName").setValue(RESERVED_NAME);
         submit();
 
-        Assert.assertEquals("size must be between 0 and 20",
-                field("lastName").getPropertyString("errorMessage"));
+        waitUntil(driver -> pageText().contains("Validation errors"));
+        Assert.assertTrue("The rejected value was saved",
+                $("*").attribute("id", "saved").all().isEmpty());
+
+        // The rejected value is not in the database either
+        open("/form");
+        waitUntil(driver -> !field("lastName").getValue().isEmpty());
+        Assert.assertNotEquals(RESERVED_NAME, field("lastName").getValue());
     }
 
     @Test
@@ -75,6 +96,10 @@ public class FormIT extends AbstractNativeIT {
     private TextFieldElement field(String name) {
         return $(TextFieldElement.class).withAttribute("name", name)
                 .waitForFirst();
+    }
+
+    private String pageText() {
+        return getDriver().findElement(By.tagName("body")).getText();
     }
 
     private void submit() {

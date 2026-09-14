@@ -15,12 +15,8 @@
  */
 package com.example.application;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.time.Duration;
 
-import org.junit.Assert;
 import org.junit.Before;
 
 import com.vaadin.flow.component.login.testbench.LoginFormElement;
@@ -28,22 +24,39 @@ import com.vaadin.flow.testutil.ChromeBrowserTest;
 
 /**
  * Base class for the ITs of the application compiled to a native image.
- *
- * In a native build the binary is started asynchronously by the exec plugin, so
- * unlike the other test applications there is nothing that waits for the server
- * before the tests run. That wait happens here, once per test run.
  */
 public abstract class AbstractNativeIT extends ChromeBrowserTest {
 
     private static final Duration STARTUP_TIMEOUT = Duration.ofMinutes(2);
 
-    private static volatile boolean applicationReady;
-
+    /**
+     * The binary is started asynchronously by the exec plugin, so unlike the
+     * other test applications there is nothing that waits for the server before
+     * the tests run. The check of the base class, which is what fails first on
+     * a server that is not up yet, is therefore retried here until the
+     * application answers. It records its own success, so this happens once per
+     * test run.
+     */
     @Override
     @Before
-    public void setup() throws Exception {
-        super.setup();
-        waitForApplication();
+    public void checkIfServerAvailable() {
+        var deadline = System.nanoTime() + STARTUP_TIMEOUT.toNanos();
+
+        while (true) {
+            try {
+                super.checkIfServerAvailable();
+                return;
+            } catch (IllegalStateException e) {
+                if (System.nanoTime() > deadline) {
+                    throw new IllegalStateException(
+                            "The application did not answer within "
+                                    + STARTUP_TIMEOUT
+                                    + ". Check the output of the binary.",
+                            e);
+                }
+                sleep();
+            }
+        }
     }
 
     /**
@@ -75,27 +88,14 @@ public abstract class AbstractNativeIT extends ChromeBrowserTest {
         waitUntil(driver -> username.equals($("*").id("user").getText()));
     }
 
-    private void waitForApplication() throws InterruptedException {
-        if (applicationReady) {
-            return;
+    private static void sleep() {
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Interrupted while waiting for "
+                    + "the application to answer", e);
         }
-
-        var address = new InetSocketAddress(getDeploymentHostname(),
-                getDeploymentPort());
-        var deadline = System.nanoTime() + STARTUP_TIMEOUT.toNanos();
-
-        while (System.nanoTime() < deadline) {
-            try (var socket = new Socket()) {
-                socket.connect(address, 1000);
-                applicationReady = true;
-                return;
-            } catch (IOException e) {
-                Thread.sleep(500);
-            }
-        }
-
-        Assert.fail(address + " did not accept a connection within "
-                + STARTUP_TIMEOUT + ". Check the output of the binary.");
     }
 
 }

@@ -39,6 +39,7 @@ public class Person {
 
     @NotBlank
     @Size(max = 20)
+    @NotReserved
     private String lastName;
 
     public Long getId() {
