@@ -32,6 +32,10 @@ public class ReservedNameEndpoint {
     public void remove(long delete) {
     }
 
+    public String eval(String arguments) {
+        return arguments;
+    }
+
     public long size() {
         return 0;
     }
