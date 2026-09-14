@@ -17,6 +17,7 @@ package com.vaadin.hilla.generator.model;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A type which the endpoints refer to and which is generated as a TypeScript
@@ -43,15 +44,36 @@ public sealed interface EntityModel {
      * @param superTypes
      *            the types the declaration extends, which hold the properties
      *            this one inherits rather than declares
+     * @param discriminator
+     *            the property saying which subtype a value is, which is there
+     *            for a type belonging to a polymorphic hierarchy
      */
     record Bean(String javaClass, List<String> typeParameters,
             List<TypeModel.EntityRef> superTypes,
-            List<PropertyModel> properties) implements EntityModel {
+            List<PropertyModel> properties,
+            Optional<Discriminator> discriminator) implements EntityModel {
         public Bean {
             Objects.requireNonNull(javaClass);
             typeParameters = List.copyOf(typeParameters);
             superTypes = List.copyOf(superTypes);
             properties = List.copyOf(properties);
+            Objects.requireNonNull(discriminator);
+        }
+    }
+
+    /**
+     * The property saying which subtype a value is.
+     *
+     * @param acceptedValues
+     *            the values the property can hold, which are the id of the type
+     *            itself and the ids of the subtypes below it, so that reading
+     *            the property of a value of the base type says which of the
+     *            subtypes it is
+     */
+    record Discriminator(String name, List<String> acceptedValues) {
+        public Discriminator {
+            Objects.requireNonNull(name);
+            acceptedValues = List.copyOf(acceptedValues);
         }
     }
 
