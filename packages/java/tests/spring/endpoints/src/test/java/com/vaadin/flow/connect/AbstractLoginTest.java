@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.connect;
 
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
@@ -49,7 +50,22 @@ public abstract class AbstractLoginTest extends ChromeBrowserTest {
         // same test component as the page a successful one leads to. Without
         // this the test would carry on as if it were authenticated and fail
         // later on with an unexplained 401.
-        waitUntil(driver -> !driver.getCurrentUrl().contains("/login"), 25);
+        //
+        // The wait is a generous one: the first login of a run is served
+        // while the application is still warming up, and the tests of the
+        // suite log in and out of the same application at the same time. What
+        // it says when it gives up is where the browser ended up, since a
+        // login which was rejected and one which is still on its way look the
+        // same from here.
+        try {
+            waitUntil(driver -> !driver.getCurrentUrl().contains("/login"),
+                    60);
+        } catch (TimeoutException e) {
+            throw new AssertionError("The login of " + user + " did not leave"
+                    + " the login view, which is where a rejected login lands"
+                    + " as well. The browser is at "
+                    + getDriver().getCurrentUrl(), e);
+        }
     }
 
     /**
