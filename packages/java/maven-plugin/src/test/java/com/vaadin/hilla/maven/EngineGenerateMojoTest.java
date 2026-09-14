@@ -79,7 +79,9 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
 
             var inOrder = Mockito.inOrder(parserProcessor, generatorProcessor);
             inOrder.verify(parserProcessor).process(List.of());
-            inOrder.verify(generatorProcessor).process();
+            // The generator is handed what the parser found, which is what it
+            // writes the TypeScript of the endpoints from
+            inOrder.verify(generatorProcessor).process(parserProcessor);
         }
     }
 
