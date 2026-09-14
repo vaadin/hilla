@@ -39,11 +39,10 @@ public class TypeWriterTest {
 
     @Test
     public void should_WriteWhatAGenericEntityIsUsedWith() {
-        var box = new TypeModel.EntityRef(
-                "com.example.Box", List
-                        .of(new TypeModel.TypeVariable("T"),
-                                new TypeModel.Scalar(
-                                        TypeModel.ScalarKind.STRING, true)),
+        var box = new TypeModel.EntityRef("com.example.Box",
+                List.of(new TypeModel.TypeVariable("T"),
+                        new TypeModel.Scalar(TypeModel.ScalarKind.STRING, true,
+                                String.class.getName())),
                 true);
 
         assertEquals("Box<T, string | undefined> | undefined",
