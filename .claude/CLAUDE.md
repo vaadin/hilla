@@ -103,19 +103,19 @@ This is an Nx-based monorepo with:
 
 #### Engine (`packages/java/engine-core`, `packages/java/engine-runtime`)
 - **EngineConfiguration**: Main configuration for code generation
-- **CodeGenerationEngine**: Orchestrates OpenAPI generation and TypeScript generation
+- **ParserProcessor / TypeScriptProcessor**: Walk the browser callable classes and write the TypeScript of them
 - Integrates with Maven/Gradle plugins
 
-#### Parser (`packages/java/parser-jvm-*`)
-- **parser-jvm-core**: Core Java parsing infrastructure using JavaParser
-- **parser-jvm-plugin-***: Specialized plugins for:
-  - `backbone`: Base OpenAPI structure
-  - `model`: Java model to OpenAPI schema conversion
+#### Parser and generator (`packages/java/typescript-generator`)
+- **parser core**: Walks the browser callable classes with ClassGraph
+- **plugins**: Say what the walk finds:
+  - `backbone`: The endpoints, their methods and the types they send
+  - `model`: What the validation and persistence annotations say about a value
   - `nonnull`: Nullability analysis
   - `subtypes`: Polymorphic type handling
   - `transfertypes`: Data transfer object processing
-
-Generates OpenAPI 3 specification from Java classes.
+- **generator**: The model the writers need, and the TypeScript files written
+  from it
 
 #### Maven/Gradle Plugins
 - **maven-plugin** (`packages/java/maven-plugin`): Configures and runs code generation during Maven build
@@ -142,21 +142,24 @@ stays, since the file router writes its routes with it.
 
 ### Code Generation Flow
 
-1. **Java → OpenAPI**: Parser plugins analyze Java endpoints and generate OpenAPI 3 spec
-2. **OpenAPI → TypeScript**: Generator plugins read OpenAPI and generate TypeScript code
-3. **Output**: Type-safe TypeScript clients matching Java endpoints exactly
+1. **The walk**: The parser plugins walk the browser callable classes and say what
+   they find about the endpoints, their methods and the types of the values
+2. **The model**: A plugin collects what the writers need while that happens
+3. **The writers**: The TypeScript files are filled in from the model
+4. **Output**: Type-safe TypeScript clients matching Java endpoints exactly
 
 Generated code location in apps: `frontend/generated/`
 
 ### Important Technical Details
 
-#### Jackson 2/3 Hybrid Approach
-Hilla uses **Jackson 3** (`tools.jackson.*`) for internal serialization but maintains **Jackson 2** (`com.fasterxml.jackson.*`) for OpenAPI/Swagger compatibility. See `JACKSON.md` for detailed migration notes.
+#### Jackson
+Hilla uses **Jackson 3** (`tools.jackson.*`): the endpoints serialize with it,
+and the parser asks it what a class serializes as. The annotations
+(`com.fasterxml.jackson.annotation.*`) are the ones both versions share.
 
 Key points:
 - Use `tools.jackson.databind.ObjectMapper` for Hilla serialization
-- OpenAPI models still use Jackson 2 annotations
-- `JsonPrinter` detects and routes to correct Jackson version
+- An application may still have an object mapper of Jackson 2 of its own
 
 #### Testing Structure
 - **packages/java/tests/spring/**: Spring Boot integration tests
@@ -204,10 +207,9 @@ Key points:
 - **Maven**: >= 3
 
 ### Key Java Dependencies
-- Spring Boot 4.0.0-M3
-- Jackson 3.0.0-rc9 (with Jackson 2 for OpenAPI)
-- Vaadin Flow 25.3-SNAPSHOT
-- Swagger Parser 2.1.15
+- Spring Boot 4.1.1
+- Jackson 3.1.5
+- Vaadin Flow 25.4-SNAPSHOT
 
 ### Key TypeScript Dependencies
 - TypeScript 5.9.3
