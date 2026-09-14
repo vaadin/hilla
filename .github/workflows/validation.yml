@@ -382,11 +382,17 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
       # Replaces the JDK of the setup action with one that has native-image.
+      # The image is built with the current GraalVM rather than with the 21 the
+      # other jobs compile against: the native-image of GraalVM for JDK 21 ends
+      # the build with "Classes that should be initialized at run time got
+      # initialized during image building" for the logging classes, which the
+      # AOT output of Spring Boot 4 expects a newer one to handle. The classes
+      # themselves are still compiled for 21, as everywhere else.
       - name: Setup GraalVM
         uses: graalvm/setup-graalvm@0426e2e191540e8514dff98dc52a5f5146a2a276 # v1.6.6
         with:
           distribution: graalvm
-          java-version: '21'
+          java-version: '25'
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/download-artifact@v7
         with:
