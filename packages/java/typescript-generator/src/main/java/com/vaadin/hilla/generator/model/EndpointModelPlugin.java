@@ -300,6 +300,38 @@ public final class EndpointModelPlugin
                 : MethodModel.Kind.CALLED;
     }
 
+    private void collect(Node<?, ?> parent, TypeModel type) {
+        types.computeIfAbsent(parent, key -> new ArrayList<>()).add(type);
+    }
+
+    private void collect(Node<?, ?> parent, MethodParameterNode node,
+            List<TypeModel> ownTypes) {
+        var type = only(ownTypes);
+
+        parameters.computeIfAbsent(parent, key -> new ArrayList<>())
+                .add(new ParameterModel(node.getTarget(), type));
+    }
+
+    private void collect(Node<?, ?> parent, PropertyNode node,
+            List<TypeModel> ownTypes) {
+        var type = only(ownTypes);
+        var valueType = node.getValueType();
+
+        // Whether the value of a property can be absent is not settled until
+        // the property itself is left: the nullability a Kotlin declaration
+        // keeps on the member it is written as is decided there. A value of a
+        // type variable is left as absent as the type it stands for says,
+        // since a declaration extending this one gives that type and is free
+        // to say that the value is always there
+        var absent = valueType == null ? type.optional()
+                : valueType.isOptional();
+
+        properties.computeIfAbsent(parent, key -> new ArrayList<>())
+                .add(new PropertyModel(node.getTarget(),
+                        type instanceof TypeModel.TypeVariable && !absent ? type
+                                : asAbsent(type, absent)));
+    }
+
     /**
      * Builds the declaration of a type the endpoints refer to. An enum is the
      * constants it is serialized as; anything else is the properties it
