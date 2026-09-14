@@ -74,7 +74,6 @@
     <gentyref.version>1.2.0.vaadin1</gentyref.version>
     <jsr305.version>3.0.2</jsr305.version>
     <jna.version>5.14.0</jna.version>
-    <jackson2.version>2.22.1</jackson2.version>
     <jackson-annotations.version>2.22</jackson-annotations.version>
     <jackson.version>3.1.5</jackson.version>
     <junit.version>5.10.1</junit.version>
@@ -227,31 +226,6 @@
         <groupId>tools.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
         <version>${jackson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>tools.jackson.dataformat</groupId>
-        <artifactId>jackson-dataformat-yaml</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>${jackson2.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.dataformat</groupId>
-        <artifactId>jackson-dataformat-yaml</artifactId>
-        <version>${jackson2.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.datatype</groupId>
-        <artifactId>jackson-datatype-jdk8</artifactId>
-        <version>${jackson2.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.datatype</groupId>
-        <artifactId>jackson-datatype-jsr310</artifactId>
-        <version>${jackson2.version}</version>
       </dependency>
       <dependency>
         <groupId>org.junit</groupId>
