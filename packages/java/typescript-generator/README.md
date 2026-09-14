@@ -33,10 +33,10 @@ it covers the client, the endpoints, the barrel, the types they refer to, the
 models a form binds those types through, with what the annotations of the
 validation API say a value has to satisfy and what the ones of the persistence
 API say it is, the unions saying which subtype a value of a polymorphic type
-is, the methods sending a series of values rather than returning one and the
-types it refers to by name rather than declaring, such as a file or a signal;
-what an endpoint does with a signal still comes from the Node generator, which
-is what the pipeline runs.
+is, the methods sending a series of values rather than returning one, the
+types it refers to by name rather than declaring, such as a file or a signal,
+and the signals a value is shared through. What is left of the Node generator
+is the file router, which the pipeline still runs.
 
 ## Architecture
 
