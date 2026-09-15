@@ -67,7 +67,8 @@ export const Max = new ConstraintBuilder()
   .build();
 
 /**
- * The constrained model value must be a number that is greater than or equal to the specified value.
+ * The constrained model value must be a number above the specified value,
+ * inclusive unless the `inclusive` attribute is set to `false`.
  *
  * `undefined` value is considered valid.
  */
@@ -80,7 +81,8 @@ export const DecimalMin = new ConstraintBuilder()
   .build();
 
 /**
- * The constrained model value must be a number that is lower than or equal to the specified value.
+ * The constrained model value must be a number below the specified value,
+ * inclusive unless the `inclusive` attribute is set to `false`.
  *
  * `undefined` value is considered valid.
  */
