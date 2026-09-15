@@ -1,42 +1,60 @@
-import ts, {
-  type ArrowFunction,
-  type Expression,
-  type Identifier,
-  type PropertyDeclaration,
-} from '@typescript/typescript6';
+import ts, { type Expression, type Identifier } from '@typescript/typescript6';
 import type Plugin from '@vaadin/hilla-generator-core/Plugin.js';
 import type DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
+import type { Cycles } from './cycles.js';
 
 export type Context = Readonly<{
   owner: Plugin;
+  cycles: Cycles;
 }>;
 
 export const defaultMediaType = 'application/json';
 
-export function importBuiltInFormModel(specifier: string, { imports, paths }: DependencyManager): Identifier {
-  const modelPath = paths.createBareModulePath('@vaadin/hilla-lit-form', false);
-  return imports.named.getIdentifier(modelPath, specifier) ?? imports.named.add(modelPath, specifier);
+const MODELS_MODULE = '@vaadin/hilla-models';
+
+/**
+ * Imports a named export of the model library, such as `StringModel`.
+ */
+export function importModel(specifier: string, { imports, paths }: DependencyManager): Identifier {
+  const path = paths.createBareModulePath(MODELS_MODULE, false);
+  return imports.named.getIdentifier(path, specifier) ?? imports.named.add(path, specifier);
 }
 
-export function createModelBuildingCallback(name: Identifier, args: readonly Expression[]): ArrowFunction {
-  const defaults = [ts.factory.createIdentifier('parent'), ts.factory.createIdentifier('key')];
+/**
+ * Imports the `m` namespace of the model library, which holds the builders and
+ * the converters.
+ */
+export function importM({ imports, paths }: DependencyManager): Identifier {
+  const path = paths.createBareModulePath(MODELS_MODULE, false);
+  return imports.default.getIdentifier(path) ?? imports.default.add(path, 'm');
+}
 
-  return ts.factory.createArrowFunction(
+/**
+ * Builds a call of a converter of the `m` namespace, e.g. `m.optional(model)`.
+ */
+export function createModelCall(
+  dependencies: DependencyManager,
+  name: string,
+  args: readonly Expression[],
+): ts.CallExpression {
+  return ts.factory.createCallExpression(
+    ts.factory.createPropertyAccessExpression(importM(dependencies), name),
     undefined,
-    undefined,
-    defaults.map((arg) => ts.factory.createParameterDeclaration(undefined, undefined, arg)),
-    undefined,
-    ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-    ts.factory.createNewExpression(name, undefined, [...defaults, ...args]),
+    args,
   );
 }
 
-export function createEmptyValueMaker(maker: Identifier, model: Identifier): PropertyDeclaration {
-  return ts.factory.createPropertyDeclaration(
-    [ts.factory.createModifier(ts.SyntaxKind.StaticKeyword), ts.factory.createModifier(ts.SyntaxKind.OverrideKeyword)],
-    'createEmptyValue',
+/**
+ * Builds `() => Model`, which defers reading the model until the property is
+ * accessed and so survives a circular import.
+ */
+export function createModelProvider(model: Expression): ts.ArrowFunction {
+  return ts.factory.createArrowFunction(
     undefined,
     undefined,
-    ts.factory.createCallExpression(maker, undefined, [model]),
+    [],
+    undefined,
+    ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
+    model,
   );
 }

@@ -1,9 +1,9 @@
-import { _getPropertyModel, makeObjectEmptyValueCreator, NumberModel, ObjectModel } from "@vaadin/hilla-lit-form";
+import m, { NumberModel } from "@vaadin/hilla-models";
 import type Square from "./Square.js";
-class SquareModel<T extends Square = Square> extends ObjectModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(SquareModel);
-    get side(): NumberModel {
-        return this[_getPropertyModel]("side", (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: "double" } }));
-    }
-}
+const SquareModel = m
+  .object<Square>("Square")
+  .property("side", m.meta(NumberModel, { jvmType: "double" }))
+  .property("shape", m.literal("square"))
+  .build();
+type SquareModel = typeof SquareModel;
 export default SquareModel;
