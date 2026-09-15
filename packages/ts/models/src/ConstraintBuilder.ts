@@ -27,11 +27,11 @@ import {
 export class ConstraintBuilder<V = unknown, const N extends string = string, A extends AnyObject = EmptyObject> {
   #supportedModel: Model<V>;
   protected [$name]: N | undefined;
-  readonly #attributeDefaults: Required<A>;
+  readonly #attributeDefaults: A;
 
   constructor() {
     this.#supportedModel = Model as unknown as Model<V>;
-    this.#attributeDefaults = {} as unknown as Required<A>;
+    this.#attributeDefaults = {} as unknown as A;
   }
 
   /**
@@ -102,7 +102,7 @@ export class ConstraintBuilder<V = unknown, const N extends string = string, A e
             ? valueOrAttributes
             : { value: valueOrAttributes }),
         }).filter(([, attributeValue]) => attributeValue !== undefined),
-      ) as Required<A>;
+      ) as A;
 
       return Object.defineProperties(Object.create(NonAttributedConstraint), {
         attributes: { value: attributes },

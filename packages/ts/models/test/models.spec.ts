@@ -624,6 +624,12 @@ describe('@vaadin/hilla-models', () => {
         .to.have.property('attributes')
         .which.does.not.have.property('message');
       expect(NotBlank({ message: 'required' }).attributes).to.be.like({ message: 'required' });
+
+      // and the type has to say so: an assignment the other way around would
+      // pass even if `message` were required, as `string` fits `string | undefined`
+      const _attributes: Constraint<number, 'Min', Readonly<{ value: number; message?: string }>>['attributes'] = {
+        value: 5,
+      };
     });
 
     it('should keep the declared default of an omitted attribute', () => {
