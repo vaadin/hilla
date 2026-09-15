@@ -1,18 +1,29 @@
 import ts, { type Identifier, type ImportDeclaration, type Statement } from '@typescript/typescript6';
-import createFullyUniqueIdentifier from '../createFullyUniqueIdentifier.js';
 import type CodeConvertable from './CodeConvertable.js';
+import NameRegistry from './NameRegistry.js';
 import StatementRecordManager, { createComparator, type StatementRecord } from './StatementRecordManager.js';
 import { createDependencyRecord, type DependencyRecord } from './utils.js';
 
 export class NamedImportManager extends StatementRecordManager<ImportDeclaration> {
   readonly #map = new Map<string, Map<string, DependencyRecord>>();
+  readonly #names: NameRegistry;
+
+  constructor(collator: Intl.Collator, names: NameRegistry) {
+    super(collator);
+    this.#names = names;
+  }
 
   get size(): number {
     return this.#map.size;
   }
 
   add(path: string, specifier: string, isType?: boolean, uniqueId?: Identifier): Identifier {
-    const record = createDependencyRecord(uniqueId ?? createFullyUniqueIdentifier(specifier), isType);
+    if (uniqueId) {
+      this.#names.claim(uniqueId.text);
+    }
+
+    const id = uniqueId ?? this.getIdentifier(path, specifier) ?? this.#names.reserveIdentifier(specifier);
+    const record = createDependencyRecord(id, isType);
 
     if (this.#map.has(path)) {
       this.#map.get(path)!.set(specifier, record);
@@ -83,7 +94,7 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
                 const { id, isType } = specifiers.get(name)!;
                 return ts.factory.createImportSpecifier(
                   isTypeOnly ? false : isType,
-                  ts.factory.createIdentifier(name),
+                  id.text === name ? undefined : ts.factory.createIdentifier(name),
                   id,
                 );
               }),
@@ -106,13 +117,23 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
 
 export class NamespaceImportManager extends StatementRecordManager<ImportDeclaration> {
   readonly #map = new Map<string, Identifier>();
+  readonly #names: NameRegistry;
+
+  constructor(collator: Intl.Collator, names: NameRegistry) {
+    super(collator);
+    this.#names = names;
+  }
 
   get size(): number {
     return this.#map.size;
   }
 
   add(path: string, name: string, uniqueId?: Identifier): Identifier {
-    const id = uniqueId ?? createFullyUniqueIdentifier(name);
+    if (uniqueId) {
+      this.#names.claim(uniqueId.text);
+    }
+
+    const id = uniqueId ?? this.#map.get(path) ?? this.#names.reserveIdentifier(name);
     this.#map.set(path, id);
     return id;
   }
@@ -159,13 +180,23 @@ export class NamespaceImportManager extends StatementRecordManager<ImportDeclara
 
 export class DefaultImportManager extends StatementRecordManager<ImportDeclaration> {
   readonly #map = new Map<string, DependencyRecord>();
+  readonly #names: NameRegistry;
+
+  constructor(collator: Intl.Collator, names: NameRegistry) {
+    super(collator);
+    this.#names = names;
+  }
 
   get size(): number {
     return this.#map.size;
   }
 
   add(path: string, name: string, isType?: boolean, uniqueId?: Identifier): Identifier {
-    const id = uniqueId ?? createFullyUniqueIdentifier(name);
+    if (uniqueId) {
+      this.#names.claim(uniqueId.text);
+    }
+
+    const id = uniqueId ?? this.getIdentifier(path) ?? this.#names.reserveIdentifier(name);
     this.#map.set(path, createDependencyRecord(id, isType));
     return id;
   }
@@ -220,13 +251,15 @@ export default class ImportManager implements CodeConvertable<readonly Statement
   readonly collator: Intl.Collator;
   readonly default: DefaultImportManager;
   readonly named: NamedImportManager;
+  readonly names: NameRegistry;
   readonly namespace: NamespaceImportManager;
 
-  constructor(collator: Intl.Collator) {
-    this.default = new DefaultImportManager(collator);
-    this.named = new NamedImportManager(collator);
-    this.namespace = new NamespaceImportManager(collator);
+  constructor(collator: Intl.Collator, names: NameRegistry = new NameRegistry()) {
+    this.default = new DefaultImportManager(collator, names);
+    this.named = new NamedImportManager(collator, names);
+    this.namespace = new NamespaceImportManager(collator, names);
     this.collator = collator;
+    this.names = names;
   }
 
   get size(): number {
@@ -249,6 +282,17 @@ export default class ImportManager implements CodeConvertable<readonly Statement
     this.named.clear();
     this.namespace.clear();
 
+    // Anything already spelled out in the source is off limits for names the
+    // registry hands out later.
+    const claim = (node: ts.Node): void => {
+      if (ts.isIdentifier(node)) {
+        this.names.claim(node.text);
+      }
+
+      ts.forEachChild(node, claim);
+    };
+    claim(source);
+
     const imports = source.statements.filter((statement): statement is ImportDeclaration =>
       ts.isImportDeclaration(statement),
     );
@@ -266,8 +310,10 @@ export default class ImportManager implements CodeConvertable<readonly Statement
         if (ts.isNamespaceImport(namedBindings)) {
           this.namespace.add(path, namedBindings.name.text, namedBindings.name);
         } else {
-          for (const { isTypeOnly, name: specifier } of namedBindings.elements) {
-            this.named.add(path, specifier.text, isTypeOnly, specifier);
+          for (const { isTypeOnly, name: local, propertyName } of namedBindings.elements) {
+            // `propertyName` holds the exported name whenever the import is
+            // aliased; the local binding alone would not survive the round trip.
+            this.named.add(path, (propertyName ?? local).text, isTypeOnly, local);
           }
         }
       } else if (name) {

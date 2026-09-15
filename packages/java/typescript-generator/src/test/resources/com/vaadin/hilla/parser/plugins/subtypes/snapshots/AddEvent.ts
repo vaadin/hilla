@@ -1,5 +1,5 @@
-import type BaseEvent_1 from "./BaseEvent.js";
-interface AddEvent extends BaseEvent_1 {
+import type BaseEvent from "./BaseEvent.js";
+interface AddEvent extends BaseEvent {
     item?: string;
     "@type": "add";
 }

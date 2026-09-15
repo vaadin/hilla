@@ -1,5 +1,5 @@
-import { EndpointRequestInit as EndpointRequestInit_1 } from "@vaadin/hilla-frontend";
-import type JavaTypeTestEntity_1 from "./com/vaadin/hilla/parser/plugins/model/javatypes/JavaTypeEndpoint/JavaTypeTestEntity.js";
-import client_1 from "./connect-client.default.js";
-async function getTestEntity_1(init?: EndpointRequestInit_1): Promise<JavaTypeTestEntity_1 | undefined> { return client_1.call("JavaTypeEndpoint", "getTestEntity", {}, init); }
-export { getTestEntity_1 as getTestEntity };
+import { EndpointRequestInit } from "@vaadin/hilla-frontend";
+import type JavaTypeTestEntity from "./com/vaadin/hilla/parser/plugins/model/javatypes/JavaTypeEndpoint/JavaTypeTestEntity.js";
+import client from "./connect-client.default.js";
+async function getTestEntity(init?: EndpointRequestInit): Promise<JavaTypeTestEntity | undefined> { return client.call("JavaTypeEndpoint", "getTestEntity", {}, init); }
+export { getTestEntity };
