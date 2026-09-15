@@ -111,16 +111,23 @@ export interface LazyOf<M extends Model> extends ModelConverter {
 }
 
 /**
- * Defers resolving the model until the owner property is first read.
+ * Defers reading a model reference until the owner property is first accessed.
  *
- * Object models are built eagerly, so two models that reference each other
- * would read an uninitialized binding of the circular import. The provider
- * turns that read into a property access, which happens after both modules
- * have been evaluated.
+ * The property model is built lazily in any case, but the model handed to
+ * `property` is an ordinary argument and is evaluated while the builder chain
+ * runs. Two models that reference each other across modules form an import
+ * cycle, so the module evaluated second would read an uninitialized binding.
+ * The provider turns that read into a property access, which happens after both
+ * modules have been evaluated. Use {@link self} for a model that refers to
+ * itself.
  *
- * Every cycle must be broken by an `optional` property: the default value of an
- * object model recurses into every non-optional one, so an all-required cycle
- * overflows the stack.
+ * Only the value is deferred: models in a cycle still need an explicit type
+ * annotation, as their types cannot be inferred from each other.
+ *
+ * Every cycle must be broken by a property whose default value does not read
+ * the model it refers to: an optional one defaults to `undefined`, an array to
+ * `[]` and a record to `{}`. A required object property reads the default value
+ * of its own model instead, so an unbroken cycle overflows the stack.
  *
  * @param provider - Returns the model to use.
  */
