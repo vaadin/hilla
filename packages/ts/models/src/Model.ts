@@ -143,7 +143,7 @@ export type NonAttributedConstraint<
  * @typeParam A - The attributes of the constraint.
  */
 export type Constraint<V = unknown, N extends string = string, A extends AnyObject = AnyObject> = Readonly<{
-  attributes: EmptyObject extends A ? A : Required<A>;
+  attributes: A;
   name: N;
   [$assertSupportedModel](model: Model<V>): void;
 }>;
