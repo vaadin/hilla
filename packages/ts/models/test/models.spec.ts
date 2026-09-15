@@ -644,6 +644,10 @@ describe('@vaadin/hilla-models', () => {
         value: '0.01',
         inclusive: false,
       });
+
+      // the call result carries its attribute types rather than a bare `{}`
+      const _bound: number | string = DecimalMin('0.01').attributes.value;
+      const _inclusive: boolean | undefined = DecimalMin('0.01').attributes.inclusive;
     });
 
     it('should support custom constraints', () => {
