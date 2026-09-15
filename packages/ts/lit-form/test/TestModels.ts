@@ -1,5 +1,7 @@
 import m, {
   BooleanModel,
+  DecimalMax,
+  DecimalMin,
   Future,
   Model,
   NotBlank,
@@ -123,6 +125,20 @@ export const EmployeeModel = m
   .property('colleagues', m.optional(m.array(m.optional(m.self))))
   .build();
 export type EmployeeModel = typeof EmployeeModel;
+
+// The generator emits the decimal bounds as strings, the way Bean Validation
+// declares them, so the models keep them in that form.
+export interface DecimalEntity {
+  decimalMin: number;
+  decimalMax: number;
+}
+
+export const DecimalEntityModel = m
+  .object<DecimalEntity>('DecimalEntity')
+  .property('decimalMin', m.constrained(NumberModel, DecimalMin('0.01')))
+  .property('decimalMax', m.constrained(NumberModel, DecimalMax({ value: '100', inclusive: false })))
+  .build();
+export type DecimalEntityModel = typeof DecimalEntityModel;
 
 export interface TestMessageInterpolationEntity {
   stringMinSize: string;

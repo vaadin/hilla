@@ -27,11 +27,11 @@ import {
 export class ConstraintBuilder<V = unknown, const N extends string = string, A extends AnyObject = EmptyObject> {
   #supportedModel: Model<V>;
   protected [$name]: N | undefined;
-  readonly #attributeDefaults: Required<A>;
+  readonly #attributeDefaults: A;
 
   constructor() {
     this.#supportedModel = Model as unknown as Model<V>;
-    this.#attributeDefaults = {} as unknown as Required<A>;
+    this.#attributeDefaults = {} as unknown as A;
   }
 
   /**
@@ -92,17 +92,22 @@ export class ConstraintBuilder<V = unknown, const N extends string = string, A e
     }
 
     let NonAttributedConstraint = ((valueOrAttributes?: unknown) => {
-      const attributes: Required<A> = {
-        ...attributeDefaults,
-        ...(typeof valueOrAttributes === 'object' && valueOrAttributes !== null
-          ? valueOrAttributes
-          : { value: valueOrAttributes }),
-      };
+      // Attributes without a value are left out rather than set to `undefined`:
+      // consumers spread them over their own defaults, which an explicit
+      // `undefined` would overwrite.
+      const attributes = Object.fromEntries(
+        Object.entries({
+          ...attributeDefaults,
+          ...(typeof valueOrAttributes === 'object' && valueOrAttributes !== null
+            ? valueOrAttributes
+            : { value: valueOrAttributes }),
+        }).filter(([, attributeValue]) => attributeValue !== undefined),
+      ) as A;
 
       return Object.defineProperties(Object.create(NonAttributedConstraint), {
         attributes: { value: attributes },
       }) as Constraint<V | undefined, N, A>;
-    }) as unknown as ConstraintFn<V | undefined, A>;
+    }) as unknown as ConstraintFn<V | undefined, N, A>;
 
     NonAttributedConstraint = Object.defineProperties(NonAttributedConstraint, {
       name: { value: name },
