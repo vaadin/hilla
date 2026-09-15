@@ -512,15 +512,16 @@ describe('@vaadin/hilla-models', () => {
     });
 
     it('should compose with array', () => {
-      type Branch = { name: string; children: Branch[] };
-
-      const BranchModel = m
-        .object<Branch>('Branch')
-        .property('name', StringModel)
-        .property('children', m.array(m.self))
+      // `array` wraps the provider rather than a model, so the item model only
+      // materialises once the property is read.
+      const ShelfModel = m
+        .object<{ label: string; books: Book[] }>('Shelf')
+        .property('label', StringModel)
+        .property('books', m.array(m.lazy(() => BookModel)))
         .build();
 
-      expect(BranchModel.children[$itemModel]).to.be.equal(BranchModel);
+      expect(ShelfModel.books[$itemModel]).to.be.equal(BookModel);
+      expect(ShelfModel[$defaultValue]).to.be.like({ label: '', books: [] });
     });
   });
 
