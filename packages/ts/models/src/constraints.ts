@@ -76,7 +76,7 @@ export const DecimalMin = new ConstraintBuilder()
   .model(m.union(NumberModel, StringModel))
   .attribute('message', message)
   .name('DecimalMin')
-  .attribute('value', NumberModel)
+  .attribute('value', m.union(NumberModel, StringModel))
   .attribute('inclusive', m.optional(m.withDefaultValue(BooleanModel, true)))
   .build();
 
@@ -90,7 +90,7 @@ export const DecimalMax = new ConstraintBuilder()
   .model(m.union(NumberModel, StringModel))
   .attribute('message', message)
   .name('DecimalMax')
-  .attribute('value', NumberModel)
+  .attribute('value', m.union(NumberModel, StringModel))
   .attribute('inclusive', m.optional(m.withDefaultValue(BooleanModel, true)))
   .build();
 
