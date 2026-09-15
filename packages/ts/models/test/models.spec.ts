@@ -524,6 +524,36 @@ describe('@vaadin/hilla-models', () => {
       expect(ShelfModel.books[$itemModel]).to.be.equal(BookModel);
       expect(ShelfModel[$defaultValue]).to.be.like({ label: '', books: [] });
     });
+
+    it('should let a required array break a cycle', () => {
+      interface Rack {
+        label: string;
+        books: RackedBook[];
+      }
+      interface RackedBook {
+        title: string;
+        rack: Rack;
+      }
+
+      // the array default is `[]` without reading the item model, so the
+      // recursion stops even though neither property is optional
+      const RackModel: ObjectModel<Rack> = m
+        .object<Rack>('Rack')
+        .property('label', StringModel)
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        .property('books', m.array(m.lazy(() => RackedBookModel)))
+        .build();
+      const RackedBookModel: ObjectModel<RackedBook> = m
+        .object<RackedBook>('RackedBook')
+        .property('title', StringModel)
+        .property(
+          'rack',
+          m.lazy(() => RackModel),
+        )
+        .build();
+
+      expect(RackedBookModel[$defaultValue]).to.be.like({ title: '', rack: { label: '', books: [] } });
+    });
   });
 
   describe('Validation constraints support', () => {
