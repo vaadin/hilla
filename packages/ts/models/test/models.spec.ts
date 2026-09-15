@@ -30,6 +30,7 @@ import m, {
   NotEmpty,
   Min,
   Max,
+  DecimalMin,
   Size,
   type Value,
   type Constraint,
@@ -627,6 +628,16 @@ describe('@vaadin/hilla-models', () => {
 
     it('should keep the declared default of an omitted attribute', () => {
       expect(Size({ max: 140 }).attributes).to.be.like({ min: 0, max: 140 });
+    });
+
+    it('should accept a decimal bound as a string', () => {
+      // `@DecimalMin` carries its bound as a string in Java, and that is what
+      // the generator emits.
+      expect(DecimalMin('0.01').attributes).to.be.like({ value: '0.01', inclusive: true });
+      expect(DecimalMin({ value: '0.01', inclusive: false }).attributes).to.be.like({
+        value: '0.01',
+        inclusive: false,
+      });
     });
 
     it('should support custom constraints', () => {
