@@ -107,7 +107,7 @@ export class ConstraintBuilder<V = unknown, const N extends string = string, A e
       return Object.defineProperties(Object.create(NonAttributedConstraint), {
         attributes: { value: attributes },
       }) as Constraint<V | undefined, N, A>;
-    }) as unknown as ConstraintFn<V | undefined, A>;
+    }) as unknown as ConstraintFn<V | undefined, N, A>;
 
     NonAttributedConstraint = Object.defineProperties(NonAttributedConstraint, {
       name: { value: name },
