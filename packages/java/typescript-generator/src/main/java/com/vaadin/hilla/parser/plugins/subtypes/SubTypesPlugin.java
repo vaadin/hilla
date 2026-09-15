@@ -15,6 +15,8 @@
  */
 package com.vaadin.hilla.parser.plugins.subtypes;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -170,7 +172,8 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                 .filter(c -> c.getAnnotation(JsonTypeInfo.class) != null
                         && c.getAnnotation(JsonSubTypes.class) != null)
                 .findFirst()
-                .map(c -> new SubTypesInfo(c.getAnnotation(JsonTypeInfo.class),
+                .map(c -> new SubTypesInfo(c,
+                        c.getAnnotation(JsonTypeInfo.class),
                         c.getAnnotation(JsonSubTypes.class)));
     }
 
@@ -233,7 +236,17 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
      * The {@code @JsonTypeInfo} and {@code @JsonSubTypes} annotations that
      * apply to a class.
      */
-    private record SubTypesInfo(JsonTypeInfo typeInfo, JsonSubTypes subTypes) {
+    private record SubTypesInfo(Class<?> declaringClass, JsonTypeInfo typeInfo,
+            JsonSubTypes subTypes) {
+
+        /**
+         * What a type id, which is a string, can be declared as. Anything else
+         * cannot be described as the ids without contradicting the type the
+         * property is declared with.
+         */
+        private static final Set<Class<?>> TYPE_ID_TYPES = Set.of(String.class,
+                Object.class);
+
         /**
          * The type id strategies whose values are known here: both take the id
          * from the annotations and fall back to the name of the class itself.
@@ -262,12 +275,68 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                 return Optional.empty();
             }
 
-            var property = typeInfo.property();
+            // An id strategy of its own decides the name when the annotation
+            // leaves it out, and not every one of them has one
+            var property = typeInfo.property().isBlank()
+                    ? typeInfo.use().getDefaultPropertyName()
+                    : typeInfo.property();
 
-            return property.isBlank()
-                    ? Optional
-                            .ofNullable(typeInfo.use().getDefaultPropertyName())
-                    : Optional.of(property);
+            return Optional.ofNullable(property).filter(this::acceptsTypeIds);
+        }
+
+        /**
+         * Whether the property can be described as the type ids the hierarchy
+         * uses, which are strings.
+         *
+         * <p>
+         * With {@code As.EXISTING_PROPERTY} the discriminator is a property the
+         * types declare themselves, and Jackson serializes the type id as its
+         * value, so a declared property of any other type, an enum being the
+         * common case, cannot be described as the ids without contradicting the
+         * type it is declared with. Nothing is generated for it then, which
+         * leaves the property as what it is declared as: describing it as the
+         * ids instead produced TypeScript which did not compile.
+         */
+        private boolean acceptsTypeIds(String property) {
+            return declaredType(property).map(TYPE_ID_TYPES::contains)
+                    .orElse(true);
+        }
+
+        /**
+         * The type the hierarchy declares the property with, if it declares it
+         * at all, looking at the type which declares the subtypes as well as at
+         * the subtypes themselves. A discriminator which no type declares is
+         * added by the parser, and is a string by construction.
+         */
+        private Optional<Class<?>> declaredType(String property) {
+            return Stream
+                    .concat(Stream.of(declaringClass),
+                            Arrays.stream(subTypes.value())
+                                    .map(JsonSubTypes.Type::value))
+                    .flatMap(SubTypesPlugin::hierarchyOf).distinct()
+                    .<Class<?>> flatMap(
+                            cls -> Stream.concat(
+                                    Arrays.stream(cls.getDeclaredFields())
+                                            .filter(field -> field.getName()
+                                                    .equals(property))
+                                            .map(Field::getType),
+                                    Arrays.stream(cls.getDeclaredMethods())
+                                            .filter(method -> isGetterOf(method,
+                                                    property))
+                                            .map(Method::getReturnType)))
+                    .findFirst();
+        }
+
+        private static boolean isGetterOf(Method method, String property) {
+            if (method.getParameterCount() > 0) {
+                return false;
+            }
+
+            var capitalized = Character.toUpperCase(property.charAt(0))
+                    + property.substring(1);
+
+            return method.getName().equals("get" + capitalized)
+                    || method.getName().equals("is" + capitalized);
         }
 
         /**
