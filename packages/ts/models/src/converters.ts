@@ -118,6 +118,10 @@ export interface LazyOf<M extends Model> extends ModelConverter {
  * turns that read into a property access, which happens after both modules
  * have been evaluated.
  *
+ * Every cycle must be broken by an `optional` property: the default value of an
+ * object model recurses into every non-optional one, so an all-required cycle
+ * overflows the stack.
+ *
  * @param provider - Returns the model to use.
  */
 export function lazy<const M extends Model>(this: void, provider: () => M): LazyOf<M> & (() => M) {
