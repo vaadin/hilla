@@ -1,5 +1,6 @@
 import ts, { type ObjectLiteralExpression, type PropertyAssignment } from '@typescript/typescript6';
 import type { Schema } from '@vaadin/hilla-generator-core/Schema.js';
+import { createExpressionFromValue } from './utils.js';
 
 interface Annotation {
   name: string;
@@ -18,11 +19,17 @@ function createAnnotationsProperty(schema: SchemaWithMetadata): PropertyAssignme
     return null;
   }
 
-  const annotationLiterals = annotations.map((annotation) =>
-    ts.factory.createObjectLiteralExpression([
-      ts.factory.createPropertyAssignment('name', ts.factory.createStringLiteral(annotation.name)),
-    ]),
-  );
+  const annotationLiterals = annotations.map((annotation) => {
+    const properties = [ts.factory.createPropertyAssignment('name', ts.factory.createStringLiteral(annotation.name))];
+
+    if (annotation.attributes && Object.keys(annotation.attributes).length > 0) {
+      properties.push(
+        ts.factory.createPropertyAssignment('attributes', createExpressionFromValue(annotation.attributes)),
+      );
+    }
+
+    return ts.factory.createObjectLiteralExpression(properties);
+  });
 
   return ts.factory.createPropertyAssignment(
     'annotations',
