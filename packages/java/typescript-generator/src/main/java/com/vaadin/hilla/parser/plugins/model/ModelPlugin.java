@@ -40,6 +40,7 @@ import com.vaadin.hilla.parser.models.ArraySignatureModel;
 import com.vaadin.hilla.parser.models.BaseSignatureModel;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
+import com.vaadin.hilla.parser.models.Model;
 import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.AnnotatedNode;
@@ -90,18 +91,24 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
     /**
      * Converts an annotation parameter value into something the OpenAPI
      * document can hold. The parser hands back its own models for enum
-     * constants, class references and nested annotations, which carry a whole
-     * type graph behind them. An array arrives as a list of such values.
+     * constants and class references. An array arrives as a list of such
+     * values.
      */
     private static Object convertAttributeValue(Object value) {
         return switch (value) {
         case AnnotationParameterEnumValueModel enumValue ->
             enumValue.getValueName();
         case ClassInfoModel classInfo -> new JvmTypeRef(classInfo.getName());
-        case AnnotationInfoModel annotation -> new JvmAnnotationRef(
-                annotation.getName(), extractAttributes(annotation));
         case Collection<?> collection -> collection.stream()
                 .map(ModelPlugin::convertAttributeValue).toList();
+        // Every other model carries a whole type graph behind it, which the
+        // serializer would write into the document. The only kind left is a
+        // nested annotation, which nothing reaching this plugin has: the
+        // include-list holds none, and a repeated constraint is unwrapped
+        // before it gets here. Adding one means adding its conversion too.
+        case Model model -> throw new IllegalStateException(
+                "No OpenAPI representation for the annotation attribute value "
+                        + model);
         default -> value;
         };
     }
