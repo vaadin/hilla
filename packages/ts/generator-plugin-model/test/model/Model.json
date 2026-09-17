@@ -395,19 +395,6 @@
                 }
               },
               {
-                "name": "jakarta.persistence.JoinTable",
-                "attributes": {
-                  "joinColumns": [
-                    {
-                      "jvmType": "jakarta.persistence.JoinColumn",
-                      "attributes": {
-                        "name": "entity_id"
-                      }
-                    }
-                  ]
-                }
-              },
-              {
                 "name": "jakarta.persistence.Id",
                 "attributes": {}
               }

@@ -25,7 +25,7 @@ class FormEntityMetadataModel<T extends FormEntityMetadata = FormEntityMetadata>
         return this[_getPropertyModel]("nestedModelWithAnnotations", (parent, key) => new FormEntityModel(parent, key, false, { meta: { annotations: [{ name: "jakarta.persistence.OneToOne" }] } }));
     }
     get withAnnotationAttributes(): NumberModel {
-        return this[_getPropertyModel]("withAnnotationAttributes", (parent, key) => new NumberModel(parent, key, false, { meta: { annotations: [{ name: "jakarta.persistence.ManyToMany", attributes: { fetch: "EAGER", targetEntity: { jvmType: "com.example.application.endpoints.TsFormEndpoint$FormEntity" }, cascade: ["PERSIST", "MERGE"] } }, { name: "jakarta.persistence.JoinTable", attributes: { joinColumns: [{ jvmType: "jakarta.persistence.JoinColumn", attributes: { name: "entity_id" } }] } }, { name: "jakarta.persistence.Id" }] } }));
+        return this[_getPropertyModel]("withAnnotationAttributes", (parent, key) => new NumberModel(parent, key, false, { meta: { annotations: [{ name: "jakarta.persistence.ManyToMany", attributes: { fetch: "EAGER", targetEntity: { jvmType: "com.example.application.endpoints.TsFormEndpoint$FormEntity" }, cascade: ["PERSIST", "MERGE"] } }, { name: "jakarta.persistence.Id" }] } }));
     }
 }
 export default FormEntityMetadataModel;
