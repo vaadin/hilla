@@ -110,6 +110,10 @@ public class ValidationEndpoint {
                 Pattern.Flag.COMMENTS })
         public String patternWithFlags;
 
+        @Pattern(regexp = "\\d+")
+        @Pattern(regexp = ".+")
+        public String patternRepeated;
+
         @Positive
         public int positive;
 
