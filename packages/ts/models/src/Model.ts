@@ -5,7 +5,7 @@ export interface JvmTypeRef {
   genericArguments?: JvmTypeRef[];
 }
 
-export type AnnotationValue = AnnotationValue[] | JvmTypeRef | boolean | number | string | undefined;
+export type AnnotationValue = Annotation | AnnotationValue[] | JvmTypeRef | boolean | number | string | undefined;
 
 export interface Annotation {
   jvmType: string;

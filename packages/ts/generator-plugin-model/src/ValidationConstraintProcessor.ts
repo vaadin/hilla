@@ -1,12 +1,6 @@
-import ts, {
-  type Expression,
-  type Identifier,
-  type NewExpression,
-  type Statement,
-  type VariableStatement,
-} from '@typescript/typescript6';
+import ts, { type Expression, type Identifier, type NewExpression } from '@typescript/typescript6';
 import type { NonComposedRegularSchema, Schema } from '@vaadin/hilla-generator-core/Schema.js';
-import { template, transform } from '@vaadin/hilla-generator-utils/ast.js';
+import { createExpressionFromValue } from './utils.js';
 
 export type ValidationConstrainedSchema = NonComposedRegularSchema &
   Readonly<{ 'x-validation-constraints': readonly ValidationConstraint[] }>;
@@ -25,12 +19,6 @@ export interface ValidationConstraint {
 
 export type ValidationConstraintImporter = (name: string) => Identifier;
 
-function selector<T extends Expression>([statement]: readonly Statement[]): T {
-  return (statement as VariableStatement).declarationList.declarations[0].initializer as T;
-}
-
-const variableStatementVar = 'const a';
-
 export class ValidationConstraintProcessor {
   readonly #importer: ValidationConstraintImporter;
 
@@ -47,15 +35,9 @@ export class ValidationConstraintProcessor {
   }
 
   static #processAttributes(attributes: Record<string, unknown>): Expression {
+    // A sole `value` attribute is the argument of the validator itself
     const names = Object.keys(attributes);
-    const tpl = JSON.stringify(names.includes('value') && names.length === 1 ? attributes.value : attributes);
 
-    return template(`${variableStatementVar}=${tpl}`, selector, [
-      transform((node) =>
-        ts.isPropertyAssignment(node) && ts.isStringLiteral(node.name)
-          ? ts.factory.createPropertyAssignment(node.name.text, node.initializer)
-          : node,
-      ),
-    ]);
+    return createExpressionFromValue(names.length === 1 && names[0] === 'value' ? attributes.value : attributes);
   }
 }
