@@ -21,11 +21,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -83,9 +86,44 @@ public class AnnotationInfoModelTests {
                 AnnotationParameterModel.of("classParameter", Sample.class,
                         false),
                 AnnotationParameterModel.of("enumParameter", Sample.Enum.VALUE,
-                        false));
+                        false),
+                AnnotationParameterModel.of("classArrayParameter",
+                        new Class<?>[] { Sample.class, Sample.Enum.class },
+                        false),
+                AnnotationParameterModel.of("enumArrayParameter",
+                        new Sample.Enum[] { Sample.Enum.VALUE,
+                                Sample.Enum.OTHER_VALUE },
+                        false),
+                AnnotationParameterModel.of("nestedParameter",
+                        ctx.getReflectionOrigin().nestedParameter(), false));
         var actual = model.getParameters();
         assertEquals(expected, actual);
+    }
+
+    @DisplayName("It should unwrap array and nested annotation parameters")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_UnwrapCompoundParameters(AnnotationInfoModel model,
+            ModelKind kind) {
+        var parameters = model.getParameters().stream().collect(Collectors
+                .toMap(AnnotationParameterModel::getName, Function.identity()));
+
+        assertEquals(
+                List.of(ClassInfoModel.of(Sample.class),
+                        ClassInfoModel.of(Sample.Enum.class)),
+                parameters.get("classArrayParameter").getValue());
+        assertEquals(
+                List.of(AnnotationParameterEnumValueModel.of(Sample.Enum.VALUE),
+                        AnnotationParameterEnumValueModel
+                                .of(Sample.Enum.OTHER_VALUE)),
+                parameters.get("enumArrayParameter").getValue());
+
+        var nested = (AnnotationInfoModel) parameters.get("nestedParameter")
+                .getValue();
+        assertEquals(Sample.Bar.class.getName(), nested.getName());
+        assertEquals(
+                Set.of(AnnotationParameterModel.of("intParameter", 20, false)),
+                nested.getParameters());
     }
 
     @DisplayName("It should have the same hashCode for source and reflection models")
@@ -209,23 +247,36 @@ public class AnnotationInfoModelTests {
     }
 
     static final class Sample {
-        @Foo(stringParameter = "foo1", classParameter = Sample.class, enumParameter = Enum.VALUE)
+        @Foo(stringParameter = "foo1", classParameter = Sample.class, enumParameter = Enum.VALUE, classArrayParameter = {
+                Sample.class, Enum.class }, enumArrayParameter = { Enum.VALUE,
+                        Enum.OTHER_VALUE }, nestedParameter = @Bar(intParameter = 20))
         private String bar;
 
         enum Enum {
-            VALUE
+            VALUE, OTHER_VALUE
         }
 
         @Retention(RetentionPolicy.RUNTIME)
         @Target(ElementType.FIELD)
         @interface Foo {
+            Class<?>[] classArrayParameter();
+
             Class<?> classParameter();
+
+            Enum[] enumArrayParameter();
 
             Enum enumParameter();
 
             int intParameter() default 10;
 
+            Bar nestedParameter();
+
             String stringParameter() default "bar1";
+        }
+
+        @Retention(RetentionPolicy.RUNTIME)
+        @interface Bar {
+            int intParameter() default 10;
         }
     }
 
@@ -333,6 +384,13 @@ public class AnnotationInfoModelTests {
                         .of((AnnotationEnumValue) value);
             } else if (value instanceof Enum<?>) {
                 return AnnotationParameterEnumValueModel.of((Enum<?>) value);
+            } else if (value instanceof AnnotationInfo) {
+                return AnnotationInfoModel.of((AnnotationInfo) value);
+            } else if (value instanceof Annotation) {
+                return AnnotationInfoModel.of((Annotation) value);
+            } else if (value instanceof Object[]) {
+                return Arrays.stream((Object[]) value).map(this::process)
+                        .toList();
             } else {
                 return value;
             }
