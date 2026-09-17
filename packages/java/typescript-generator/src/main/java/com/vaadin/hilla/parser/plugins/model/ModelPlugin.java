@@ -16,7 +16,6 @@
 package com.vaadin.hilla.parser.plugins.model;
 
 import java.lang.reflect.AnnotatedArrayType;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -90,17 +89,17 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
     /**
      * Converts an annotation parameter value into something the OpenAPI
      * document can hold. The parser hands back its own models for enum
-     * constants and class references, which carry a whole type graph behind
-     * them.
+     * constants, class references and nested annotations, which carry a whole
+     * type graph behind them. An array arrives as a list of such values.
      */
     private static Object convertAttributeValue(Object value) {
         return switch (value) {
         case AnnotationParameterEnumValueModel enumValue ->
             enumValue.getValueName();
         case ClassInfoModel classInfo -> new JvmTypeRef(classInfo.getName());
+        case AnnotationInfoModel annotation -> new JvmAnnotationRef(
+                annotation.getName(), extractAttributes(annotation));
         case Collection<?> collection -> collection.stream()
-                .map(ModelPlugin::convertAttributeValue).toList();
-        case Object[] array -> Arrays.stream(array)
                 .map(ModelPlugin::convertAttributeValue).toList();
         default -> value;
         };
