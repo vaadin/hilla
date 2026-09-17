@@ -20,6 +20,7 @@ interface ValidationData {
     past?: string;
     pattern?: string;
     patternWithFlags?: string;
+    patternRepeated?: string;
     positive: number;
     positiveOrZero: number;
     size?: string;

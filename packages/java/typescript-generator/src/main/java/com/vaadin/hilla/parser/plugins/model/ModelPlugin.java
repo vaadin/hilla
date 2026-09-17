@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import io.swagger.v3.oas.models.media.Schema;
 import org.jspecify.annotations.NonNull;
@@ -110,6 +111,33 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
                 .substring(fullyQualifiedName.lastIndexOf(".") + 1);
     }
 
+    /**
+     * Replaces the container the compiler synthesizes for a repeated
+     * constraint, such as {@code @Pattern.List} for two {@code @Pattern}s, with
+     * the constraints it holds. The container has no validator of its own, so
+     * emitting it would ask the form binder for a name it does not export.
+     * <p>
+     * A container is recognized by its shape rather than by its name: a single
+     * {@code value} parameter holding the repeated annotations.
+     */
+    private static Stream<AnnotationInfoModel> unwrapRepeatableContainer(
+            AnnotationInfoModel annotation) {
+        var parameters = annotation.getParameters();
+
+        if (parameters.size() == 1) {
+            var parameter = parameters.iterator().next();
+
+            if ("value".equals(parameter.getName())
+                    && parameter.getValue() instanceof Collection<?> values
+                    && !values.isEmpty() && values.stream()
+                            .allMatch(AnnotationInfoModel.class::isInstance)) {
+                return values.stream().map(AnnotationInfoModel.class::cast);
+            }
+        }
+
+        return Stream.of(annotation);
+    }
+
     private static boolean isValidationConstraintAnnotation(
             AnnotationInfoModel annotation) {
         return annotation.getName()
@@ -164,6 +192,7 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
             Schema<?> schema) {
         var constraints = annotatedNode.getAnnotations().stream()
                 .filter(ModelPlugin::isValidationConstraintAnnotation)
+                .flatMap(ModelPlugin::unwrapRepeatableContainer)
                 .map(ModelPlugin::convertValidationConstraintAnnotation)
                 .collect(Collectors.toList());
 
