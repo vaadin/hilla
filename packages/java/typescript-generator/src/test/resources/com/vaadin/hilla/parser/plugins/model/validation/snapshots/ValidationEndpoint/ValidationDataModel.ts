@@ -60,6 +60,9 @@ class ValidationDataModel<T extends ValidationData = ValidationData> extends Obj
     get pattern(): StringModel {
         return this[_getPropertyModel]("pattern", (parent, key) => new StringModel(parent, key, true, { validators: [new Pattern({ regexp: "\\d+\\..+" })], meta: { javaType: "java.lang.String" } }));
     }
+    get patternWithFlags(): StringModel {
+        return this[_getPropertyModel]("patternWithFlags", (parent, key) => new StringModel(parent, key, true, { validators: [new Pattern({ regexp: "\\d+", flags: ["CASE_INSENSITIVE", "COMMENTS"] })], meta: { javaType: "java.lang.String" } }));
+    }
     get positive(): NumberModel {
         return this[_getPropertyModel]("positive", (parent, key) => new NumberModel(parent, key, false, { validators: [new Positive()], meta: { javaType: "int" } }));
     }

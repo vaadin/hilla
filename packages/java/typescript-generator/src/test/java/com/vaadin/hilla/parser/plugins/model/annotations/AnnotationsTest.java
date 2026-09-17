@@ -24,19 +24,28 @@ import java.util.Map;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.hilla.parser.plugins.model.Annotation;
+import com.vaadin.hilla.parser.plugins.model.JvmTypeRef;
 import com.vaadin.hilla.parser.testutils.AbstractFullStackTest;
 
 /**
- * The attributes of the annotations reach TypeScript through the OpenAPI
- * document, so they are asserted on the document itself: the TypeScript
- * snapshots only show the annotation names.
+ * The generated TypeScript is covered by the snapshot of this package. The
+ * shape an attribute value takes is asserted on the OpenAPI document as well,
+ * since that is the contract the TypeScript generator reads.
  */
 public class AnnotationsTest extends AbstractFullStackTest {
     private static final String ENTITY = AnnotationsEndpoint.AnnotationTestEntity.class
             .getName();
+
+    private OpenAPI openAPI;
+
+    @BeforeEach
+    public void parseEndpoint() {
+        openAPI = generator(AnnotationsEndpoint.class).parse();
+    }
 
     @Test
     public void should_GenerateTypescript() {
@@ -45,7 +54,7 @@ public class AnnotationsTest extends AbstractFullStackTest {
 
     @Test
     public void should_IncludeAnnotationAttributes() {
-        var annotations = annotationsOf(parse(), "manyToManyWithFetchType");
+        var annotations = annotationsOf("manyToManyWithFetchType");
 
         assertEquals(1, annotations.size());
 
@@ -55,20 +64,33 @@ public class AnnotationsTest extends AbstractFullStackTest {
     }
 
     @Test
+    public void should_ReferenceAClassAttributeByItsJvmType() {
+        var attributes = annotationsOf("oneToManyWithTargetEntity").get(0)
+                .getAttributes();
+
+        var targetEntity = (JvmTypeRef) attributes.get("targetEntity");
+        assertEquals(AnnotationsEndpoint.NestedEntity.class.getName(),
+                targetEntity.getJvmType());
+    }
+
+    @Test
+    public void should_ConvertTheElementsOfAnArrayAttribute() {
+        var attributes = annotationsOf("manyToManyWithCascade").get(0)
+                .getAttributes();
+
+        assertEquals(List.of("PERSIST", "MERGE"), attributes.get("cascade"));
+    }
+
+    @Test
     public void should_LeaveOutAttributesThatKeepTheirDefaults() {
-        var annotations = annotationsOf(parse(), "manyToMany");
+        var annotations = annotationsOf("manyToMany");
 
         assertEquals(1, annotations.size());
         assertNull(annotations.get(0).getAttributes());
     }
 
-    private OpenAPI parse() {
-        return generator(AnnotationsEndpoint.class).parse();
-    }
-
     @SuppressWarnings("unchecked")
-    private static List<Annotation> annotationsOf(OpenAPI openAPI,
-            String propertyName) {
+    private List<Annotation> annotationsOf(String propertyName) {
         var entity = openAPI.getComponents().getSchemas().get(ENTITY);
         assertTrue(entity != null, "no schema for " + ENTITY);
 
