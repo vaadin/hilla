@@ -19,6 +19,7 @@ interface ValidationData {
     notNullEntity?: ValidationData_1;
     past?: string;
     pattern?: string;
+    patternWithFlags?: string;
     positive: number;
     positiveOrZero: number;
     size?: string;

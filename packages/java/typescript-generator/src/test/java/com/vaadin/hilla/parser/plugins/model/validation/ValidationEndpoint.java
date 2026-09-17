@@ -106,6 +106,10 @@ public class ValidationEndpoint {
         @Pattern(regexp = "\\d+\\..+")
         public String pattern;
 
+        @Pattern(regexp = "\\d+", flags = { Pattern.Flag.CASE_INSENSITIVE,
+                Pattern.Flag.COMMENTS })
+        public String patternWithFlags;
+
         @Positive
         public int positive;
 
