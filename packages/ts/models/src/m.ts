@@ -24,14 +24,12 @@ import {
   type LiteralModel,
   NumberModel,
   ObjectModel,
-  RecordModel,
   StringModel,
   type UnionModel,
   $itemModel,
   $literal,
   type OptionalModel,
   $enum,
-  $valueModel,
 } from './models.js';
 
 const { defineProperty } = Object;
@@ -51,20 +49,7 @@ function getRawValue<T>(model: Model<T>): T | typeof nothing {
   return (model[$owner] as Target<T>).value;
 }
 
-export { self, optional, array, constrained, meta, lazy } from './converters.js';
-
-/**
- * Creates a new model of an arbitrary object with string keys, such as a Java
- * `Map<String, V>`.
- *
- * @param valueModel - The model of the record values.
- */
-export function record<const M extends Model>(this: void, valueModel: M): RecordModel<string, Value<M>, M> {
-  return new CoreModelBuilder<Record<string, Value<M>>>(RecordModel, () => ({}))
-    .name(`Record<string, ${valueModel[$name]}>`)
-    .define($valueModel, { value: valueModel })
-    .build();
-}
+export { self, optional, array, record, constrained, meta, lazy } from './converters.js';
 
 /**
  * Creates a new model pinned to a single value. Use {@link union} to accept

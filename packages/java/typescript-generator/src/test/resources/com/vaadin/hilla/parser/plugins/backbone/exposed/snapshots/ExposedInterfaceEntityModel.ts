@@ -1,6 +1,5 @@
-import { _getPropertyModel, makeObjectEmptyValueCreator, ObjectModel } from "@vaadin/hilla-lit-form";
+import m from "@vaadin/hilla-models";
 import type ExposedInterfaceEntity from "./ExposedInterfaceEntity.js";
-class ExposedInterfaceEntityModel<T extends ExposedInterfaceEntity = ExposedInterfaceEntity> extends ObjectModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(ExposedInterfaceEntityModel);
-}
+const ExposedInterfaceEntityModel = m.object<ExposedInterfaceEntity>("ExposedInterfaceEntity").build();
+type ExposedInterfaceEntityModel = typeof ExposedInterfaceEntityModel;
 export default ExposedInterfaceEntityModel;
