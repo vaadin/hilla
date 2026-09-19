@@ -12,10 +12,22 @@ import {
 import m from '@vaadin/hilla-models';
 import { beforeEach, describe, expect, it } from 'vitest';
 // API to test
-import { Binder, type BinderNode, IsNumber, NotBlank, NotEmpty, NotNull, Positive, Size } from '../src/index.js';
+import {
+  Binder,
+  type BinderNode,
+  DecimalMax,
+  DecimalMin,
+  IsNumber,
+  NotBlank,
+  NotEmpty,
+  NotNull,
+  Positive,
+  Size,
+} from '../src/index.js';
 
 import { getStringConverter } from '../src/stringConverters.js';
 import {
+  DecimalEntityModel,
   type IdEntity,
   IdEntityModel,
   RecordStatus,
@@ -116,6 +128,34 @@ describe('@vaadin/hilla-lit-form', () => {
           expect(fromString('1e')).to.satisfy(Number.isNaN);
           expect(fromString('1e0')).to.satisfy(Number.isNaN);
         });
+      });
+    });
+
+    describe('decimal constraints', () => {
+      let decimalBinder: Binder<DecimalEntityModel>;
+
+      beforeEach(() => {
+        decimalBinder = new Binder(document.createElement('div'), DecimalEntityModel);
+      });
+
+      it('should map DecimalMin to its validator', () => {
+        const [validator] = decimalBinder
+          .for(decimalBinder.model.decimalMin)
+          .validators.filter((v): v is DecimalMin<number> => v instanceof DecimalMin);
+
+        expect(validator.message).to.equal('must be greater than or equal to 0.01');
+        expect(validator.value).to.equal(0.01);
+        expect(validator.inclusive).to.be.true;
+      });
+
+      it('should map DecimalMax to its validator', () => {
+        const [validator] = decimalBinder
+          .for(decimalBinder.model.decimalMax)
+          .validators.filter((v): v is DecimalMax<number> => v instanceof DecimalMax);
+
+        expect(validator.message).to.equal('must be less than 100');
+        expect(validator.value).to.equal(100);
+        expect(validator.inclusive).to.be.false;
       });
     });
 
