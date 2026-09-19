@@ -21,10 +21,11 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.hilla.generator.fixtures.EmptyEndpoint;
+import com.vaadin.hilla.generator.fixtures.InheritingEndpoint;
 import com.vaadin.hilla.generator.fixtures.SampleEndpoint;
 import com.vaadin.hilla.generator.fixtures.ShadowingEndpoint;
 import com.vaadin.hilla.generator.model.EndpointModel;
-import com.vaadin.hilla.generator.openapi.OpenAPIToModel;
 import com.vaadin.hilla.generator.typescript.BarrelWriter;
 import com.vaadin.hilla.generator.typescript.ClientWriter;
 import com.vaadin.hilla.generator.typescript.EndpointWriter;
@@ -47,12 +48,13 @@ public class GeneratedTypeScriptTest {
         assertEquals(
                 """
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
-                        import type Box from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Box.js';
+                        import type Kind from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Kind.js';
                         import type Sample from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Sample.js';
+                        import type Wrapper from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Wrapper.js';
                         import client from './connect-client.default.js';
 
-                        export async function box(init?: EndpointRequestInit): Promise<Box<string | undefined> | undefined> {
-                          return client.call('SampleEndpoint', 'box', {}, init);
+                        export async function all(init?: EndpointRequestInit): Promise<Array<Sample | undefined> | undefined> {
+                          return client.call('SampleEndpoint', 'all', {}, init);
                         }
 
                         export async function count(init?: EndpointRequestInit): Promise<number> {
@@ -80,12 +82,36 @@ public class GeneratedTypeScriptTest {
                           return client.call('SampleEndpoint', 'greet', { name }, init);
                         }
 
+                        export async function kind(init?: EndpointRequestInit): Promise<Kind | undefined> {
+                          return client.call('SampleEndpoint', 'kind', {}, init);
+                        }
+
+                        export async function maybe(init?: EndpointRequestInit): Promise<string | undefined> {
+                          return client.call('SampleEndpoint', 'maybe', {}, init);
+                        }
+
+                        export async function maybeCounts(init?: EndpointRequestInit): Promise<Record<string, number | undefined> | undefined> {
+                          return client.call('SampleEndpoint', 'maybeCounts', {}, init);
+                        }
+
+                        export async function maybeNames(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
+                          return client.call('SampleEndpoint', 'maybeNames', {}, init);
+                        }
+
                         export async function names(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'names', {}, init);
                         }
 
                         export async function ping(init?: EndpointRequestInit): Promise<void> {
                           return client.call('SampleEndpoint', 'ping', {}, init);
+                        }
+
+                        export async function required(name: string, init?: EndpointRequestInit): Promise<string> {
+                          return client.call('SampleEndpoint', 'required', { name }, init);
+                        }
+
+                        export async function wrapped(init?: EndpointRequestInit): Promise<Wrapper<Sample | undefined> | undefined> {
+                          return client.call('SampleEndpoint', 'wrapped', {}, init);
                         }
                         """,
                 file.content());
@@ -100,12 +126,53 @@ public class GeneratedTypeScriptTest {
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
                         import client_1 from './connect-client.default.js';
 
+                        export async function client(init?: EndpointRequestInit): Promise<string | undefined> {
+                          return client_1.call('ShadowingEndpoint', 'client', {}, init);
+                        }
+
                         export async function echo(
                           client: string | undefined,
                           init: string | undefined,
                           _init?: EndpointRequestInit,
                         ): Promise<string | undefined> {
                           return client_1.call('ShadowingEndpoint', 'echo', { client, init }, _init);
+                        }
+                        """,
+                new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
+                        .write(endpoint).content());
+    }
+
+    /**
+     * The Node generator writes no file at all for such an endpoint, and no
+     * entry in the barrel either. Writing a module which exports nothing keeps
+     * the barrel able to name every endpoint; whether the file is worth writing
+     * is for the step which puts these writers in the pipeline.
+     */
+    @Test
+    public void should_WriteAModuleForAnEndpointWithoutMethods() {
+        var endpoint = endpointsOf(EmptyEndpoint.class).get(0);
+
+        assertEquals(List.of(), endpoint.methods());
+        assertEquals("export {};\n",
+                new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
+                        .write(endpoint).content());
+    }
+
+    @Test
+    public void should_WriteAMethodOnceAlthoughTheWalkCarriesItTwice() {
+        var endpoint = endpointsOf(InheritingEndpoint.class).get(0);
+
+        assertEquals(
+                """
+                        import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
+                        import client from './connect-client.default.js';
+
+                        export async function shared(init?: EndpointRequestInit): Promise<string | undefined> {
+                          return client.call('InheritingEndpoint', 'shared', {}, init);
+                        }
+
+                        export async function twice(one: string | undefined, init?: EndpointRequestInit): Promise<string | undefined> {
+                          return client.call('InheritingEndpoint', 'twice', { one }, init);
                         }
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
@@ -153,9 +220,17 @@ public class GeneratedTypeScriptTest {
                 """, written.content());
     }
 
+    @Test
+    public void should_DescribeOnlyTheLastRunOfTheParser() {
+        var generator = new FullStackGenerator(GeneratedTypeScriptTest.class,
+                SampleEndpoint.class);
+        generator.parseModel();
+
+        assertEquals(1, generator.parseModel().size());
+    }
+
     private static List<EndpointModel> endpointsOf(Class<?> endpoint) {
-        return OpenAPIToModel.endpoints(
-                new FullStackGenerator(GeneratedTypeScriptTest.class, endpoint)
-                        .parse());
+        return new FullStackGenerator(GeneratedTypeScriptTest.class, endpoint)
+                .parseModel();
     }
 }
