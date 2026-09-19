@@ -49,6 +49,7 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 import com.vaadin.hilla.parser.plugins.model.Annotation;
 import com.vaadin.hilla.parser.plugins.model.ValidationConstraint;
 import com.vaadin.hilla.parser.plugins.subtypes.SubTypesPlugin;
+import com.vaadin.hilla.transfertypes.annotations.FromModule;
 
 /**
  * Builds the model the TypeScript generator works from out of the browser
@@ -95,6 +96,22 @@ public final class EndpointModelPlugin
     private final List<EndpointModel> endpoints = new ArrayList<>();
     private final List<EntityModel> entities = new ArrayList<>();
     private final Map<String, List<String>> unions = new LinkedHashMap<>();
+
+    /**
+     * The Java types the generated TypeScript refers to by name rather than by
+     * declaring them, which the plugin handling the transfer types has already
+     * mapped the ones of the application to. The browser knows a file, and the
+     * signals are exported by a module of the framework, which the class says
+     * itself.
+     */
+    private static final Map<String, TypeModel.Provided> PROVIDED_TYPES = Stream
+            .of(com.vaadin.hilla.runtime.transfertypes.File.class,
+                    com.vaadin.hilla.runtime.transfertypes.Signal.class,
+                    com.vaadin.hilla.runtime.transfertypes.NumberSignal.class,
+                    com.vaadin.hilla.runtime.transfertypes.ValueSignal.class,
+                    com.vaadin.hilla.runtime.transfertypes.ListSignal.class)
+            .collect(java.util.stream.Collectors.toMap(Class::getName,
+                    EndpointModelPlugin::providedType));
 
     /**
      * The Java types an endpoint sends a series of values through, which the
@@ -190,7 +207,8 @@ public final class EndpointModelPlugin
             collectMethod(nodePath, method);
         } else if (node instanceof PropertyNode property) {
             collect(parentOf(nodePath), property, taken(node));
-        } else if (node instanceof EntityNode entity) {
+        } else if (node instanceof EntityNode entity
+                && !isProvided(entity.getSource().getName())) {
             entities.add(buildEntity(entity,
                     properties.getOrDefault(node, List.of())));
         } else if (node instanceof SubTypesPlugin.UnionNode union) {
@@ -409,6 +427,11 @@ public final class EndpointModelPlugin
                     name(signature), constraints, annotations);
         }
 
+        if (signature.isClassRef() && isProvided(name(signature))) {
+            return provided(name(signature), referred, optional, constraints,
+                    annotations);
+        }
+
         if (signature.isClassRef() && isEntity(signature)) {
             return new TypeModel.EntityRef(name(signature), referred, optional,
                     constraints, annotations);
@@ -435,6 +458,9 @@ public final class EndpointModelPlugin
         case TypeModel.EntityRef entity ->
             new TypeModel.EntityRef(entity.javaClass(), entity.typeArguments(),
                     true, entity.constraints(), entity.annotations());
+        case TypeModel.Provided provided -> new TypeModel.Provided(
+                provided.name(), provided.module(), provided.typeArguments(),
+                true, provided.constraints(), provided.annotations());
         case TypeModel.TypeVariable variable ->
             new TypeModel.TypeVariable(variable.name(), true,
                     variable.constraints(), variable.annotations());
@@ -460,6 +486,38 @@ public final class EndpointModelPlugin
         }
 
         return TypeModel.ScalarKind.UNKNOWN;
+    }
+
+    private static boolean isProvided(String javaClass) {
+        return PROVIDED_TYPES.containsKey(javaClass);
+    }
+
+    /**
+     * The name a type is referred to by and the module exporting it under that
+     * name, both of which the class says itself: the ones the browser has say
+     * nothing, and go by the name of the class.
+     */
+    private static TypeModel.Provided providedType(Class<?> javaClass) {
+        var fromModule = javaClass.getAnnotation(FromModule.class);
+
+        return fromModule == null
+                ? new TypeModel.Provided(javaClass.getSimpleName(), "",
+                        List.of(), false)
+                : new TypeModel.Provided(fromModule.namedSpecifier(),
+                        fromModule.module(), List.of(), false);
+    }
+
+    /**
+     * The type as it is referred to where it is used, which is what the class
+     * says of it together with the arguments it is used with.
+     */
+    private static TypeModel provided(String javaClass,
+            List<TypeModel> typeArguments, boolean optional,
+            List<ConstraintModel> constraints, List<String> annotations) {
+        var provided = PROVIDED_TYPES.get(javaClass);
+
+        return new TypeModel.Provided(provided.name(), provided.module(),
+                typeArguments, optional, constraints, annotations);
     }
 
     /**
