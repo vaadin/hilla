@@ -62,12 +62,22 @@ public final class OutputFolder {
      * Writes the files of one generation, and removes what the run before it
      * left behind.
      *
+     * <p>
+     * A generation of nothing leaves no list behind either: with nothing
+     * generated, nothing in the folder is the generator's any more.
+     *
      * @param files
      *            the files of the generation, by their path relative to this
      *            folder
      */
     public void write(List<GeneratedFile> files) throws IOException {
         var previous = readFileList();
+
+        if (files.isEmpty()) {
+            remove(List.copyOf(previous));
+            Files.deleteIfExists(folder.resolve(FILE_LIST));
+            return;
+        }
 
         Files.createDirectories(folder);
         Files.writeString(folder.resolve(FILE_LIST), files.stream()
