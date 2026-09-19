@@ -34,13 +34,13 @@ public class TypeWriterTest {
 
     @Test
     public void should_WriteATypeVariableAsTheNameItIsDeclaredUnder() {
-        assertEquals("T", writer.write(new TypeModel.TypeVariable("T")));
+        assertEquals("T", writer.write(TypeModel.TypeVariable.of("T")));
     }
 
     @Test
     public void should_WriteWhatAGenericEntityIsUsedWith() {
         var box = new TypeModel.EntityRef("com.example.Box",
-                List.of(new TypeModel.TypeVariable("T"),
+                List.of(TypeModel.TypeVariable.of("T"),
                         new TypeModel.Scalar(TypeModel.ScalarKind.STRING, true,
                                 String.class.getName())),
                 true);
