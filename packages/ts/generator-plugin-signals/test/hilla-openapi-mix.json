@@ -22,6 +22,10 @@
     {
       "name" : "PersonService",
       "x-class-name" : "com.github.taefi.services.PersonService"
+    },
+    {
+      "name" : "ShadowedSignalService",
+      "x-class-name" : "com.github.taefi.services.ShadowedSignalService"
     }
   ],
   "paths" : {
@@ -348,6 +352,90 @@
         }
       }
     },
+    "/ShadowedSignalService/personSignal" : {
+      "post" : {
+        "tags" : [
+          "ShadowedSignalService"
+        ],
+        "operationId" : "ShadowedSignalService_personSignal_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.runtime.transfertypes.ValueSignal"
+                    }
+                  ],
+                  "x-type-arguments" : {
+                    "allOf" : [
+                      {
+                        "anyOf" : [
+                          {
+                            "$ref" : "#/components/schemas/com.github.taefi.data.Person"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ShadowedSignalService/otherPersonSignal" : {
+      "post" : {
+        "tags" : [
+          "ShadowedSignalService"
+        ],
+        "operationId" : "ShadowedSignalService_otherPersonSignal_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "ValueSignal" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.runtime.transfertypes.ValueSignal"
+                    }
+                  ],
+                  "x-type-arguments" : {
+                    "allOf" : [
+                      {
+                        "anyOf" : [
+                          {
+                            "$ref" : "#/components/schemas/com.github.taefi.data.other.Person"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/PersonService/personSignalNotNull" : {
       "post" : {
         "tags" : [
@@ -368,6 +456,42 @@
                   "x-type-arguments" : {
                     "allOf" : [
                       {
+                        "anyOf" : [
+                          {
+                            "$ref" : "#/components/schemas/com.github.taefi.data.Person"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PersonService/delete" : {
+      "post" : {
+        "tags" : [
+          "PersonService"
+        ],
+        "operationId" : "PersonService_delete_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.runtime.transfertypes.ValueSignal"
+                    }
+                  ],
+                  "x-type-arguments" : {
+                    "allOf" : [
+                      {
+                        "nullable" : true,
                         "anyOf" : [
                           {
                             "$ref" : "#/components/schemas/com.github.taefi.data.Person"
@@ -569,7 +693,16 @@
           }
         }
       },
-      "com.github.taefi.data.Person" : {
+      "com.github.taefi.data.other.Person" : {
+      "type" : "object",
+      "properties" : {
+        "nickname" : {
+          "type" : "string",
+          "x-java-type" : "java.lang.String"
+        }
+      }
+    },
+    "com.github.taefi.data.Person" : {
         "type" : "object",
         "properties" : {
           "name" : {

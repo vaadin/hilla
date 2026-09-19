@@ -1,10 +1,10 @@
-import { EndpointRequestInit as EndpointRequestInit_1 } from "@vaadin/hilla-frontend";
-import type Order_1 from "./com/vaadin/hilla/mappedtypes/Order.js";
-import type Pageable_1 from "./com/vaadin/hilla/mappedtypes/Pageable.js";
-import type Sort_1 from "./com/vaadin/hilla/mappedtypes/Sort.js";
-import client_1 from "./connect-client.default.js";
-async function getOrder_1(init?: EndpointRequestInit_1): Promise<Order_1 | undefined> { return client_1.call("PageableEndpoint", "getOrder", {}, init); }
-async function getPage_1(init?: EndpointRequestInit_1): Promise<Array<string | undefined> | undefined> { return client_1.call("PageableEndpoint", "getPage", {}, init); }
-async function getPageable_1(init?: EndpointRequestInit_1): Promise<Pageable_1 | undefined> { return client_1.call("PageableEndpoint", "getPageable", {}, init); }
-async function getSort_1(init?: EndpointRequestInit_1): Promise<Sort_1 | undefined> { return client_1.call("PageableEndpoint", "getSort", {}, init); }
-export { getOrder_1 as getOrder, getPage_1 as getPage, getPageable_1 as getPageable, getSort_1 as getSort };
+import { EndpointRequestInit } from "@vaadin/hilla-frontend";
+import type Order from "./com/vaadin/hilla/mappedtypes/Order.js";
+import type Pageable from "./com/vaadin/hilla/mappedtypes/Pageable.js";
+import type Sort from "./com/vaadin/hilla/mappedtypes/Sort.js";
+import client from "./connect-client.default.js";
+async function getOrder(init?: EndpointRequestInit): Promise<Order | undefined> { return client.call("PageableEndpoint", "getOrder", {}, init); }
+async function getPage(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> { return client.call("PageableEndpoint", "getPage", {}, init); }
+async function getPageable(init?: EndpointRequestInit): Promise<Pageable | undefined> { return client.call("PageableEndpoint", "getPageable", {}, init); }
+async function getSort(init?: EndpointRequestInit): Promise<Sort | undefined> { return client.call("PageableEndpoint", "getSort", {}, init); }
+export { getOrder, getPage, getPageable, getSort };

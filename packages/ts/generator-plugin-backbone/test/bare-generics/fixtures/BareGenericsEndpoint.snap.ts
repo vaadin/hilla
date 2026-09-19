@@ -1,6 +1,6 @@
-import { EndpointRequestInit as EndpointRequestInit_1 } from "@vaadin/hilla-frontend";
-import client_1 from "./connect-client.default.js";
-async function getBareList_1(init?: EndpointRequestInit_1): Promise<Array<unknown> | undefined> { return client_1.call("BareGenericsEndpoint", "getBareList", {}, init); }
-async function getBareMap_1(init?: EndpointRequestInit_1): Promise<Record<string, unknown> | undefined> { return client_1.call("BareGenericsEndpoint", "getBareMap", {}, init); }
-async function getBareOptional_1(init?: EndpointRequestInit_1): Promise<unknown> { return client_1.call("BareGenericsEndpoint", "getBareOptional", {}, init); }
-export { getBareList_1 as getBareList, getBareMap_1 as getBareMap, getBareOptional_1 as getBareOptional };
+import { EndpointRequestInit } from "@vaadin/hilla-frontend";
+import client from "./connect-client.default.js";
+async function getBareList(init?: EndpointRequestInit): Promise<Array<unknown> | undefined> { return client.call("BareGenericsEndpoint", "getBareList", {}, init); }
+async function getBareMap(init?: EndpointRequestInit): Promise<Record<string, unknown> | undefined> { return client.call("BareGenericsEndpoint", "getBareMap", {}, init); }
+async function getBareOptional(init?: EndpointRequestInit): Promise<unknown> { return client.call("BareGenericsEndpoint", "getBareOptional", {}, init); }
+export { getBareList, getBareMap, getBareOptional };

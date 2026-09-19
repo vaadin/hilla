@@ -32,6 +32,10 @@ export class SubTypesProcessor {
   process(): SourceFile {
     const { exports, imports, paths } = this.#dependencies;
 
+    // claimed before the subtype imports, so that the declaration keeps the
+    // unsuffixed name on a collision
+    const unionIdentifier = exports.default.set(simplifyFullyQualifiedName(this.#typeName));
+
     // import all subtypes and return them
     const subTypes = this.#oneOf.map((schema): TypeNode => {
       const path = paths.createRelativePath(convertReferenceSchemaToPath(schema));
@@ -53,11 +57,7 @@ export class SubTypesProcessor {
     // create the statement: the source is fully replaced, as whatever the
     // backbone plugin made of a schema that only has a `oneOf` is of no use
     const { fileName } = this.#source;
-    const unionTypeName = `${simplifyFullyQualifiedName(this.#typeName)}`;
-    const unionIdentifier = ts.factory.createIdentifier(unionTypeName);
     const statement = ts.factory.createTypeAliasDeclaration(undefined, unionIdentifier, undefined, union);
-
-    exports.default.set(unionTypeName);
 
     return createSourceFile([...imports.toCode(), statement, ...exports.toCode()], fileName);
   }

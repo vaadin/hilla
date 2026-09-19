@@ -1,15 +1,15 @@
-import { _getPropertyModel as _getPropertyModel_1, ArrayModel as ArrayModel_1, makeObjectEmptyValueCreator as makeObjectEmptyValueCreator_1 } from "@vaadin/hilla-lit-form";
-import AbstractEntityModel_1 from "./AbstractEntityModel.js";
-import EmployeeModel_1 from "./EmployeeModel.js";
-import ManagerModel_1 from "./ManagerModel.js";
-import type Team_1 from "./Team.js";
-class TeamModel<T extends Team_1 = Team_1> extends AbstractEntityModel_1<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator_1(TeamModel);
-    get employees(): ArrayModel_1<EmployeeModel_1> {
-        return this[_getPropertyModel_1]("employees", (parent, key) => new ArrayModel_1(parent, key, true, (parent, key) => new EmployeeModel_1(parent, key, false), { meta: { javaType: "java.util.List" } }));
+import { _getPropertyModel, ArrayModel, makeObjectEmptyValueCreator } from "@vaadin/hilla-lit-form";
+import AbstractEntityModel from "./AbstractEntityModel.js";
+import EmployeeModel from "./EmployeeModel.js";
+import ManagerModel from "./ManagerModel.js";
+import type Team from "./Team.js";
+class TeamModel<T extends Team = Team> extends AbstractEntityModel<T> {
+    static override createEmptyValue = makeObjectEmptyValueCreator(TeamModel);
+    get employees(): ArrayModel<EmployeeModel> {
+        return this[_getPropertyModel]("employees", (parent, key) => new ArrayModel(parent, key, true, (parent, key) => new EmployeeModel(parent, key, false), { meta: { javaType: "java.util.List" } }));
     }
-    get manager(): ManagerModel_1 {
-        return this[_getPropertyModel_1]("manager", (parent, key) => new ManagerModel_1(parent, key, true));
+    get manager(): ManagerModel {
+        return this[_getPropertyModel]("manager", (parent, key) => new ManagerModel(parent, key, true));
     }
 }
 export default TeamModel;
