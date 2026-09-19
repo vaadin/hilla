@@ -16,7 +16,10 @@
 package com.vaadin.hilla.generator.typescript;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.vaadin.hilla.generator.model.EndpointModel;
@@ -36,7 +39,7 @@ public final class EndpointWriter {
     private static final String OPTIONS_PARAMETER = "options";
 
     private static final String METHOD = """
-            export async function {{method}}({{parameters}}): Promise<{{returnType}}> {
+            {{export}}async function {{name}}({{parameters}}): Promise<{{returnType}}> {
               return {{client}}.call('{{endpoint}}', '{{method}}', {{arguments}}, {{init}});
             }""";
 
@@ -46,7 +49,7 @@ public final class EndpointWriter {
      * the options of a single request.
      */
     private static final String SUBSCRIPTION = """
-            export function {{method}}({{parameters}}): {{subscription}}<{{returnType}}> {
+            {{export}}function {{name}}({{parameters}}): {{subscription}}<{{returnType}}> {
               return {{client}}.subscribe('{{endpoint}}', '{{method}}', {{arguments}});
             }""";
 
@@ -56,7 +59,7 @@ public final class EndpointWriter {
      * the value of the two in step afterwards.
      */
     private static final String SIGNAL = """
-            export function {{method}}({{parameters}}): {{returnType}} {
+            {{export}}function {{name}}({{parameters}}): {{returnType}} {
               return new {{signal}}({{defaultValue}}{
                 client: {{client}},
                 endpoint: '{{endpoint}}',
@@ -85,15 +88,15 @@ public final class EndpointWriter {
         }
 
         var imports = new ImportRegistry();
-        var types = new TypeWriter(imports, "");
+        var types = new TypeWriter(imports, "").withoutTypeParameters();
+        var names = declaredNames(endpoint);
 
         // The methods and their parameters are named by the Java class, so the
         // imports have to give way to them rather than the other way around,
         // as do the types the browser has and the file writes as they are
         endpoint.methods().forEach(method -> {
-            imports.reserve(method.name());
-            method.parameters().stream().map(ParameterModel::name)
-                    .forEach(imports::reserve);
+            imports.reserve(names.get(method.name()));
+            declaredNames(method).values().forEach(imports::reserve);
             types.reserveProvided(method.returnType());
             method.parameters().forEach(
                     parameter -> types.reserveProvided(parameter.type()));
@@ -103,25 +106,36 @@ public final class EndpointWriter {
         var models = new ModelWriter(imports, "");
 
         var methods = endpoint.methods().stream()
-                .map(method -> writeMethod(endpoint, method, imports, types,
-                        models, client))
+                .map(method -> writeMethod(endpoint, method,
+                        names.get(method.name()), imports, types, models,
+                        client))
                 .toList();
 
         var lines = new ArrayList<>(imports.write());
         lines.add("");
         lines.add(String.join("\n\n", methods));
 
+        var renamed = exported(endpoint, names);
+
+        if (!renamed.isEmpty()) {
+            lines.add("");
+            lines.add(renamed);
+        }
+
         return new GeneratedFile(path, String.join("\n", lines) + "\n");
     }
 
     private String writeMethod(EndpointModel endpoint, MethodModel method,
-            ImportRegistry imports, TypeWriter types, ModelWriter models,
-            String client) {
-        var init = ownName(method, INIT_PARAMETER);
-        var declared = declaredParameters(method, init, imports, types);
+            String name, ImportRegistry imports, TypeWriter types,
+            ModelWriter models, String client) {
+        var parameters = declaredNames(method);
+        var init = ownName(parameters, INIT_PARAMETER);
+        var declared = declaredParameters(method, parameters, init, imports,
+                types);
 
-        var written = fill(endpoint, method, String.join(", ", declared), types,
-                models, client, init, imports);
+        var written = fill(endpoint, method, name, parameters,
+                String.join(", ", declared), types, models, client, init,
+                imports);
 
         // Written again with the parameters on a line each when the first line
         // came out too wide to read
@@ -129,16 +143,21 @@ public final class EndpointWriter {
             return written;
         }
 
-        return fill(endpoint, method,
+        return fill(endpoint, method, name, parameters,
                 declared.stream()
                         .collect(Collectors.joining(",\n  ", "\n  ", ",\n")),
                 types, models, client, init, imports);
     }
 
-    private String fill(EndpointModel endpoint, MethodModel method,
-            String parameters, TypeWriter types, ModelWriter models,
-            String client, String init, ImportRegistry imports) {
+    private String fill(EndpointModel endpoint, MethodModel method, String name,
+            Map<String, String> parameterNames, String parameters,
+            TypeWriter types, ModelWriter models, String client, String init,
+            ImportRegistry imports) {
         var template = Template.of(templateOf(method)) //
+                // A function which is not declared under the name of the
+                // method is exported under it at the end of the file instead
+                .with("export", name.equals(method.name()) ? "export " : "") //
+                .with("name", name) //
                 .with("method", method.name()) //
                 .with("parameters", parameters) //
                 .with("returnType", types.write(method.returnType())) //
@@ -147,18 +166,78 @@ public final class EndpointWriter {
 
         switch (method.kind()) {
         case CALLED ->
-            template.with("arguments", packParameters(method.parameters()))
+            template.with("arguments", packParameters(method, parameterNames))
                     .with("init", init);
         case SUBSCRIBED ->
-            template.with("arguments", packParameters(method.parameters()))
+            template.with("arguments", packParameters(method, parameterNames))
                     .with("subscription", imports.importNamed(HILLA_FRONTEND,
                             SUBSCRIPTION_TYPE, true));
         default -> template.with("signal", signalClass(method, imports))
-                .with("defaultValue", defaultValue(method, models))
-                .with("params", sharedParameters(method));
+                .with("defaultValue",
+                        defaultValue(method, parameterNames, models))
+                .with("params", sharedParameters(method, parameterNames));
         }
 
         return template.fill();
+    }
+
+    /**
+     * The name each method is declared under, which is its own unless
+     * TypeScript reads it as a word of the language: a Java method may be
+     * called delete, which no declaration can be.
+     */
+    private static Map<String, String> declaredNames(EndpointModel endpoint) {
+        return declaredNames(endpoint.methods().stream().map(MethodModel::name)
+                .collect(Collectors.toSet()));
+    }
+
+    /**
+     * The name each parameter of a method is declared under, which is its own
+     * unless TypeScript reads it as a word of the language: a function cannot
+     * take a parameter called delete, although the server knows it by that
+     * name.
+     */
+    private static Map<String, String> declaredNames(MethodModel method) {
+        return declaredNames(method.parameters().stream()
+                .map(ParameterModel::name).collect(Collectors.toSet()));
+    }
+
+    /**
+     * Each of the given names by the name it is declared under, which is one
+     * nothing else goes by: a name taken instead of a word of the language is
+     * left to whoever has it already.
+     */
+    private static Map<String, String> declaredNames(Set<String> names) {
+        var declared = new LinkedHashMap<String, String>();
+
+        for (var name : names) {
+            var own = name;
+
+            while (Names.isReserved(own)
+                    || (!own.equals(name) && names.contains(own))) {
+                own = "_" + own;
+            }
+
+            declared.put(name, own);
+        }
+
+        return declared;
+    }
+
+    /**
+     * Exports the methods which are declared under another name than their own,
+     * which is how the caller still reaches them by the name of the Java
+     * method.
+     */
+    private static String exported(EndpointModel endpoint,
+            Map<String, String> names) {
+        var renamed = endpoint.methods().stream().map(MethodModel::name)
+                .filter(method -> !names.get(method).equals(method))
+                .map(method -> names.get(method) + " as " + method).toList();
+
+        return renamed.isEmpty() ? ""
+                : renamed.stream()
+                        .collect(Collectors.joining(", ", "export { ", " };"));
     }
 
     private static String templateOf(MethodModel method) {
@@ -185,7 +264,8 @@ public final class EndpointWriter {
      * passes, falling back to the empty value of the type unless it can be
      * absent, and zero for a number, which is what a number signal starts from.
      */
-    private static String defaultValue(MethodModel method, ModelWriter models) {
+    private static String defaultValue(MethodModel method,
+            Map<String, String> parameterNames, ModelWriter models) {
         if (method.kind() == MethodModel.Kind.LIST_SIGNAL) {
             return "";
         }
@@ -195,7 +275,8 @@ public final class EndpointWriter {
         }
 
         var value = sharedValue(method);
-        var given = ownName(method, OPTIONS_PARAMETER) + "?.defaultValue";
+        var given = ownName(parameterNames, OPTIONS_PARAMETER)
+                + "?.defaultValue";
 
         return (value.optional() ? given
                 : given + " ?? " + models.className(value)
@@ -217,9 +298,11 @@ public final class EndpointWriter {
      * What the method is called with, which the signal sends along so that the
      * server knows which value is being shared.
      */
-    private static String sharedParameters(MethodModel method) {
+    private static String sharedParameters(MethodModel method,
+            Map<String, String> parameterNames) {
         return method.parameters().isEmpty() ? ""
-                : "\n    params: " + packParameters(method.parameters()) + ",";
+                : "\n    params: " + packParameters(method, parameterNames)
+                        + ",";
     }
 
     private static String firstLineOf(String method) {
@@ -230,12 +313,11 @@ public final class EndpointWriter {
      * A name the generated function needs for itself, which gives way to a
      * parameter of the method if they happen to be the same.
      */
-    private static String ownName(MethodModel method, String preferred) {
-        var names = method.parameters().stream().map(ParameterModel::name)
-                .toList();
+    private static String ownName(Map<String, String> parameterNames,
+            String preferred) {
         var name = preferred;
 
-        while (names.contains(name)) {
+        while (parameterNames.containsValue(name)) {
             name = "_" + name;
         }
 
@@ -248,10 +330,12 @@ public final class EndpointWriter {
      * single request.
      */
     private static List<String> declaredParameters(MethodModel method,
-            String init, ImportRegistry imports, TypeWriter types) {
+            Map<String, String> parameterNames, String init,
+            ImportRegistry imports, TypeWriter types) {
         var declared = new ArrayList<String>();
-        method.parameters().forEach(parameter -> declared
-                .add(parameter.name() + ": " + types.write(parameter.type())));
+        method.parameters().forEach(
+                parameter -> declared.add(parameterNames.get(parameter.name())
+                        + ": " + types.write(parameter.type())));
 
         switch (method.kind()) {
         case CALLED -> declared.add(init + "?: "
@@ -259,7 +343,7 @@ public final class EndpointWriter {
         // The caller of a method sharing a value can say which value to start
         // from, which a number signal decides itself
         case VALUE_SIGNAL ->
-            declared.add(ownName(method, OPTIONS_PARAMETER) + "?: "
+            declared.add(ownName(parameterNames, OPTIONS_PARAMETER) + "?: "
                     + imports.importNamed(signalsModule(method),
                             SIGNAL_OPTIONS_TYPE, true)
                     + "<" + types.write(sharedValue(method)) + ">");
@@ -276,14 +360,17 @@ public final class EndpointWriter {
 
     /**
      * The parameters are sent as one object, keyed by the name the server knows
-     * them by.
+     * them by, which a parameter declared under another name is written as.
      */
-    private static String packParameters(List<ParameterModel> parameters) {
-        if (parameters.isEmpty()) {
+    private static String packParameters(MethodModel method,
+            Map<String, String> parameterNames) {
+        if (method.parameters().isEmpty()) {
             return "{}";
         }
 
-        return parameters.stream().map(ParameterModel::name)
+        return method.parameters().stream().map(ParameterModel::name)
+                .map(name -> name.equals(parameterNames.get(name)) ? name
+                        : name + ": " + parameterNames.get(name))
                 .collect(Collectors.joining(", ", "{ ", " }"));
     }
 }
