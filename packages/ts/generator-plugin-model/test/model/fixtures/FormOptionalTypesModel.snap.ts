@@ -7,7 +7,7 @@ class FormOptionalTypesModel<T extends FormOptionalTypes = FormOptionalTypes> ex
         return this[_getPropertyModel]("optionalString", (parent, key) => new StringModel(parent, key, false));
     }
     get optionalEntity(): FormEntityModel {
-        return this[_getPropertyModel]("optionalEntity", (parent, key) => new FormEntityModel(parent, key, false));
+        return this[_getPropertyModel]("optionalEntity", (parent, key) => new FormEntityModel(parent, key, true));
     }
     get optionalList(): ArrayModel<StringModel> {
         return this[_getPropertyModel]("optionalList", (parent, key) => new ArrayModel(parent, key, false, (parent, key) => new StringModel(parent, key, true)));
