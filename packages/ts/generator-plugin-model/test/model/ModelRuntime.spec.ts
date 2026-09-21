@@ -9,17 +9,17 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import ModelPlugin from '../../src/index.js';
 
 /**
- * The snapshot tests only compare text, so generated code that cannot be
- * evaluated still passes them. Mutually referencing models are the case that
- * matters: they import each other, and reading the other binding while the
- * module is still evaluating throws. `Model.json` has several such cycles, e.g.
- * `FormEntity` and `FormArrayTypes`.
+ * The snapshot tests only compare text, so generated code that throws still
+ * passes them. Importing a model module only runs its class body; every
+ * property expression — nested `ArrayModel` factories, validator construction,
+ * optional flags — sits in a getter body. `createEmptyValue()` walks all of
+ * them and recurses into child models, so it covers what the import alone does
+ * not.
  *
  * The sources are written into the package so that their imports resolve the
  * way an application's would, and are transformed by Vite on import.
  */
 const outputDir = join(import.meta.dirname, '.generated');
-const entityDir = 'com/example/application/endpoints/TsFormEndpoint';
 
 function moduleUrl(name: string): string {
   return pathToFileURL(join(outputDir, name)).href;
@@ -56,33 +56,32 @@ describe('ModelPlugin', () => {
     const modelFiles = generated.filter((name) => name.endsWith('Model.ts'));
     expect(modelFiles.length, 'generated model files').to.be.greaterThan(0);
 
-    const failures = (
-      await Promise.all(
-        modelFiles.map(async (name) => {
-          try {
-            const module = (await import(moduleUrl(name))) as { default?: unknown };
-            return module.default === undefined ? `${name}: no default export` : undefined;
-          } catch (e: unknown) {
-            return `${name}: ${String(e)}`;
-          }
-        }),
-      )
-    ).filter(Boolean);
+    // Every module is loaded before any getter runs. Vite's SSR runner resolves
+    // an import as soon as that one module's body has run, even when a module it
+    // is in a cycle with has not reached its `export default` yet — unlike
+    // native ESM, which evaluates the whole cycle first.
+    const models = await Promise.all(
+      modelFiles.map(async (name) => {
+        const module = (await import(moduleUrl(name))) as { default?: { createEmptyValue(): unknown } };
+        return [name, module.default] as const;
+      }),
+    );
+
+    const failures = models
+      .map(([name, model]) => {
+        if (model === undefined) {
+          return `${name}: no default export`;
+        }
+
+        try {
+          model.createEmptyValue();
+          return undefined;
+        } catch (e: unknown) {
+          return `${name}: ${String(e)}`;
+        }
+      })
+      .filter(Boolean);
 
     expect(failures).to.deep.equal([]);
-  }, 30000);
-
-  it('resolves models that reference each other', async () => {
-    // FormEntity has a FormArrayTypes property and vice versa, so whichever
-    // module is evaluated first sees the other one uninitialised
-    const { default: FormEntityModel } = (await import(moduleUrl(`${entityDir}/FormEntityModel.ts`))) as {
-      default: unknown;
-    };
-    const { default: FormArrayTypesModel } = (await import(moduleUrl(`${entityDir}/FormArrayTypesModel.ts`))) as {
-      default: unknown;
-    };
-
-    expect(FormEntityModel, 'FormEntityModel').to.not.be.undefined;
-    expect(FormArrayTypesModel, 'FormArrayTypesModel').to.not.be.undefined;
   }, 30000);
 });
