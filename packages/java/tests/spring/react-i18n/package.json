@@ -21,7 +21,7 @@
     "lit": "3.3.3",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "react-router": "7.18.3"
+    "react-router": "7.18.4"
   },
   "devDependencies": {
     "@babel/preset-react": "7.29.7",
@@ -30,7 +30,7 @@
     "@preact/signals-react-transform": "0.8.2",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.4.0",
-    "@types/node": "25.9.6",
+    "@types/node": "25.9.8",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
@@ -74,7 +74,7 @@
       "lit": "3.3.3",
       "react": "19.3.0",
       "react-dom": "19.3.0",
-      "react-router": "7.18.3"
+      "react-router": "7.18.4"
     },
     "devDependencies": {
       "@babel/preset-react": "7.29.7",
@@ -83,7 +83,7 @@
       "@preact/signals-react-transform": "0.8.2",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.4.0",
-      "@types/node": "25.9.6",
+      "@types/node": "25.9.8",
       "@types/react": "19.3.0",
       "@types/react-dom": "19.3.0",
       "@vaadin/hilla-generator-cli": "25.1.10",
@@ -107,7 +107,7 @@
       "vite": "7.3.6",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "64f3cb10595746f3082df24273ae5cc5db8205b9d1cf969b95197f5c455aa9bf",
+    "hash": "cee203d9c7fb9b63b7167de6f50de030d940269f02e685a72aa38aece72487d5",
     "overrides": {
       "@vaadin/a11y-base": "25.1.14",
       "@vaadin/accordion": "25.1.14",

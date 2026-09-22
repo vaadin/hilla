@@ -21,7 +21,7 @@
     "@preact/signals-react-transform": "0.8.2",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.4.0",
-    "@types/node": "25.9.6",
+    "@types/node": "25.9.8",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
     "@vaadin/hilla-generator-core": "file:../../../../ts/generator-core",
     "@vaadin/hilla-generator-plugin-backbone": "file:../../../../ts/generator-plugin-backbone",
@@ -68,7 +68,7 @@
       "@preact/signals-react-transform": "0.8.2",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.4.0",
-      "@types/node": "25.9.6",
+      "@types/node": "25.9.8",
       "@vaadin/hilla-generator-cli": "25.1.10",
       "@vaadin/hilla-generator-core": "25.1.10",
       "@vaadin/hilla-generator-plugin-backbone": "25.1.10",
@@ -95,7 +95,7 @@
       "workbox-routing": "7.4.1",
       "workbox-strategies": "7.4.1"
     },
-    "hash": "44b1ff7577a282e4ab20f47076d1ed34385dded084b1688c237ab044fef23eb8",
+    "hash": "9c5d7c6d2580362b19c7bf6e2ad4b7ac5696b42b94f6db6dd49fd6a9f0c4cea2",
     "overrides": {
       "@vaadin/common-frontend": "$@vaadin/common-frontend",
       "@vaadin/icon": "$@vaadin/icon",
