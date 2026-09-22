@@ -24,7 +24,7 @@
     "@rolldown/plugin-babel": "0.2.4",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.4.0",
-    "@types/node": "25.9.6",
+    "@types/node": "25.9.8",
     "@vaadin/hilla-generator-cli": "file:../../../ts/generator-cli",
     "@vaadin/hilla-generator-core": "file:../../../ts/generator-core",
     "@vaadin/hilla-generator-plugin-backbone": "file:../../../ts/generator-plugin-backbone",
@@ -69,7 +69,7 @@
       "@rolldown/plugin-babel": "0.2.4",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.4.0",
-      "@types/node": "25.9.6",
+      "@types/node": "25.9.8",
       "@vaadin/hilla-generator-cli": "25.2.9",
       "@vaadin/hilla-generator-core": "25.2.9",
       "@vaadin/hilla-generator-plugin-backbone": "25.2.9",
@@ -91,7 +91,7 @@
       "vite": "8.0.16",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "4589f19c50b122f88f20274c42ddc402d39d965af1d4ad3b622f933f1b52f056"
+    "hash": "246cf98d24937239eb4b85aac97f596d062e174bfdeddd2d0866f86bc0435059"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
