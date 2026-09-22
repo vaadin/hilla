@@ -20,7 +20,7 @@
     "lit": "3.3.3",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "react-router": "8.3.1"
+    "react-router": "8.4.0"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
@@ -32,7 +32,7 @@
     "@rolldown/plugin-babel": "0.2.4",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.4.0",
-    "@types/node": "26.5.1",
+    "@types/node": "26.6.2",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
@@ -47,7 +47,7 @@
     "@vaadin/hilla-generator-plugin-transfertypes": "file:../../../../ts/generator-plugin-transfertypes",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
     "@vitejs/plugin-react": "6.1.1",
-    "magic-string": "1.3.1",
+    "magic-string": "1.4.1",
     "rollup-plugin-brotli": "3.1.0",
     "rollup-plugin-visualizer": "7.1.1",
     "strip-css-comments": "5.0.0",
@@ -75,7 +75,7 @@
       "lit": "3.3.3",
       "react": "19.3.0",
       "react-dom": "19.3.0",
-      "react-router": "8.3.1"
+      "react-router": "8.4.0"
     },
     "devDependencies": {
       "@babel/core": "7.29.7",
@@ -87,7 +87,7 @@
       "@rolldown/plugin-babel": "0.2.4",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.4.0",
-      "@types/node": "26.5.1",
+      "@types/node": "26.6.2",
       "@types/react": "19.3.0",
       "@types/react-dom": "19.3.0",
       "@vaadin/hilla-generator-cli": "25.3.0-beta2",
@@ -102,7 +102,7 @@
       "@vaadin/hilla-generator-plugin-transfertypes": "25.3.0-beta2",
       "@vaadin/hilla-generator-utils": "25.3.0-beta2",
       "@vitejs/plugin-react": "6.1.1",
-      "magic-string": "1.3.1",
+      "magic-string": "1.4.1",
       "rollup-plugin-brotli": "3.1.0",
       "rollup-plugin-visualizer": "7.1.1",
       "strip-css-comments": "5.0.0",
@@ -111,7 +111,7 @@
       "vite": "8.3.0",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "7240a44daa941ffe185d1487f2ff268dfc0110d690e95aa6f563342c0d8ac3b8"
+    "hash": "6925d2f064a131788bd4b171ce0e24959b0a7e80d4d40c1674ef6bf1dc3868db"
   },
   "overrides": {
     "@vaadin/a11y-base": "25.3.0-beta1",
