@@ -39,7 +39,7 @@ function createReplacedTypeMaker(name: string): ReplacedTypeMaker {
 type ReplacedTypes = Readonly<Record<string, ReplacedTypeMaker>>;
 
 const replacedTypes: ReplacedTypes = Object.fromEntries(
-  ['File', 'Signal', 'NumberSignal', 'ValueSignal', 'ListSignal'].map((name) => [
+  ['File', 'Signal', 'NumberSignal', 'ValueSignal', 'ListSignal', 'MapSignal'].map((name) => [
     `com.vaadin.hilla.runtime.transfertypes.${name}`,
     createReplacedTypeMaker(name),
   ]),
