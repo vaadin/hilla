@@ -71,11 +71,15 @@ public final class EndpointWriter {
         var types = new TypeWriter(imports, "");
 
         // The methods and their parameters are named by the Java class, so the
-        // imports have to give way to them rather than the other way around
+        // imports have to give way to them rather than the other way around,
+        // as do the types the browser has and the file writes as they are
         endpoint.methods().forEach(method -> {
             imports.reserve(method.name());
             method.parameters().stream().map(ParameterModel::name)
                     .forEach(imports::reserve);
+            types.reserveProvided(method.returnType());
+            method.parameters().forEach(
+                    parameter -> types.reserveProvided(parameter.type()));
         });
 
         var client = imports.importDefault(clientModule, "client", false);
