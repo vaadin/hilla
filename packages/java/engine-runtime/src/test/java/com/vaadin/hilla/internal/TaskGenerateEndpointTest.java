@@ -71,10 +71,10 @@ public class TaskGenerateEndpointTest extends EndpointsTaskTest {
 
         String output = FileUtils.readFileToString(client, "UTF-8");
         assertThat(output, containsString(
-                "import { ConnectClient as ConnectClient_1 } from \"@vaadin/hilla-frontend\";"));
+                "import { ConnectClient } from \"@vaadin/hilla-frontend\";"));
         assertThat(output, containsString(
-                "const client_1 = new ConnectClient_1({ prefix: \"connect\" });"));
-        assertThat(output, containsString("export default client_1;"));
+                "const client = new ConnectClient({ prefix: \"connect\" });"));
+        assertThat(output, containsString("export default client;"));
     }
 
     @Test
@@ -104,9 +104,9 @@ public class TaskGenerateEndpointTest extends EndpointsTaskTest {
 
         String outputEndpoinTs1 = FileUtils.readFileToString(ts1, "UTF-8");
         String outputEndpoinTs2 = FileUtils.readFileToString(ts2, "UTF-8");
-        assertThat(outputEndpoinTs1, containsString(
-                "import client_1 from \"../connect-client.js\";"));
-        assertThat(outputEndpoinTs2, containsString(
-                "import client_1 from \"../connect-client.js\";"));
+        assertThat(outputEndpoinTs1,
+                containsString("import client from \"../connect-client.js\";"));
+        assertThat(outputEndpoinTs2,
+                containsString("import client from \"../connect-client.js\";"));
     }
 }
