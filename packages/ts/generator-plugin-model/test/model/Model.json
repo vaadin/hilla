@@ -380,6 +380,25 @@
                 "name": "jakarta.persistence.OneToOne"
               }
             ]
+          },
+          "withAnnotationAttributes": {
+            "type": "number",
+            "x-annotations": [
+              {
+                "name": "jakarta.persistence.ManyToMany",
+                "attributes": {
+                  "fetch": "EAGER",
+                  "targetEntity": {
+                    "jvmType": "com.example.application.endpoints.TsFormEndpoint$FormEntity"
+                  },
+                  "cascade": ["PERSIST", "MERGE"]
+                }
+              },
+              {
+                "name": "jakarta.persistence.Id",
+                "attributes": {}
+              }
+            ]
           }
         }
       },
