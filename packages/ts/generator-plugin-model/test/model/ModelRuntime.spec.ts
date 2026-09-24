@@ -18,6 +18,12 @@ import ModelPlugin from '../../src/index.js';
  *
  * The sources are written into the package so that their imports resolve the
  * way an application's would, and are transformed by Vite on import.
+ *
+ * `Model.json` deliberately has no unbroken cycle of non-optional object
+ * references, because `makeObjectEmptyValueCreator` recurses into every one of
+ * them without a cycle guard and overflows the stack. `@NotNull` does not
+ * produce that shape — the parser emits such a property as optional — but the
+ * `@Nonnull` family does, so the generator can still emit one.
  */
 const outputDir = join(import.meta.dirname, '.generated');
 
