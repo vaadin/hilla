@@ -57,10 +57,20 @@ final class Names {
     }
 
     /**
-     * The name of a property as it is written in a type or an object, quoted
-     * when it is not a name TypeScript accepts as it is.
+     * The name of a property as it is written in a type or an object, written
+     * as a string when it is not a name TypeScript accepts as it is.
      */
     static String property(String name) {
-        return IDENTIFIER.matcher(name).matches() ? name : "'" + name + "'";
+        return IDENTIFIER.matcher(name).matches() ? name : string(name);
+    }
+
+    /**
+     * A value as TypeScript reads it as a string, with what the language would
+     * otherwise read as the end of it, or as another line, written as it says
+     * itself.
+     */
+    static String string(String value) {
+        return "'" + value.replace("\\", "\\\\").replace("'", "\\'")
+                .replace("\n", "\\n").replace("\r", "\\r") + "'";
     }
 }
