@@ -18,18 +18,8 @@ package com.vaadin.hilla.generator.fixtures;
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 /**
- * Has parameters named after what the generated file needs for itself.
+ * Has nothing to call, which still is an endpoint.
  */
 @Endpoint
-public class ShadowingEndpoint {
-    public String echo(String client, String init) {
-        return client + init;
-    }
-
-    /**
-     * Named after the client the generated file calls the server with.
-     */
-    public String client() {
-        return "";
-    }
+public class EmptyEndpoint {
 }
