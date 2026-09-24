@@ -31,13 +31,6 @@ public final class EndpointWriter {
     private static final String INIT_TYPE = "EndpointRequestInit";
     private static final String INIT_PARAMETER = "init";
 
-    /**
-     * The width beyond which the parameters of a method go on lines of their
-     * own, keeping a long signature readable. Same as the width the sources of
-     * the project are formatted to.
-     */
-    private static final int MAX_WIDTH = 120;
-
     private static final String METHOD = """
             export async function {{method}}({{parameters}}): Promise<{{returnType}}> {
               return {{client}}.call('{{endpoint}}', '{{method}}', {{arguments}}, {{init}});
@@ -97,7 +90,7 @@ public final class EndpointWriter {
 
         // Written again with the parameters on a line each when the first line
         // came out too wide to read
-        if (firstLineOf(written).length() <= MAX_WIDTH) {
+        if (firstLineOf(written).length() <= Layout.MAX_WIDTH) {
             return written;
         }
 
