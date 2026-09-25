@@ -5,6 +5,7 @@ import { pathToFileURL } from 'node:url';
 import Generator from '@vaadin/hilla-generator-core/Generator.js';
 import BackbonePlugin from '@vaadin/hilla-generator-plugin-backbone/index.js';
 import LoggerFactory from '@vaadin/hilla-generator-utils/LoggerFactory.js';
+import { typeCheck } from '@vaadin/hilla-generator-utils/testing/typeCheck.js';
 import { beforeAll, describe, expect, it } from 'vitest';
 import ModelPlugin from '../../src/index.js';
 
@@ -17,7 +18,9 @@ import ModelPlugin from '../../src/index.js';
  * not.
  *
  * The sources are written into the package so that their imports resolve the
- * way an application's would, and are transformed by Vite on import.
+ * way an application's would, and are transformed by Vite on import. Vite
+ * strips the types rather than checking them, so type-incorrect output still
+ * evaluates; `typeCheck()` compiles the same files to cover that.
  *
  * `Model.json` deliberately has no unbroken cycle of non-optional object
  * references, because `makeObjectEmptyValueCreator` recurses into every one of
@@ -31,7 +34,7 @@ function moduleUrl(name: string): string {
   return pathToFileURL(join(outputDir, name)).href;
 }
 
-async function generate(): Promise<readonly string[]> {
+async function generate(): Promise<readonly File[]> {
   const generator = new Generator([BackbonePlugin, ModelPlugin], {
     logger: new LoggerFactory({ name: 'model-plugin-runtime-test', verbose: true }),
   });
@@ -41,25 +44,26 @@ async function generate(): Promise<readonly string[]> {
 
   await rm(outputDir, { force: true, recursive: true });
 
-  return Promise.all(
+  await Promise.all(
     files.map(async (file) => {
       const path = join(outputDir, file.name);
       await mkdir(dirname(path), { recursive: true });
       await writeFile(path, await file.text());
-      return file.name;
     }),
   );
+
+  return files;
 }
 
 describe('ModelPlugin', () => {
-  let generated: readonly string[];
+  let generated: readonly File[];
 
   beforeAll(async () => {
     generated = await generate();
   }, 30000);
 
   it('generates models that can be evaluated', async () => {
-    const modelFiles = generated.filter((name) => name.endsWith('Model.ts'));
+    const modelFiles = generated.map((file) => file.name).filter((name) => name.endsWith('Model.ts'));
     expect(modelFiles.length, 'generated model files').to.be.greaterThan(0);
 
     // Every module is loaded before any getter runs. Vite's SSR runner resolves
@@ -90,4 +94,8 @@ describe('ModelPlugin', () => {
 
     expect(failures).to.deep.equal([]);
   }, 30000);
+
+  it('generates code that type-checks', async () => {
+    expect(await typeCheck(outputDir, generated)).to.deep.equal([]);
+  }, 30000); // compiling the whole model hierarchy is slow on CI
 });
