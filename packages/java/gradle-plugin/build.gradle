@@ -76,12 +76,24 @@ repositories {
     maven { url = 'https://maven.vaadin.com/vaadin-prereleases' }
 }
 
+// The Spring Data Commons version managed by the Spring Boot BOM
+def springDataCommonsVersion = configurations.detachedConfiguration(
+        dependencies.platform("org.springframework.boot:spring-boot-dependencies:$springBootVersion"),
+        dependencies.create('org.springframework.data:spring-data-commons'))
+        .incoming.resolutionResult.allComponents
+        .find { it.moduleVersion.group == 'org.springframework.data' && it.moduleVersion.name == 'spring-data-commons' }
+        .moduleVersion.version
+
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     implementation("com.vaadin:hilla-engine-core:$version")
     implementation("com.vaadin:flow-gradle-plugin:$flowVersion")
     implementation("com.vaadin:flow-plugin-base:$flowVersion")
     implementation("org.springframework.boot:spring-boot-loader-tools:$springBootVersion")
+    // The generator maps Spring Data types to the Hilla transfer types, which
+    // reference Spring Data Commons. Hilla no longer brings it transitively,
+    // so the plugin class loader needs it for applications that use Pageable.
+    implementation("org.springframework.data:spring-data-commons:$springDataCommonsVersion")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")

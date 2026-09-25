@@ -104,10 +104,12 @@
       <artifactId>hilla-runtime-plugin-transfertypes</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <!-- Spring Data Commons from parser-jvm-plugin-transfertypes -->
+    <!-- Spring Data Commons, optional in the runtime transfer types, for the
+         tests of the Pageable and Sort mappings -->
     <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-commons</artifactId>
+      <scope>test</scope>
     </dependency>
     <!-- Test dependencies -->
     <dependency>

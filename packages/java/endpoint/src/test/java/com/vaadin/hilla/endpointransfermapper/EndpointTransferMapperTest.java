@@ -15,7 +15,14 @@
  */
 package com.vaadin.hilla.endpointransfermapper;
 
+import java.io.File;
+import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -176,5 +183,40 @@ public class EndpointTransferMapperTest {
         incoming.add("Second");
         Page p = endpointTransferMapper.toEndpointType(incoming, Page.class);
         Assert.assertEquals(incoming, p.getContent());
+    }
+
+    @Test
+    public void withoutSpringData_otherTypesAreMapped() throws Exception {
+        var urls = Arrays.stream(
+                System.getProperty("java.class.path").split(File.pathSeparator))
+                .map(path -> {
+                    try {
+                        return Path.of(path).toUri().toURL();
+                    } catch (MalformedURLException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                }).toArray(URL[]::new);
+        try (var classLoader = new URLClassLoader(urls,
+                ClassLoader.getPlatformClassLoader()) {
+            @Override
+            protected Class<?> loadClass(String name, boolean resolve)
+                    throws ClassNotFoundException {
+                if (name.startsWith("org.springframework.data.")) {
+                    throw new ClassNotFoundException(name);
+                }
+                return super.loadClass(name, resolve);
+            }
+        }) {
+            var mapperClass = classLoader
+                    .loadClass(EndpointTransferMapper.class.getName());
+            var mapper = mapperClass.getConstructor().newInstance();
+            var getTransferType = mapperClass.getMethod("getTransferType",
+                    String.class);
+
+            Assert.assertEquals(String.class.getName(),
+                    getTransferType.invoke(mapper, UUID.class.getName()));
+            Assert.assertNull(getTransferType.invoke(mapper,
+                    org.springframework.data.domain.Pageable.class.getName()));
+        }
     }
 }

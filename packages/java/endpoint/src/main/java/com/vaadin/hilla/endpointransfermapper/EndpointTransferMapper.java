@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.multipart.MultipartFile;
 import tools.jackson.core.JsonParser;
 import tools.jackson.databind.DeserializationContext;
@@ -113,6 +114,10 @@ public class EndpointTransferMapper {
 
     }
 
+    private static final boolean SPRING_DATA_PRESENT = ClassUtils.isPresent(
+            "org.springframework.data.domain.Pageable",
+            EndpointTransferMapper.class.getClassLoader());
+
     private Map<Class<?>, Class<?>> endpointToTransfer = new HashMap<>();
 
     private Map<Class<?>, Mapper<?, ?>> mappers = new HashMap<>();
@@ -121,11 +126,16 @@ public class EndpointTransferMapper {
 
     /**
      * Creates a new instance.
+     * <p>
+     * The mappers for Spring Data types are only registered when Spring Data
+     * Commons is on the classpath.
      */
     public EndpointTransferMapper() {
-        registerMapper(new PageableMapper());
         registerMapper(new UUIDMapper());
-        registerMapper(new PageMapper());
+        if (SPRING_DATA_PRESENT) {
+            registerMapper(new PageableMapper());
+            registerMapper(new PageMapper());
+        }
     }
 
     /**

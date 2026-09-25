@@ -90,6 +90,18 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        <!-- Hilla uses the Spring Security context for endpoint and push
+             calls, but leaves the dependency to the application -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+        </dependency>
+        <!-- Websocket push in the embedded server, which Hilla and Vaadin
+             Spring leave to the application -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-websocket</artifactId>
+        </dependency>
 
         <!-- Project dependencies -->
         <dependency>
