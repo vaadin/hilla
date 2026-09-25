@@ -1,9 +1,8 @@
-import { _getPropertyModel, makeObjectEmptyValueCreator, ObjectModel, StringModel } from "@vaadin/hilla-lit-form";
+import m, { StringModel } from "@vaadin/hilla-models";
 import type SubPackageDependency from "./SubPackageDependency.js";
-class SubPackageDependencyModel<T extends SubPackageDependency = SubPackageDependency> extends ObjectModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(SubPackageDependencyModel);
-    get defaultField(): StringModel {
-        return this[_getPropertyModel]("defaultField", (parent, key) => new StringModel(parent, key, true, { meta: { javaType: "java.lang.String" } }));
-    }
-}
+const SubPackageDependencyModel = m
+  .object<SubPackageDependency>("SubPackageDependency")
+  .property("defaultField", m.meta(m.optional(StringModel), { jvmType: "java.lang.String" }))
+  .build();
+type SubPackageDependencyModel = typeof SubPackageDependencyModel;
 export default SubPackageDependencyModel;

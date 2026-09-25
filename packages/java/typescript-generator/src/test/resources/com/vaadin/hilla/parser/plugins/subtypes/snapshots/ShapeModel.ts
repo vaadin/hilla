@@ -1,6 +1,5 @@
-import { _getPropertyModel, makeObjectEmptyValueCreator, ObjectModel } from "@vaadin/hilla-lit-form";
+import m from "@vaadin/hilla-models";
 import type Shape from "./Shape.js";
-class ShapeModel<T extends Shape = Shape> extends ObjectModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(ShapeModel);
-}
+const ShapeModel = m.object<Shape>("Shape").build();
+type ShapeModel = typeof ShapeModel;
 export default ShapeModel;
