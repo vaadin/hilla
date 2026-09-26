@@ -35,6 +35,7 @@
     "@types/node": "26.6.2",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "@typescript/native": "npm:typescript@7.0.2",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
     "@vaadin/hilla-generator-core": "file:../../../../ts/generator-core",
     "@vaadin/hilla-generator-plugin-backbone": "file:../../../../ts/generator-plugin-backbone",
@@ -52,7 +53,7 @@
     "rollup-plugin-visualizer": "7.1.1",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
-    "typescript": "7.0.2",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
     "vite": "8.3.0",
     "vite-plugin-checker": "0.14.5"
   },
@@ -90,6 +91,7 @@
       "@types/node": "26.6.2",
       "@types/react": "19.3.0",
       "@types/react-dom": "19.3.0",
+      "@typescript/native": "npm:typescript@7.0.2",
       "@vaadin/hilla-generator-cli": "25.3.0",
       "@vaadin/hilla-generator-core": "25.3.0",
       "@vaadin/hilla-generator-plugin-backbone": "25.3.0",
@@ -107,11 +109,11 @@
       "rollup-plugin-visualizer": "7.1.1",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
-      "typescript": "7.0.2",
+      "typescript": "npm:@typescript/typescript6@6.0.2",
       "vite": "8.3.0",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "63b5601d85579d7f08ebfda82ac7ec3344cd6c737c8910190e8152a29f685d8e"
+    "hash": "8434b5080d5e0f6ec4f3f01420378de3abf605616ba6a4177ff29f77a54f3c7b"
   },
   "overrides": {
     "@vaadin/a11y-base": "25.3.0-beta1",
