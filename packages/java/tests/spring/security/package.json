@@ -26,7 +26,7 @@
     "@rolldown/plugin-babel": "0.2.4",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.4.0",
-    "@types/node": "26.6.2",
+    "@types/node": "26.6.3",
     "@typescript/native": "npm:typescript@7.0.2",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
     "@vaadin/hilla-generator-core": "file:../../../../ts/generator-core",
@@ -40,13 +40,13 @@
     "@vaadin/hilla-generator-plugin-transfertypes": "file:../../../../ts/generator-plugin-transfertypes",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
     "@vitejs/plugin-react": "6.1.1",
-    "magic-string": "1.4.1",
+    "magic-string": "1.4.2",
     "rollup-plugin-brotli": "3.1.0",
     "rollup-plugin-visualizer": "7.1.1",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "npm:@typescript/typescript6@6.0.2",
-    "vite": "8.3.0",
+    "vite": "8.3.1",
     "vite-plugin-checker": "0.14.5"
   },
   "vaadin": {
@@ -74,7 +74,7 @@
       "@rolldown/plugin-babel": "0.2.4",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.4.0",
-      "@types/node": "26.6.2",
+      "@types/node": "26.6.3",
       "@typescript/native": "npm:typescript@7.0.2",
       "@vaadin/hilla-generator-cli": "25.3.0",
       "@vaadin/hilla-generator-core": "25.3.0",
@@ -88,16 +88,16 @@
       "@vaadin/hilla-generator-plugin-transfertypes": "25.3.0",
       "@vaadin/hilla-generator-utils": "25.3.0",
       "@vitejs/plugin-react": "6.1.1",
-      "magic-string": "1.4.1",
+      "magic-string": "1.4.2",
       "rollup-plugin-brotli": "3.1.0",
       "rollup-plugin-visualizer": "7.1.1",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "npm:@typescript/typescript6@6.0.2",
-      "vite": "8.3.0",
+      "vite": "8.3.1",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "c49e96b306ff3b11ef1c32b6ae285d432bfdf5d980cbe1fc3a14f7b80228d5dc"
+    "hash": "026d73af00add5165559d60c973dc9c5c700540d9b9a03cc7c6c8880c76f8d53"
   },
   "overrides": {
     "@adobe/lit-mobx": "$@adobe/lit-mobx",
