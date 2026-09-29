@@ -24,7 +24,7 @@
     "@rolldown/plugin-babel": "0.2.4",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.4.0",
-    "@types/node": "26.6.2",
+    "@types/node": "26.6.3",
     "@typescript/native": "npm:typescript@7.0.2",
     "@vaadin/hilla-generator-cli": "file:../../../ts/generator-cli",
     "@vaadin/hilla-generator-core": "file:../../../ts/generator-core",
@@ -38,13 +38,13 @@
     "@vaadin/hilla-generator-plugin-transfertypes": "file:../../../ts/generator-plugin-transfertypes",
     "@vaadin/hilla-generator-utils": "file:../../../ts/generator-utils",
     "@vitejs/plugin-react": "6.1.1",
-    "magic-string": "1.4.1",
+    "magic-string": "1.4.2",
     "rollup-plugin-brotli": "3.1.0",
     "rollup-plugin-visualizer": "7.1.1",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "npm:@typescript/typescript6@6.0.2",
-    "vite": "8.3.0",
+    "vite": "8.3.1",
     "vite-plugin-checker": "0.14.5"
   },
   "vaadin": {
@@ -70,7 +70,7 @@
       "@rolldown/plugin-babel": "0.2.4",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.4.0",
-      "@types/node": "26.6.2",
+      "@types/node": "26.6.3",
       "@typescript/native": "npm:typescript@7.0.2",
       "@vaadin/hilla-generator-cli": "25.3.0",
       "@vaadin/hilla-generator-core": "25.3.0",
@@ -84,16 +84,16 @@
       "@vaadin/hilla-generator-plugin-transfertypes": "25.3.0",
       "@vaadin/hilla-generator-utils": "25.3.0",
       "@vitejs/plugin-react": "6.1.1",
-      "magic-string": "1.4.1",
+      "magic-string": "1.4.2",
       "rollup-plugin-brotli": "3.1.0",
       "rollup-plugin-visualizer": "7.1.1",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "npm:@typescript/typescript6@6.0.2",
-      "vite": "8.3.0",
+      "vite": "8.3.1",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "5e0023aec75ff150c3946ab87f7e27cc0baf4604ce1c1c967d22fbe9a1355002"
+    "hash": "a76e6dbd16e1075c9123040ab4887b7b3451a2566c2a847c2b5302d884f31fa8"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
