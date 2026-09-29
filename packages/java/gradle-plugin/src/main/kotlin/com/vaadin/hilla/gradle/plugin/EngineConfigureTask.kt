@@ -22,11 +22,13 @@ import org.gradle.api.Project
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 
 /**
  * Task that generates the configuration json which is needed
  * for next task of generating the endpoints and model classes.
  */
+@DisableCachingByDefault(because = "Sets the default engine configuration and produces no output")
 public abstract class EngineConfigureTask : DefaultTask() {
 
     init {
