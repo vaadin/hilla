@@ -1,13 +1,13 @@
-import { _getPropertyModel as _getPropertyModel_1, makeObjectEmptyValueCreator as makeObjectEmptyValueCreator_1, NumberModel as NumberModel_1, StringModel as StringModel_1 } from "@vaadin/hilla-lit-form";
-import type FormEntityHierarchy_1 from "./FormEntityHierarchy.js";
-import FormEntityIdModel_1 from "./FormEntityIdModel.js";
-class FormEntityHierarchyModel<T extends FormEntityHierarchy_1 = FormEntityHierarchy_1> extends FormEntityIdModel_1<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator_1(FormEntityHierarchyModel);
-    get lorem(): StringModel_1 {
-        return this[_getPropertyModel_1]("lorem", (parent, key) => new StringModel_1(parent, key, false));
+import { _getPropertyModel, makeObjectEmptyValueCreator, NumberModel, StringModel } from "@vaadin/hilla-lit-form";
+import type FormEntityHierarchy from "./FormEntityHierarchy.js";
+import FormEntityIdModel from "./FormEntityIdModel.js";
+class FormEntityHierarchyModel<T extends FormEntityHierarchy = FormEntityHierarchy> extends FormEntityIdModel<T> {
+    static override createEmptyValue = makeObjectEmptyValueCreator(FormEntityHierarchyModel);
+    get lorem(): StringModel {
+        return this[_getPropertyModel]("lorem", (parent, key) => new StringModel(parent, key, false));
     }
-    get ipsum(): NumberModel_1 {
-        return this[_getPropertyModel_1]("ipsum", (parent, key) => new NumberModel_1(parent, key, false));
+    get ipsum(): NumberModel {
+        return this[_getPropertyModel]("ipsum", (parent, key) => new NumberModel(parent, key, false));
     }
 }
 export default FormEntityHierarchyModel;

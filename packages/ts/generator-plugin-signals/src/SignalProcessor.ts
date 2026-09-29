@@ -1,8 +1,9 @@
-import { dirname, extname } from 'node:path';
+import { basename, dirname, extname } from 'node:path';
 import {
   factory,
   isTypeReferenceNode,
   isIdentifier,
+  type Identifier,
   type ReturnStatement,
   type SourceFile,
   type TypeNode,
@@ -34,6 +35,7 @@ export default class SignalProcessor {
   readonly #owner: Plugin;
   readonly #service: string;
   readonly #methods: Map<string, string>;
+  readonly #methodsByDeclaredName: ReadonlyMap<string, string>;
   readonly #sourceFile: SourceFile;
 
   constructor(service: string, methods: Map<string, string>, sourceFile: SourceFile, owner: Plugin) {
@@ -43,6 +45,13 @@ export default class SignalProcessor {
     this.#owner = owner;
     this.#dependencyManager = new DependencyManager(new PathManager({ extension: '.js' }));
     this.#dependencyManager.imports.fromCode(this.#sourceFile);
+    this.#dependencyManager.exports.fromCode(this.#sourceFile);
+
+    const { exports } = this.#dependencyManager;
+    // a method whose name is a reserved word is declared under a suffixed one
+    this.#methodsByDeclaredName = new Map(
+      Iterator.from(methods.keys()).map((method) => [exports.named.getIdentifier(method)?.text ?? method, method]),
+    );
   }
 
   process(): SourceFile {
@@ -57,10 +66,14 @@ export default class SignalProcessor {
     const [file] = transform(this.#sourceFile, [
       createTransformer((node) => {
         if (isFunctionDeclaration(node)) {
+          // The declared name is not the method name when the latter is a
+          // reserved word.
+          const methodName = node.name && this.#methodsByDeclaredName.get(node.name.text);
+
           // Check if the function is a signal method.
-          if (node.name && this.#methods.has(node.name.text)) {
+          if (methodName) {
             // Get or add the signal class identifier for runtime use.
-            const signalClassName = simplifyFullyQualifiedName(this.#methods.get(node.name.text)!);
+            const signalClassName = simplifyFullyQualifiedName(this.#methods.get(methodName)!);
             const signalId =
               imports.named.getIdentifier(HILLA_REACT_SIGNALS, signalClassName) ??
               imports.named.add(HILLA_REACT_SIGNALS, signalClassName);
@@ -71,7 +84,11 @@ export default class SignalProcessor {
             );
 
             // Calculate the default value for the signal class.
-            const { defaultValue, defaultValueParameter } = this.#createDefaultValue(signalId.text, node.type);
+            const { defaultValue, defaultValueParameter } = this.#createDefaultValue(
+              signalClassName,
+              signalId,
+              node.type,
+            );
 
             // Remove the `async` modifier if present.
             const modifiers = node.modifiers?.filter((m) => m.kind !== SyntaxKind.AsyncKeyword);
@@ -98,7 +115,7 @@ export default class SignalProcessor {
               return new ${signalId}(${defaultValue}${defaultValue ? ',' : ''}{
                 client: ${connectClientId},
                 endpoint: '${this.#service}',
-                method: '${node.name.text}'
+                method: '${methodName}'
                 ${paramNames.length ? `, params: { ${paramNames.join('\n')} }` : ''} });
             }% });`;
 
@@ -140,18 +157,20 @@ export default class SignalProcessor {
     );
   }
 
-  #createDefaultValue(signalClass: string, returnType?: TypeNode) {
+  // The class name is the one of the signal itself, while the identifier is how
+  // the file refers to it, which carries a suffix on a collision.
+  #createDefaultValue(signalClassName: string, signalId: Identifier, returnType?: TypeNode) {
     const { imports } = this.#dependencyManager;
 
     // If the signal class is a collection signal, we have no default value to
     // generate.
-    if (COLLECTION_SIGNALS.includes(signalClass)) {
+    if (COLLECTION_SIGNALS.includes(signalClassName)) {
       return {};
     }
 
     // If we have the NumberSignal class, we can use `0` as the default.
-    if (!GENERIC_SIGNALS.includes(signalClass)) {
-      return signalClass.startsWith('NumberSignal') ? { defaultValue: '0' } : {};
+    if (!GENERIC_SIGNALS.includes(signalClassName)) {
+      return signalClassName.startsWith('NumberSignal') ? { defaultValue: '0' } : {};
     }
 
     // Extract the generic argument of the signal class to get the default
@@ -159,7 +178,7 @@ export default class SignalProcessor {
     const type = traverse(returnType!, (node) =>
       isTypeReferenceNode(node) &&
       isIdentifier(node.typeName) &&
-      GENERIC_SIGNALS.includes(node.typeName.text) &&
+      node.typeName.text === signalId.text &&
       node.typeArguments
         ? node.typeArguments[0]
         : undefined,
@@ -213,7 +232,9 @@ export default class SignalProcessor {
         throw new Error(`Model not found for ${node.text}`);
       }
 
-      const modelName = `${node.text}Model`;
+      // the path is what the model name comes from: the identifier may carry a
+      // suffix, while the file the entity lives in never does
+      const modelName = `${basename(path, extname(path))}Model`;
       const modelPath = `${dirname(path)}/${modelName}${extname(path)}`;
 
       return imports.default.getIdentifier(modelPath) ?? imports.default.add(modelPath, modelName);
