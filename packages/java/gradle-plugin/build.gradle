@@ -12,7 +12,7 @@ plugins {
     id 'idea'
     id 'com.gradle.plugin-publish' version '1.3.1'
     id 'org.jetbrains.kotlin.jvm' version "$kotlinVersion"
-    id 'org.jetbrains.dokka' version '1.9.0'
+    id 'org.jetbrains.dokka-javadoc' version '2.2.0'
 }
 
 /***********************************************************************************************************************
@@ -59,8 +59,7 @@ configurations {
 // artifacts. Package the Dokka-generated API documentation into the javadoc
 // jar so the published javadoc reflects the Kotlin sources.
 tasks.matching { it.name == 'javadocJar' }.configureEach {
-    dependsOn dokkaJavadoc
-    from dokkaJavadoc.outputDirectory
+    from tasks.named('dokkaGeneratePublicationJavadoc').flatMap { it.outputDirectory }
 }
 
 /***********************************************************************************************************************
@@ -83,6 +82,9 @@ dependencies {
     implementation("com.vaadin:flow-plugin-base:$flowVersion")
     implementation("org.springframework.boot:spring-boot-loader-tools:$springBootVersion")
 
+    // Gradle 9 no longer puts the Gradle API on the unit test runtime
+    // classpath, and the tests use Gradle types directly.
+    testImplementation(gradleApi())
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
@@ -173,8 +175,8 @@ gradlePlugin {
  *
  **********************************************************************************************************************/
 wrapper {
-    gradleVersion = '8.14'
-    distributionType = Wrapper.DistributionType.ALL
+    gradleVersion = '9.8.0'
+    distributionType = Wrapper.DistributionType.BIN
 }
 
 // This will print ongoing tests, taken from https://stackoverflow.com/a/4292739/377320

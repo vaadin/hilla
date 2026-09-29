@@ -20,6 +20,7 @@
     <module>packages/java/engine-runtime</module>
     <module>packages/java/maven-plugin</module>
     <module>packages/java/gradle-plugin</module>
+    <module>packages/java/gradle-plugin/pom-portal.xml</module>
     <module>packages/java/hilla</module>
     <module>packages/java/hilla-bom</module>
     <module>packages/java/typescript-generator</module>
@@ -36,16 +37,6 @@
       </activation>
       <modules>
         <module>packages/java/tests</module>
-      </modules>
-    </profile>
-    <profile>
-      <id>gradle</id>
-      <activation>
-        <jdk>(,22]</jdk>
-      </activation>
-      <modules>
-        <module>packages/java/gradle-plugin</module>
-        <module>packages/java/gradle-plugin/pom-portal.xml</module>
       </modules>
     </profile>
     <profile>
