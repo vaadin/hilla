@@ -49,10 +49,15 @@ const versions = withReactComponents(withNpmPackages(platformVersions, component
 
 console.log(`Read ${[...componentNpmPackages.keys()].join(', ')} from the component annotations.`);
 
-const reactNpmNames = Object.values(reactComponents).map(({ npmName }) => npmName);
-const reactDeclared = reactNpmNames.filter((npmName) => npmName && findNpmVersion(platformVersions, npmName));
+const reactEntries = Object.entries(reactComponents);
+const reactNpmNames = reactEntries.map(([, { npmName }]) => npmName);
+const reactKept = reactEntries
+  .filter(([name, entry]) => versions.react[name] !== entry)
+  .map(([, { npmName }]) => npmName);
 console.log(
-  `Read ${reactNpmNames.join(', ')} from the React components of the component sources${reactDeclared.length > 0 ? `, keeping the platform versions of ${reactDeclared.join(', ')}` : ''}.`,
+  reactNpmNames.length === 0
+    ? 'Read no React components from the component sources.'
+    : `Read ${reactNpmNames.join(', ')} from the React components of the component sources${reactKept.length > 0 ? `, keeping the platform versions of ${reactKept.join(', ')}` : ''}.`,
 );
 
 // The npm packages Hilla depends on itself, and therefore needs a version for.
