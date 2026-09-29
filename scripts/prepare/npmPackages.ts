@@ -103,3 +103,78 @@ export function withNpmPackages(versions: Versions, packages: ReadonlyMap<string
 
   return { ...versions, core };
 }
+
+const REACT_COMPONENTS = /REACT_COMPONENTS\s*=\s*Map\.of\(([\s\S]*?)\);/u;
+
+const REACT_COMPONENT = /"([^"]+)"\s*,\s*List\.of\(([^)]*)\)/gu;
+
+const STRING = /"([^"]+)"/gu;
+
+/**
+ * Reads the React component packages a Java source declares in its
+ * `REACT_COMPONENTS` map, each with the web component packages it brings,
+ * which a React application leaves out of its `package.json`. They are
+ * released with the components, so their version is the one the annotations
+ * of the same source declare, which have to agree on it.
+ */
+export function parseReactComponents(source: string, origin = 'the source'): Versions['react'] {
+  const map = REACT_COMPONENTS.exec(source);
+  if (!map) {
+    return {};
+  }
+
+  const versions = new Set(parseNpmPackages(source, origin).values());
+  if (versions.size !== 1) {
+    throw new Error(
+      `The React components in ${origin} take the version of its annotations, which declare ${versions.size === 0 ? 'none' : [...versions].join(', ')}`,
+    );
+  }
+  const [jsVersion] = versions;
+
+  const react: Versions['react'] = {};
+
+  for (const [, npmName, packages] of map[1].matchAll(REACT_COMPONENT)) {
+    react[npmName.replace(/^@[^/]+\//u, '')] = {
+      exclusions: [...packages.matchAll(STRING)].map(([, excluded]) => excluded),
+      jsVersion,
+      mode: 'react',
+      npmName,
+    };
+  }
+
+  return react;
+}
+
+/**
+ * Reads the React component packages the given Java sources declare.
+ */
+export async function fetchReactComponents(sources: readonly URL[]): Promise<Versions['react']> {
+  const parsed = await Promise.all(
+    sources.map(async (url) => {
+      const res = await fetch(url);
+      if (!res.ok) {
+        throw new Error(`Could not read ${url.toString()}: ${res.status} ${res.statusText}`);
+      }
+      return parseReactComponents(await res.text(), url.toString());
+    }),
+  );
+
+  return Object.assign({}, ...parsed) as Versions['react'];
+}
+
+/**
+ * Adds the React component packages read from the component sources to the
+ * `react` section of the platform versions, leaving alone any the platform
+ * declares itself, as a maintenance branch still does.
+ */
+export function withReactComponents(versions: Versions, react: Versions['react']): Versions {
+  const merged = { ...versions.react };
+
+  for (const [name, entry] of Object.entries(react)) {
+    if (entry.npmName && findNpmVersion(versions, entry.npmName) === undefined) {
+      merged[name] = entry;
+    }
+  }
+
+  return { ...versions, react: merged };
+}

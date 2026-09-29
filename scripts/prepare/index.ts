@@ -13,12 +13,18 @@ import {
   type Versions,
 } from './config.js';
 import generate from './generate.js';
-import { fetchNpmPackages, findNpmVersion, withNpmPackages } from './npmPackages.js';
+import {
+  fetchNpmPackages,
+  fetchReactComponents,
+  findNpmVersion,
+  withNpmPackages,
+  withReactComponents,
+} from './npmPackages.js';
 
 console.log(`Fetching versions from platform branch: ${platformBranch}`);
 console.log(`Fetching component npm versions from flow-components branch: ${flowComponentsBranch}`);
 
-const [{ version }, platformVersions, componentNpmPackages] = await Promise.all([
+const [{ version }, platformVersions, componentNpmPackages, reactComponents] = await Promise.all([
   readFile(local.versionedPackageJson, 'utf-8').then(JSON.parse) as Promise<PackageJson>,
   // download needed files from vaadin/platform
   fetch(remote.versions)
@@ -27,6 +33,8 @@ const [{ version }, platformVersions, componentNpmPackages] = await Promise.all(
   // and the component npm versions from vaadin/flow-components, which the
   // platform no longer declares
   fetchNpmPackages(remote.componentSources),
+  // and the React components, which the platform no longer declares either
+  fetchReactComponents(remote.componentSources),
   mkdir(local.src, { recursive: true }),
   mkdir(local.results, { recursive: true }),
 ]);
@@ -35,7 +43,7 @@ if (!version) {
   throw new Error('No version found in package.json of Hilla "/ts/generator-core"');
 }
 
-const versions = withNpmPackages(platformVersions, componentNpmPackages);
+const versions = withReactComponents(withNpmPackages(platformVersions, componentNpmPackages), reactComponents);
 
 console.log(`Read ${[...componentNpmPackages.keys()].join(', ')} from the component annotations.`);
 
