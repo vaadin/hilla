@@ -13,20 +13,27 @@ import {
   type Versions,
 } from './config.js';
 import generate from './generate.js';
-import { fetchNpmPackages, findNpmVersion, withNpmPackages } from './npmPackages.js';
+import {
+  fetchSources,
+  findNpmVersion,
+  npmPackagesIn,
+  reactComponentsIn,
+  withNpmPackages,
+  withReactComponents,
+} from './npmPackages.js';
 
 console.log(`Fetching versions from platform branch: ${platformBranch}`);
 console.log(`Fetching component npm versions from flow-components branch: ${flowComponentsBranch}`);
 
-const [{ version }, platformVersions, componentNpmPackages] = await Promise.all([
+const [{ version }, platformVersions, componentSources] = await Promise.all([
   readFile(local.versionedPackageJson, 'utf-8').then(JSON.parse) as Promise<PackageJson>,
   // download needed files from vaadin/platform
   fetch(remote.versions)
     .then(async (res) => await res.text())
     .then((str) => JSON.parse(str, (_, val) => (val === '{{version}}' ? undefined : val))) as Promise<Versions>,
-  // and the component npm versions from vaadin/flow-components, which the
-  // platform no longer declares
-  fetchNpmPackages(remote.componentSources),
+  // and the sources in vaadin/flow-components which declare the component
+  // npm versions and the React components, which the platform no longer does
+  fetchSources(remote.componentSources),
   mkdir(local.src, { recursive: true }),
   mkdir(local.results, { recursive: true }),
 ]);
@@ -35,9 +42,18 @@ if (!version) {
   throw new Error('No version found in package.json of Hilla "/ts/generator-core"');
 }
 
-const versions = withNpmPackages(platformVersions, componentNpmPackages);
+const componentNpmPackages = npmPackagesIn(componentSources);
+const reactComponents = reactComponentsIn(componentSources);
+
+const versions = withReactComponents(withNpmPackages(platformVersions, componentNpmPackages), reactComponents);
 
 console.log(`Read ${[...componentNpmPackages.keys()].join(', ')} from the component annotations.`);
+
+const reactNpmNames = Object.values(reactComponents).map(({ npmName }) => npmName);
+const reactDeclared = reactNpmNames.filter((npmName) => npmName && findNpmVersion(platformVersions, npmName));
+console.log(
+  `Read ${reactNpmNames.join(', ')} from the React components of the component sources${reactDeclared.length > 0 ? `, keeping the platform versions of ${reactDeclared.join(', ')}` : ''}.`,
+);
 
 // The npm packages Hilla depends on itself, and therefore needs a version for.
 // A package no version is found for has moved somewhere this script does not
