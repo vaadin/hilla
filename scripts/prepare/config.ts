@@ -1,6 +1,7 @@
-import { argv, env } from "node:process";
+import { argv, env } from 'node:process';
 
 export type Version = {
+  exclusions?: readonly string[];
   javaVersion?: string;
   jsVersion?: string;
   mode?: string;
@@ -36,8 +37,8 @@ const branch = 'main';
 const args = argv.slice(2);
 function getArgValue(argName: string): string | undefined {
   const argPrefix = `--${argName}=`;
-  const arg = args.find((arg) => arg.startsWith(argPrefix))
-  return arg?.substring(argPrefix.length)
+  const arg = args.find((arg) => arg.startsWith(argPrefix));
+  return arg?.substring(argPrefix.length);
 }
 // Also honour PLATFORM_BRANCH from the environment, so CI can point the
 // script at a branch without having to expand the npm build script itself.
@@ -73,7 +74,9 @@ export const local = {
 // moves to another module has to be listed here under its new path.
 const componentSources = [
   // `@vaadin/a11y-base`, `@vaadin/component-base`, `@vaadin/field-base`,
-  // `@vaadin/input-container`, `@vaadin/lit-renderer`, `@vaadin/overlay`
+  // `@vaadin/input-container`, `@vaadin/lit-renderer`, `@vaadin/overlay`,
+  // and the React components `@vaadin/react-components` and
+  // `@vaadin/react-components-pro`, in its `REACT_COMPONENTS` map
   'vaadin-flow-components-shared-parent/vaadin-flow-components-base/src/main/java/com/vaadin/flow/component/shared/internal/TransitiveNpmPackages.java',
   // `@vaadin/vaadin-lumo-styles`, `@vaadin/vaadin-themable-mixin`
   'vaadin-lumo-theme-flow-parent/vaadin-lumo-theme-flow/src/main/java/com/vaadin/flow/theme/lumo/Lumo.java',
