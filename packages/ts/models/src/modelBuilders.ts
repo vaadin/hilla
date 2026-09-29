@@ -226,8 +226,10 @@ export class ObjectModelBuilder<
    * value type of the model to make it closer to the final value type.
    *
    * @param key - The key of the property.
-   * @param model - The model of the property value. You can also provide a
-   * function that produces the model based on the current model.
+   * @param model - The model of the property value, or a model converter such
+   * as {@link m.optional}, {@link m.array} or {@link m.lazy}. Use
+   * {@link m.lazy} to defer reading a model that is not initialized yet, and
+   * {@link m.self} for a model that refers to itself.
    *
    * @returns The current builder instance updated with the new property type.
    */
