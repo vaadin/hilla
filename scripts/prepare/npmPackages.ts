@@ -30,14 +30,12 @@ export function parseNpmPackages(source: string, origin = 'the source'): Readonl
 }
 
 /**
- * Reads the npm packages the given Java sources declare, by package name. The
- * same package may be declared by several of them, as long as the version
- * matches, which is what the version update in vaadin/flow-components keeps it
- * at.
+ * Downloads the given Java sources, each once, so that everything read from
+ * them comes from the same revision of the files.
  */
-export async function fetchNpmPackages(sources: readonly URL[]): Promise<ReadonlyMap<string, string>> {
-  const sourcesWithContents = await Promise.all(
-    sources.map(async (url) => {
+export async function fetchSources(urls: readonly URL[]): Promise<ReadonlyArray<readonly [URL, string]>> {
+  return Promise.all(
+    urls.map(async (url) => {
       const res = await fetch(url);
       if (!res.ok) {
         throw new Error(`Could not read ${url.toString()}: ${res.status} ${res.statusText}`);
@@ -45,10 +43,18 @@ export async function fetchNpmPackages(sources: readonly URL[]): Promise<Readonl
       return [url, await res.text()] as const;
     }),
   );
+}
 
+/**
+ * Reads the npm packages the given Java sources declare, by package name. The
+ * same package may be declared by several of them, as long as the version
+ * matches, which is what the version update in vaadin/flow-components keeps it
+ * at.
+ */
+export function npmPackagesIn(sources: ReadonlyArray<readonly [URL, string]>): ReadonlyMap<string, string> {
   const packages = new Map<string, string>();
 
-  for (const [url, contents] of sourcesWithContents) {
+  for (const [url, contents] of sources) {
     for (const [npmName, version] of parseNpmPackages(contents, url.toString())) {
       const declared = packages.get(npmName);
       if (declared !== undefined && declared !== version) {
@@ -148,18 +154,11 @@ export function parseReactComponents(source: string, origin = 'the source'): Ver
 /**
  * Reads the React component packages the given Java sources declare.
  */
-export async function fetchReactComponents(sources: readonly URL[]): Promise<Versions['react']> {
-  const parsed = await Promise.all(
-    sources.map(async (url) => {
-      const res = await fetch(url);
-      if (!res.ok) {
-        throw new Error(`Could not read ${url.toString()}: ${res.status} ${res.statusText}`);
-      }
-      return parseReactComponents(await res.text(), url.toString());
-    }),
-  );
-
-  return Object.assign({}, ...parsed) as Versions['react'];
+export function reactComponentsIn(sources: ReadonlyArray<readonly [URL, string]>): Versions['react'] {
+  return Object.assign(
+    {},
+    ...sources.map(([url, contents]) => parseReactComponents(contents, url.toString())),
+  ) as Versions['react'];
 }
 
 /**
