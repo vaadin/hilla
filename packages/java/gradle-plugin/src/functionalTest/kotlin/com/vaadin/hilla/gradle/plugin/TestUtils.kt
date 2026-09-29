@@ -25,6 +25,7 @@ import java.io.IOException
 import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.zip.ZipInputStream
+import kotlin.io.path.createTempDirectory
 import kotlin.test.expect
 import kotlin.test.fail
 
@@ -234,7 +235,7 @@ class TestProject(val gradleVersion: String = "8.14") {
     /**
      * The project root dir.
      */
-    val dir: File = createTempDir("junit-hilla-gradle-plugin")
+    val dir: File = createTempDirectory("junit-hilla-gradle-plugin").toFile()
 
     /**
      * The main `build.gradle` file.

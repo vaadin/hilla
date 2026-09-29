@@ -39,11 +39,13 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.work.DisableCachingByDefault
 
 /**
  * Task that generates the endpoints.ts and model TS classes
  * needed for calling the backend in a typesafe manner.
  */
+@DisableCachingByDefault(because = "Inputs contain absolute project paths")
 public abstract class EngineGenerateTask : DefaultTask() {
 
     init {
@@ -103,7 +105,7 @@ public abstract class EngineGenerateTask : DefaultTask() {
 
     @get:Optional
     @get:Input
-    internal abstract val mainClass: Property<String?>
+    internal abstract val mainClass: Property<String>
 
     @get:Input
     internal abstract val sourceClasses: ListProperty<String>
