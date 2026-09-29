@@ -15,6 +15,9 @@
  */
 package com.vaadin.hilla.parser.models;
 
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+
 final class AnnotationParameterReflectionModel<T>
         extends AnnotationParameterModel implements ReflectionModel {
     private final ReflectionOrigin<T> origin;
@@ -40,14 +43,24 @@ final class AnnotationParameterReflectionModel<T>
 
     @Override
     protected Object prepareValue() {
-        var value = origin.getValue();
+        return convert(origin.getValue());
+    }
 
-        if (value instanceof Class<?>) {
-            return ClassInfoModel.of((Class<?>) value);
-        } else if (value instanceof Enum<?>) {
-            return AnnotationParameterEnumValueModel.of((Enum<?>) value);
-        }
-
-        return value;
+    /**
+     * Replaces the reflection objects an annotation attribute may hold with the
+     * models of this package, recursing into arrays so that an element gets the
+     * same treatment as a value of its own. Arrays become lists, which gives
+     * {@link AnnotationParameterModel#equals(Object)} value semantics.
+     */
+    private static Object convert(Object value) {
+        return switch (value) {
+        case Class<?> cls -> ClassInfoModel.of(cls);
+        case Enum<?> enumValue ->
+            AnnotationParameterEnumValueModel.of(enumValue);
+        case Annotation annotation -> AnnotationInfoModel.of(annotation);
+        case Object[] array -> Arrays.stream(array)
+                .map(AnnotationParameterReflectionModel::convert).toList();
+        default -> value;
+        };
     }
 }

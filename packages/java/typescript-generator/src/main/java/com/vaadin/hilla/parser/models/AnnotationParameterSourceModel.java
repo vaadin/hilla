@@ -15,8 +15,11 @@
  */
 package com.vaadin.hilla.parser.models;
 
+import java.util.Arrays;
+
 import io.github.classgraph.AnnotationClassRef;
 import io.github.classgraph.AnnotationEnumValue;
+import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.AnnotationParameterValue;
 
 final class AnnotationParameterSourceModel extends AnnotationParameterModel
@@ -44,21 +47,27 @@ final class AnnotationParameterSourceModel extends AnnotationParameterModel
 
     @Override
     protected Object prepareValue() {
-        var _value = origin.getValue();
+        return convert(origin.getValue());
+    }
 
-        if (_value instanceof AnnotationClassRef) {
-            var _ref = (AnnotationClassRef) _value;
-            if (_ref.getClassInfo() == null) {
-                // ClassGraph is missing the class, try loading from reflection
-                return ClassInfoModel.of(_ref.loadClass());
-            } else {
-                return ClassInfoModel.of(_ref.getClassInfo());
-            }
-        } else if (_value instanceof AnnotationEnumValue) {
-            return AnnotationParameterEnumValueModel
-                    .of((AnnotationEnumValue) _value);
-        }
-
-        return _value;
+    /**
+     * Replaces the ClassGraph objects an annotation attribute may hold with the
+     * models of this package, recursing into arrays so that an element gets the
+     * same treatment as a value of its own. Arrays become lists, which gives
+     * {@link AnnotationParameterModel#equals(Object)} value semantics.
+     */
+    private static Object convert(Object value) {
+        return switch (value) {
+        case AnnotationClassRef ref ->
+            ref.getClassInfo() != null ? ClassInfoModel.of(ref.getClassInfo())
+                    // ClassGraph is missing the class, load it by reflection
+                    : ClassInfoModel.of(ref.loadClass());
+        case AnnotationEnumValue enumValue ->
+            AnnotationParameterEnumValueModel.of(enumValue);
+        case AnnotationInfo annotation -> AnnotationInfoModel.of(annotation);
+        case Object[] array -> Arrays.stream(array)
+                .map(AnnotationParameterSourceModel::convert).toList();
+        default -> value;
+        };
     }
 }
