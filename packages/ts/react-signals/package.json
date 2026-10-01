@@ -46,7 +46,7 @@
   "dependencies": {
     "@preact/signals-react": "3.0.1",
     "@vaadin/hilla-frontend": "24.7.14",
-    "nanoid": "5.0.9"
+    "nanoid": "5.1.16"
   },
   "peerDependencies": {
     "react": "18 || 19",
