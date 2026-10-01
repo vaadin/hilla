@@ -9,11 +9,11 @@
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
     "@vaadin/icon": "24.9.19",
     "@vaadin/icons": "24.9.19",
-    "@vaadin/polymer-legacy-adapter": "24.9.18",
+    "@vaadin/polymer-legacy-adapter": "24.9.19",
     "@vaadin/router": "2.0.1",
     "@vaadin/tooltip": "24.9.19",
-    "@vaadin/vaadin-lumo-styles": "24.9.18",
-    "@vaadin/vaadin-themable-mixin": "24.9.18",
+    "@vaadin/vaadin-lumo-styles": "24.9.19",
+    "@vaadin/vaadin-themable-mixin": "24.9.19",
     "construct-style-sheets-polyfill": "3.1.0",
     "lit": "3.3.3"
   },
@@ -58,11 +58,11 @@
       "@vaadin/hilla-lit-form": "24.9.23",
       "@vaadin/icon": "24.9.19",
       "@vaadin/icons": "24.9.19",
-      "@vaadin/polymer-legacy-adapter": "24.9.18",
+      "@vaadin/polymer-legacy-adapter": "24.9.19",
       "@vaadin/router": "2.0.1",
       "@vaadin/tooltip": "24.9.19",
-      "@vaadin/vaadin-lumo-styles": "24.9.18",
-      "@vaadin/vaadin-themable-mixin": "24.9.18",
+      "@vaadin/vaadin-lumo-styles": "24.9.19",
+      "@vaadin/vaadin-themable-mixin": "24.9.19",
       "construct-style-sheets-polyfill": "3.1.0",
       "lit": "3.3.3"
     },
@@ -99,7 +99,7 @@
       "workbox-routing": "7.4.1",
       "workbox-strategies": "7.4.1"
     },
-    "hash": "1addbc5654576541f57390a6f7108e1442465561f19bc3d5078a72a9af16fe5d",
+    "hash": "f84bbb8f0ed8383d7be47072f59e69099be287d48b2d7d5f7add0e9e25a68786",
     "overrides": {
       "@polymer/polymer": "$@polymer/polymer",
       "@vaadin/common-frontend": "$@vaadin/common-frontend",
@@ -113,9 +113,7 @@
       "construct-style-sheets-polyfill": "$construct-style-sheets-polyfill",
       "lit": "$lit",
       "workbox-build": {
-        "@rollup/plugin-terser": "1.0.0",
-        "glob": "13.0.6",
-        "serialize-javascript": "7.0.4"
+        "glob": "13.0.6"
       }
     }
   },
@@ -134,9 +132,7 @@
     "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles",
     "@vaadin/tooltip": "$@vaadin/tooltip",
     "workbox-build": {
-      "glob": "13.0.6",
-      "serialize-javascript": "7.0.4",
-      "@rollup/plugin-terser": "1.0.0"
+      "glob": "13.0.6"
     }
   }
 }
