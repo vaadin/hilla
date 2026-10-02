@@ -1039,7 +1039,7 @@ describe('@vaadin/hilla-react-crud', () => {
                 key: 'firstName',
               };
 
-              setFilter(filter as FilterUnion);
+              setFilter(filter);
             }}
           ></TextField>
         );
@@ -1280,7 +1280,7 @@ describe('@vaadin/hilla-react-crud', () => {
               key: 'fullName',
             };
 
-            setFilter(filter as FilterUnion);
+            setFilter(filter);
           }}
         ></TextField>
       );
