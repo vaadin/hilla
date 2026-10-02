@@ -15,6 +15,9 @@ class AnnotationTestEntityModel<T extends AnnotationTestEntity = AnnotationTestE
     get oneToMany(): ArrayModel<NestedEntityModel> {
         return this[_getPropertyModel]("oneToMany", (parent, key) => new ArrayModel(parent, key, true, (parent, key) => new NestedEntityModel(parent, key, true), { meta: { annotations: [{ name: "jakarta.persistence.OneToMany" }], javaType: "java.util.List" } }));
     }
+    get oneToManyWithTargetEntity(): ArrayModel<NestedEntityModel> {
+        return this[_getPropertyModel]("oneToManyWithTargetEntity", (parent, key) => new ArrayModel(parent, key, true, (parent, key) => new NestedEntityModel(parent, key, true), { meta: { annotations: [{ name: "jakarta.persistence.OneToMany", attributes: { targetEntity: { jvmType: "com.vaadin.hilla.parser.plugins.model.annotations.AnnotationsEndpoint$NestedEntity" } } }], javaType: "java.util.List" } }));
+    }
     get manyToOne(): NestedEntityModel {
         return this[_getPropertyModel]("manyToOne", (parent, key) => new NestedEntityModel(parent, key, true, { meta: { annotations: [{ name: "jakarta.persistence.ManyToOne" }] } }));
     }
@@ -22,7 +25,10 @@ class AnnotationTestEntityModel<T extends AnnotationTestEntity = AnnotationTestE
         return this[_getPropertyModel]("manyToMany", (parent, key) => new ArrayModel(parent, key, true, (parent, key) => new NestedEntityModel(parent, key, true), { meta: { annotations: [{ name: "jakarta.persistence.ManyToMany" }], javaType: "java.util.List" } }));
     }
     get manyToManyWithFetchType(): ArrayModel<NestedEntityModel> {
-        return this[_getPropertyModel]("manyToManyWithFetchType", (parent, key) => new ArrayModel(parent, key, true, (parent, key) => new NestedEntityModel(parent, key, true), { meta: { annotations: [{ name: "jakarta.persistence.ManyToMany" }], javaType: "java.util.List" } }));
+        return this[_getPropertyModel]("manyToManyWithFetchType", (parent, key) => new ArrayModel(parent, key, true, (parent, key) => new NestedEntityModel(parent, key, true), { meta: { annotations: [{ name: "jakarta.persistence.ManyToMany", attributes: { fetch: "EAGER" } }], javaType: "java.util.List" } }));
+    }
+    get manyToManyWithCascade(): ArrayModel<NestedEntityModel> {
+        return this[_getPropertyModel]("manyToManyWithCascade", (parent, key) => new ArrayModel(parent, key, true, (parent, key) => new NestedEntityModel(parent, key, true), { meta: { annotations: [{ name: "jakarta.persistence.ManyToMany", attributes: { cascade: ["PERSIST", "MERGE"] } }], javaType: "java.util.List" } }));
     }
     get name(): StringModel {
         return this[_getPropertyModel]("name", (parent, key) => new StringModel(parent, key, true, { meta: { javaType: "java.lang.String" } }));
