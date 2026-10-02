@@ -1,5 +1,5 @@
-import type EmailNotification_1 from "./EmailNotification.js";
-interface HtmlEmailNotification extends EmailNotification_1 {
+import type EmailNotification from "./EmailNotification.js";
+interface HtmlEmailNotification extends EmailNotification {
     html?: string;
     kind: "html-email";
 }

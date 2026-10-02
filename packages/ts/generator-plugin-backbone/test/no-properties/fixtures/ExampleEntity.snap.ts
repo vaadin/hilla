@@ -1,5 +1,5 @@
-import type CoreEntity_1 from "./CoreEntity.js";
-interface ExampleEntity extends CoreEntity_1 {
+import type CoreEntity from "./CoreEntity.js";
+interface ExampleEntity extends CoreEntity {
     id?: number;
 }
 export default ExampleEntity;

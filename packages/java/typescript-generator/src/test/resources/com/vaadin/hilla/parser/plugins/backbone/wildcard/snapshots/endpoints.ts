@@ -1,2 +1,2 @@
-import * as WildcardTypeEndpoint_1 from "./WildcardTypeEndpoint.js";
-export { WildcardTypeEndpoint_1 as WildcardTypeEndpoint };
+import * as WildcardTypeEndpoint from "./WildcardTypeEndpoint.js";
+export { WildcardTypeEndpoint };

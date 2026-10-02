@@ -7,6 +7,7 @@ import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/Depend
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
 import { OpenAPIV3 } from 'openapi-types';
 import EndpointMethodOperationProcessor from './EndpointMethodOperationProcessor.js';
+import { defaultMediaType } from './utils.js';
 
 export default class EndpointProcessor {
   static async create(
@@ -16,10 +17,32 @@ export default class EndpointProcessor {
     owner: Plugin,
   ): Promise<EndpointProcessor> {
     const endpoint = new EndpointProcessor(name, methods, storage, owner);
-    endpoint.#dependencies.imports.default.add(
-      endpoint.#dependencies.paths.createRelativePath(await ClientPlugin.getClientFileName(storage.outputDir)),
-      'client',
-    );
+    const { exports, imports, names, paths } = endpoint.#dependencies;
+
+    // Claim declared names and parameters before imports, so that it is an
+    // import that gets suffixed on a collision. The method names go first: the
+    // push and signals plugins look the generated functions up by name, so a
+    // method should not be suffixed because of another method's parameter.
+    for (const [method, pathItem] of methods) {
+      // anything else is reported and skipped by `createProcessor` later on
+      if (pathItem[OpenAPIV3.HttpMethods.POST]) {
+        exports.named.add(method);
+      }
+    }
+
+    for (const pathItem of methods.values()) {
+      // only the names are of interest here, so the schemas are left alone
+      const { requestBody } = pathItem[OpenAPIV3.HttpMethods.POST] ?? {};
+      const schema = requestBody ? owner.resolver.resolve(requestBody).content[defaultMediaType].schema : undefined;
+      const properties = schema ? owner.resolver.resolve(schema).properties : undefined;
+
+      for (const parameter of Object.keys(properties ?? {})) {
+        names.claim(parameter);
+      }
+    }
+
+    imports.default.add(paths.createRelativePath(await ClientPlugin.getClientFileName(storage.outputDir)), 'client');
+
     return endpoint;
   }
 
