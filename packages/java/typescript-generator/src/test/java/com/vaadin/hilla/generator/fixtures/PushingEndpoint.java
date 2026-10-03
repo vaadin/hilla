@@ -13,19 +13,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.hilla.generator.model;
+package com.vaadin.hilla.generator.fixtures;
 
-import java.util.List;
-import java.util.Objects;
+import reactor.core.publisher.Flux;
+
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 /**
- * A method of a browser callable class.
+ * Has nothing but methods sending a series of values, so that the file it is
+ * written to needs nothing of what a single request takes.
  */
-public record MethodModel(String name, List<ParameterModel> parameters,
-        TypeModel returnType, boolean pushes) {
-    public MethodModel {
-        Objects.requireNonNull(name);
-        Objects.requireNonNull(returnType);
-        parameters = List.copyOf(parameters);
+@Endpoint
+public class PushingEndpoint {
+    public Flux<String> messages() {
+        return null;
     }
 }
