@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import reactor.core.publisher.Flux;
 
+import com.vaadin.flow.signals.Signal;
 import com.vaadin.hilla.EndpointSubscription;
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
@@ -267,6 +268,8 @@ public class SampleEndpoint {
 
         private Optional<List<String>> maybeTags;
 
+        private Signal<String> signal;
+
         public int getCount() {
             return count;
         }
@@ -345,6 +348,14 @@ public class SampleEndpoint {
 
         public void setMaybeTags(Optional<List<String>> maybeTags) {
             this.maybeTags = maybeTags;
+        }
+
+        public Signal<String> getSignal() {
+            return signal;
+        }
+
+        public void setSignal(Signal<String> signal) {
+            this.signal = signal;
         }
     }
 
