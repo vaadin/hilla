@@ -26,6 +26,7 @@ import com.vaadin.hilla.generator.model.TypeModel;
 final class TypeWriter {
     private final ImportRegistry imports;
     private final String directory;
+    private final boolean readOnly;
 
     /**
      * @param imports
@@ -35,8 +36,22 @@ final class TypeWriter {
      *            folder, which decides how entity files are referred to
      */
     TypeWriter(ImportRegistry imports, String directory) {
+        this(imports, directory, false);
+    }
+
+    private TypeWriter(ImportRegistry imports, String directory,
+            boolean readOnly) {
         this.imports = imports;
         this.directory = directory;
+        this.readOnly = readOnly;
+    }
+
+    /**
+     * The same writer, writing an array as one which cannot be changed, which
+     * is what a form model says about the values it holds.
+     */
+    TypeWriter readOnly() {
+        return new TypeWriter(imports, directory, true);
     }
 
     String write(TypeModel type) {
@@ -58,7 +73,8 @@ final class TypeWriter {
     String writeRequired(TypeModel type) {
         return switch (type) {
         case TypeModel.Scalar scalar -> write(scalar.kind());
-        case TypeModel.ArrayOf array -> "Array<" + write(array.items()) + ">";
+        case TypeModel.ArrayOf array -> (readOnly ? "ReadonlyArray<" : "Array<")
+                + write(array.items()) + ">";
         case TypeModel.MapOf map ->
             "Record<string, " + write(map.values()) + ">";
         case TypeModel.EntityRef entity -> write(entity);
