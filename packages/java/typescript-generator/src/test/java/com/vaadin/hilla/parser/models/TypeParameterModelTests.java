@@ -37,6 +37,7 @@ import io.github.classgraph.TypeParameter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -90,6 +91,24 @@ public class TypeParameterModelTests {
                             .collect(Collectors.toList()));
             break;
         }
+    }
+
+    @DisplayName("It should compare an F-bounded type parameter")
+    @Test
+    public void should_CompareFBoundedTypeParameter() {
+        var origin = FBoundedSample.class.getTypeParameters()[0];
+        var otherOrigin = OtherFBoundedSample.class.getTypeParameters()[0];
+
+        assertEquals(TypeParameterModel.of(origin),
+                TypeParameterModel.of(origin));
+
+        // Both are named E and both are F-bounded, so only the bounds tell
+        // them apart: breaking out of the cycle may not stop the comparison
+        // before they are reached.
+        assertNotEquals(TypeParameterModel.of(origin),
+                TypeParameterModel.of(otherOrigin));
+        assertNotEquals(TypeParameterModel.of(otherOrigin),
+                TypeParameterModel.of(origin));
     }
 
     @DisplayName("It should have the same hashCode for source and reflection models")
@@ -196,6 +215,21 @@ public class TypeParameterModelTests {
                                 entry.getKey()));
             }
         }
+    }
+
+    /**
+     * An F-bounded type parameter: its bound leads back to the type parameter
+     * itself, which is the shape of the type parameter of {@link Enum} and of
+     * any type parameterized by an enum.
+     */
+    static final class FBoundedSample<E extends Enum<E>> {
+    }
+
+    /**
+     * Another F-bounded type parameter, of the same name as the one of
+     * {@link FBoundedSample} but with a different bound.
+     */
+    static final class OtherFBoundedSample<E extends Comparable<E>> {
     }
 
     static final class Sample<@Sample.Foo RegularTypeParameter, @Sample.Foo BoundedTypeParameter extends Sample.Bound> {
