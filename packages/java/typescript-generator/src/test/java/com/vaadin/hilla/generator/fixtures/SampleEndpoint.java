@@ -15,8 +15,11 @@
  */
 package com.vaadin.hilla.generator.fixtures;
 
+import jakarta.annotation.Nonnull;
+
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
@@ -45,12 +48,64 @@ public class SampleEndpoint {
         return null;
     }
 
+    public List<Sample> all() {
+        return List.of();
+    }
+
+    public Wrapper<Sample> wrapped() {
+        return null;
+    }
+
+    public Kind kind() {
+        return null;
+    }
+
     public String describe(String firstName, String lastName, int age) {
         return firstName + lastName + age;
     }
 
-    public Box<String> box() {
-        return null;
+    /**
+     * Annotated as always having a value, both what it returns and what it
+     * takes, which the writers have to tell apart from the rest.
+     */
+    @Nonnull
+    public String required(@Nonnull String name) {
+        return name;
+    }
+
+    /**
+     * Holds a value or does not, which TypeScript has nothing of its own for.
+     */
+    public Optional<String> maybe() {
+        return Optional.empty();
+    }
+
+    public Optional<List<String>> maybeNames() {
+        return Optional.empty();
+    }
+
+    public Optional<Map<String, Integer>> maybeCounts() {
+        return Optional.empty();
+    }
+
+    public enum Kind {
+        ONE, OTHER
+    }
+
+    /**
+     * An entity with a type parameter, which the type it is used with is
+     * written into.
+     */
+    public static class Wrapper<T> {
+        private T value;
+
+        public T getValue() {
+            return value;
+        }
+
+        public void setValue(T value) {
+            this.value = value;
+        }
     }
 
     public static class Sample {
@@ -62,22 +117,6 @@ public class SampleEndpoint {
 
         public void setName(String name) {
             this.name = name;
-        }
-    }
-
-    /**
-     * An entity with a type parameter, which the type it is used with is
-     * written into.
-     */
-    public static class Box<T> {
-        private T value;
-
-        public T getValue() {
-            return value;
-        }
-
-        public void setValue(T value) {
-            this.value = value;
         }
     }
 }
