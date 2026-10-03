@@ -25,18 +25,38 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
+import com.vaadin.hilla.engine.GeneratorProcessor;
+import com.vaadin.hilla.engine.ParserProcessor;
+import com.vaadin.hilla.internal.fixtures.MyEndpoint;
 
 public class TaskGenerateEndpointTest extends EndpointsTaskTest {
 
     private Path outputDirectory;
     private TaskGenerateEndpoint taskGenerateEndpoint;
+
+    /**
+     * These are the tests of the Node generator, which writes the TypeScript
+     * for a run which asks for it rather than for every run.
+     */
+    @BeforeEach
+    public void writeTypeScriptWithTheNodeGenerator() {
+        System.setProperty(GeneratorProcessor.JAVA_TYPESCRIPT_PROPERTY,
+                "false");
+    }
+
+    @AfterEach
+    public void writeTypeScriptInJava() {
+        System.clearProperty(GeneratorProcessor.JAVA_TYPESCRIPT_PROPERTY);
+    }
 
     @BeforeEach
     public void setUp() throws IOException, URISyntaxException {
@@ -48,6 +68,21 @@ public class TaskGenerateEndpointTest extends EndpointsTaskTest {
         Files.copy(referenceOpenAPIJsonFile, getOpenAPIFile());
         outputDirectory = Files.createDirectory(
                 getTemporaryDirectory().resolve(getOutputDirectory()));
+    }
+
+    @Test
+    public void should_GenerateFromTheOpenAPIDefinitionOfAParserRun()
+            throws Exception {
+        var configuration = getEngineConfiguration();
+        var parser = new ParserProcessor(configuration);
+        parser.process(List.of(MyEndpoint.class));
+
+        // What a run of the parser leaves behind is what the Node generator
+        // writes the TypeScript from, whoever hands it the run
+        new GeneratorProcessor(configuration).process(parser);
+
+        assertTrue(outputDirectory.resolve("MyEndpoint.ts").toFile().exists(),
+                "The endpoint the parser walked is written");
     }
 
     @Test
