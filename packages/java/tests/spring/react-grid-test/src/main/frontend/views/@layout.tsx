@@ -11,7 +11,7 @@ export default function MainLayout(): React.JSX.Element {
       <div slot="drawer" className="flex flex-col justify-between h-full p-m">
         <header className="flex flex-col gap-m">
           <h1 className="text-l m-0">Test</h1>
-          <SideNav onNavigate={({ path }) => navigate(path!)} location={location}>
+          <SideNav onNavigate={({ path }) => navigate(`/${path!}`)} location={location}>
             {createMenuItems().map(({ to, title, icon }) => (
               <SideNavItem path={to} key={to}>
                 {icon ? <Icon src={icon} slot="prefix"></Icon> : <></>}
