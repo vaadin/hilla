@@ -27,6 +27,7 @@ final class TypeWriter {
     private final ImportRegistry imports;
     private final String directory;
     private final boolean readOnly;
+    private final boolean declaresTypeParameters;
 
     /**
      * @param imports
@@ -36,14 +37,15 @@ final class TypeWriter {
      *            folder, which decides how entity files are referred to
      */
     TypeWriter(ImportRegistry imports, String directory) {
-        this(imports, directory, false);
+        this(imports, directory, false, true);
     }
 
     private TypeWriter(ImportRegistry imports, String directory,
-            boolean readOnly) {
+            boolean readOnly, boolean declaresTypeParameters) {
         this.imports = imports;
         this.directory = directory;
         this.readOnly = readOnly;
+        this.declaresTypeParameters = declaresTypeParameters;
     }
 
     /**
@@ -51,7 +53,17 @@ final class TypeWriter {
      * is what a form model says about the values it holds.
      */
     TypeWriter readOnly() {
-        return new TypeWriter(imports, directory, true);
+        return new TypeWriter(imports, directory, true, declaresTypeParameters);
+    }
+
+    /**
+     * The same writer, for a file which declares no type parameters, and where
+     * a value of one is therefore written as an unknown value: an endpoint is
+     * written as functions, and what a type parameter of the class or of the
+     * method stands for is only known to the server.
+     */
+    TypeWriter withoutTypeParameters() {
+        return new TypeWriter(imports, directory, readOnly, false);
     }
 
     String write(TypeModel type) {
@@ -79,7 +91,8 @@ final class TypeWriter {
             "Record<string, " + write(map.values()) + ">";
         case TypeModel.EntityRef entity -> write(entity);
         case TypeModel.Provided provided -> write(provided);
-        case TypeModel.TypeVariable variable -> variable.name();
+        case TypeModel.TypeVariable variable ->
+            declaresTypeParameters ? variable.name() : "unknown";
         };
     }
 
