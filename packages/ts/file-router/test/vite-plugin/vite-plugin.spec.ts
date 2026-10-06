@@ -97,7 +97,7 @@ describe('@vaadin/hilla-file-router', () => {
       plugin = vitePluginFileSystemRouter({ isDevMode: true, debug: true });
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error: the configResolved method could be either a function or an object.
-      plugin.configResolved({
+      await plugin.configResolved({
         logger: { info: sinon.spy(), warn: sinon.spy(), error: sinon.spy() },
         root: fileURLToPath(rootDir),
         build: { outDir: fileURLToPath(outDir) },
@@ -114,6 +114,27 @@ describe('@vaadin/hilla-file-router', () => {
     it('should generate fs routes during build', async () => {
       await (plugin.buildStart as () => Promise<void>)();
       expect(existsSync(fileRoutesJsonModule.file!)).to.be.true;
+    });
+
+    // Regression test for https://github.com/vaadin/hilla/issues/6040: the TypeScript
+    // checker type-checks the project before `buildStart` runs, so in dev mode the
+    // files have to be on disk as soon as `configResolved` resolves.
+    it('should generate fs routes in dev mode without buildStart', async () => {
+      const ownRootDir = await createTmpDir();
+      await createTestingRouteFiles(new URL('frontend/views/', ownRootDir));
+      const ownGeneratedDir = new URL('frontend/generated/', ownRootDir);
+      const ownPlugin = vitePluginFileSystemRouter({ isDevMode: true });
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error: the configResolved method could be either a function or an object.
+      await ownPlugin.configResolved({
+        logger: { info: sinon.spy(), warn: sinon.spy(), error: sinon.spy() },
+        root: fileURLToPath(ownRootDir),
+        build: { outDir: fileURLToPath(new URL('dist/', ownRootDir)) },
+      });
+
+      expect(existsSync(fileURLToPath(new URL('file-routes.ts', ownGeneratedDir)))).to.be.true;
+      expect(existsSync(fileURLToPath(new URL('file-routes.json', ownGeneratedDir)))).to.be.true;
     });
 
     it('should send fs-route-update when file-routes.json is added', async () => {
@@ -335,7 +356,7 @@ export default function MyView(): ReactElement { return <div></div>; }
           prodPlugin = vitePluginFileSystemRouter({ isDevMode: false });
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-expect-error: the configResolved method could be either a function or an object.
-          prodPlugin.configResolved({
+          await prodPlugin.configResolved({
             logger: { info: sinon.spy(), warn: sinon.spy(), error: sinon.spy() },
             root: fileURLToPath(prodRootDir),
             build: { outDir: fileURLToPath(new URL('dist/', prodRootDir)) },
