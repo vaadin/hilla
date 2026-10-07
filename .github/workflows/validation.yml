@@ -61,13 +61,6 @@ env:
 jobs:
   init:
     name: Build Java and TypeScript for other tasks
-    # Every job below needs this one, so a label that asks for neither of the
-    # jobs a label can ask for leaves the run empty. validation-label.yml does
-    # not call this workflow for such a label, so this only backs that up.
-    if: >-
-      ${{ github.event.action != 'labeled'
-      || github.event.label.name == 'run-windows-tests'
-      || github.event.label.name == 'run-native-build' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -485,10 +478,7 @@ jobs:
       ${{ github.event.action == 'labeled' && 'Label Summary'
       || 'Tests Summary' }}
     runs-on: ubuntu-latest
-    # Without a job to summarise there is also no artifact to merge, which the
-    # merge below reports as an error, so this stays out of a run that asked
-    # for nothing - the one where init itself is skipped.
-    if: ${{ always() && needs.init.result != 'skipped' }}
+    if: ${{ always() }}
     needs:
       - init
       - check-style
