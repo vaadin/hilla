@@ -39,8 +39,8 @@ import com.vaadin.hilla.internal.fixtures.MyEndpoint;
 /**
  * Verifies the tasks writing the TypeScript of the endpoints, which needs no
  * Node at all: the task which parses the classes writes it, because only that
- * run has what the writers need, and the task which would run the Node
- * generator does nothing.
+ * run has what the writers need, and the task of the endpoints is one which
+ * skips, having nothing left to do.
  */
 // The same classes as the other task tests, which is what has them share one
 // application context: the provider of it is a static one
