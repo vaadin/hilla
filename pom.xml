@@ -79,7 +79,7 @@
     <swagger.parser.v3.version>2.1.42</swagger.parser.v3.version>
     <jackson2.version>2.22.1</jackson2.version>
     <jackson-annotations.version>2.22</jackson-annotations.version>
-    <jackson.version>3.1.5</jackson.version>
+    <jackson.version>3.1.7</jackson.version>
     <junit.version>5.10.1</junit.version>
     <mockito.version>4.5.0</mockito.version>
     <flow.version>25.2-SNAPSHOT</flow.version>
