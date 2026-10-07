@@ -287,12 +287,6 @@ public class GeneratedTypeScriptTest {
                         + " the browser needs");
     }
 
-    /**
-     * The Node generator writes no file at all for such an endpoint, and no
-     * entry in the barrel either. Writing a module which exports nothing keeps
-     * the barrel able to name every endpoint; whether the file is worth writing
-     * is for the step which puts these writers in the pipeline.
-     */
     @Test
     public void should_BuildTheSignalAValueIsSharedThrough() {
         // A signal is not returned by the method: the client builds one and the

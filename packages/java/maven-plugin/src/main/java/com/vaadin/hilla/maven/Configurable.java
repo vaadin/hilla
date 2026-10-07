@@ -37,8 +37,6 @@ interface Configurable {
 
     File getGenerated();
 
-    String getNode();
-
     String getMainClass();
 
     String[] getSourceClasses();

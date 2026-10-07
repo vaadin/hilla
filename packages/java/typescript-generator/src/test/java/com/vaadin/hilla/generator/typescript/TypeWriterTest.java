@@ -25,8 +25,7 @@ import com.vaadin.hilla.generator.model.TypeModel;
 
 /**
  * Covers what a type parameter turns into, which no endpoint signature has by
- * itself: it is the entities, which are still written by the Node generator,
- * that declare and use them.
+ * itself: it is the entities that declare and use them.
  */
 public class TypeWriterTest {
     private final ImportRegistry imports = new ImportRegistry();
