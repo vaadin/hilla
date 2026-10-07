@@ -68,9 +68,6 @@ public class BuildFrontendMojo extends
     @Parameter(property = "generatedTsFolder")
     private File generated;
 
-    @Parameter(property = "nodeCommand", defaultValue = "node")
-    private String node;
-
     @Parameter
     private String mainClass;
 
@@ -86,11 +83,6 @@ public class BuildFrontendMojo extends
             throw new MojoExecutionException(e);
         }
         super.executeInternal();
-    }
-
-    @Override
-    public String getNode() {
-        return node;
     }
 
     @Override
