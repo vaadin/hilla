@@ -6,7 +6,7 @@
     "postinstall": "npm run --include-workspace-root --workspace=@vaadin/hilla install:vite-copy"
   },
   "dependencies": {
-    "@adobe/lit-mobx": "2.0.0-rc.4",
+    "@adobe/lit-mobx": "2.2.2",
     "@polymer/polymer": "3.5.2",
     "@vaadin/a11y-base": "24.7.13",
     "@vaadin/accordion": "24.7.13",
@@ -119,7 +119,7 @@
   },
   "vaadin": {
     "dependencies": {
-      "@adobe/lit-mobx": "2.0.0-rc.4",
+      "@adobe/lit-mobx": "2.2.2",
       "@polymer/polymer": "3.5.2",
       "@vaadin/a11y-base": "24.7.3",
       "@vaadin/accordion": "24.7.3",
