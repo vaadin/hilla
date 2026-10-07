@@ -54,9 +54,6 @@ public final class EngineGenerateMojo extends AbstractMojo
     @Parameter(property = "generatedTsFolder")
     private File generated;
 
-    @Parameter(property = "nodeCommand", defaultValue = "node")
-    private String node;
-
     @Parameter(property = "mainClass")
     private String mainClass;
 
@@ -87,11 +84,6 @@ public final class EngineGenerateMojo extends AbstractMojo
                 | DependencyResolutionRequiredException e) {
             throw new EngineGenerateMojoException("Execution failed", e);
         }
-    }
-
-    @Override
-    public String getNode() {
-        return node;
     }
 
     @Override
