@@ -8,7 +8,7 @@ import org.springframework.context.annotation.FilterType;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
 @SpringBootApplication
-@NpmPackage(value = "@adobe/lit-mobx", version = "2.0.0-rc.4")
+@NpmPackage(value = "@adobe/lit-mobx", version = "2.2.2")
 @NpmPackage(value = "mobx", version = "6.3.3")
 @ComponentScan(basePackages = { "com.vaadin.flow.spring.fusionsecurity",
         "com.vaadin.flow.spring.fusionsecurityjwt", }, excludeFilters = {
