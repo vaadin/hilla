@@ -110,7 +110,7 @@ export default function vitePluginFileSystemRouter({
   return {
     name: 'vite-plugin-file-router',
     enforce: 'pre',
-    configResolved({ logger, root, build: { outDir } }) {
+    async configResolved({ logger, root, build: { outDir } }) {
       const _root = pathToFileURL(root);
       const _generatedDir = new URL(generatedDir, _root);
 
@@ -137,6 +137,14 @@ export default function vitePluginFileSystemRouter({
           return true;
         }
       };
+
+      // The TypeScript checker starts `tsc` from `configureServer`, which Vite runs
+      // before `buildStart`. Generating here instead — `configResolved` is awaited
+      // inside `resolveConfig` — guarantees `file-routes.ts` exists before the first
+      // type check. See https://github.com/vaadin/hilla/issues/6040.
+      if (isDevMode) {
+        await _generateRuntimeFiles();
+      }
     },
     async buildStart() {
       await _generateRuntimeFiles();
