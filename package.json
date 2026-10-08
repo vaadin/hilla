@@ -34,6 +34,7 @@
   },
   "devDependencies": {
     "@nx/js": "^18.0.4",
+    "@testing-library/dom": "^10.4.0",
     "@types/karma": "^6.3.8",
     "@types/node": "^20.11.19",
     "@vaadin/react-components": "24.4.20",
