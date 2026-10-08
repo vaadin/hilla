@@ -471,12 +471,11 @@ jobs:
             packages/java/tests/spring/native/error-screenshots/*.png
 
   test-all:
-    # A run a label started summarises only the job the label asked for, so it
-    # reports under a name of its own: the summary of the run that validated
-    # the commit is what the pull request keeps.
-    name: >-
-      ${{ github.event.action == 'labeled' && 'Label Summary'
-      || 'Tests Summary' }}
+    # A static name, as this is the required check of a pull request. A run a
+    # label started is called from validation-label.yml, so its summary is
+    # listed as `Requested by label / Tests Summary` and does not replace the
+    # one of the run that validated the commit.
+    name: Tests Summary
     runs-on: ubuntu-latest
     if: ${{ always() }}
     needs:
