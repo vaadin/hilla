@@ -1,82 +1,82 @@
-import { _getPropertyModel as _getPropertyModel_1, ArrayModel as ArrayModel_1, BooleanModel as BooleanModel_1, makeObjectEmptyValueCreator as makeObjectEmptyValueCreator_1, NumberModel as NumberModel_1, ObjectModel as ObjectModel_1, StringModel as StringModel_1 } from "@vaadin/hilla-lit-form";
-import CustomEntityModel_1 from "./CustomEntityModel.js";
-import type JavaTypeTestEntity_1 from "./JavaTypeTestEntity.js";
-class JavaTypeTestEntityModel<T extends JavaTypeTestEntity_1 = JavaTypeTestEntity_1> extends ObjectModel_1<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator_1(JavaTypeTestEntityModel);
-    get aBoolean(): BooleanModel_1 {
-        return this[_getPropertyModel_1]("aBoolean", (parent, key) => new BooleanModel_1(parent, key, false, { meta: { javaType: "boolean" } }));
+import { _getPropertyModel, ArrayModel, BooleanModel, makeObjectEmptyValueCreator, NumberModel, ObjectModel, StringModel } from "@vaadin/hilla-lit-form";
+import CustomEntityModel from "./CustomEntityModel.js";
+import type JavaTypeTestEntity from "./JavaTypeTestEntity.js";
+class JavaTypeTestEntityModel<T extends JavaTypeTestEntity = JavaTypeTestEntity> extends ObjectModel<T> {
+    static override createEmptyValue = makeObjectEmptyValueCreator(JavaTypeTestEntityModel);
+    get aBoolean(): BooleanModel {
+        return this[_getPropertyModel]("aBoolean", (parent, key) => new BooleanModel(parent, key, false, { meta: { javaType: "boolean" } }));
     }
-    get aNullableBoolean(): BooleanModel_1 {
-        return this[_getPropertyModel_1]("aNullableBoolean", (parent, key) => new BooleanModel_1(parent, key, true, { meta: { javaType: "java.lang.Boolean" } }));
+    get aNullableBoolean(): BooleanModel {
+        return this[_getPropertyModel]("aNullableBoolean", (parent, key) => new BooleanModel(parent, key, true, { meta: { javaType: "java.lang.Boolean" } }));
     }
-    get aByte(): NumberModel_1 {
-        return this[_getPropertyModel_1]("aByte", (parent, key) => new NumberModel_1(parent, key, false, { meta: { javaType: "byte" } }));
+    get aByte(): NumberModel {
+        return this[_getPropertyModel]("aByte", (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: "byte" } }));
     }
-    get aNullableByte(): NumberModel_1 {
-        return this[_getPropertyModel_1]("aNullableByte", (parent, key) => new NumberModel_1(parent, key, true, { meta: { javaType: "java.lang.Byte" } }));
+    get aNullableByte(): NumberModel {
+        return this[_getPropertyModel]("aNullableByte", (parent, key) => new NumberModel(parent, key, true, { meta: { javaType: "java.lang.Byte" } }));
     }
-    get aChar(): StringModel_1 {
-        return this[_getPropertyModel_1]("aChar", (parent, key) => new StringModel_1(parent, key, false, { meta: { javaType: "char" } }));
+    get aChar(): StringModel {
+        return this[_getPropertyModel]("aChar", (parent, key) => new StringModel(parent, key, false, { meta: { javaType: "char" } }));
     }
-    get aNullableChar(): StringModel_1 {
-        return this[_getPropertyModel_1]("aNullableChar", (parent, key) => new StringModel_1(parent, key, true, { meta: { javaType: "java.lang.Character" } }));
+    get aNullableChar(): StringModel {
+        return this[_getPropertyModel]("aNullableChar", (parent, key) => new StringModel(parent, key, true, { meta: { javaType: "java.lang.Character" } }));
     }
-    get aDouble(): NumberModel_1 {
-        return this[_getPropertyModel_1]("aDouble", (parent, key) => new NumberModel_1(parent, key, false, { meta: { javaType: "double" } }));
+    get aDouble(): NumberModel {
+        return this[_getPropertyModel]("aDouble", (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: "double" } }));
     }
-    get aNullableDouble(): NumberModel_1 {
-        return this[_getPropertyModel_1]("aNullableDouble", (parent, key) => new NumberModel_1(parent, key, true, { meta: { javaType: "java.lang.Double" } }));
+    get aNullableDouble(): NumberModel {
+        return this[_getPropertyModel]("aNullableDouble", (parent, key) => new NumberModel(parent, key, true, { meta: { javaType: "java.lang.Double" } }));
     }
-    get aFloat(): NumberModel_1 {
-        return this[_getPropertyModel_1]("aFloat", (parent, key) => new NumberModel_1(parent, key, false, { meta: { javaType: "float" } }));
+    get aFloat(): NumberModel {
+        return this[_getPropertyModel]("aFloat", (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: "float" } }));
     }
-    get aNullableFloat(): NumberModel_1 {
-        return this[_getPropertyModel_1]("aNullableFloat", (parent, key) => new NumberModel_1(parent, key, true, { meta: { javaType: "java.lang.Float" } }));
+    get aNullableFloat(): NumberModel {
+        return this[_getPropertyModel]("aNullableFloat", (parent, key) => new NumberModel(parent, key, true, { meta: { javaType: "java.lang.Float" } }));
     }
-    get aInt(): NumberModel_1 {
-        return this[_getPropertyModel_1]("aInt", (parent, key) => new NumberModel_1(parent, key, false, { meta: { javaType: "int" } }));
+    get aInt(): NumberModel {
+        return this[_getPropertyModel]("aInt", (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: "int" } }));
     }
-    get aNullableInt(): NumberModel_1 {
-        return this[_getPropertyModel_1]("aNullableInt", (parent, key) => new NumberModel_1(parent, key, true, { meta: { javaType: "java.lang.Integer" } }));
+    get aNullableInt(): NumberModel {
+        return this[_getPropertyModel]("aNullableInt", (parent, key) => new NumberModel(parent, key, true, { meta: { javaType: "java.lang.Integer" } }));
     }
-    get aLong(): NumberModel_1 {
-        return this[_getPropertyModel_1]("aLong", (parent, key) => new NumberModel_1(parent, key, false, { meta: { javaType: "long" } }));
+    get aLong(): NumberModel {
+        return this[_getPropertyModel]("aLong", (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: "long" } }));
     }
-    get aNullableLong(): NumberModel_1 {
-        return this[_getPropertyModel_1]("aNullableLong", (parent, key) => new NumberModel_1(parent, key, true, { meta: { javaType: "java.lang.Long" } }));
+    get aNullableLong(): NumberModel {
+        return this[_getPropertyModel]("aNullableLong", (parent, key) => new NumberModel(parent, key, true, { meta: { javaType: "java.lang.Long" } }));
     }
-    get aShort(): NumberModel_1 {
-        return this[_getPropertyModel_1]("aShort", (parent, key) => new NumberModel_1(parent, key, false, { meta: { javaType: "short" } }));
+    get aShort(): NumberModel {
+        return this[_getPropertyModel]("aShort", (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: "short" } }));
     }
-    get aNullableShort(): NumberModel_1 {
-        return this[_getPropertyModel_1]("aNullableShort", (parent, key) => new NumberModel_1(parent, key, true, { meta: { javaType: "java.lang.Short" } }));
+    get aNullableShort(): NumberModel {
+        return this[_getPropertyModel]("aNullableShort", (parent, key) => new NumberModel(parent, key, true, { meta: { javaType: "java.lang.Short" } }));
     }
-    get aString(): StringModel_1 {
-        return this[_getPropertyModel_1]("aString", (parent, key) => new StringModel_1(parent, key, true, { meta: { javaType: "java.lang.String" } }));
+    get aString(): StringModel {
+        return this[_getPropertyModel]("aString", (parent, key) => new StringModel(parent, key, true, { meta: { javaType: "java.lang.String" } }));
     }
-    get aDate(): StringModel_1 {
-        return this[_getPropertyModel_1]("aDate", (parent, key) => new StringModel_1(parent, key, true, { meta: { javaType: "java.util.Date" } }));
+    get aDate(): StringModel {
+        return this[_getPropertyModel]("aDate", (parent, key) => new StringModel(parent, key, true, { meta: { javaType: "java.util.Date" } }));
     }
-    get aLocalDate(): StringModel_1 {
-        return this[_getPropertyModel_1]("aLocalDate", (parent, key) => new StringModel_1(parent, key, true, { meta: { javaType: "java.time.LocalDate" } }));
+    get aLocalDate(): StringModel {
+        return this[_getPropertyModel]("aLocalDate", (parent, key) => new StringModel(parent, key, true, { meta: { javaType: "java.time.LocalDate" } }));
     }
-    get aLocalTime(): StringModel_1 {
-        return this[_getPropertyModel_1]("aLocalTime", (parent, key) => new StringModel_1(parent, key, true, { meta: { javaType: "java.time.LocalTime" } }));
+    get aLocalTime(): StringModel {
+        return this[_getPropertyModel]("aLocalTime", (parent, key) => new StringModel(parent, key, true, { meta: { javaType: "java.time.LocalTime" } }));
     }
-    get aLocalDateTime(): StringModel_1 {
-        return this[_getPropertyModel_1]("aLocalDateTime", (parent, key) => new StringModel_1(parent, key, true, { meta: { javaType: "java.time.LocalDateTime" } }));
+    get aLocalDateTime(): StringModel {
+        return this[_getPropertyModel]("aLocalDateTime", (parent, key) => new StringModel(parent, key, true, { meta: { javaType: "java.time.LocalDateTime" } }));
     }
-    get aStringArray(): ArrayModel_1<StringModel_1> {
-        return this[_getPropertyModel_1]("aStringArray", (parent, key) => new ArrayModel_1(parent, key, true, (parent, key) => new StringModel_1(parent, key, true, { meta: { javaType: "java.lang.String" } }), { meta: { javaType: "java.lang.String[]" } }));
+    get aStringArray(): ArrayModel<StringModel> {
+        return this[_getPropertyModel]("aStringArray", (parent, key) => new ArrayModel(parent, key, true, (parent, key) => new StringModel(parent, key, true, { meta: { javaType: "java.lang.String" } }), { meta: { javaType: "java.lang.String[]" } }));
     }
-    get aByteArray(): ArrayModel_1<NumberModel_1> {
-        return this[_getPropertyModel_1]("aByteArray", (parent, key) => new ArrayModel_1(parent, key, true, (parent, key) => new NumberModel_1(parent, key, false, { meta: { javaType: "byte" } }), { meta: { javaType: "byte[]" } }));
+    get aByteArray(): ArrayModel<NumberModel> {
+        return this[_getPropertyModel]("aByteArray", (parent, key) => new ArrayModel(parent, key, true, (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: "byte" } }), { meta: { javaType: "byte[]" } }));
     }
-    get aStringList(): ArrayModel_1<StringModel_1> {
-        return this[_getPropertyModel_1]("aStringList", (parent, key) => new ArrayModel_1(parent, key, true, (parent, key) => new StringModel_1(parent, key, true, { meta: { javaType: "java.lang.String" } }), { meta: { javaType: "java.util.List" } }));
+    get aStringList(): ArrayModel<StringModel> {
+        return this[_getPropertyModel]("aStringList", (parent, key) => new ArrayModel(parent, key, true, (parent, key) => new StringModel(parent, key, true, { meta: { javaType: "java.lang.String" } }), { meta: { javaType: "java.util.List" } }));
     }
-    get aCustomEntity(): CustomEntityModel_1 {
-        return this[_getPropertyModel_1]("aCustomEntity", (parent, key) => new CustomEntityModel_1(parent, key, true));
+    get aCustomEntity(): CustomEntityModel {
+        return this[_getPropertyModel]("aCustomEntity", (parent, key) => new CustomEntityModel(parent, key, true));
     }
 }
 export default JavaTypeTestEntityModel;

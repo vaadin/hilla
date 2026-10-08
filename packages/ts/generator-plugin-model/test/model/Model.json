@@ -369,7 +369,7 @@
             ],
             "x-java-type": "java.lang.Long"
           },
-          "nestedModelWithAnnotations" : {
+          "nestedModelWithAnnotations": {
             "allOf": [
               {
                 "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormEntity"
@@ -796,6 +796,14 @@
       "com.example.application.endpoints.TsFormEndpoint.FormEnumTypes": {
         "type": "string",
         "enum": ["ENUM1", "ENUM2", "ENUM_2", "HELLO_WORLD", "_HELLO", "MANY_MANY_WORDS"]
+      },
+      "com.example.application.endpoints.TsFormEndpoint.T": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
       }
     },
     "securitySchemes": {

@@ -1,5 +1,5 @@
-import type AbstractEntity_1 from "./AbstractEntity.js";
-interface Address extends AbstractEntity_1 {
+import type AbstractEntity from "./AbstractEntity.js";
+interface Address extends AbstractEntity {
     street: string;
     zipCode: string;
     city?: string;

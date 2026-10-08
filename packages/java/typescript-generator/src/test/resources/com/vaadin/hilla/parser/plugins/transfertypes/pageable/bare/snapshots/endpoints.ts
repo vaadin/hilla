@@ -1,2 +1,2 @@
-import * as BarePageableEndpoint_1 from "./BarePageableEndpoint.js";
-export { BarePageableEndpoint_1 as BarePageableEndpoint };
+import * as BarePageableEndpoint from "./BarePageableEndpoint.js";
+export { BarePageableEndpoint };

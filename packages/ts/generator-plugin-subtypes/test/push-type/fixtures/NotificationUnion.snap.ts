@@ -1,10 +1,10 @@
-import type EmailNotification_1 from "./EmailNotification.js";
-import type HtmlEmailNotification_1 from "./HtmlEmailNotification.js";
-import type MultipartSmsNotification_1 from "./MultipartSmsNotification.js";
-import type Notification_1 from "./Notification.js";
-type NotificationUnion = (Notification_1 & {
+import type EmailNotification from "./EmailNotification.js";
+import type HtmlEmailNotification from "./HtmlEmailNotification.js";
+import type MultipartSmsNotification from "./MultipartSmsNotification.js";
+import type Notification from "./Notification.js";
+type NotificationUnion = (Notification & {
     kind: "plain";
-}) | (EmailNotification_1 & {
+}) | (EmailNotification & {
     kind: "email";
-}) | HtmlEmailNotification_1 | MultipartSmsNotification_1;
+}) | HtmlEmailNotification | MultipartSmsNotification;
 export default NotificationUnion;
