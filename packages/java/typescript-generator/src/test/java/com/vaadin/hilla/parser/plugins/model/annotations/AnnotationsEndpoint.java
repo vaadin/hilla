@@ -15,6 +15,7 @@
  */
 package com.vaadin.hilla.parser.plugins.model.annotations;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -51,6 +52,9 @@ public class AnnotationsEndpoint {
         @OneToMany
         public List<NestedEntity> oneToMany;
 
+        @OneToMany(targetEntity = NestedEntity.class)
+        public List<NestedEntity> oneToManyWithTargetEntity;
+
         @ManyToOne
         public NestedEntity manyToOne;
 
@@ -59,6 +63,9 @@ public class AnnotationsEndpoint {
 
         @ManyToMany(fetch = FetchType.EAGER)
         public List<NestedEntity> manyToManyWithFetchType;
+
+        @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+        public List<NestedEntity> manyToManyWithCascade;
 
         @Column(name = "test_column")
         public String name;
