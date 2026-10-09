@@ -10,8 +10,8 @@
     "@vaadin/icons": "25.3.2",
     "@vaadin/router": "2.0.1",
     "@vaadin/tooltip": "25.3.2",
-    "@vaadin/vaadin-lumo-styles": "25.4.0-alpha1",
-    "@vaadin/vaadin-themable-mixin": "25.4.0-alpha1",
+    "@vaadin/vaadin-lumo-styles": "25.4.0-alpha2",
+    "@vaadin/vaadin-themable-mixin": "25.4.0-alpha2",
     "lit": "3.3.3"
   },
   "devDependencies": {
@@ -103,7 +103,7 @@
       "workbox-routing": "7.4.1",
       "workbox-strategies": "7.4.1"
     },
-    "hash": "99d77d4da83093467a7a6112f2d859e5d47a52b72623cf798f6bae51903d069f"
+    "hash": "ee118eb3c30a88d9a80ebddea3676ef2444177af5919aadde3b0fcb2adf9b903"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
