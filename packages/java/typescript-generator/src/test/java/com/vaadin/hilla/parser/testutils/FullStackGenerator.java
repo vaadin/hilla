@@ -39,6 +39,7 @@ import com.vaadin.flow.internal.FrontendUtils;
 import com.vaadin.hilla.EndpointSubscription;
 import com.vaadin.hilla.generator.model.EndpointModel;
 import com.vaadin.hilla.generator.model.EndpointModelPlugin;
+import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
@@ -187,6 +188,15 @@ public final class FullStackGenerator {
     public List<EndpointModel> parseModel() {
         parse();
         return modelPlugin.getEndpoints();
+    }
+
+    /**
+     * Runs the Java part of the pipeline and returns the types the endpoints
+     * refer to, which are generated as declarations of their own.
+     */
+    public List<EntityModel> parseEntities() {
+        parse();
+        return modelPlugin.getEntities();
     }
 
     /**
