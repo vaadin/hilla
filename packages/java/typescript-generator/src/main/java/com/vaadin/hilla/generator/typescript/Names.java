@@ -35,15 +35,20 @@ final class Names {
      * those which a Java or Kotlin method can also be called are of interest,
      * but the rest cost nothing and keep the list the list of the language
      * rather than a selection someone has to keep up to date.
+     *
+     * <p>
+     * A generated file is a module, which the language reads in strict mode,
+     * where {@code eval} and {@code arguments} are names a declaration cannot
+     * go by either.
      */
-    private static final Set<String> RESERVED = Set.of("await", "break", "case",
-            "catch", "class", "const", "continue", "debugger", "default",
-            "delete", "do", "else", "enum", "export", "extends", "false",
-            "finally", "for", "function", "if", "implements", "import", "in",
-            "instanceof", "interface", "let", "new", "null", "package",
-            "private", "protected", "public", "return", "static", "super",
-            "switch", "this", "throw", "true", "try", "typeof", "var", "void",
-            "while", "with", "yield");
+    private static final Set<String> RESERVED = Set.of("arguments", "await",
+            "break", "case", "catch", "class", "const", "continue", "debugger",
+            "default", "delete", "do", "else", "enum", "eval", "export",
+            "extends", "false", "finally", "for", "function", "if",
+            "implements", "import", "in", "instanceof", "interface", "let",
+            "new", "null", "package", "private", "protected", "public",
+            "return", "static", "super", "switch", "this", "throw", "true",
+            "try", "typeof", "var", "void", "while", "with", "yield");
 
     private Names() {
     }
