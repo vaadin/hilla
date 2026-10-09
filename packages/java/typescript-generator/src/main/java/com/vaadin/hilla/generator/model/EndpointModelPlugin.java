@@ -38,6 +38,7 @@ import com.vaadin.hilla.parser.models.FieldInfoModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.models.SpecializedModel;
 import com.vaadin.hilla.parser.models.TypeParameterModel;
+import com.vaadin.hilla.parser.models.jackson.JacksonPropertyModel;
 import com.vaadin.hilla.parser.plugins.backbone.EntityFacts;
 import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointNode;
@@ -298,8 +299,32 @@ public final class EndpointModelPlugin
 
     private void collect(Node<?, ?> parent, PropertyNode node,
             List<TypeModel> ownTypes) {
+        var type = only(ownTypes);
+
+        // Whether the value of a property can be absent is not settled until
+        // the property itself is left: the nullability a Kotlin declaration
+        // keeps on the member it is written as is decided there. A property
+        // holding an optional is one which can be absent whatever such a
+        // declaration says, since an empty optional is what the server leaves
+        // out. A value of a type variable is left as absent as the type it
+        // stands for says, since a declaration extending this one gives that
+        // type and is free to say that the value is always there
+        var absent = isOptional(node.getSource())
+                || node.getValueType().isOptional();
+
         properties.computeIfAbsent(parent, key -> new ArrayList<>())
-                .add(new PropertyModel(node.getTarget(), only(ownTypes)));
+                .add(new PropertyModel(node.getTarget(),
+                        type instanceof TypeModel.TypeVariable && !absent ? type
+                                : asAbsent(type, absent)));
+    }
+
+    /**
+     * Whether the value a property holds is an optional, which the type of the
+     * member it is written as says.
+     */
+    private static boolean isOptional(JacksonPropertyModel property) {
+        return property.getAssociatedTypes().stream().findFirst()
+                .filter(SignatureModel::isOptional).isPresent();
     }
 
     /**

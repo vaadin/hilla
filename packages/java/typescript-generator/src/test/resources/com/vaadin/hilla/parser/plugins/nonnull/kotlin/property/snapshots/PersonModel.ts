@@ -62,12 +62,17 @@ class PersonModel<T extends Person = Person> extends AbstractEntityModel<T> {
 
   get fullName(): StringModel {
     return this[_getPropertyModel]('fullName', (parent, key) =>
-      new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }));
+      new StringModel(parent, key, false, { meta: { javaType: 'java.lang.String' } }));
   }
 
   get age(): NumberModel {
     return this[_getPropertyModel]('age', (parent, key) =>
       new NumberModel(parent, key, true, { meta: { javaType: 'java.lang.Integer' } }));
+  }
+
+  get nickname(): StringModel {
+    return this[_getPropertyModel]('nickname', (parent, key) =>
+      new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }));
   }
 }
 

@@ -22,7 +22,7 @@ import com.vaadin.hilla.parser.models.jackson.JacksonPropertyModel;
 import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 
 public class PropertyNode extends AbstractNode<JacksonPropertyModel, String> {
-    private TypeFacts valueType;
+    private TypeFacts valueType = TypeFacts.unknown();
 
     protected PropertyNode(@NonNull JacksonPropertyModel source,
             @NonNull String target) {
@@ -31,7 +31,8 @@ public class PropertyNode extends AbstractNode<JacksonPropertyModel, String> {
 
     /**
      * What the walk says about the type of the value the property holds, which
-     * the walk carries as a node below this one.
+     * the walk carries as a node below this one. Until that node is left, it is
+     * what is known about a type nothing has been walked for.
      */
     public TypeFacts getValueType() {
         return valueType;
