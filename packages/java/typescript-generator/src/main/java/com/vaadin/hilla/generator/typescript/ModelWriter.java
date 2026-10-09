@@ -269,23 +269,14 @@ final class ModelWriter {
         }
 
         if (value instanceof AnnotationParameterEnumValueModel constant) {
-            return string(constant.getValueName());
+            return Names.string(constant.getValueName());
         }
 
         if (value instanceof ClassInfoModel javaClass) {
-            return string(javaClass.getName());
+            return Names.string(javaClass.getName());
         }
 
-        return string(String.valueOf(value));
-    }
-
-    /**
-     * A string as TypeScript reads it, with what the language would otherwise
-     * read as the end of it, or as another line, written as it says itself.
-     */
-    private static String string(String value) {
-        return "'" + value.replace("\\", "\\\\").replace("'", "\\'")
-                .replace("\n", "\\n").replace("\r", "\\r") + "'";
+        return Names.string(String.valueOf(value));
     }
 
     private static String instance(String model, boolean optional,
