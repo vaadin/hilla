@@ -1,2 +1,3 @@
+import * as ExistingPropertyEndpoint_1 from "./ExistingPropertyEndpoint.js";
 import * as SubTypesEndpoint_1 from "./SubTypesEndpoint.js";
-export { SubTypesEndpoint_1 as SubTypesEndpoint };
+export { ExistingPropertyEndpoint_1 as ExistingPropertyEndpoint, SubTypesEndpoint_1 as SubTypesEndpoint };
