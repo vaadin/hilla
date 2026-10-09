@@ -18,18 +18,21 @@ package com.vaadin.hilla.generator.fixtures;
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 /**
- * Has parameters named after what the generated file needs for itself.
+ * Has the two ways a name can be there more than once: an override of an
+ * exposed method, and an overload.
  */
 @Endpoint
-public class ShadowingEndpoint {
-    public String echo(String client, String init) {
-        return client + init;
+public class InheritingEndpoint extends ExposedBase {
+    @Override
+    public String shared() {
+        return "own";
     }
 
-    /**
-     * Named after the client the generated file calls the server with.
-     */
-    public String client() {
-        return "";
+    public String twice(String one) {
+        return one;
+    }
+
+    public String twice(String one, String two) {
+        return one + two;
     }
 }
