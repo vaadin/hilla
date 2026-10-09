@@ -11,8 +11,8 @@
     "@vaadin/icons": "25.3.2",
     "@vaadin/router": "2.0.1",
     "@vaadin/tooltip": "25.3.2",
-    "@vaadin/vaadin-lumo-styles": "25.4.0-alpha1",
-    "@vaadin/vaadin-themable-mixin": "25.4.0-alpha1",
+    "@vaadin/vaadin-lumo-styles": "25.4.0-alpha2",
+    "@vaadin/vaadin-themable-mixin": "25.4.0-alpha2",
     "lit": "3.3.3",
     "mobx": "6.3.3"
   },
@@ -97,7 +97,7 @@
       "vite": "8.3.2",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "8fe8fd2b14f6cc4195e032c4830e0f8f1efa87aab1e896918a96a932bd9a0c36"
+    "hash": "6c4c84887588b1e08cd7aa1c63329c75358f7785c4ea87889110b8f3df27da15"
   },
   "overrides": {
     "@adobe/lit-mobx": "$@adobe/lit-mobx",
