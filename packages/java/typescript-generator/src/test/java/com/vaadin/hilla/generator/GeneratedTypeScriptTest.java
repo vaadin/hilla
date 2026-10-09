@@ -587,11 +587,15 @@ public class GeneratedTypeScriptTest {
 
     @Test
     public void should_WriteAnEntityExtendingAnother() {
+        // A property of the type the entity is written from is written from
+        // the same import: the file needs the type once however many ways it
+        // refers to it
         assertEquals("""
                 import type Sample from './Sample.js';
 
                 interface Detailed extends Sample {
                   note?: string;
+                  basis?: Sample;
                 }
 
                 export default Detailed;
@@ -886,7 +890,8 @@ public class GeneratedTypeScriptTest {
     @Test
     public void should_WriteTheModelOfATypeInheritingProperties() {
         // Built on the model of the type the properties come from, so that the
-        // inherited ones are bound as well
+        // inherited ones are bound as well, and a property of that type binds
+        // through the very same model
         var file = writeModel(entity(SampleEndpoint.Detailed.class));
 
         assertEquals(
@@ -904,6 +909,11 @@ public class GeneratedTypeScriptTest {
                           get note(): StringModel {
                             return this[_getPropertyModel]('note', (parent, key) =>
                               new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }));
+                          }
+
+                          get basis(): SampleModel {
+                            return this[_getPropertyModel]('basis', (parent, key) =>
+                              new SampleModel(parent, key, true));
                           }
                         }
 
