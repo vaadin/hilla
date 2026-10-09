@@ -19,11 +19,26 @@ import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.jackson.JacksonPropertyModel;
+import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 
 public class PropertyNode extends AbstractNode<JacksonPropertyModel, String> {
+    private TypeFacts valueType;
+
     protected PropertyNode(@NonNull JacksonPropertyModel source,
             @NonNull String target) {
         super(source, target);
+    }
+
+    /**
+     * What the walk says about the type of the value the property holds, which
+     * the walk carries as a node below this one.
+     */
+    public TypeFacts getValueType() {
+        return valueType;
+    }
+
+    public void setValueType(TypeFacts valueType) {
+        this.valueType = valueType;
     }
 
     @NonNull

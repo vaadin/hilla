@@ -65,30 +65,31 @@ public class BasicTests {
 
     @Test
     public void should_TraverseInConsistentOrder() {
-        var openAPI = new Parser().classPath(classPath)
-                .endpointAnnotations(List.of(Endpoint.class))
-                .endpointExposedAnnotations(List.of(EndpointExposed.class))
-                .addPlugin(new BasicPlugin()).execute(endpoints);
+        var plugin = walk();
 
         // The list of endpoints seems to be serialized as "List12". The
         // replacement tries to accommodate for similar representations.
         assertEquals(String.join("\n", STEPS),
-                ((String) openAPI.getExtensions()
-                        .get(BasicPlugin.FOOTSTEPS_STORAGE_KEY))
-                        .replaceAll("List\\w*", "List"));
+                plugin.getFootsteps().replaceAll("List\\w*", "List"));
     }
 
     @Test
     public void should_UpdateNodesAndCollectNames() {
-        var openAPI = new Parser().classPath(classPath)
-                .endpointAnnotations(List.of(Endpoint.class))
-                .endpointExposedAnnotations(List.of(EndpointExposed.class))
-                .addPlugin(new BasicPlugin()).execute(endpoints);
-
         assertEquals(String.join(", ",
                 List.of("FieldInfoModel foo", "FieldInfoModel fieldFoo",
                         "FieldInfoModel fieldBar", "MethodInfoModel methodFoo",
                         "MethodInfoModel methodBar")),
-                openAPI.getExtensions().get(BasicPlugin.STORAGE_KEY));
+                walk().getMembers());
+    }
+
+    private BasicPlugin walk() {
+        var plugin = new BasicPlugin();
+
+        new Parser().classPath(classPath)
+                .endpointAnnotations(List.of(Endpoint.class))
+                .endpointExposedAnnotations(List.of(EndpointExposed.class))
+                .addPlugin(plugin).execute(endpoints);
+
+        return plugin;
     }
 }

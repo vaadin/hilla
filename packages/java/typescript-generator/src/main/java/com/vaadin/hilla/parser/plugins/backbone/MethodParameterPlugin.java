@@ -19,39 +19,16 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.ObjectSchema;
-import io.swagger.v3.oas.models.parameters.RequestBody;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
 import com.vaadin.hilla.parser.core.NodeDependencies;
-import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
 
 public final class MethodParameterPlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
-
-    @Override
-    public void enter(NodePath<?> nodePath) {
-        var node = nodePath.getNode();
-        var parentNode = nodePath.getParentPath().getNode();
-        if (node instanceof MethodParameterNode
-                && parentNode instanceof MethodNode) {
-            var pathItem = (PathItem) parentNode.getTarget();
-            if (pathItem.getPost().getRequestBody() == null) {
-                pathItem.getPost().setRequestBody(createRequestBody());
-            }
-        }
-    }
-
-    @Override
-    public void exit(NodePath<?> nodePath) {
-    }
 
     @NonNull
     @Override
@@ -62,12 +39,6 @@ public final class MethodParameterPlugin
                     .appendChildNodes(getParametersStream(methodNode));
         }
         return nodeDependencies;
-    }
-
-    private RequestBody createRequestBody() {
-        var requestMap = new ObjectSchema();
-        return new RequestBody().content(new Content().addMediaType(
-                MethodPlugin.MEDIA_TYPE, new MediaType().schema(requestMap)));
     }
 
     private Stream<Node<?, ?>> getParametersStream(MethodNode methodNode) {

@@ -15,9 +15,7 @@
  */
 package com.vaadin.hilla.engine;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
@@ -31,14 +29,12 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.hilla.generator.model.EndpointModelPlugin;
 import com.vaadin.hilla.generator.model.Generation;
-import com.vaadin.hilla.parser.core.OpenAPIFileType;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.core.PluginManager;
 
 public final class ParserProcessor {
     private static final Logger logger = LoggerFactory
             .getLogger(ParserProcessor.class);
-    private final Path baseDir;
     private final Set<Path> classPath;
     private final ParserConfiguration.PluginsProcessor pluginsProcessor = new ParserConfiguration.PluginsProcessor();
 
@@ -51,10 +47,8 @@ public final class ParserProcessor {
     private List<Class<? extends Annotation>> endpointAnnotations = List.of();
     private List<Class<? extends Annotation>> endpointExposedAnnotations = List
             .of();
-    private String openAPIBasePath;
 
     public ParserProcessor(EngineAutoConfiguration conf) {
-        this.baseDir = conf.getBaseDir();
         this.classPath = conf.getClasspath();
         this.endpointAnnotations = conf.getEndpointAnnotations();
         this.endpointExposedAnnotations = conf.getEndpointExposedAnnotations();
@@ -76,7 +70,6 @@ public final class ParserProcessor {
                 .endpointExposedAnnotations(endpointExposedAnnotations);
 
         preparePlugins(parser);
-        prepareOpenAPIBase(parser);
 
         logger.debug("Starting JVM Parser");
 
@@ -93,8 +86,6 @@ public final class ParserProcessor {
         applyEndpointAnnotations(parserConfiguration.getEndpointAnnotations());
         applyEndpointExposedAnnotations(
                 parserConfiguration.getEndpointExposedAnnotations());
-        parserConfiguration.getOpenAPIBasePath()
-                .ifPresent(this::applyOpenAPIBase);
         parserConfiguration.getPlugins().ifPresent(this::applyPlugins);
     }
 
@@ -109,34 +100,8 @@ public final class ParserProcessor {
                 .requireNonNull(endpointExposedAnnotations);
     }
 
-    private void applyOpenAPIBase(@NonNull String openAPIBasePath) {
-        this.openAPIBasePath = openAPIBasePath;
-    }
-
     private void applyPlugins(ParserConfiguration.@NonNull Plugins plugins) {
         this.pluginsProcessor.setConfig(plugins);
-    }
-
-    private void prepareOpenAPIBase(Parser parser) {
-        if (openAPIBasePath == null) {
-            return;
-        }
-
-        try {
-            var path = baseDir.resolve(openAPIBasePath);
-            var fileName = path.getFileName().toString();
-
-            if (!fileName.endsWith("yml") && !fileName.endsWith("yaml")
-                    && !fileName.endsWith("json")) {
-                throw new IOException("No OpenAPI base file found");
-            }
-
-            parser.openAPISource(Files.readString(path),
-                    fileName.endsWith("json") ? OpenAPIFileType.JSON
-                            : OpenAPIFileType.YAML);
-        } catch (IOException e) {
-            throw new ParserException("Failed loading OpenAPI spec file", e);
-        }
     }
 
     private void preparePlugins(Parser parser) {
