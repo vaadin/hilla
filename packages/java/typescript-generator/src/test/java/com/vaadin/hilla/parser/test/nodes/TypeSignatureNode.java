@@ -15,21 +15,21 @@
  */
 package com.vaadin.hilla.parser.test.nodes;
 
-import io.swagger.v3.oas.models.media.Schema;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.SignatureModel;
+import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 
 public final class TypeSignatureNode
-        extends AbstractNode<SignatureModel, Schema<?>> {
+        extends AbstractNode<SignatureModel, TypeFacts> {
     private TypeSignatureNode(@NonNull SignatureModel source,
-            @NonNull Schema<?> target) {
+            @NonNull TypeFacts target) {
         super(source, target);
     }
 
     @NonNull
     static public TypeSignatureNode of(@NonNull SignatureModel source) {
-        return new TypeSignatureNode(source, new Schema<>());
+        return new TypeSignatureNode(source, TypeFacts.unknown());
     }
 }
