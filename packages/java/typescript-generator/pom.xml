@@ -43,11 +43,6 @@
       <groupId>tools.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
     </dependency>
-    <!-- Keep Jackson 3 for YAML processing in other parts -->
-    <dependency>
-      <groupId>tools.jackson.dataformat</groupId>
-      <artifactId>jackson-dataformat-yaml</artifactId>
-    </dependency>
     <!-- Vaadin Flow dependency from parser-jvm-utils -->
     <dependency>
       <groupId>com.vaadin</groupId>
