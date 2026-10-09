@@ -44,21 +44,11 @@
     "workbox-build": "7.4.0",
     "workbox-core": "7.3.0",
     "workbox-precaching": "7.3.0",
-    "@vaadin/hilla-generator-plugin-transfertypes": "25.2.0-alpha1",
-    "@vaadin/hilla-generator-plugin-model": "25.2.0-alpha1",
-    "@vaadin/hilla-generator-plugin-client": "25.2.0-alpha1",
     "@rolldown/plugin-babel": "0.2.1",
-    "@vaadin/hilla-generator-plugin-subtypes": "25.2.0-alpha1",
     "@vaadin/hilla-generator-utils": "25.2.0-alpha1",
-    "@vaadin/hilla-generator-plugin-barrel": "25.2.0-alpha1",
-    "@vaadin/hilla-generator-plugin-signals": "25.2.0-alpha1",
-    "@vaadin/hilla-generator-cli": "25.2.0-alpha1",
     "@babel/core": "7.29.0",
     "@types/node": "25.5.0",
-    "magic-string": "0.30.21",
-    "@vaadin/hilla-generator-core": "25.2.0-alpha1",
-    "@vaadin/hilla-generator-plugin-push": "25.2.0-alpha1",
-    "@vaadin/hilla-generator-plugin-backbone": "25.2.0-alpha1"
+    "magic-string": "0.30.21"
   },
   "vaadin": {
     "dependencies": {
@@ -98,21 +88,11 @@
       "workbox-build": "7.4.0",
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0",
-      "@vaadin/hilla-generator-plugin-transfertypes": "25.2.0-alpha1",
-      "@vaadin/hilla-generator-plugin-model": "25.2.0-alpha1",
-      "@vaadin/hilla-generator-plugin-client": "25.2.0-alpha1",
       "@rolldown/plugin-babel": "0.2.1",
-      "@vaadin/hilla-generator-plugin-subtypes": "25.2.0-alpha1",
       "@vaadin/hilla-generator-utils": "25.2.0-alpha1",
-      "@vaadin/hilla-generator-plugin-barrel": "25.2.0-alpha1",
-      "@vaadin/hilla-generator-plugin-signals": "25.2.0-alpha1",
-      "@vaadin/hilla-generator-cli": "25.2.0-alpha1",
       "@babel/core": "7.29.0",
       "@types/node": "25.5.0",
-      "magic-string": "0.30.21",
-      "@vaadin/hilla-generator-core": "25.2.0-alpha1",
-      "@vaadin/hilla-generator-plugin-push": "25.2.0-alpha1",
-      "@vaadin/hilla-generator-plugin-backbone": "25.2.0-alpha1"
+      "magic-string": "0.30.21"
     },
     "hash": "09d3c230c129cd355846b59d1c96561c070ba7879e23bebd9f206b993d5e6509"
   },

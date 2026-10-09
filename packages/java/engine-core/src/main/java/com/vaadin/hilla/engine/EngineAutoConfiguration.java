@@ -60,12 +60,10 @@ public class EngineAutoConfiguration {
     private Path buildDir;
     private Path baseDir;
     private List<Path> classesDirs;
-    private GeneratorConfiguration generator;
     private Path outputDir;
     private ParserConfiguration parser;
     private BrowserCallableFinder browserCallableFinder;
     private boolean productionMode = false;
-    private String nodeCommand = "node";
     private ClassFinder classFinder;
     private ClassLoader classLoader;
     private EngineConfiguration userEngineConfiguration;
@@ -73,7 +71,6 @@ public class EngineAutoConfiguration {
     private EngineAutoConfiguration() {
         baseDir = Path.of(System.getProperty("user.dir"));
         buildDir = baseDir.resolve("target");
-        generator = new GeneratorConfiguration();
         parser = new ParserConfiguration();
 
         var legacyFrontendDir = baseDir.resolve("frontend");
@@ -118,10 +115,6 @@ public class EngineAutoConfiguration {
                 : classesDirs;
     }
 
-    public GeneratorConfiguration getGenerator() {
-        return generator;
-    }
-
     public Path getOutputDir() {
         return outputDir;
     }
@@ -132,10 +125,6 @@ public class EngineAutoConfiguration {
 
     public boolean isProductionMode() {
         return productionMode;
-    }
-
-    public String getNodeCommand() {
-        return nodeCommand;
     }
 
     public ClassFinder getClassFinder() {
@@ -282,7 +271,6 @@ public class EngineAutoConfiguration {
             this.configuration.buildDir = configuration.buildDir;
             this.configuration.classesDirs = configuration.classesDirs;
             this.configuration.classpath = configuration.classpath;
-            this.configuration.generator = configuration.generator;
             this.configuration.parser = configuration.parser;
             this.configuration.outputDir = configuration.outputDir;
             this.configuration.groupId = configuration.groupId;
@@ -291,7 +279,6 @@ public class EngineAutoConfiguration {
             this.configuration.sourceClasses = configuration.sourceClasses;
             this.configuration.browserCallableFinder = configuration.browserCallableFinder;
             this.configuration.productionMode = configuration.productionMode;
-            this.configuration.nodeCommand = configuration.nodeCommand;
             this.configuration.classFinder = configuration.classFinder;
             this.configuration.classLoader = configuration.classLoader;
             this.configuration.parser.setEndpointAnnotations(
@@ -328,11 +315,6 @@ public class EngineAutoConfiguration {
 
         public EngineAutoConfiguration build() {
             return configuration;
-        }
-
-        public Builder generator(GeneratorConfiguration value) {
-            configuration.generator = value;
-            return this;
         }
 
         public Builder outputDir(String value) {
@@ -376,11 +358,6 @@ public class EngineAutoConfiguration {
 
         public Builder productionMode(boolean value) {
             configuration.productionMode = value;
-            return this;
-        }
-
-        public Builder nodeCommand(String value) {
-            configuration.nodeCommand = value;
             return this;
         }
 

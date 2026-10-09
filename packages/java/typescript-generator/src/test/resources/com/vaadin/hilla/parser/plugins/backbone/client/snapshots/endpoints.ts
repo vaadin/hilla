@@ -1,2 +1,3 @@
-import * as ClientEndpoint_1 from "./ClientEndpoint.js";
-export { ClientEndpoint_1 as ClientEndpoint };
+import * as ClientEndpoint from './ClientEndpoint.js';
+
+export { ClientEndpoint };

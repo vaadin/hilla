@@ -1,6 +1,8 @@
-import type Notification_1 from "./Notification.js";
-interface EmailNotification extends Notification_1 {
-    address?: string;
-    kind: "email" | "html-email";
+import type Notification from './Notification.js';
+
+interface EmailNotification extends Notification {
+  address?: string;
+  kind: 'email' | 'html-email';
 }
+
 export default EmailNotification;

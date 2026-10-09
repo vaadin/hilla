@@ -82,7 +82,7 @@ public abstract class AbstractFullStackTest {
      *
      * @see FullStackGenerator#withClientFile()
      */
-    protected static final String CLIENT_FILE = "connect-client.default.ts";
+    private static final String CLIENT_FILE = "connect-client.default.ts";
 
     private static final String UPDATE_SNAPSHOTS_PROPERTY = "hilla.test.updateSnapshots";
 
@@ -180,7 +180,7 @@ public abstract class AbstractFullStackTest {
      *
      * @see #toSnapshotPaths(FullStackGenerator, Map)
      */
-    protected static String toSnapshotPath(FullStackGenerator generator,
+    private static String toSnapshotPath(FullStackGenerator generator,
             String path) {
         var prefix = generator.getSnapshotsPackage().replace('.', '/') + "/";
 
@@ -195,7 +195,7 @@ public abstract class AbstractFullStackTest {
     /**
      * The files a case expects, keyed by their place in the snapshots folder.
      */
-    protected static Map<String, String> readSnapshots(
+    private static Map<String, String> readSnapshots(
             FullStackGenerator generator) {
         var snapshotsDir = getSnapshotsDir(generator);
 
