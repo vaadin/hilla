@@ -24,6 +24,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,6 +36,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import com.vaadin.hilla.generator.model.EntityModel;
+import com.vaadin.hilla.generator.model.PropertyModel;
 import com.vaadin.hilla.parser.testutils.AbstractFullStackTest;
 import com.vaadin.hilla.parser.testutils.ResourceLoader;
 
@@ -102,6 +106,49 @@ public class EndpointGenerationTest extends AbstractFullStackTest {
                             endpointsOf(testCase, endpoints, withTestClass)))
                     .toList().stream();
         }
+    }
+
+    /**
+     * TypeScript does not accept a declaration which says that a property of a
+     * type it extends can be absent: a value of it would not be a value of the
+     * type it extends. Whether a value can be absent is decided in more than
+     * one place, so the declarations of a hierarchy are checked against each
+     * other rather than one by one.
+     */
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("should_GenerateTheExpectedTypeScript")
+    public void should_NotSayThatAnInheritedPropertyCanBeAbsent(String testCase,
+            List<Class<?>> endpoints) {
+        var beans = generator(endpoints.toArray(Class<?>[]::new))
+                .parseGeneration().entities().stream()
+                .filter(EntityModel.Bean.class::isInstance)
+                .map(EntityModel.Bean.class::cast)
+                .collect(Collectors.toMap(EntityModel::javaClass, bean -> bean,
+                        (first, second) -> first));
+
+        var absent = beans.values().stream().flatMap(bean -> bean.properties()
+                .stream().filter(property -> property.type().optional())
+                .filter(property -> inherited(beans, bean, property.name())
+                        .anyMatch(inherited -> !inherited.type().optional()))
+                .map(property -> bean.javaClass() + "." + property.name()))
+                .sorted().toList();
+
+        assertTrue(absent.isEmpty(),
+                () -> "The types they are declared in say that these values are"
+                        + " always there: " + absent);
+    }
+
+    /**
+     * The declarations of the same property in the types the given one extends.
+     */
+    private static Stream<PropertyModel> inherited(
+            Map<String, EntityModel.Bean> beans, EntityModel.Bean bean,
+            String name) {
+        return bean.superTypes().stream()
+                .map(superType -> beans.get(superType.javaClass()))
+                .filter(Objects::nonNull)
+                .flatMap(superType -> superType.properties().stream())
+                .filter(property -> property.name().equals(name));
     }
 
     /**
