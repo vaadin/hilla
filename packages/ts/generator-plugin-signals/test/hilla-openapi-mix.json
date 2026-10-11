@@ -348,6 +348,41 @@
         }
       }
     },
+    "/PersonService/personMapSignal" : {
+      "post" : {
+        "tags" : [
+          "PersonService"
+        ],
+        "operationId" : "PersonService_personMapSignal_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.runtime.transfertypes.MapSignal"
+                    }
+                  ],
+                  "x-type-arguments" : {
+                    "allOf" : [
+                      {
+                        "anyOf" : [
+                          {
+                            "$ref" : "#/components/schemas/com.github.taefi.data.Person"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/PersonService/personSignalNotNull" : {
       "post" : {
         "tags" : [
@@ -587,6 +622,13 @@
         "type" : "object",
         "x-from-module" : {
           "named" : "ListSignal",
+          "module" : "@vaadin/hilla-react-signals"
+        }
+      },
+      "com.vaadin.hilla.runtime.transfertypes.MapSignal" : {
+        "type" : "object",
+        "x-from-module" : {
+          "named" : "MapSignal",
           "module" : "@vaadin/hilla-react-signals"
         }
       },

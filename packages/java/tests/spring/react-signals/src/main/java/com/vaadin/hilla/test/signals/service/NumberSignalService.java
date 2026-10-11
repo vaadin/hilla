@@ -45,12 +45,12 @@ public class NumberSignalService {
 
     @NotNull
     public Double fetchSharedValue() {
-        return sharedValue.get();
+        return sharedValue.peek();
     }
 
     @NotNull
     public Long fetchCounterValue() {
-        return Optional.ofNullable(counter.get()).map(Double::longValue)
+        return Optional.ofNullable(counter.peek()).map(Double::longValue)
                 .orElse(null);
     }
 
