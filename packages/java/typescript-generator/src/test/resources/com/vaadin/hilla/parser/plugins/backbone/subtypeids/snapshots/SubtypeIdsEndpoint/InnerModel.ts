@@ -1,14 +1,12 @@
-import { StringModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import m, { StringModel } from '@vaadin/hilla-models';
 import type Inner from './Inner.js';
 import WrappedModel from './WrappedModel.js';
 
-class InnerModel<T extends Inner = Inner> extends WrappedModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(InnerModel);
-
-  get value(): StringModel {
-    return this[_getPropertyModel]('value', (parent, key) =>
-      new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }));
-  }
-}
+const InnerModel = m
+  .extend(WrappedModel)
+  .object<Inner>('Inner')
+  .property('value', m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))
+  .build();
+type InnerModel = typeof InnerModel;
 
 export default InnerModel;

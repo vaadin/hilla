@@ -1,8 +1,9 @@
-import { ObjectModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import m from '@vaadin/hilla-models';
 import type Count from './Count.js';
 
-class CountModel<T extends Count = Count> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(CountModel);
-}
+const CountModel = m
+  .object<Count>('Count')
+  .build();
+type CountModel = typeof CountModel;
 
 export default CountModel;

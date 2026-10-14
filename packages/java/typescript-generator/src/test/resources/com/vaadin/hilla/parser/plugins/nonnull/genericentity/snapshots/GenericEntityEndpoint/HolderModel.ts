@@ -1,19 +1,12 @@
-import { ObjectModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import m from '@vaadin/hilla-models';
 import BoxModel from './BoxModel.js';
 import type Holder from './Holder.js';
 
-class HolderModel<T extends Holder = Holder> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(HolderModel);
-
-  get boxOfMaybe(): BoxModel {
-    return this[_getPropertyModel]('boxOfMaybe', (parent, key) =>
-      new BoxModel(parent, key, false));
-  }
-
-  get maybeBoxOf(): BoxModel {
-    return this[_getPropertyModel]('maybeBoxOf', (parent, key) =>
-      new BoxModel(parent, key, true));
-  }
-}
+const HolderModel = m
+  .object<Holder>('Holder')
+  .property('boxOfMaybe', BoxModel)
+  .property('maybeBoxOf', m.optional(BoxModel))
+  .build();
+type HolderModel = typeof HolderModel;
 
 export default HolderModel;

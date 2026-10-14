@@ -1,3 +1,4 @@
-interface Wrapped {}
+interface Wrapped {
+}
 
 export default Wrapped;

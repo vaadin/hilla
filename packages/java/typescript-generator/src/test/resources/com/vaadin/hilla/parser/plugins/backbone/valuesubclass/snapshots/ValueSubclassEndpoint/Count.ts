@@ -1,3 +1,4 @@
-interface Count {}
+interface Count {
+}
 
 export default Count;

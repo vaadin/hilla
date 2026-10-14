@@ -1,10 +1,7 @@
-import { EnumModel, _enum, makeEnumEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import m from '@vaadin/hilla-models';
 import Level from './Level.js';
 
-class LevelModel extends EnumModel<typeof Level> {
-  static override createEmptyValue = makeEnumEmptyValueCreator(LevelModel);
-
-  readonly [_enum] = Level;
-}
+const LevelModel = m.enum(Level, 'Level');
+type LevelModel = typeof LevelModel;
 
 export default LevelModel;

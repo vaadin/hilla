@@ -1,8 +1,9 @@
-import { ObjectModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import m from '@vaadin/hilla-models';
 import type Wrapped from './Wrapped.js';
 
-class WrappedModel<T extends Wrapped = Wrapped> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(WrappedModel);
-}
+const WrappedModel = m
+  .object<Wrapped>('Wrapped')
+  .build();
+type WrappedModel = typeof WrappedModel;
 
 export default WrappedModel;
