@@ -118,6 +118,36 @@ public class OutputFolderTest {
         assertTrue(Files.exists(folder.resolve("of-the-application.ts")));
     }
 
+    @Test
+    public void should_KeepTheOutputFolderAndWhatTheApplicationKeepsInIt()
+            throws IOException {
+        output.write(List.of(new GeneratedFile("com/example/Person.ts",
+                "interface P {}\n")));
+        Files.writeString(folder.resolve("com/mine.ts"), "// mine\n");
+
+        output.write(List.of());
+
+        assertFalse(Files.exists(folder.resolve("com/example")),
+                "The folder of the type is left empty by it");
+        assertTrue(Files.exists(folder.resolve("com/mine.ts")),
+                "A folder holding a file of the application stays");
+        assertTrue(Files.isDirectory(folder),
+                "The output folder is the application's, empty or not");
+    }
+
+    @Test
+    public void should_ReadNoFileFromABlankLineOfTheList() throws IOException {
+        Files.createDirectories(folder.resolve("com"));
+        Files.writeString(folder.resolve(OutputFolder.FILE_LIST), "\ncom\n\n");
+
+        output.write(
+                List.of(new GeneratedFile("endpoints.ts", "export {};\n")));
+
+        assertTrue(Files.isDirectory(folder),
+                "A blank line names no file, so nothing is removed for it");
+        assertEquals("endpoints.ts\n", read(OutputFolder.FILE_LIST));
+    }
+
     private String read(String path) throws IOException {
         return Files.readString(folder.resolve(path));
     }

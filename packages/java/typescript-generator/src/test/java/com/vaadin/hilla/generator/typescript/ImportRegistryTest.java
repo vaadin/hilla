@@ -41,6 +41,30 @@ public class ImportRegistryTest {
 
         assertEquals("Person", first);
         assertEquals("Person_1", second);
+        assertEquals("Person_2",
+                imports.importDefault("./three/Person.js", "Person", true));
+    }
+
+    @Test
+    public void should_ReuseTheNameOfAModuleImportedAsAWhole() {
+        assertEquals("PersonEndpoint",
+                imports.importAll("./PersonEndpoint.js", "PersonEndpoint"));
+        assertEquals("PersonEndpoint",
+                imports.importAll("./PersonEndpoint.js", "PersonEndpoint"));
+        assertEquals(List
+                .of("import * as PersonEndpoint from './PersonEndpoint.js';"),
+                imports.write());
+    }
+
+    @Test
+    public void should_ImportANamedExportUnderTheNameItWasGiven() {
+        imports.reserve("Subscription");
+
+        assertEquals("Subscription_1", imports
+                .importNamed("@vaadin/hilla-frontend", "Subscription", true));
+        assertEquals(List.of(
+                "import type { Subscription as Subscription_1 } from '@vaadin/hilla-frontend';"),
+                imports.write());
     }
 
     @Test

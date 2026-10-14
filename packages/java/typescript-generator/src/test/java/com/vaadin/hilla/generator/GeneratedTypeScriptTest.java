@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.hilla.generator.fixtures.ClientMethodEndpoint;
 import com.vaadin.hilla.generator.fixtures.CustomDateEndpoint;
 import com.vaadin.hilla.generator.fixtures.EmptyEndpoint;
 import com.vaadin.hilla.generator.fixtures.GenericEndpoint;
@@ -194,10 +195,6 @@ public class GeneratedTypeScriptTest {
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
                         import client_1 from './connect-client.default.js';
 
-                        export async function client(init?: EndpointRequestInit): Promise<string | undefined> {
-                          return client_1.call('ShadowingEndpoint', 'client', {}, init);
-                        }
-
                         export async function echo(
                           client: string | undefined,
                           init: string | undefined,
@@ -208,6 +205,22 @@ public class GeneratedTypeScriptTest {
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpoint).content());
+    }
+
+    @Test
+    public void should_NotLetAMethodShadowWhatTheFileNeedsForItself() {
+        assertEquals(
+                """
+                        import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
+                        import client_1 from './connect-client.default.js';
+
+                        export async function client(init?: EndpointRequestInit): Promise<string | undefined> {
+                          return client_1.call('ClientMethodEndpoint', 'client', {}, init);
+                        }
+                        """,
+                new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
+                        .write(endpointsOf(ClientMethodEndpoint.class).get(0))
+                        .content());
     }
 
     @Test
@@ -630,8 +643,14 @@ public class GeneratedTypeScriptTest {
         var generator = new FullStackGenerator(GeneratedTypeScriptTest.class,
                 SampleEndpoint.class);
         generator.parseModel();
+        var generation = generator.parseGeneration();
 
-        assertEquals(1, generator.parseModel().size());
+        assertEquals(1, generation.endpoints().size());
+        assertEquals(
+                new FullStackGenerator(GeneratedTypeScriptTest.class,
+                        SampleEndpoint.class).parseGeneration(),
+                generation,
+                "What the first run found is not found again by the second");
     }
 
     @Test
@@ -1063,6 +1082,27 @@ public class GeneratedTypeScriptTest {
                         export default KindModel;
                         """,
                 file.content());
+    }
+
+    @Test
+    public void should_NotLetTheModelOfAnEnumShadowTheModelItExtends() {
+        // The model of an enum called Enum is called as the class of the form
+        // library it extends, which it then imports under another name
+        assertEquals(
+                """
+                        import { EnumModel as EnumModel_1, _enum, makeEnumEmptyValueCreator } from '@vaadin/hilla-lit-form';
+                        import Enum from './Enum.js';
+
+                        class EnumModel extends EnumModel_1<typeof Enum> {
+                          static override createEmptyValue = makeEnumEmptyValueCreator(EnumModel);
+
+                          readonly [_enum] = Enum;
+                        }
+
+                        export default EnumModel;
+                        """,
+                writeModel(new EntityModel.Enumeration("com.example.Enum",
+                        List.of("ONE"))).content());
     }
 
     @Test
