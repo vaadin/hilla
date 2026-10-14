@@ -502,7 +502,9 @@ describe('@vaadin/hilla-react-crud', () => {
         await waitForClosingDialogs();
 
         // grid selection is cleared
-        expect(grid.isSelected(0)).to.be.false;
+        await waitFor(() => {
+          expect(grid.isSelected(0)).to.be.false;
+        });
 
         // saves
         expect(saveSpy).to.have.been.called;
