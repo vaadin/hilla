@@ -18,6 +18,7 @@ package com.vaadin.hilla.generator.typescript;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.vaadin.hilla.generator.model.ConstraintModel;
@@ -37,6 +38,8 @@ import com.vaadin.hilla.parser.models.ClassInfoModel;
 final class ModelWriter {
     private static final String LIT_FORM = "@vaadin/hilla-lit-form";
     private static final String OBJECT_MODEL = "ObjectModel";
+    private static final Set<String> PRIMITIVES = Set.of("boolean", "byte",
+            "char", "double", "float", "int", "long", "short");
 
     private final ImportRegistry imports;
     private final TypeWriter types;
@@ -188,7 +191,7 @@ final class ModelWriter {
                     .collect(Collectors.joining(", ")) + "]");
         }
 
-        if (javaType != null) {
+        if (isJavaTypeWritten(javaType)) {
             meta.add("javaType: '" + javaType + "'");
         }
 
@@ -200,6 +203,25 @@ final class ModelWriter {
         return written.isEmpty() ? ""
                 : written.stream()
                         .collect(Collectors.joining(", ", "{ ", " }"));
+    }
+
+    /**
+     * Whether the Java type of a value is one a model is told about: a
+     * primitive or a type of the JDK, or an array of one. A class of the
+     * application, or an array of arrays, is left out, so that the client is
+     * not told the names of the classes behind it, and a grid falls back to the
+     * model it is built from.
+     */
+    private static boolean isJavaTypeWritten(String javaType) {
+        if (javaType == null) {
+            return false;
+        }
+
+        var type = javaType.endsWith("[]")
+                ? javaType.substring(0, javaType.length() - 2)
+                : javaType;
+
+        return PRIMITIVES.contains(type) || type.startsWith("java.");
     }
 
     /**
