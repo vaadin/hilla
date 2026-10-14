@@ -32,9 +32,17 @@ import java.util.TreeMap;
  * they asked for before.
  */
 final class ImportRegistry {
+    /**
+     * The types of the language the generated files refer to by name. An import
+     * going by one of them, such as an entity class called {@code Record},
+     * would take its place in the whole file.
+     */
+    private static final Set<String> GLOBAL_TYPES = Set.of("Array", "Promise",
+            "ReadonlyArray", "Record");
+
     private final Map<String, Module> modules = new TreeMap<>(
             ImportRegistry::compareModules);
-    private final Set<String> usedNames = new HashSet<>();
+    private final Set<String> usedNames = new HashSet<>(GLOBAL_TYPES);
 
     /**
      * Imports the default export of a module, as in
