@@ -16,6 +16,7 @@
 package com.vaadin.hilla.generator.fixtures;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -69,6 +70,10 @@ public class TypeIdentityEndpoint {
     }
 
     public LocalDateTime moment() {
+        return null;
+    }
+
+    public DayOfWeek day() {
         return null;
     }
 }
