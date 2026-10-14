@@ -6,11 +6,6 @@ import com.vaadin.flow.testutil.ChromeBrowserTest
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.openqa.selenium.TimeoutException
-import org.openqa.selenium.chrome.ChromeOptions
-import org.openqa.selenium.logging.LogType
-import org.openqa.selenium.logging.LoggingPreferences
-import java.util.logging.Level
 
 class FormValidationsForKotlinEntitiesIT : ChromeBrowserTest() {
 
@@ -18,52 +13,13 @@ class FormValidationsForKotlinEntitiesIT : ChromeBrowserTest() {
     override fun setup() {
         super.setup()
         getDriver().get(testPath)
-        println("=== After get($testPath): currentUrl=${driver.currentUrl} ===")
-        try {
-            `$`(ButtonElement::class.java).withId("save").waitForFirst()
-        } catch (e: TimeoutException) {
-            printPageDiagnostics()
-            // Check whether navigating again recovers a browser that never
-            // left its start page.
+        // On a slow machine the new headless browser can still be loading its
+        // data:, start page when the first navigation is sent, and then that
+        // navigation is dropped and the page stays blank. Navigate again.
+        if (!driver.currentUrl.startsWith(rootURL)) {
             getDriver().get(testPath)
-            println("=== After second get($testPath): currentUrl=${driver.currentUrl} ===")
-            try {
-                `$`(ButtonElement::class.java).withId("save").waitForFirst()
-                println("=== Second get rendered the view ===")
-            } catch (e2: TimeoutException) {
-                println("=== Second get did not render the view either ===")
-                printPageDiagnostics()
-            }
-            throw e
         }
-    }
-
-    // Temporary: on Windows CI the page is sometimes still blank here, without
-    // even the layout rendered. Record the browser console so the cause shows
-    // up in the build log.
-    override fun updateHeadlessChromeOptions(chromeOptions: ChromeOptions) {
-        super.updateHeadlessChromeOptions(chromeOptions)
-        val logPrefs = LoggingPreferences()
-        logPrefs.enable(LogType.BROWSER, Level.ALL)
-        chromeOptions.setCapability("goog:loggingPrefs", logPrefs)
-    }
-
-    private fun printPageDiagnostics() {
-        val report = StringBuilder("=== Page diagnostics for $testPath ===\n")
-        try {
-            report.append(executeScript(PAGE_STATE_SCRIPT)).append('\n')
-        } catch (e: Exception) {
-            report.append("Could not read the page state: $e\n")
-        }
-        report.append("--- Browser console ---\n")
-        try {
-            driver.manage().logs().get(LogType.BROWSER).forEach {
-                report.append("${it.timestamp} ${it.level} ${it.message}\n")
-            }
-        } catch (e: Exception) {
-            report.append("Could not read the browser console: $e\n")
-        }
-        println(report.append("=== End of page diagnostics ==="))
+        `$`(ButtonElement::class.java).withId("save").waitForFirst()
     }
 
     override fun getTestPath(): String = "$rootURL/person-form"
@@ -108,28 +64,4 @@ class FormValidationsForKotlinEntitiesIT : ChromeBrowserTest() {
 
 
     private fun getButton(id: String): ButtonElement = `$`(ButtonElement::class.java).id(id)
-
-    companion object {
-        private const val PAGE_STATE_SCRIPT = """
-            const outlet = document.getElementById('outlet');
-            const nav = performance.getEntriesByType('navigation')[0];
-            const resources = performance.getEntriesByType('resource').map(r =>
-                '  ' + r.name + ' status=' + r.responseStatus +
-                ' start=' + Math.round(r.startTime) + 'ms duration=' + Math.round(r.duration) +
-                'ms size=' + r.transferSize);
-            return [
-                'url: ' + location.href,
-                'readyState: ' + document.readyState,
-                'title: ' + document.title,
-                'navigation: status=' + (nav && nav.responseStatus) +
-                    ' duration=' + (nav && Math.round(nav.duration)) + 'ms',
-                'time since navigation start: ' + Math.round(performance.now()) + 'ms',
-                'window.Vaadin keys: ' + (window.Vaadin ? Object.keys(window.Vaadin).join(', ') : 'undefined'),
-                'scripts: ' + Array.from(document.scripts).map(s => s.src || '(inline)').join(', '),
-                'outlet: ' + (outlet ? outlet.innerHTML.substring(0, 2000) : 'missing'),
-                'body: ' + document.body.innerHTML.substring(0, 2000),
-                'resources (' + resources.length + '):',
-            ].concat(resources).join('\n');
-        """
-    }
 }
