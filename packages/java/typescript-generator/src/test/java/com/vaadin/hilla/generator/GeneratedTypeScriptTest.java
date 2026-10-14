@@ -302,7 +302,9 @@ public class GeneratedTypeScriptTest {
     @Test
     public void should_WriteWhatATypeParameterIsBoundToInsteadOfItsName() {
         // The declaration does not keep a parameter bound to something else
-        // than an object, so nothing would declare the name it goes by
+        // than an object, so nothing would declare the name it goes by. Of
+        // more than one bound, the first is written, being the one the
+        // parameter erases to
         assertEquals("""
                 import type Sample from './Sample.js';
 
