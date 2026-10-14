@@ -25,9 +25,28 @@ export default class GridController {
   readonly instance: GridElement<Person>;
   readonly #user: ReturnType<(typeof userEvent)['setup']>;
 
+  // `waitFor` only retries when its callback throws, so all the checks below
+  // have to throw instead of returning a falsy value. Otherwise they resolve
+  // right away with a grid that has not rendered its rows yet.
   static async init(result: RenderResult, user: ReturnType<(typeof userEvent)['setup']>): Promise<GridController> {
-    const grid = await waitFor(() => result.container.querySelector('vaadin-grid')!);
-    await waitFor(() => grid.shadowRoot?.querySelector('tbody')?.children);
+    const grid = await waitFor(() => {
+      const element = result.container.querySelector<GridElement<Person>>('vaadin-grid');
+      if (!element) {
+        throw new Error('No <vaadin-grid> element rendered');
+      }
+      if (!element.shadowRoot?.querySelector('tbody')) {
+        throw new Error('The <vaadin-grid> element has not rendered its body yet');
+      }
+      return element;
+    });
+
+    // The data provider is asynchronous, so the rows only appear after the grid
+    // has finished loading.
+    await waitFor(() => {
+      if (grid.loading) {
+        throw new Error('The <vaadin-grid> element is still loading items');
+      }
+    });
 
     return new GridController(grid, user);
   }
@@ -47,8 +66,21 @@ export default class GridController {
     return headers.indexOf(text);
   }
 
+  async waitForBodyRow(row: number): Promise<HTMLTableRowElement> {
+    return await waitFor(() => {
+      const physicalRow = this.getBodyRow(row);
+      if (!physicalRow) {
+        throw new Error(`The grid has not rendered a body row with the index ${row}`);
+      }
+      return physicalRow;
+    });
+  }
+
   getBodyCell(row: number, col: number): HTMLElement {
     const physicalRow = this.getBodyRow(row);
+    if (!physicalRow) {
+      throw new Error(`The grid has not rendered a body row with the index ${row}`);
+    }
     const cells = getRowCells(physicalRow) as readonly HTMLElement[];
     return cells[col];
   }
@@ -114,6 +146,7 @@ export default class GridController {
   }
 
   async toggleRowSelected(row: number): Promise<void> {
+    await this.waitForBodyRow(row);
     await this.#user.click(this.getBodyCellContent(row, 0));
   }
 
