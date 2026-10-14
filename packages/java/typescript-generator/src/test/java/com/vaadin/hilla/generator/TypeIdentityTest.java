@@ -48,11 +48,17 @@ public class TypeIdentityTest {
                 endpoint.javaClass());
     }
 
+    /**
+     * An enum of the JDK, such as {@code DayOfWeek}, is not generated as an
+     * enum of its own, but it is still serialized as the name of a constant, so
+     * it is a string rather than an unknown value.
+     */
     @Test
     public void should_TellApartTheTypesWrittenAsAString() {
         assertEquals(
                 List.of("approximated: number (float)", "counted: number (int)",
                         "date: string (java.time.LocalDate)",
+                        "day: string (java.time.DayOfWeek)",
                         "enabled: boolean (boolean)",
                         "exact: number (java.math.BigDecimal)",
                         "identifier: number (long)", "initial: string (char)",
