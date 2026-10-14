@@ -15,6 +15,8 @@
  */
 package com.vaadin.hilla.generator.fixtures;
 
+import java.util.List;
+
 import com.vaadin.flow.signals.shared.SharedListSignal;
 import com.vaadin.flow.signals.shared.SharedNumberSignal;
 import com.vaadin.flow.signals.shared.SharedValueSignal;
@@ -62,6 +64,41 @@ public class SignalsEndpoint {
      */
     @Nonnull
     public SharedValueSignal<String> pending() {
+        return null;
+    }
+
+    /**
+     * Values which are always there start from the empty value of the model of
+     * their type, whichever model that is.
+     */
+    @Nonnull
+    public SharedValueSignal<@Nonnull Integer> limit() {
+        return null;
+    }
+
+    @Nonnull
+    public SharedValueSignal<@Nonnull Boolean> enabled() {
+        return null;
+    }
+
+    @Nonnull
+    public SharedValueSignal<@Nonnull List<SampleEndpoint.Sample>> crowd() {
+        return null;
+    }
+
+    public SharedNumberSignal counterOf(String name) {
+        return null;
+    }
+
+    public SharedListSignal<SampleEndpoint.Sample> channel(String name) {
+        return null;
+    }
+
+    /**
+     * Takes a parameter called as the options of the signal, which therefore go
+     * by another name.
+     */
+    public SharedValueSignal<String> chosen(String options) {
         return null;
     }
 }
