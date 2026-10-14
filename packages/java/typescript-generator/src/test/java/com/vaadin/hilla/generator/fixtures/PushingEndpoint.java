@@ -15,6 +15,7 @@
  */
 package com.vaadin.hilla.generator.fixtures;
 
+import org.jspecify.annotations.NonNull;
 import reactor.core.publisher.Flux;
 
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
@@ -26,6 +27,10 @@ import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 @Endpoint
 public class PushingEndpoint {
     public Flux<String> messages() {
+        return null;
+    }
+
+    public Flux<@NonNull String> nonNullMessages() {
         return null;
     }
 }
