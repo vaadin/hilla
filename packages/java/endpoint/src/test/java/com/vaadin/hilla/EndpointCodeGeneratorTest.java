@@ -64,8 +64,6 @@ public class EndpointCodeGeneratorTest {
                 .thenReturn(configuration);
 
         var applicationContext = mock(ApplicationContext.class);
-        when(applicationContext.getBeansWithAnnotation(any()))
-                .thenReturn(Map.of());
         when(applicationContext.getBeansWithAnnotation(BrowserCallable.class))
                 .thenReturn(Map.of("greeting", new GreetingService()));
         new ApplicationContextProvider()
