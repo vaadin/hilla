@@ -1,10 +1,14 @@
-import m, { StringModel } from "@vaadin/hilla-models";
-import type Child from "./Child.js";
-import EmptyModel from "./EmptyModel.js";
-const ChildModel = m
-  .extend(EmptyModel)
-  .object<Child>("Child")
-  .property("name", m.meta(m.optional(StringModel), { jvmType: "java.lang.String" }))
-  .build();
-type ChildModel = typeof ChildModel;
+import { StringModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import type Child from './Child.js';
+import EmptyModel from './EmptyModel.js';
+
+class ChildModel<T extends Child = Child> extends EmptyModel<T> {
+  static override createEmptyValue = makeObjectEmptyValueCreator(ChildModel);
+
+  get name(): StringModel {
+    return this[_getPropertyModel]('name', (parent, key) =>
+      new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }));
+  }
+}
+
 export default ChildModel;

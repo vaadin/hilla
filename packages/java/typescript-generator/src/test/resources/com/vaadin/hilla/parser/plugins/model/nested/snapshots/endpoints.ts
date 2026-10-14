@@ -1,2 +1,3 @@
-import * as NestedEndpoint from "./NestedEndpoint.js";
+import * as NestedEndpoint from './NestedEndpoint.js';
+
 export { NestedEndpoint };

@@ -1,2 +1,3 @@
-import * as EmptySuperclassEndpoint from "./EmptySuperclassEndpoint.js";
+import * as EmptySuperclassEndpoint from './EmptySuperclassEndpoint.js';
+
 export { EmptySuperclassEndpoint };
