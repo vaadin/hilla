@@ -44,6 +44,18 @@ public class ImportRegistryTest {
     }
 
     @Test
+    public void should_KeepTheTypesOfTheLanguageFromBeingShadowed() {
+        assertEquals("Promise_1",
+                imports.importDefault("./Promise.js", "Promise", true));
+        assertEquals("Record_1",
+                imports.importDefault("./Record.js", "Record", true));
+        assertEquals("Array_1",
+                imports.importDefault("./Array.js", "Array", true));
+        assertEquals("ReadonlyArray_1", imports
+                .importDefault("./ReadonlyArray.js", "ReadonlyArray", true));
+    }
+
+    @Test
     public void should_KeepAValueImportWhenTheSameThingIsAlsoNeededAsAType() {
         imports.importDefault("./client.js", "client", true);
         imports.importDefault("./client.js", "client", false);
