@@ -143,7 +143,7 @@ public class SampleEndpoint {
      * declaration stands for: TypeScript is not told what the parameter is,
      * only what it has to be.
      */
-    public static class Bounded<T extends Sample> {
+    public static class Bounded<T extends Sample & java.io.Serializable> {
         private T held;
 
         public T getHeld() {
