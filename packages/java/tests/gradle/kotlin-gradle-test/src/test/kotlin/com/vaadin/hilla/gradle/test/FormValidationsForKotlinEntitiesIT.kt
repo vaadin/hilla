@@ -18,10 +18,22 @@ class FormValidationsForKotlinEntitiesIT : ChromeBrowserTest() {
     override fun setup() {
         super.setup()
         getDriver().get(testPath)
+        println("=== After get($testPath): currentUrl=${driver.currentUrl} ===")
         try {
             `$`(ButtonElement::class.java).withId("save").waitForFirst()
         } catch (e: TimeoutException) {
             printPageDiagnostics()
+            // Check whether navigating again recovers a browser that never
+            // left its start page.
+            getDriver().get(testPath)
+            println("=== After second get($testPath): currentUrl=${driver.currentUrl} ===")
+            try {
+                `$`(ButtonElement::class.java).withId("save").waitForFirst()
+                println("=== Second get rendered the view ===")
+            } catch (e2: TimeoutException) {
+                println("=== Second get did not render the view either ===")
+                printPageDiagnostics()
+            }
             throw e
         }
     }
