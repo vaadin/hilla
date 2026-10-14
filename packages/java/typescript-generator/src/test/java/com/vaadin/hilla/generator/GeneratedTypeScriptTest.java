@@ -198,18 +198,26 @@ public class GeneratedTypeScriptTest {
     @Test
     public void should_TakeNoRequestOptionsWhenEveryMethodSendsASeries() {
         // The options are those of a single request, so a file with nothing
-        // but subscriptions in it has no use for the type of them either
+        // but subscriptions in it has no use for the type of them either. A
+        // value of the series which cannot be absent is not written as one
+        // which can
         var endpoint = endpointsOf(PushingEndpoint.class).get(0);
 
-        assertEquals("""
-                import type { Subscription } from '@vaadin/hilla-frontend';
-                import client from './connect-client.default.js';
+        assertEquals(
+                """
+                        import type { Subscription } from '@vaadin/hilla-frontend';
+                        import client from './connect-client.default.js';
 
-                export function messages(): Subscription<string | undefined> {
-                  return client.subscribe('PushingEndpoint', 'messages', {});
-                }
-                """, new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
-                .write(endpoint).content());
+                        export function messages(): Subscription<string | undefined> {
+                          return client.subscribe('PushingEndpoint', 'messages', {});
+                        }
+
+                        export function nonNullMessages(): Subscription<string> {
+                          return client.subscribe('PushingEndpoint', 'nonNullMessages', {});
+                        }
+                        """,
+                new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
+                        .write(endpoint).content());
     }
 
     @Test
