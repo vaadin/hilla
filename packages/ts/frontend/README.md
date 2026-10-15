@@ -27,7 +27,7 @@ Read the [contributing guide](https://vaadin.com/docs/latest/contributing-docs/o
 
 ## License
 
-Apache License 2.0
+This program is available under Vaadin Commercial License and Service Terms. For license terms, see LICENSE.
 
 Vaadin collects development time usage statistics to improve this product.
 For details and to opt-out, see https://github.com/vaadin/vaadin-usage-statistics.
