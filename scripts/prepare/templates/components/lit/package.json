@@ -6,7 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "Apache-2.0",
+  "license": "SEE LICENSE IN https://vaadin.com/commercial-license-and-service-terms",
   "dependencies": {
     "@vaadin/hilla-frontend": "{{version}}",
     "@vaadin/hilla-lit-form": "{{version}}"
