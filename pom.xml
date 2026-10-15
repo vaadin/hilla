@@ -107,9 +107,9 @@
   <url>https://vaadin.com</url>
   <licenses>
     <license>
-      <name>Apache License Version 2.0</name>
+      <name>Vaadin Commercial License and Service Terms</name>
       <distribution>repo</distribution>
-      <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+      <url>https://vaadin.com/commercial-license-and-service-terms</url>
     </license>
   </licenses>
   <scm>
