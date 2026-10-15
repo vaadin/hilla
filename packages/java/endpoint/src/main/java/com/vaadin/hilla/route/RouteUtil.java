@@ -1,5 +1,6 @@
 package com.vaadin.hilla.route;
 
+import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.internal.hilla.FileRouterRequestUtil;
 import com.vaadin.flow.server.*;
 import com.vaadin.flow.server.menu.AvailableViewInfo;
@@ -60,17 +61,40 @@ public class RouteUtil implements FileRouterRequestUtil {
      */
     @Override
     public boolean isRouteAllowed(HttpServletRequest request) {
-        var config = ApplicationConfiguration
-                .get(new VaadinServletContext(request.getServletContext()));
-        boolean isLiveReloadMode = config.getMode()
-                .equals(Mode.DEVELOPMENT_FRONTEND_LIVERELOAD);
-        if (registeredRoutes == null || isLiveReloadMode) {
-            collectClientRoutes(config);
+        if (!collectClientRoutesIfNecessary(request)) {
+            return false;
         }
 
         var viewConfig = getRouteData(request);
 
         return viewConfig.isPresent();
+    }
+
+    /**
+     * Collects the client routes if they are not collected yet or if the
+     * application runs in live reload mode.
+     * <p>
+     * Requests served by a servlet context without a Vaadin {@link Lookup},
+     * e.g. requests to Spring Boot's separate management port, cannot target a
+     * client route, so they are skipped.
+     *
+     * @param request
+     *            the HTTP request
+     * @return <code>true</code> if the request is served by a Vaadin servlet
+     *         context, <code>false</code> otherwise
+     */
+    private boolean collectClientRoutesIfNecessary(HttpServletRequest request) {
+        var context = new VaadinServletContext(request.getServletContext());
+        if (context.getAttribute(Lookup.class) == null) {
+            return false;
+        }
+        var config = ApplicationConfiguration.get(context);
+        boolean isLiveReloadMode = config.getMode()
+                .equals(Mode.DEVELOPMENT_FRONTEND_LIVERELOAD);
+        if (registeredRoutes == null || isLiveReloadMode) {
+            collectClientRoutes(config);
+        }
+        return true;
     }
 
     private static void filterClientViews(
