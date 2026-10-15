@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.util.Collections;
 import java.util.Map;
 
+import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.server.*;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
@@ -14,6 +15,7 @@ import org.junit.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockServletContext;
 
 import com.vaadin.flow.server.menu.AvailableViewInfo;
 
@@ -28,6 +30,8 @@ public class RouteUtilTest {
 
     private final ApplicationConfiguration config = Mockito
             .mock(ApplicationConfiguration.class);
+
+    private MockServletContext servletContext;
 
     private MockHttpServletRequest request;
 
@@ -46,7 +50,10 @@ public class RouteUtilTest {
 
         Mockito.when(config.getMode()).thenReturn(Mode.PRODUCTION_CUSTOM);
 
-        request = new MockHttpServletRequest();
+        servletContext = new MockServletContext();
+        servletContext.setAttribute(Lookup.class.getName(),
+                Mockito.mock(Lookup.class));
+        request = new MockHttpServletRequest(servletContext);
     }
 
     @After
@@ -87,7 +94,8 @@ public class RouteUtilTest {
 
     @Test
     public void test_login_required() {
-        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletRequest request = new MockHttpServletRequest(
+                servletContext);
         request.setRequestURI("/context/test");
         request.setContextPath("/context");
         request.setUserPrincipal(Mockito.mock(Principal.class));
@@ -231,5 +239,21 @@ public class RouteUtilTest {
     private void getMenuItems() {
         MenuRegistry.collectClientMenuItems(Mockito.eq(false),
                 Mockito.eq(config), Mockito.isNull());
+    }
+
+    @Test
+    public void servletContextWithoutLookup_noRouteMatchedAndNoException() {
+        applicationConfigurationMockedStatic
+                .when(() -> ApplicationConfiguration.get(Mockito.any()))
+                .thenThrow(new IllegalStateException(
+                        "The application Lookup instance is not found"));
+        // e.g. a request to Spring Boot's separate management server
+        var request = new MockHttpServletRequest(new MockServletContext());
+        request.setRequestURI("/test");
+        var info = new AvailableViewInfo("Test", new String[] { "ROLE_USER" },
+                false, "/test", false, false, null, null, null, false);
+        routeUtil.setRoutes(Collections.singletonMap("/test", info));
+
+        Assert.assertFalse(routeUtil.isRouteAllowed(request));
     }
 }
