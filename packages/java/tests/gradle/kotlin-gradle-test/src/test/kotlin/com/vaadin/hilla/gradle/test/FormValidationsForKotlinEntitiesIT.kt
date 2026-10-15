@@ -13,6 +13,12 @@ class FormValidationsForKotlinEntitiesIT : ChromeBrowserTest() {
     override fun setup() {
         super.setup()
         getDriver().get(testPath)
+        // On a slow machine the new headless browser can still be loading its
+        // data:, start page when the first navigation is sent, and then that
+        // navigation is dropped and the page stays blank. Navigate again.
+        if (!driver.currentUrl.startsWith(rootURL)) {
+            getDriver().get(testPath)
+        }
         `$`(ButtonElement::class.java).withId("save").waitForFirst()
     }
 
