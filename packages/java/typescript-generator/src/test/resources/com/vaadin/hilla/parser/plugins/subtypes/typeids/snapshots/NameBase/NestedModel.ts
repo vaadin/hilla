@@ -1,14 +1,13 @@
-import { StringModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import m, { StringModel } from '@vaadin/hilla-models';
 import NameBaseModel from '../NameBaseModel.js';
 import type Nested from './Nested.js';
 
-class NestedModel<T extends Nested = Nested> extends NameBaseModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(NestedModel);
-
-  get note(): StringModel {
-    return this[_getPropertyModel]('note', (parent, key) =>
-      new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }));
-  }
-}
+const NestedModel = m
+  .extend(NameBaseModel)
+  .object<Nested>('Nested')
+  .property('note', m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))
+  .property('@type', m.literal('NameBase$Nested'))
+  .build();
+type NestedModel = typeof NestedModel;
 
 export default NestedModel;

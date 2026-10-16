@@ -1,13 +1,10 @@
-import { ObjectModel, StringModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import m, { StringModel } from '@vaadin/hilla-models';
 import type MinimalBase from './MinimalBase.js';
 
-class MinimalBaseModel<T extends MinimalBase = MinimalBase> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(MinimalBaseModel);
-
-  get id(): StringModel {
-    return this[_getPropertyModel]('id', (parent, key) =>
-      new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }));
-  }
-}
+const MinimalBaseModel = m
+  .object<MinimalBase>('MinimalBase')
+  .property('id', m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))
+  .build();
+type MinimalBaseModel = typeof MinimalBaseModel;
 
 export default MinimalBaseModel;
