@@ -491,9 +491,12 @@ public final class EndpointModelPlugin
      * plugin building the OpenAPI definition has already picked out of the ones
      * the property declares.
      */
-    private static List<String> annotationsOf(Schema<?> schema) {
+    private static List<AnnotationModel> annotationsOf(Schema<?> schema) {
         return extensions(schema, ANNOTATIONS, Annotation.class)
-                .map(Annotation::getName).toList();
+                .map(annotation -> new AnnotationModel(annotation.getName(),
+                        annotation.getAttributes() == null ? Map.of()
+                                : annotation.getAttributes()))
+                .toList();
     }
 
     /**

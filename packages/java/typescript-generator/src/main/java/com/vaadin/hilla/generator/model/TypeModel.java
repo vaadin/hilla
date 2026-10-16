@@ -43,12 +43,11 @@ public sealed interface TypeModel {
     List<ConstraintModel> constraints();
 
     /**
-     * The annotations of a value which a form model is told about, by their
-     * fully qualified name: whether a value is the id of an entity is nothing
-     * TypeScript can see, and a form or a grid built from the model decides
-     * with it what to do with the value.
+     * The annotations of a value which a form model is told about: whether a
+     * value is the id of an entity is nothing TypeScript can see, and a form or
+     * a grid built from the model decides with it what to do with the value.
      */
-    List<String> annotations();
+    List<AnnotationModel> annotations();
 
     /**
      * The types which TypeScript expresses without a declaration of their own.
@@ -65,7 +64,7 @@ public sealed interface TypeModel {
      */
     record Scalar(ScalarKind kind, boolean optional, String javaType,
             List<ConstraintModel> constraints,
-            List<String> annotations) implements TypeModel {
+            List<AnnotationModel> annotations) implements TypeModel {
         public Scalar {
             Objects.requireNonNull(kind);
             Objects.requireNonNull(javaType);
@@ -90,7 +89,7 @@ public sealed interface TypeModel {
      */
     record ArrayOf(TypeModel items, boolean optional, String javaType,
             List<ConstraintModel> constraints,
-            List<String> annotations) implements TypeModel {
+            List<AnnotationModel> annotations) implements TypeModel {
         public ArrayOf {
             Objects.requireNonNull(items);
             Objects.requireNonNull(javaType);
@@ -110,7 +109,7 @@ public sealed interface TypeModel {
      */
     record MapOf(TypeModel values, boolean optional, String javaType,
             List<ConstraintModel> constraints,
-            List<String> annotations) implements TypeModel {
+            List<AnnotationModel> annotations) implements TypeModel {
         public MapOf {
             Objects.requireNonNull(values);
             Objects.requireNonNull(javaType);
@@ -132,7 +131,7 @@ public sealed interface TypeModel {
      */
     record EntityRef(String javaClass, List<TypeModel> typeArguments,
             boolean optional, List<ConstraintModel> constraints,
-            List<String> annotations) implements TypeModel {
+            List<AnnotationModel> annotations) implements TypeModel {
         public EntityRef {
             Objects.requireNonNull(javaClass);
             typeArguments = List.copyOf(typeArguments);
@@ -156,7 +155,7 @@ public sealed interface TypeModel {
      */
     record TypeVariable(String name, boolean optional,
             List<ConstraintModel> constraints,
-            List<String> annotations) implements TypeModel {
+            List<AnnotationModel> annotations) implements TypeModel {
         public TypeVariable {
             Objects.requireNonNull(name);
             constraints = List.copyOf(constraints);

@@ -1,10 +1,11 @@
-import { _getPropertyModel, makeObjectEmptyValueCreator, StringModel } from "@vaadin/hilla-lit-form";
+import m, { StringModel } from "@vaadin/hilla-models";
 import type AddEvent from "./AddEvent.js";
 import BaseEventModel from "./BaseEventModel.js";
-class AddEventModel<T extends AddEvent = AddEvent> extends BaseEventModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(AddEventModel);
-    get item(): StringModel {
-        return this[_getPropertyModel]("item", (parent, key) => new StringModel(parent, key, true, { meta: { javaType: "java.lang.String" } }));
-    }
-}
+const AddEventModel = m
+  .extend(BaseEventModel)
+  .object<AddEvent>("AddEvent")
+  .property("item", m.meta(m.optional(StringModel), { jvmType: "java.lang.String" }))
+  .property("@type", m.literal("add"))
+  .build();
+type AddEventModel = typeof AddEventModel;
 export default AddEventModel;
