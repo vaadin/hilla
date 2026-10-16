@@ -121,8 +121,9 @@ export interface LazyOf<M extends Model> extends ModelConverter {
  * modules have been evaluated. Use {@link self} for a model that refers to
  * itself.
  *
- * Only the value is deferred: models in a cycle still need an explicit type
- * annotation, as their types cannot be inferred from each other.
+ * Only the value is deferred: the types of models in a cycle cannot be
+ * inferred from each other, so the cycle has to be broken on the type level as
+ * well, for example with a return type of the provider.
  *
  * Every cycle must be broken by a property whose default value does not read
  * the model it refers to: an optional one defaults to `undefined`, an array to

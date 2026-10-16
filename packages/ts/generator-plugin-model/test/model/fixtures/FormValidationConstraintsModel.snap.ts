@@ -1,14 +1,15 @@
 import m, { DecimalMax, DecimalMin, Digits, Email, Future, Max, Min, Negative, NegativeOrZero, NotBlank, NotEmpty, NotNull, Null, NumberModel, ObjectModel, Past, Pattern, Positive, PositiveOrZero, Size, StringModel } from "@vaadin/hilla-models";
+import type FormEntity from "./FormEntity.js";
 import FormEntityModel from "./FormEntityModel.js";
 import type FormValidationConstraints from "./FormValidationConstraints.js";
-const FormValidationConstraintsModel: ObjectModel<FormValidationConstraints> = m
+const FormValidationConstraintsModel = m
   .object<FormValidationConstraints>("FormValidationConstraints")
   .property("list", m.constrained(m.array(m.optional(StringModel)), NotEmpty()))
   .property("email", m.constrained(StringModel, Email({ message: "foo" })))
   .property("isNull", m.constrained(StringModel, Null()))
   .property("notNull", m.constrained(StringModel, NotNull()))
   .property("notEmpty", m.constrained(StringModel, NotEmpty(), NotNull()))
-  .property("notNullEntity", m.constrained(m.optional(m.lazy(() => FormEntityModel)), NotNull()))
+  .property("notNullEntity", m.constrained(m.optional(m.lazy((): ObjectModel<FormEntity> => FormEntityModel)), NotNull()))
   .property("notBlank", m.constrained(StringModel, NotBlank()))
   .property("assertTrue", StringModel)
   .property("assertFalse", StringModel)

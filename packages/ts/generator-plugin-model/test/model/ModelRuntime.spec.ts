@@ -85,16 +85,14 @@ describe('ModelPlugin', () => {
     ({ files: generated, models } = await generate());
   }, 30000);
 
-  it('generates models that can be evaluated', () => {
-    const missing = Object.entries(models)
-      .filter(([, model]) => model === undefined)
-      .map(([name]) => name);
-
-    expect(missing).to.deep.equal([]);
-  });
-
   it('generates models that type check', async () => {
-    expect(await typeCheck(outputDir, generated)).to.deep.equal([]);
+    // a model taking part in a cycle keeps its property models in the type
+    const usage = [
+      "import FormEntityModel from './com/example/application/endpoints/TsFormEndpoint/FormEntityModel.js';",
+      'export const properties = [FormEntityModel.myId, FormEntityModel.dataPrimitives];',
+    ].join('\n');
+
+    expect(await typeCheck(outputDir, generated, { 'usage.ts': usage })).to.deep.equal([]);
   }, 60000); // compiling the whole model hierarchy is slow on CI
 
   it('builds a default value out of the generated models', () => {
@@ -103,7 +101,11 @@ describe('ModelPlugin', () => {
     const failures = Object.entries(models)
       .map(([name, model]) => {
         try {
-          return model![$defaultValue] === undefined ? `${name}: no default value` : undefined;
+          if (model === undefined) {
+            return `${name}: not evaluated`;
+          }
+
+          return model[$defaultValue] === undefined ? `${name}: no default value` : undefined;
         } catch (e: unknown) {
           return `${name}: ${String(e)}`;
         }

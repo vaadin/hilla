@@ -16,13 +16,6 @@ export interface Cycles {
    * Whether a property of `owner` referring to `target` has to be deferred.
    */
   isDeferred(owner: string, target: string): boolean;
-
-  /**
-   * Whether the model of the schema takes part in a cycle with another schema.
-   * The type of such a model cannot be inferred, as it would refer to itself
-   * through the other one, so it needs an explicit type annotation.
-   */
-  isMutuallyReferencing(name: string): boolean;
 }
 
 /**
@@ -103,11 +96,6 @@ export function analyzeCycles(schemas: Readonly<Record<string, Schema>>): Cycles
   return {
     isDeferred(owner, target) {
       return owner === target || reach(target).has(owner);
-    },
-    isMutuallyReferencing(name) {
-      // a schema referring only to itself needs no annotation: `m.self`
-      // resolves against the owner model rather than the declared constant
-      return [...(edges.get(name) ?? [])].some((target) => target !== name && reach(target).has(name));
     },
   };
 }

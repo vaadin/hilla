@@ -227,7 +227,19 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<Exp
     const path = paths.createRelativePath(`${convertReferenceSchemaToPath(schema)}Model`);
     const model = imports.default.getIdentifier(path) ?? imports.default.add(path, name);
 
-    return this.#cycles.isDeferred(this.#owner, target) ? this.#call('lazy', [createModelProvider(model)]) : model;
+    if (!this.#cycles.isDeferred(this.#owner, target)) {
+      return model;
+    }
+
+    const entityPath = paths.createRelativePath(convertReferenceSchemaToPath(schema));
+    const entity =
+      imports.default.getIdentifier(entityPath) ??
+      imports.default.add(entityPath, convertReferenceSchemaToSpecifier(schema), true);
+    const type = ts.factory.createTypeReferenceNode(importModel('ObjectModel', this[$dependencies]), [
+      ts.factory.createTypeReferenceNode(entity),
+    ]);
+
+    return this.#call('lazy', [createModelProvider(model, type)]);
   }
 
   protected override [$processString](_: StringSchema): Expression {

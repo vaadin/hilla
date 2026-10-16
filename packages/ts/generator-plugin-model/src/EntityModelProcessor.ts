@@ -19,7 +19,7 @@ import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js'
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
 import { ModelSchemaExpressionProcessor } from './ModelSchemaProcessor.js';
-import { type Context, importM, importModel } from './utils.js';
+import { type Context, importM } from './utils.js';
 
 export type DependencyData = Readonly<{
   id: Identifier;
@@ -95,14 +95,14 @@ export abstract class EntityModelProcessor {
    * that `export default` carries both meanings and consumers can keep using
    * the imported name in type and value position alike.
    */
-  protected [$declare](initializer: Expression, type?: ts.TypeNode): readonly Statement[] {
+  protected [$declare](initializer: Expression): readonly Statement[] {
     const { id } = this[$model];
 
     return [
       ts.factory.createVariableStatement(
         undefined,
         ts.factory.createVariableDeclarationList(
-          [ts.factory.createVariableDeclaration(id, undefined, type, initializer)],
+          [ts.factory.createVariableDeclaration(id, undefined, undefined, initializer)],
           ts.NodeFlags.Const,
         ),
       ),
@@ -193,20 +193,7 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
       [],
     );
 
-    return this[$declare](expression, this.#createTypeAnnotation(entity));
-  }
-
-  /**
-   * Models that refer to one another cannot have their type inferred, as it
-   * would refer to itself through the other one. Only those get an explicit
-   * annotation, so that every other model keeps its properties navigable.
-   */
-  #createTypeAnnotation(entity: Identifier): ts.TypeNode | undefined {
-    return this.#context.cycles.isMutuallyReferencing(this[$fullyQualifiedName])
-      ? ts.factory.createTypeReferenceNode(importModel('ObjectModel', this[$dependencies]), [
-          ts.factory.createTypeReferenceNode(entity),
-        ])
-      : undefined;
+    return this[$declare](expression);
   }
 
   #processProperties({ properties }: ObjectSchema): ReadonlyArray<readonly [string, Expression]> {

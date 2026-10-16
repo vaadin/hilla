@@ -84,15 +84,20 @@ export function createModelCall(
 }
 
 /**
- * Builds `() => Model`, which defers reading the model until the property is
- * accessed and so survives a circular import.
+ * Builds `(): Type => Model`, which defers reading the model until the property
+ * is accessed and so survives a circular import.
+ *
+ * The return type breaks the cycle on the type level as well: the type of a
+ * model cannot be inferred from a model whose type is in turn inferred from it,
+ * so the provider states it instead of the model constants, which then keep
+ * their inferred, navigable types.
  */
-export function createModelProvider(model: Expression): ts.ArrowFunction {
+export function createModelProvider(model: Expression, type: ts.TypeNode): ts.ArrowFunction {
   return ts.factory.createArrowFunction(
     undefined,
     undefined,
     [],
-    undefined,
+    type,
     ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
     model,
   );
