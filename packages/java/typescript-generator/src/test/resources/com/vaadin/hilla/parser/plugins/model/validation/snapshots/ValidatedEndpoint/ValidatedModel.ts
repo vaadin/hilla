@@ -45,7 +45,7 @@ class ValidatedModel<T extends Validated = Validated> extends ObjectModel<T> {
   get codes(): ArrayModel<StringModel> {
     return this[_getPropertyModel]('codes', (parent, key) =>
       new ArrayModel(parent, key, true,
-        (parent, key) => new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }),
+        (parent, key) => new StringModel(parent, key, true, { validators: [new NotBlank()], meta: { javaType: 'java.lang.String' } }),
         { validators: [new Size({ min: 1 })], meta: { javaType: 'java.lang.String[]' } }));
   }
 
