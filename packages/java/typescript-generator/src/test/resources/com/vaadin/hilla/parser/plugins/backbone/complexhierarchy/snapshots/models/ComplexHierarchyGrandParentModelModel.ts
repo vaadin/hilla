@@ -1,9 +1,8 @@
-import { _getPropertyModel, makeObjectEmptyValueCreator, NumberModel, ObjectModel } from "@vaadin/hilla-lit-form";
+import m, { NumberModel } from "@vaadin/hilla-models";
 import type ComplexHierarchyGrandParentModel from "./ComplexHierarchyGrandParentModel.js";
-class ComplexHierarchyGrandParentModelModel<T extends ComplexHierarchyGrandParentModel = ComplexHierarchyGrandParentModel> extends ObjectModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(ComplexHierarchyGrandParentModelModel);
-    get build(): NumberModel {
-        return this[_getPropertyModel]("build", (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: "int" } }));
-    }
-}
+const ComplexHierarchyGrandParentModelModel = m
+  .object<ComplexHierarchyGrandParentModel>("ComplexHierarchyGrandParentModel")
+  .property("build", m.meta(NumberModel, { jvmType: "int" }))
+  .build();
+type ComplexHierarchyGrandParentModelModel = typeof ComplexHierarchyGrandParentModelModel;
 export default ComplexHierarchyGrandParentModelModel;

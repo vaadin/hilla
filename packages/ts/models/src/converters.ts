@@ -14,7 +14,7 @@ import {
   type Value,
 } from './Model.js';
 import { CoreModelBuilder } from './modelBuilders.js';
-import { $itemModel, ArrayModel, type OptionalModel } from './models.js';
+import { $itemModel, $valueModel, ArrayModel, type OptionalModel, RecordModel } from './models.js';
 
 /**
  * Function that converts the given model.
@@ -121,8 +121,9 @@ export interface LazyOf<M extends Model> extends ModelConverter {
  * modules have been evaluated. Use {@link self} for a model that refers to
  * itself.
  *
- * Only the value is deferred: models in a cycle still need an explicit type
- * annotation, as their types cannot be inferred from each other.
+ * Only the value is deferred: the types of models in a cycle cannot be
+ * inferred from each other, so the cycle has to be broken on the type level as
+ * well, for example with a return type of the provider.
  *
  * Every cycle must be broken by a property whose default value does not read
  * the model it refers to: an optional one defaults to `undefined`, an array to
@@ -156,6 +157,30 @@ function arrayImpl<const M extends Model>(model: M): ArrayModel<M> {
  */
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
 export const array = createModelConverter<ArrayOf, typeof arrayImpl>(arrayImpl);
+
+/**
+ * HKT signature for the record converter, which returns a record model with
+ * values of the given model.
+ */
+export interface RecordOf extends ModelConverter {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
+  readonly [$targetModel]: RecordModel<string, Value<SourceModel<this>>, SourceModel<this>>;
+}
+function recordImpl<const M extends Model>(model: M): RecordModel<string, Value<M>, M> {
+  return new CoreModelBuilder<Record<string, Value<M>>>(RecordModel, (): Record<string, Value<M>> => ({}))
+    .name(`Record<string, ${model[$name]}>`)
+    .define($valueModel, { value: model })
+    .build();
+}
+
+/**
+ * Creates a new model of an arbitrary object with string keys, such as a Java
+ * `Map<String, V>`.
+ *
+ * @param valueModel - The model of the record values.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
+export const record = createModelConverter<RecordOf, typeof recordImpl>(recordImpl);
 
 function constrainedImpl<const M extends Model>(
   this: void,

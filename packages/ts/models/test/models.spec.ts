@@ -11,6 +11,7 @@ import m, {
   $name,
   $optional,
   $owner,
+  $attributeNames,
   $constraints,
   $literal,
   $valueModel,
@@ -31,6 +32,7 @@ import m, {
   Min,
   Max,
   DecimalMin,
+  Pattern,
   Size,
   type Value,
   type Constraint,
@@ -172,6 +174,22 @@ describe('@vaadin/hilla-models', () => {
     expect(EmployeeModel).to.have.property($defaultValue).which.is.like({ colleagues: undefined });
   });
 
+  it('should allow self-reference with record of optional', () => {
+    interface Employee {
+      reports: Record<string, Employee | undefined>;
+    }
+
+    const EmployeeModel = m
+      .object<Employee>('Employee')
+      .property('reports', m.record(m.optional(m.self)))
+      .build();
+
+    expect(EmployeeModel).to.have.property('reports').which.is.instanceof(RecordModel);
+    expect(EmployeeModel.reports[$valueModel]).to.be.instanceof(EmployeeModel);
+    expect(EmployeeModel.reports[$valueModel]).to.have.property($optional).which.equals(true);
+    expect(EmployeeModel).to.have.property($defaultValue).which.is.like({ reports: {} });
+  });
+
   it('should allow self-reference with array of optional', () => {
     interface Employee {
       colleagues: Array<Employee | undefined>;
@@ -200,6 +218,17 @@ describe('@vaadin/hilla-models', () => {
     expect(RoleModel).to.have.property($name, 'Role');
     expect(RoleModel).to.have.property($enum, Role);
     expect(RoleModel).to.have.property($defaultValue).which.is.equal(Role.Guest);
+  });
+
+  it('should keep createEmptyValue as a deprecated alias of the default value', () => {
+    const value: Person = PersonModel.createEmptyValue();
+
+    expect(value).to.deep.equal(PersonModel[$defaultValue]);
+    expect(value).not.to.equal(PersonModel.createEmptyValue());
+    expect(RoleModel.createEmptyValue()).to.equal(Role.Guest);
+
+    const { createEmptyValue } = PersonModel;
+    expect(createEmptyValue()).to.deep.equal(value);
   });
 
   it('correctly sets the model owner', () => {
@@ -644,6 +673,11 @@ describe('@vaadin/hilla-models', () => {
       expect(m.isConstraint(personModelWithNonEmptyComments.comments[$constraints][0], Size)).to.be.false;
       expect(personModelWithNonEmptyComments.comments[$constraints][0].attributes).to.be.like({});
       expect(personModelWithNonEmptyComments.comments[$constraints][0].name).to.be.equal('NotEmpty');
+    });
+
+    it('should list the declared attributes, including those without a default', () => {
+      expect(Pattern[$attributeNames]).to.have.members(['message', 'regexp']);
+      expect(Size[$attributeNames]).to.have.members(['message', 'min', 'max']);
     });
 
     it('should leave out attributes that were not given', () => {

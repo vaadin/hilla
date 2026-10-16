@@ -1,9 +1,8 @@
-import { _getPropertyModel, ArrayModel, makeObjectEmptyValueCreator, ObjectModel, StringModel } from "@vaadin/hilla-lit-form";
+import m, { StringModel } from "@vaadin/hilla-models";
 import type NonNullableFieldModel from "./NonNullableFieldModel.js";
-class NonNullableFieldModelModel<T extends NonNullableFieldModel = NonNullableFieldModel> extends ObjectModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(NonNullableFieldModelModel);
-    get stringList(): ArrayModel<StringModel> {
-        return this[_getPropertyModel]("stringList", (parent, key) => new ArrayModel(parent, key, false, (parent, key) => new StringModel(parent, key, false, { meta: { javaType: "java.lang.String" } }), { meta: { javaType: "java.util.List" } }));
-    }
-}
+const NonNullableFieldModelModel = m
+  .object<NonNullableFieldModel>("NonNullableFieldModel")
+  .property("stringList", m.meta(m.array(m.meta(StringModel, { jvmType: "java.lang.String" })), { jvmType: "java.util.List" }))
+  .build();
+type NonNullableFieldModelModel = typeof NonNullableFieldModelModel;
 export default NonNullableFieldModelModel;

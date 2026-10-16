@@ -1,6 +1,7 @@
 import type { EmptyObject } from 'type-fest';
 import {
   $assertSupportedModel,
+  $attributeNames,
   type Constraint,
   type ConstraintFn,
   type NonAttributedConstraint,
@@ -112,6 +113,7 @@ export class ConstraintBuilder<V = unknown, const N extends string = string, A e
     NonAttributedConstraint = Object.defineProperties(NonAttributedConstraint, {
       name: { value: name },
       [$assertSupportedModel]: { value: assertSupportedModel },
+      [$attributeNames]: { value: Object.freeze(Object.keys(attributeDefaults)) },
     });
 
     return NonAttributedConstraint as NonAttributedConstraint<V | undefined, N, A>;

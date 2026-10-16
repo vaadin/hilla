@@ -14,48 +14,35 @@ export type SchemaWithMetadata = Schema & {
 
 function createAnnotationsProperty(schema: SchemaWithMetadata): PropertyAssignment | null {
   const annotations = schema['x-annotations'];
-  const hasAnnotations = annotations && annotations.length > 0;
-  if (!hasAnnotations) {
+
+  if (!annotations || annotations.length === 0) {
     return null;
   }
 
-  const annotationLiterals = annotations.map((annotation) => {
-    const properties = [ts.factory.createPropertyAssignment('name', ts.factory.createStringLiteral(annotation.name))];
-
-    if (annotation.attributes && Object.keys(annotation.attributes).length > 0) {
-      properties.push(
-        ts.factory.createPropertyAssignment('attributes', createExpressionFromValue(annotation.attributes)),
-      );
-    }
-
-    return ts.factory.createObjectLiteralExpression(properties);
-  });
-
-  return ts.factory.createPropertyAssignment(
-    'annotations',
-    ts.factory.createArrayLiteralExpression(annotationLiterals),
+  const literals = annotations.map(({ name, attributes }) =>
+    ts.factory.createObjectLiteralExpression([
+      ts.factory.createPropertyAssignment('jvmType', ts.factory.createStringLiteral(name)),
+      ...(attributes && Object.keys(attributes).length > 0
+        ? [ts.factory.createPropertyAssignment('attributes', createExpressionFromValue(attributes))]
+        : []),
+    ]),
   );
+
+  return ts.factory.createPropertyAssignment('annotations', ts.factory.createArrayLiteralExpression(literals));
 }
 
-function createJavaTypeProperty(schema: SchemaWithMetadata): PropertyAssignment | null {
+function createJvmTypeProperty(schema: SchemaWithMetadata): PropertyAssignment | null {
   const javaType = schema['x-java-type'];
-  if (!javaType) {
-    return null;
-  }
 
-  return ts.factory.createPropertyAssignment('javaType', ts.factory.createStringLiteral(javaType));
+  return javaType ? ts.factory.createPropertyAssignment('jvmType', ts.factory.createStringLiteral(javaType)) : null;
 }
 
 export function process(schema: Schema): ObjectLiteralExpression | null {
   const schemaWithMetadata = schema as SchemaWithMetadata;
 
-  const properties = [createAnnotationsProperty(schemaWithMetadata), createJavaTypeProperty(schemaWithMetadata)].filter(
+  const properties = [createAnnotationsProperty(schemaWithMetadata), createJvmTypeProperty(schemaWithMetadata)].filter(
     Boolean,
   ) as PropertyAssignment[];
 
-  if (properties.length === 0) {
-    return null;
-  }
-
-  return ts.factory.createObjectLiteralExpression(properties);
+  return properties.length > 0 ? ts.factory.createObjectLiteralExpression(properties) : null;
 }

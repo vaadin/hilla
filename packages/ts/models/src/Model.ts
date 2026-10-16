@@ -109,6 +109,13 @@ export type Extensions<M extends Model> = M extends Model<unknown, infer EX> ? E
 export const $assertSupportedModel = Symbol('assertSupportedModel');
 
 /**
+ * The symbol that represents the names of the attributes a
+ * {@link NonAttributedConstraint} declares, including those without a default
+ * value.
+ */
+export const $attributeNames = Symbol('attributeNames');
+
+/**
  * The constraint function type.
  */
 export type ConstraintFn<
@@ -137,6 +144,7 @@ export type NonAttributedConstraint<
     attributes: A;
     name: N;
     [$assertSupportedModel](model: Model<V>): void;
+    [$attributeNames]: ReadonlyArray<string & keyof A>;
   }>;
 
 /**
@@ -206,6 +214,13 @@ export type Model<V = unknown, EX extends AnyObject = AnyObject> = EX & {
   readonly [$defaultValue]: V;
   readonly [Symbol.toStringTag]: string;
   [Symbol.hasInstance](value: any): value is Model<V, EX>;
+
+  /**
+   * Creates the default value of the model.
+   *
+   * @deprecated Use the `$defaultValue` property instead.
+   */
+  createEmptyValue(this: void): V;
   toString(): string;
 };
 
@@ -244,6 +259,13 @@ export const Model: Model = Object.create(null, {
   [Symbol.hasInstance]: {
     value(this: Model, o: unknown) {
       return typeof o === 'object' && o != null && (this === o || Object.prototype.isPrototypeOf.call(this, o));
+    },
+  },
+  createEmptyValue: {
+    // bound to the model, so that it also works when detached, e.g. passed
+    // as `useState(PersonModel.createEmptyValue)`
+    get(this: Model) {
+      return () => this[$defaultValue];
     },
   },
   toString: {
