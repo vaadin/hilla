@@ -112,10 +112,14 @@ export class EntityProcessor {
     if (isComposedSchema(schema)) {
       const decomposed = decomposeSchema(schema);
 
-      if (decomposed.length > 2) {
+      // A subtype is a reference to the supertype composed with an object
+      // schema holding the properties of the subtype itself. Anything else,
+      // such as the union of the subtypes of a hierarchy, is not a class to
+      // declare here: the plugin which builds it replaces this file.
+      if (decomposed.length !== 2) {
         logger.debug(
           schema,
-          `Schema for '${this.#fullyQualifiedName}' has more than two components. This plugin will ignore it.`,
+          `Schema for '${this.#fullyQualifiedName}' is not a type composed of a supertype and its own properties. This plugin will ignore it.`,
         );
         return undefined;
       }
