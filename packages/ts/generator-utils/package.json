@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-generator-utils",
-  "version": "25.3.0-beta2",
+  "version": "25.4.0-alpha3",
   "description": "A set of utils for developing Hilla generator plugins",
   "main": "index.js",
   "type": "module",
@@ -25,6 +25,7 @@
     "./dependencies/PathManager.js": "./dependencies/PathManager.js",
     "./dependencies/StatementRecordManager.js": "./dependencies/StatementRecordManager.js",
     "./testing/snapshotMatcher.js": "./testing/snapshotMatcher.js",
+    "./testing/typeCheck.js": "./testing/typeCheck.js",
     "./ast.js": "./ast.js",
     "./createSourceFile.js": "./createSourceFile.js",
     "./memoize.js": "./memoize.js",

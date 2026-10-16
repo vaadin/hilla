@@ -1,7 +1,13 @@
 import { strict as assert } from 'node:assert';
 import { describe, it } from 'node:test';
 import type { Versions } from './config.js';
-import { findNpmVersion, parseNpmPackages, withNpmPackages } from './npmPackages.js';
+import {
+  findNpmVersion,
+  parseNpmPackages,
+  parseReactComponents,
+  withNpmPackages,
+  withReactComponents,
+} from './npmPackages.js';
 
 const LUMO = `
 @NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "25.3.0-beta2")
@@ -72,5 +78,66 @@ describe('withNpmPackages', () => {
 
     assert.deepEqual(versions.core['vaadin-lumo-styles'], declared);
     assert.equal(Object.keys(versions.core).length, 2, 'the package missing from the platform is still added');
+  });
+});
+
+const TRANSITIVE = `
+@NpmPackage(value = "@vaadin/a11y-base", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/component-base", version = "25.4.0-alpha1")
+final class TransitiveNpmPackages implements Serializable {
+    static final Map<String, List<String>> REACT_COMPONENTS = Map.of(
+            "@vaadin/react-components",
+            List.of("@vaadin/accordion", "@vaadin/button"),
+            "@vaadin/react-components-pro",
+            List.of("@vaadin/board", "@vaadin/charts"));
+}
+`;
+
+describe('parseReactComponents', () => {
+  it('should read the React components at the version of the annotations of the source', () => {
+    assert.deepEqual(parseReactComponents(TRANSITIVE), {
+      'react-components': {
+        exclusions: ['@vaadin/accordion', '@vaadin/button'],
+        jsVersion: '25.4.0-alpha1',
+        mode: 'react',
+        npmName: '@vaadin/react-components',
+      },
+      'react-components-pro': {
+        exclusions: ['@vaadin/board', '@vaadin/charts'],
+        jsVersion: '25.4.0-alpha1',
+        mode: 'react',
+        npmName: '@vaadin/react-components-pro',
+      },
+    });
+  });
+
+  it('should read nothing from a source without the map', () => {
+    assert.deepEqual(parseReactComponents(LUMO), {});
+  });
+
+  it('should fail where the annotations do not say one version', () => {
+    const source = TRANSITIVE.replace(
+      '"@vaadin/a11y-base", version = "25.4.0-alpha1"',
+      '"@vaadin/a11y-base", version = "25.3.0"',
+    );
+    assert.throws(() => parseReactComponents(source, 'TransitiveNpmPackages.java'), /TransitiveNpmPackages\.java/u);
+  });
+});
+
+describe('withReactComponents', () => {
+  it('should add the React components the platform no longer declares', () => {
+    const versions = withReactComponents(versionsWith({}), parseReactComponents(TRANSITIVE));
+
+    assert.equal(findNpmVersion(versions, '@vaadin/react-components'), '25.4.0-alpha1');
+    assert.equal(versions.react['react-components-pro'].mode, 'react');
+  });
+
+  it('should leave alone the React components the platform declares itself', () => {
+    const declared = {
+      'react-components': { jsVersion: '25.3.0', mode: 'react', npmName: '@vaadin/react-components' },
+    };
+    const versions = withReactComponents(versionsWith({}, declared), parseReactComponents(TRANSITIVE));
+
+    assert.equal(versions.react['react-components'].jsVersion, '25.3.0');
   });
 });
