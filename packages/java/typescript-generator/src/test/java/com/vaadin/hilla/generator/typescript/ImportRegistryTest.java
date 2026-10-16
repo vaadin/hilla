@@ -127,6 +127,29 @@ public class ImportRegistryTest {
     }
 
     @Test
+    public void should_RenameANamedImportWhichClashes() {
+        imports.reserve("ConnectClient");
+
+        assertEquals("ConnectClient_1", imports
+                .importNamed("@vaadin/hilla-frontend", "ConnectClient", false));
+        assertEquals(List.of(
+                "import { ConnectClient as ConnectClient_1 } from '@vaadin/hilla-frontend';"),
+                imports.write());
+    }
+
+    @Test
+    public void should_WriteTypeOnlyNamedImportsApartFromValueOnes() {
+        imports.importNamed("@vaadin/hilla-frontend", "ConnectClient", false);
+        imports.importNamed("@vaadin/hilla-frontend", "EndpointRequestInit",
+                true);
+
+        assertEquals(List.of(
+                "import type { EndpointRequestInit } from '@vaadin/hilla-frontend';",
+                "import { ConnectClient } from '@vaadin/hilla-frontend';"),
+                imports.write());
+    }
+
+    @Test
     public void should_WriteBareModulesBeforeRelativeOnes() {
         imports.importDefault("./client.js", "client", false);
         imports.importNamed("@vaadin/hilla-frontend", "EndpointRequestInit",
