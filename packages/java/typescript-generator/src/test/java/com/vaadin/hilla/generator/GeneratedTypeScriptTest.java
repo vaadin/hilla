@@ -618,28 +618,43 @@ public class GeneratedTypeScriptTest {
     }
 
     @Test
-    public void should_LeaveTheDiscriminatorOutOfTheModelOfASubtype() {
-        // A form binds what the type declares, and the discriminator is
-        // decided by which subtype the value is rather than edited
+    public void should_PinTheDiscriminatorOfTheModelOfASubtype() {
+        // The empty value of a subtype has to say which subtype it is for the
+        // server to read it back, so the model holds the ids the type accepts:
+        // one of its own, or its own and the ones of the subtypes below it
         assertEquals(
                 """
-                        import { NumberModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+                        import m, { NumberModel } from '@vaadin/hilla-models';
                         import FigureModel from '../FigureModel.js';
                         import type Round from './Round.js';
 
-                        class RoundModel<T extends Round = Round> extends FigureModel<T> {
-                          static override createEmptyValue = makeObjectEmptyValueCreator(RoundModel);
-
-                          get radius(): NumberModel {
-                            return this[_getPropertyModel]('radius', (parent, key) =>
-                              new NumberModel(parent, key, false, { meta: { javaType: 'double' } }));
-                          }
-                        }
+                        const RoundModel = m
+                          .extend(FigureModel)
+                          .object<Round>('Round')
+                          .property('radius', m.meta(NumberModel, { jvmType: 'double' }))
+                          .property('@type', m.union(m.literal('round'), m.literal('ring')))
+                          .build();
+                        type RoundModel = typeof RoundModel;
 
                         export default RoundModel;
                         """,
                 writeModel(entity(SampleEndpoint.Figure.Round.class))
                         .content());
+        assertEquals("""
+                import m from '@vaadin/hilla-models';
+                import FigureModel from '../FigureModel.js';
+                import type Blank from './Blank.js';
+
+                const BlankModel = m
+                  .extend(FigureModel)
+                  .object<Blank>('Blank')
+                  .property('@type', m.literal('blank'))
+                  .build();
+                type BlankModel = typeof BlankModel;
+
+                export default BlankModel;
+                """, writeModel(entity(SampleEndpoint.Figure.Blank.class))
+                .content());
     }
 
     @Test
