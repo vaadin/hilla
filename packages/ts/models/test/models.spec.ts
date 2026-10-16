@@ -11,6 +11,7 @@ import m, {
   $name,
   $optional,
   $owner,
+  $attributeNames,
   $constraints,
   $literal,
   $valueModel,
@@ -31,6 +32,7 @@ import m, {
   Min,
   Max,
   DecimalMin,
+  Pattern,
   Size,
   type Value,
   type Constraint,
@@ -644,6 +646,11 @@ describe('@vaadin/hilla-models', () => {
       expect(m.isConstraint(personModelWithNonEmptyComments.comments[$constraints][0], Size)).to.be.false;
       expect(personModelWithNonEmptyComments.comments[$constraints][0].attributes).to.be.like({});
       expect(personModelWithNonEmptyComments.comments[$constraints][0].name).to.be.equal('NotEmpty');
+    });
+
+    it('should list the declared attributes, including those without a default', () => {
+      expect(Pattern[$attributeNames]).to.have.members(['message', 'regexp']);
+      expect(Size[$attributeNames]).to.have.members(['message', 'min', 'max']);
     });
 
     it('should leave out attributes that were not given', () => {

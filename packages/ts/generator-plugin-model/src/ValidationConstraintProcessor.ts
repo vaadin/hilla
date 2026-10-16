@@ -59,16 +59,9 @@ const DECLARATIONS = new Map<string, models.NonAttributedConstraint>(
  * the annotation has, but the constraint functions take an exact attribute
  * object, so one the model library does not know, such as the `flags` of
  * `@Pattern`, would fail the compilation of the generated file.
- *
- * Read from the attributes a constraint gets when none are given, which holds
- * every declared one that has a default value. Only `message` has none, so that
- * a validator can keep its own wording, and every constraint declares it.
  */
 const DECLARED_ATTRIBUTES = new Map<string, ReadonlySet<string>>(
-  [...DECLARATIONS].map(([name, declaration]) => [
-    name,
-    new Set(['message', ...Object.keys((declaration as (attributes: object) => models.Constraint)({}).attributes)]),
-  ]),
+  [...DECLARATIONS].map(([name, declaration]) => [name, new Set(declaration[models.$attributeNames])]),
 );
 
 /**

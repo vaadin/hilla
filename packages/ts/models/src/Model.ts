@@ -109,6 +109,13 @@ export type Extensions<M extends Model> = M extends Model<unknown, infer EX> ? E
 export const $assertSupportedModel = Symbol('assertSupportedModel');
 
 /**
+ * The symbol that represents the names of the attributes a
+ * {@link NonAttributedConstraint} declares, including those without a default
+ * value.
+ */
+export const $attributeNames = Symbol('attributeNames');
+
+/**
  * The constraint function type.
  */
 export type ConstraintFn<
@@ -137,6 +144,7 @@ export type NonAttributedConstraint<
     attributes: A;
     name: N;
     [$assertSupportedModel](model: Model<V>): void;
+    [$attributeNames]: ReadonlyArray<string & keyof A>;
   }>;
 
 /**
