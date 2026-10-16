@@ -7,6 +7,7 @@
     "@vaadin/hilla-file-router": "file:../../../../ts/file-router",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
+    "@vaadin/hilla-models": "file:../../../../ts/models",
     "@vaadin/hilla-react-auth": "file:../../../../ts/react-auth",
     "@vaadin/hilla-react-crud": "file:../../../../ts/react-crud",
     "@vaadin/hilla-react-form": "file:../../../../ts/react-form",
@@ -25,13 +26,11 @@
   "devDependencies": {
     "@babel/core": "7.29.7",
     "@babel/plugin-transform-react-jsx-development": "7.29.7",
-    "@babel/preset-react": "7.29.7",
     "@babel/types": "7.29.8",
     "@preact/signals-react": "3.12.0",
     "@preact/signals-react-transform": "0.8.3",
     "@rolldown/plugin-babel": "0.2.4",
     "@rollup/plugin-replace": "6.0.3",
-    "@rollup/pluginutils": "5.4.0",
     "@types/node": "26.6.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
@@ -81,13 +80,11 @@
     "devDependencies": {
       "@babel/core": "7.29.7",
       "@babel/plugin-transform-react-jsx-development": "7.29.7",
-      "@babel/preset-react": "7.29.7",
       "@babel/types": "7.29.8",
       "@preact/signals-react": "3.12.0",
       "@preact/signals-react-transform": "0.8.3",
       "@rolldown/plugin-babel": "0.2.4",
       "@rollup/plugin-replace": "6.0.3",
-      "@rollup/pluginutils": "5.4.0",
       "@types/node": "26.6.5",
       "@types/react": "19.3.0",
       "@types/react-dom": "19.3.0",
@@ -113,7 +110,7 @@
       "vite": "8.3.4",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "bb9ad456386a424ca44d2c87d538a6bdf18b76c16afc82833218ce8d60629b83"
+    "hash": "39551a148a170d9213ac78274c09df68f4cb30a8e2fd73ad368024881e79ef0b"
   },
   "overrides": {
     "@vaadin/a11y-base": "25.3.0-beta1",
