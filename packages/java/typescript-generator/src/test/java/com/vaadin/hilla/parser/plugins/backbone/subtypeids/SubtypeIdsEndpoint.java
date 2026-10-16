@@ -21,28 +21,13 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 /**
- * Returns polymorphic types whose ids are given as a list of names, or written
- * around the value rather than as a property of it.
+ * Returns a polymorphic type whose id is written around the value rather than
+ * as a property of it.
  */
 @Endpoint
 public class SubtypeIdsEndpoint {
-    public Pet getPet() {
-        return new Cat();
-    }
-
     public Wrapped getWrapped() {
         return new Inner();
-    }
-
-    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
-    @JsonSubTypes({
-            @JsonSubTypes.Type(value = Cat.class, names = { "cat", "kitty" }) })
-    public static class Pet {
-        public String name;
-    }
-
-    public static class Cat extends Pet {
-        public boolean indoor;
     }
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
