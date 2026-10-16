@@ -4,6 +4,7 @@ import {
   type AnyObject,
   type Enum,
   type Extensions,
+  type Literal,
   type TargetModel,
   Model,
   type ModelConverter,
@@ -66,13 +67,27 @@ export type ObjectModel<V, EX extends AnyObject = AnyObject> = Model<
 export const ObjectModel = new CoreModelBuilder(Model, (): AnyObject => ({})).name('Object').build();
 
 /**
+ * The symbol that represents the RecordModel value property.
+ */
+export const $valueModel = Symbol('valueModel');
+
+/**
  * The model of a `Record<string, V>` data, which is a special case
  * of `ObjectModel<Record<string, V>>` that is used to represent an arbitrary
  * object with string keys, such as a Java `Map<String, Object>`.
  */
-export type RecordModel<K extends string, V> = Model<Record<K, V>>;
-export const RecordModel = new CoreModelBuilder(ObjectModel, (): Record<string, unknown> => ({}))
+export type RecordModel<K extends string, V, M extends Model = Model<V>> = Model<
+  Record<K, V>,
+  {
+    readonly [$valueModel]: M;
+  }
+>;
+export const RecordModel: RecordModel<string, unknown> = new CoreModelBuilder(
+  ObjectModel,
+  (): Record<string, unknown> => ({}),
+)
   .name('Record')
+  .define($valueModel, { value: Model })
   .build();
 
 /**
@@ -95,6 +110,22 @@ export const EnumModel: EnumModel<typeof Enum> = new CoreModelBuilder<(typeof En
   .define<typeof $enum, typeof Enum>($enum, { value: {} })
   .defaultValueProvider((self) => Object.values(self[$enum])[0])
   .build();
+
+/**
+ * The symbol that represents the value a {@link LiteralModel} is pinned to.
+ */
+export const $literal = Symbol('literal');
+
+/**
+ * The model of a value that is fixed to a single literal, such as the type
+ * discriminator of a polymorphic entity.
+ */
+export type LiteralModel<T extends Literal = Literal> = Model<
+  T,
+  {
+    readonly [$literal]: T;
+  }
+>;
 
 /**
  * The model of a union data.
