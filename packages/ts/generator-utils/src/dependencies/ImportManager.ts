@@ -352,6 +352,12 @@ export default class ImportManager implements CodeConvertable<readonly Statement
       const { name, namedBindings } = importClause;
       const path = (moduleSpecifier as ts.StringLiteral).text;
 
+      // a default import may come along with named bindings in a single
+      // declaration, i.e. `import m, { StringModel } from "..."`
+      if (name) {
+        this.default.add(path, name.text, importClause.isTypeOnly, name);
+      }
+
       if (namedBindings) {
         if (ts.isNamespaceImport(namedBindings)) {
           this.namespace.add(path, namedBindings.name.text, namedBindings.name);
@@ -362,8 +368,6 @@ export default class ImportManager implements CodeConvertable<readonly Statement
             this.named.add(path, (propertyName ?? local).text, isTypeOnly, local);
           }
         }
-      } else if (name) {
-        this.default.add(path, name.text, importClause.isTypeOnly, name);
       }
     }
   }
