@@ -1,9 +1,12 @@
-import { _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import m from '@vaadin/hilla-models';
 import FigureModel from '../FigureModel.js';
 import type Blank from './Blank.js';
 
-class BlankModel<T extends Blank = Blank> extends FigureModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(BlankModel);
-}
+const BlankModel = m
+  .extend(FigureModel)
+  .object<Blank>('Blank')
+  .property('@type', m.literal('blank'))
+  .build();
+type BlankModel = typeof BlankModel;
 
 export default BlankModel;

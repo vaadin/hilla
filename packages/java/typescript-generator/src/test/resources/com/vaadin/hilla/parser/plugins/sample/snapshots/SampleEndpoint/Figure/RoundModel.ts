@@ -1,14 +1,13 @@
-import { NumberModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import m, { NumberModel } from '@vaadin/hilla-models';
 import FigureModel from '../FigureModel.js';
 import type Round from './Round.js';
 
-class RoundModel<T extends Round = Round> extends FigureModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(RoundModel);
-
-  get radius(): NumberModel {
-    return this[_getPropertyModel]('radius', (parent, key) =>
-      new NumberModel(parent, key, false, { meta: { javaType: 'double' } }));
-  }
-}
+const RoundModel = m
+  .extend(FigureModel)
+  .object<Round>('Round')
+  .property('radius', m.meta(NumberModel, { jvmType: 'double' }))
+  .property('@type', m.union(m.literal('round'), m.literal('ring')))
+  .build();
+type RoundModel = typeof RoundModel;
 
 export default RoundModel;

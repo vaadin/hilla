@@ -1,8 +1,9 @@
-import { ObjectModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import m from '@vaadin/hilla-models';
 import type Marker from './Marker.js';
 
-class MarkerModel<T extends Marker = Marker> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(MarkerModel);
-}
+const MarkerModel = m
+  .object<Marker>('Marker')
+  .build();
+type MarkerModel = typeof MarkerModel;
 
 export default MarkerModel;
