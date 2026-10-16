@@ -32,9 +32,8 @@ import com.vaadin.hilla.parser.testutils.AbstractFullStackTest;
  * Verifies the type ids that the generator gives to the subtypes of a
  * polymorphic type. Which value ends up in the generated TypeScript is decided
  * by the parser, so these hierarchies are verified in what it hands the
- * writers, except for the one that must get no property at all: how a
- * discriminator is rendered is covered by the snapshots of the surrounding
- * package.
+ * writers, and the TypeScript written from it is pinned by the snapshots of
+ * this package.
  */
 public class TypeIdsTest extends AbstractFullStackTest {
     /**
@@ -102,12 +101,13 @@ public class TypeIdsTest extends AbstractFullStackTest {
     }
 
     /**
-     * A hierarchy whose type ids are unknown gets no property at all: an
-     * identifying property that the server never sends would be worse than none
-     * at all, as TypeScript would demand it from every value.
+     * Among others, the snapshots pin that a hierarchy whose type ids are
+     * unknown, such as the subtypes of {@code MinimalBase}, gets no identifying
+     * property at all: one that the server never sends would be worse than
+     * none, as TypeScript would demand it from every value.
      */
     @Test
-    public void should_NotDeclareAnIdentifyingPropertyForUnknownTypeIds() {
+    public void should_GenerateTheExpectedTypeScript() {
         assertTypescriptMatchesSnapshot(TypeIdsEndpoint.class);
     }
 
