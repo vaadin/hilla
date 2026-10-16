@@ -25,7 +25,6 @@ import '@vaadin/button';
 import '@vaadin/notification';
 
 import { field, Binder } from '@vaadin/hilla-lit-form';
-import { $defaultValue } from '@vaadin/hilla-models';
 
 import { View } from '../view';
 import ElementsModel from 'Frontend/generated/com/vaadin/flow/spring/fusionsecurity/fusionform/ElementsModel';
@@ -43,7 +42,7 @@ export class VaadinElementsView extends View {
 
   firstUpdated(arg: any) {
     super.firstUpdated(arg);
-    this.binder.read(ElementsModel[$defaultValue]);
+    this.binder.read(ElementsModel.createEmptyValue());
   }
 
   render() {

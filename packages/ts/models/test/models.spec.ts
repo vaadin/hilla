@@ -220,6 +220,14 @@ describe('@vaadin/hilla-models', () => {
     expect(RoleModel).to.have.property($defaultValue).which.is.equal(Role.Guest);
   });
 
+  it('should keep createEmptyValue as a deprecated alias of the default value', () => {
+    const value: Person = PersonModel.createEmptyValue();
+
+    expect(value).to.deep.equal(PersonModel[$defaultValue]);
+    expect(value).not.to.equal(PersonModel.createEmptyValue());
+    expect(RoleModel.createEmptyValue()).to.equal(Role.Guest);
+  });
+
   it('correctly sets the model owner', () => {
     expect(PersonModel.address.street).to.have.property($owner).which.has.property($owner).which.is.equal(PersonModel);
   });

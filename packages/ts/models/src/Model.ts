@@ -214,6 +214,13 @@ export type Model<V = unknown, EX extends AnyObject = AnyObject> = EX & {
   readonly [$defaultValue]: V;
   readonly [Symbol.toStringTag]: string;
   [Symbol.hasInstance](value: any): value is Model<V, EX>;
+
+  /**
+   * Creates the default value of the model.
+   *
+   * @deprecated Use the `$defaultValue` property instead.
+   */
+  createEmptyValue(): V;
   toString(): string;
 };
 
@@ -252,6 +259,11 @@ export const Model: Model = Object.create(null, {
   [Symbol.hasInstance]: {
     value(this: Model, o: unknown) {
       return typeof o === 'object' && o != null && (this === o || Object.prototype.isPrototypeOf.call(this, o));
+    },
+  },
+  createEmptyValue: {
+    value(this: Model) {
+      return this[$defaultValue];
     },
   },
   toString: {
