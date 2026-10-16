@@ -51,6 +51,42 @@ import * as FooEndpoint from "Frontend/generated/FooEndpoint";`;
     });
   });
 
+  describe('merging', () => {
+    let manager: ImportManager;
+
+    function print(): string {
+      return ts.createPrinter().printFile(createSourceFile(manager.toCode(), 'foo.ts'));
+    }
+
+    beforeEach(() => {
+      manager = new ImportManager(new Intl.Collator());
+    });
+
+    it.each([
+      ['a value', false, 'import m, { StringModel } from "foo";'],
+      ['a type-only', true, 'import m, { type StringModel } from "foo";'],
+    ])('should merge %s named import into the default import of the same module', (_, isType, expected) => {
+      manager.default.add('foo', 'm');
+      manager.named.add('foo', 'StringModel', isType);
+
+      expect(print()).to.equal(`${expected}\n`);
+    });
+
+    it('should keep named imports apart from a type-only default import', () => {
+      manager.default.add('foo', 'm', true);
+      manager.named.add('foo', 'StringModel');
+
+      expect(print()).to.equal('import type m from "foo";\nimport { StringModel } from "foo";\n');
+    });
+
+    it('should not merge imports of different modules', () => {
+      manager.default.add('foo', 'm');
+      manager.named.add('bar', 'StringModel');
+
+      expect(print()).to.equal('import { StringModel } from "bar";\nimport m from "foo";\n');
+    });
+  });
+
   describe('names', () => {
     let manager: ImportManager;
 
