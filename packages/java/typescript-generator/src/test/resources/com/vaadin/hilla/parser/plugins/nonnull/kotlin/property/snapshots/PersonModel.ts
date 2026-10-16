@@ -45,6 +45,11 @@ class PersonModel<T extends Person = Person> extends AbstractEntityModel<T> {
       new BooleanModel(parent, key, false, { meta: { javaType: 'boolean' } }));
   }
 
+  get age(): NumberModel {
+    return this[_getPropertyModel]('age', (parent, key) =>
+      new NumberModel(parent, key, true, { meta: { javaType: 'java.lang.Integer' } }));
+  }
+
   get luckyNumber(): NumberModel {
     return this[_getPropertyModel]('luckyNumber', (parent, key) =>
       new NumberModel(parent, key, false, { meta: { javaType: 'int' } }));
@@ -63,11 +68,6 @@ class PersonModel<T extends Person = Person> extends AbstractEntityModel<T> {
   get fullName(): StringModel {
     return this[_getPropertyModel]('fullName', (parent, key) =>
       new StringModel(parent, key, false, { meta: { javaType: 'java.lang.String' } }));
-  }
-
-  get age(): NumberModel {
-    return this[_getPropertyModel]('age', (parent, key) =>
-      new NumberModel(parent, key, true, { meta: { javaType: 'java.lang.Integer' } }));
   }
 }
 
