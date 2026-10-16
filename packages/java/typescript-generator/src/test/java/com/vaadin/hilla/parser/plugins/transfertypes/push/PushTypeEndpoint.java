@@ -15,6 +15,7 @@
  */
 package com.vaadin.hilla.parser.plugins.transfertypes.push;
 
+import org.jspecify.annotations.NonNull;
 import reactor.core.publisher.Flux;
 
 import com.vaadin.hilla.EndpointSubscription;
@@ -24,6 +25,10 @@ import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 public class PushTypeEndpoint {
 
     public Flux<String> getMessageFlux() {
+        return Flux.just();
+    }
+
+    public Flux<@NonNull String> getNonNullMessageFlux() {
         return Flux.just();
     }
 
