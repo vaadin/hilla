@@ -39,6 +39,7 @@ packages/ts/*/*.css
 packages/ts/*/.coverage
 packages/ts/*/.vite
 packages/ts/*/types/**
+packages/ts/*/test/**/.generated/
 !packages/ts/*/.lintstagedrc.js
 scripts/prepare/results/
 packages/java/hilla/*.json

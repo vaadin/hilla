@@ -1,6 +1,5 @@
-import { _getPropertyModel, makeObjectEmptyValueCreator, ObjectModel } from "@vaadin/hilla-lit-form";
+import m from "@vaadin/hilla-models";
 import type Empty from "./Empty.js";
-class EmptyModel<T extends Empty = Empty> extends ObjectModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(EmptyModel);
-}
+const EmptyModel = m.object<Empty>("Empty").build();
+type EmptyModel = typeof EmptyModel;
 export default EmptyModel;
