@@ -31,9 +31,7 @@ import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 
 import com.vaadin.hilla.EndpointSubscription;
-import com.vaadin.hilla.generator.model.EndpointModel;
 import com.vaadin.hilla.generator.model.EndpointModelPlugin;
-import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.generator.model.Generation;
 import com.vaadin.hilla.generator.typescript.TypeScriptWriter;
 import com.vaadin.hilla.parser.core.Parser;
@@ -85,7 +83,6 @@ public final class FullStackGenerator {
     private static final List<Class<?>> SCANNED_TYPES = List.of(Flux.class,
             EndpointSubscription.class, Pageable.class);
 
-    private final ResourceLoader resourceLoader;
     private final Path targetDir;
     private final List<Class<?>> endpointClasses;
     private final EndpointModelPlugin modelPlugin = new EndpointModelPlugin();
@@ -94,9 +91,8 @@ public final class FullStackGenerator {
     private String snapshotsPackage;
 
     public FullStackGenerator(Class<?> testClass, Class<?>... endpointClasses) {
-        this.resourceLoader = new ResourceLoader(testClass);
         try {
-            this.targetDir = resourceLoader.findTargetDirPath();
+            this.targetDir = new ResourceLoader(testClass).findTargetDirPath();
         } catch (URISyntaxException e) {
             throw new IllegalStateException("Unable to find the target folder",
                     e);
@@ -161,9 +157,17 @@ public final class FullStackGenerator {
      * relative to the output folder.
      */
     public Map<String, String> generate() {
+        return write(parseGeneration());
+    }
+
+    /**
+     * Writes the TypeScript of a generation and returns the files, keyed by
+     * their path relative to the output folder.
+     */
+    public static Map<String, String> write(Generation generation) {
         var files = new LinkedHashMap<String, String>();
 
-        new TypeScriptWriter().write(parseGeneration())
+        new TypeScriptWriter().write(generation)
                 .forEach(file -> files.put(file.path(), file.content()));
 
         return files;
@@ -176,24 +180,6 @@ public final class FullStackGenerator {
     public Generation parseGeneration() {
         parse();
         return modelPlugin.getGeneration();
-    }
-
-    /**
-     * Runs the Java part of the pipeline and returns the model the TypeScript
-     * is written from, which the parser builds while it walks the classes.
-     */
-    public List<EndpointModel> parseModel() {
-        parse();
-        return modelPlugin.getEndpoints();
-    }
-
-    /**
-     * Runs the Java part of the pipeline and returns the types the endpoints
-     * refer to, which are generated as declarations of their own.
-     */
-    public List<EntityModel> parseEntities() {
-        parse();
-        return modelPlugin.getEntities();
     }
 
     /**

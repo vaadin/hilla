@@ -16,8 +16,6 @@
 package com.vaadin.hilla.parser.plugins.subtypes.typeids;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -110,17 +108,7 @@ public class TypeIdsTest extends AbstractFullStackTest {
      */
     @Test
     public void should_NotDeclareAnIdentifyingPropertyForUnknownTypeIds() {
-        var sources = generator(TypeIdsEndpoint.class).generate();
-        var path = MinimalBase.Subtype.class.getName().replace('.', '/')
-                .replace('$', '/') + ".ts";
-        var source = sources.get(path);
-
-        assertNotNull(source, () -> "The generator produced no " + path
-                + ", only " + sources.keySet());
-        assertFalse(source.contains("@c"),
-                () -> "The generated " + path + " declares the property that"
-                        + " Jackson uses for a class based type id:\n"
-                        + source);
+        assertTypescriptMatchesSnapshot(TypeIdsEndpoint.class);
     }
 
     /**
