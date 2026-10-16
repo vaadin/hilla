@@ -119,7 +119,7 @@ public class OutputFolderTest {
     }
 
     @Test
-    public void should_KeepTheOutputFolderAndWhatTheApplicationKeepsInIt()
+    public void should_KeepAFolderHoldingAFileOfTheApplication()
             throws IOException {
         output.write(List.of(new GeneratedFile("com/example/Person.ts",
                 "interface P {}\n")));
@@ -131,8 +131,6 @@ public class OutputFolderTest {
                 "The folder of the type is left empty by it");
         assertTrue(Files.exists(folder.resolve("com/mine.ts")),
                 "A folder holding a file of the application stays");
-        assertTrue(Files.isDirectory(folder),
-                "The output folder is the application's, empty or not");
     }
 
     @Test
