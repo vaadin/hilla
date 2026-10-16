@@ -198,9 +198,7 @@ public final class EndpointWriter {
         var given = ownName(method, OPTIONS_PARAMETER) + "?.defaultValue";
 
         return (value.optional() ? given
-                : given + " ?? " + models.className(value)
-                        + ".createEmptyValue()")
-                + ", ";
+                : given + " ?? " + models.defaultValue(value)) + ", ";
     }
 
     /**

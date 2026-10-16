@@ -535,7 +535,8 @@ public final class EndpointModelPlugin
      */
     private static TypeModel provided(String javaClass,
             List<TypeModel> typeArguments, boolean optional,
-            List<ConstraintModel> constraints, List<String> annotations) {
+            List<ConstraintModel> constraints,
+            List<AnnotationModel> annotations) {
         var provided = PROVIDED_TYPES.get(javaClass);
 
         return new TypeModel.Provided(provided.name(), provided.module(),
@@ -571,9 +572,12 @@ public final class EndpointModelPlugin
      * plugin building the OpenAPI definition has already picked out of the ones
      * the property declares.
      */
-    private static List<String> annotationsOf(Schema<?> schema) {
+    private static List<AnnotationModel> annotationsOf(Schema<?> schema) {
         return extensions(schema, ANNOTATIONS, Annotation.class)
-                .map(Annotation::getName).toList();
+                .map(annotation -> new AnnotationModel(annotation.getName(),
+                        annotation.getAttributes() == null ? Map.of()
+                                : annotation.getAttributes()))
+                .toList();
     }
 
     /**

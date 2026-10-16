@@ -1,9 +1,8 @@
-import { _getPropertyModel, makeObjectEmptyValueCreator, ObjectModel, StringModel } from "@vaadin/hilla-lit-form";
+import m, { StringModel } from "@vaadin/hilla-models";
 import type File_1 from "./File.js";
-class FileModel<T extends File_1 = File_1> extends ObjectModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(FileModel);
-    get name(): StringModel {
-        return this[_getPropertyModel]("name", (parent, key) => new StringModel(parent, key, true, { meta: { javaType: "java.lang.String" } }));
-    }
-}
+const FileModel = m
+  .object<File_1>("File")
+  .property("name", m.meta(m.optional(StringModel), { jvmType: "java.lang.String" }))
+  .build();
+type FileModel = typeof FileModel;
 export default FileModel;
