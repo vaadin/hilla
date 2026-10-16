@@ -29,7 +29,8 @@ import com.vaadin.hilla.generator.model.EntityModel;
  * object with a property per property of the type, holding the model of the
  * value of that property, or a model of an enum. A type alias of the same name
  * goes with the constant, so that the default export can be used both as a
- * value and as a type.
+ * value and as a type. The property saying which subtype a value of a
+ * polymorphic type is goes last, pinned to the ids the type accepts.
  */
 public final class FormModelWriter {
     /**
@@ -111,6 +112,10 @@ public final class FormModelWriter {
                 .forEach(property -> calls
                         .add(".property(" + ModelWriter.string(property.name())
                                 + ", " + models.model(property.type()) + ")"));
+        bean.discriminator()
+                .ifPresent(discriminator -> calls.add(".property("
+                        + ModelWriter.string(discriminator.name()) + ", "
+                        + discriminator(discriminator, models) + ")"));
         calls.add(".build()");
 
         return Template.of(OBJECT) //
@@ -118,6 +123,22 @@ public final class FormModelWriter {
                 .with("m", models.m()) //
                 .with("calls", String.join("\n", calls)) //
                 .fill();
+    }
+
+    /**
+     * The model of the property saying which subtype a value is, pinned to the
+     * ids the type accepts, so that the empty value of a subtype says which
+     * subtype it is, which the server needs to read it back.
+     */
+    private static String discriminator(EntityModel.Discriminator discriminator,
+            ModelWriter models) {
+        var literals = discriminator.acceptedValues().stream()
+                .map(value -> models.m() + ".literal("
+                        + ModelWriter.string(value) + ")")
+                .toList();
+
+        return literals.size() == 1 ? literals.get(0)
+                : models.m() + ".union(" + String.join(", ", literals) + ")";
     }
 
     /**
