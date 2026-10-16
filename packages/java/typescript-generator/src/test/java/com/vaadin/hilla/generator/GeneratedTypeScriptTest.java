@@ -393,28 +393,16 @@ public class GeneratedTypeScriptTest {
                 file.path());
         assertEquals(
                 """
-                        import { ObjectModel, StringModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+                        import m, { StringModel } from '@vaadin/hilla-models';
                         import type Sample from './Sample.js';
-                        import SampleModel_1 from './SampleModel.js';
 
-                        class SampleModel<T extends Sample = Sample> extends ObjectModel<T> {
-                          static override createEmptyValue = makeObjectEmptyValueCreator(SampleModel);
-
-                          get name(): StringModel {
-                            return this[_getPropertyModel]('name', (parent, key) =>
-                              new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }));
-                          }
-
-                          get parent(): SampleModel_1 {
-                            return this[_getPropertyModel]('parent', (parent, key) =>
-                              new SampleModel_1(parent, key, true));
-                          }
-
-                          get label(): StringModel {
-                            return this[_getPropertyModel]('label', (parent, key) =>
-                              new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }));
-                          }
-                        }
+                        const SampleModel = m
+                          .object<Sample>('Sample')
+                          .property('name', m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))
+                          .property('parent', m.optional(m.self))
+                          .property('label', m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))
+                          .build();
+                        type SampleModel = typeof SampleModel;
 
                         export default SampleModel;
                         """,
@@ -432,80 +420,25 @@ public class GeneratedTypeScriptTest {
                 file.path());
         assertEquals(
                 """
-                        import {
-                          ArrayModel,
-                          BooleanModel,
-                          NumberModel,
-                          ObjectModel,
-                          StringModel,
-                          _getPropertyModel,
-                          makeObjectEmptyValueCreator,
-                        } from '@vaadin/hilla-lit-form';
+                        import m, { BooleanModel, NumberModel, StringModel } from '@vaadin/hilla-models';
                         import KindModel from './KindModel.js';
                         import type Mixed from './Mixed.js';
                         import SampleModel from './SampleModel.js';
 
-                        class MixedModel<T extends Mixed = Mixed> extends ObjectModel<T> {
-                          static override createEmptyValue = makeObjectEmptyValueCreator(MixedModel);
-
-                          get count(): NumberModel {
-                            return this[_getPropertyModel]('count', (parent, key) =>
-                              new NumberModel(parent, key, false, { meta: { javaType: 'int' } }));
-                          }
-
-                          get active(): BooleanModel {
-                            return this[_getPropertyModel]('active', (parent, key) =>
-                              new BooleanModel(parent, key, false, { meta: { javaType: 'boolean' } }));
-                          }
-
-                          get tags(): ArrayModel<StringModel> {
-                            return this[_getPropertyModel]('tags', (parent, key) =>
-                              new ArrayModel(parent, key, true,
-                                (parent, key) => new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }),
-                                { meta: { javaType: 'java.util.List' } }));
-                          }
-
-                          get counts(): ObjectModel<Record<string, number | undefined>> {
-                            return this[_getPropertyModel]('counts', (parent, key) =>
-                              new ObjectModel(parent, key, true, { meta: { javaType: 'java.util.Map' } }));
-                          }
-
-                          get kind(): KindModel {
-                            return this[_getPropertyModel]('kind', (parent, key) =>
-                              new KindModel(parent, key, true));
-                          }
-
-                          get sample(): SampleModel {
-                            return this[_getPropertyModel]('sample', (parent, key) =>
-                              new SampleModel(parent, key, true));
-                          }
-
-                          get words(): ArrayModel<StringModel> {
-                            return this[_getPropertyModel]('words', (parent, key) =>
-                              new ArrayModel(parent, key, true,
-                                (parent, key) => new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }),
-                                { meta: { javaType: 'java.lang.String[]' } }));
-                          }
-
-                          get unique(): ArrayModel<StringModel> {
-                            return this[_getPropertyModel]('unique', (parent, key) =>
-                              new ArrayModel(parent, key, true,
-                                (parent, key) => new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }),
-                                { meta: { javaType: 'java.util.Set' } }));
-                          }
-
-                          get grouped(): ObjectModel<Record<string, ReadonlyArray<string | undefined> | undefined>> {
-                            return this[_getPropertyModel]('grouped', (parent, key) =>
-                              new ObjectModel(parent, key, true, { meta: { javaType: 'java.util.Map' } }));
-                          }
-
-                          get maybeTags(): ArrayModel<StringModel> {
-                            return this[_getPropertyModel]('maybeTags', (parent, key) =>
-                              new ArrayModel(parent, key, true,
-                                (parent, key) => new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }),
-                                { meta: { javaType: 'java.util.List' } }));
-                          }
-                        }
+                        const MixedModel = m
+                          .object<Mixed>('Mixed')
+                          .property('count', m.meta(NumberModel, { jvmType: 'int' }))
+                          .property('active', m.meta(BooleanModel, { jvmType: 'boolean' }))
+                          .property('tags', m.meta(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))), { jvmType: 'java.util.List' }))
+                          .property('counts', m.meta(m.optional(m.record(m.meta(m.optional(NumberModel), { jvmType: 'java.lang.Integer' }))), { jvmType: 'java.util.Map' }))
+                          .property('kind', m.optional(KindModel))
+                          .property('sample', m.optional(SampleModel))
+                          .property('words', m.meta(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))), { jvmType: 'java.lang.String[]' }))
+                          .property('unique', m.meta(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))), { jvmType: 'java.util.Set' }))
+                          .property('grouped', m.meta(m.optional(m.record(m.meta(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))), { jvmType: 'java.util.List' }))), { jvmType: 'java.util.Map' }))
+                          .property('maybeTags', m.meta(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))), { jvmType: 'java.util.List' }))
+                          .build();
+                        type MixedModel = typeof MixedModel;
 
                         export default MixedModel;
                         """,
@@ -514,75 +447,34 @@ public class GeneratedTypeScriptTest {
 
     @Test
     public void should_BindWhatTheValuesOfATypeHaveToSatisfy() {
-        // The validators are named after the annotations, and are given what
+        // The constraints are named after the annotations, and are given what
         // the annotation says: the one value it says when that is all of it,
-        // and everything it says otherwise. The values of a collection are
+        // and everything else the constraint declares otherwise, which leaves
+        // out the flags of a pattern. The values of a collection are
         // constrained on their own, as the collection is. What a value is to
         // the persistence API is written along with its Java type, which is
         // how a grid tells an id from a value worth showing
         assertEquals(
                 """
-                        import {
-                          ArrayModel,
-                          Email,
-                          Min,
-                          NotBlank,
-                          NumberModel,
-                          ObjectModel,
-                          Pattern,
-                          Size,
-                          StringModel,
-                          _getPropertyModel,
-                          makeObjectEmptyValueCreator,
-                        } from '@vaadin/hilla-lit-form';
+                        import m, { Email, Min, NotBlank, NumberModel, Pattern, Size, StringModel } from '@vaadin/hilla-models';
                         import type Validated from './Validated.js';
 
-                        class ValidatedModel<T extends Validated = Validated> extends ObjectModel<T> {
-                          static override createEmptyValue = makeObjectEmptyValueCreator(ValidatedModel);
-
-                          get id(): NumberModel {
-                            return this[_getPropertyModel]('id', (parent, key) =>
-                              new NumberModel(parent, key, true, { meta: { annotations: [{ name: 'jakarta.persistence.Id' }], javaType: 'long' } }));
-                          }
-
-                          get name(): StringModel {
-                            return this[_getPropertyModel]('name', (parent, key) =>
-                              new StringModel(parent, key, true, { validators: [new NotBlank()], meta: { javaType: 'java.lang.String' } }));
-                          }
-
-                          get count(): NumberModel {
-                            return this[_getPropertyModel]('count', (parent, key) =>
-                              new NumberModel(parent, key, false, { validators: [new Min(1)], meta: { javaType: 'int' } }));
-                          }
-
-                          get address(): StringModel {
-                            return this[_getPropertyModel]('address', (parent, key) =>
-                              new StringModel(parent, key, true, { validators: [new Email({ message: 'that isn\\'t an address' })], meta: { javaType: 'java.lang.String' } }));
-                          }
-
-                          get code(): StringModel {
-                            return this[_getPropertyModel]('code', (parent, key) =>
-                              new StringModel(parent, key, true, { validators: [new Pattern({ flags: ['CASE_INSENSITIVE'], regexp: '[a-z]+' })], meta: { javaType: 'java.lang.String' } }));
-                          }
-
-                          get codes(): ArrayModel<StringModel> {
-                            return this[_getPropertyModel]('codes', (parent, key) =>
-                              new ArrayModel(parent, key, true,
-                                (parent, key) => new StringModel(parent, key, true, { validators: [new Size({ min: 1 })], meta: { javaType: 'java.lang.String' } }),
-                                { meta: { javaType: 'java.lang.String[]' } }));
-                          }
-
-                          get tags(): ArrayModel<StringModel> {
-                            return this[_getPropertyModel]('tags', (parent, key) =>
-                              new ArrayModel(parent, key, true,
-                                (parent, key) => new StringModel(parent, key, true, { validators: [new NotBlank()], meta: { javaType: 'java.lang.String' } }),
-                                { validators: [new Size({ max: 10, min: 1 })], meta: { javaType: 'java.util.List' } }));
-                          }
-                        }
+                        const ValidatedModel = m
+                          .object<Validated>('Validated')
+                          .property('id', m.meta(m.optional(NumberModel), { annotations: [{ jvmType: 'jakarta.persistence.Id' }], jvmType: 'long' }))
+                          .property('name', m.meta(m.constrained(m.optional(StringModel), NotBlank()), { jvmType: 'java.lang.String' }))
+                          .property('count', m.meta(m.constrained(NumberModel, Min(1)), { jvmType: 'int' }))
+                          .property('address', m.meta(m.constrained(m.optional(StringModel), Email({ message: 'that isn\\'t an address' })), { jvmType: 'java.lang.String' }))
+                          .property('code', m.meta(m.constrained(m.optional(StringModel), Pattern({ regexp: '[a-z]+' })), { jvmType: 'java.lang.String' }))
+                          .property('codes', m.meta(m.optional(m.array(m.meta(m.constrained(m.optional(StringModel), Size({ min: 1 })), { jvmType: 'java.lang.String' }))), { jvmType: 'java.lang.String[]' }))
+                          .property('tags', m.meta(m.constrained(m.optional(m.array(m.meta(m.constrained(m.optional(StringModel), NotBlank()), { jvmType: 'java.lang.String' }))), Size({ max: 10, min: 1 })), { jvmType: 'java.util.List' }))
+                          .build();
+                        type ValidatedModel = typeof ValidatedModel;
 
                         export default ValidatedModel;
                         """,
-                writeModel(validated()).content());
+                new FormModelWriter(List.of(validated())).write(validated())
+                        .content());
     }
 
     @Test
@@ -596,18 +488,16 @@ public class GeneratedTypeScriptTest {
                 file.path());
         assertEquals(
                 """
-                        import { StringModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+                        import m, { StringModel } from '@vaadin/hilla-models';
                         import type Detailed from './Detailed.js';
                         import SampleModel from './SampleModel.js';
 
-                        class DetailedModel<T extends Detailed = Detailed> extends SampleModel<T> {
-                          static override createEmptyValue = makeObjectEmptyValueCreator(DetailedModel);
-
-                          get note(): StringModel {
-                            return this[_getPropertyModel]('note', (parent, key) =>
-                              new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }));
-                          }
-                        }
+                        const DetailedModel = m
+                          .extend(SampleModel)
+                          .object<Detailed>('Detailed')
+                          .property('note', m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))
+                          .build();
+                        type DetailedModel = typeof DetailedModel;
 
                         export default DetailedModel;
                         """,
@@ -621,23 +511,18 @@ public class GeneratedTypeScriptTest {
         assertEquals(
                 "com/vaadin/hilla/generator/fixtures/SampleEndpoint/WrapperModel.ts",
                 file.path());
-        assertEquals(
-                """
-                        import { ObjectModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
-                        import type Wrapper from './Wrapper.js';
+        assertEquals("""
+                import m, { Model } from '@vaadin/hilla-models';
+                import type Wrapper from './Wrapper.js';
 
-                        class WrapperModel<T extends Wrapper = Wrapper> extends ObjectModel<T> {
-                          static override createEmptyValue = makeObjectEmptyValueCreator(WrapperModel);
+                const WrapperModel = m
+                  .object<Wrapper>('Wrapper')
+                  .property('value', m.optional(Model))
+                  .build();
+                type WrapperModel = typeof WrapperModel;
 
-                          get value(): ObjectModel {
-                            return this[_getPropertyModel]('value', (parent, key) =>
-                              new ObjectModel(parent, key, true));
-                          }
-                        }
-
-                        export default WrapperModel;
-                        """,
-                file.content());
+                export default WrapperModel;
+                """, file.content());
     }
 
     @Test
@@ -647,18 +532,17 @@ public class GeneratedTypeScriptTest {
         assertEquals(
                 "com/vaadin/hilla/generator/fixtures/SampleEndpoint/MarkerModel.ts",
                 file.path());
-        assertEquals(
-                """
-                        import { ObjectModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
-                        import type Marker from './Marker.js';
+        assertEquals("""
+                import m from '@vaadin/hilla-models';
+                import type Marker from './Marker.js';
 
-                        class MarkerModel<T extends Marker = Marker> extends ObjectModel<T> {
-                          static override createEmptyValue = makeObjectEmptyValueCreator(MarkerModel);
-                        }
+                const MarkerModel = m
+                  .object<Marker>('Marker')
+                  .build();
+                type MarkerModel = typeof MarkerModel;
 
-                        export default MarkerModel;
-                        """,
-                file.content());
+                export default MarkerModel;
+                """, file.content());
     }
 
     @Test
@@ -670,20 +554,15 @@ public class GeneratedTypeScriptTest {
         assertEquals(
                 "com/vaadin/hilla/generator/fixtures/SampleEndpoint/KindModel.ts",
                 file.path());
-        assertEquals(
-                """
-                        import { EnumModel, _enum, makeEnumEmptyValueCreator } from '@vaadin/hilla-lit-form';
-                        import Kind from './Kind.js';
+        assertEquals("""
+                import m from '@vaadin/hilla-models';
+                import Kind from './Kind.js';
 
-                        class KindModel extends EnumModel<typeof Kind> {
-                          static override createEmptyValue = makeEnumEmptyValueCreator(KindModel);
+                const KindModel = m.enum(Kind, 'Kind');
+                type KindModel = typeof KindModel;
 
-                          readonly [_enum] = Kind;
-                        }
-
-                        export default KindModel;
-                        """,
-                file.content());
+                export default KindModel;
+                """, file.content());
     }
 
     private static GeneratedFile write(EntityModel entity) {
@@ -691,7 +570,7 @@ public class GeneratedTypeScriptTest {
     }
 
     private static GeneratedFile writeModel(EntityModel entity) {
-        return new FormModelWriter().write(entity);
+        return new FormModelWriter(entities).write(entity);
     }
 
     /**
