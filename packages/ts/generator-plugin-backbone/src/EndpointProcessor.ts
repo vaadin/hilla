@@ -70,9 +70,14 @@ export default class EndpointProcessor {
   async process(): Promise<SourceFile> {
     this.#owner.logger.debug(`Processing endpoint: ${this.#name}`);
 
-    const statements = (
-      await Promise.all(Array.from(this.#methods, async ([method, pathItem]) => this.#processMethod(method, pathItem)))
-    ).flatMap((item) => item);
+    // One method after the other: a method takes the names of what it imports
+    // as it goes, so processing them at once would let whichever finishes first
+    // take the plain name of a clashing import.
+    const statements: Statement[] = [];
+    for (const [method, pathItem] of this.#methods) {
+      // eslint-disable-next-line no-await-in-loop
+      statements.push(...(await this.#processMethod(method, pathItem)));
+    }
 
     const { exports, imports } = this.#dependencies;
 
