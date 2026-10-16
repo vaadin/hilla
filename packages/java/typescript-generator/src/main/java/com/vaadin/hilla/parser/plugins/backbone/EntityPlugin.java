@@ -15,8 +15,6 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone;
 
-import java.util.Objects;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,7 +32,6 @@ import com.vaadin.hilla.parser.core.RootNode;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.FieldInfoModel;
-import com.vaadin.hilla.parser.models.SpecializedModel;
 import com.vaadin.hilla.parser.models.TypeParameterModel;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
@@ -52,10 +49,7 @@ public final class EntityPlugin
 
             // Create an array of schemas for the type parameters
             var generics = entityNode.getSource().getTypeParameters().stream()
-                    .filter(tp -> tp.getBounds().stream()
-                            .filter(Objects::nonNull)
-                            .noneMatch(Predicate
-                                    .not(SpecializedModel::isNativeObject)))
+                    .filter(TypeParameters::isUnbounded)
                     .map(TypeParameterModel::getName).toList();
 
             if (!generics.isEmpty()) {

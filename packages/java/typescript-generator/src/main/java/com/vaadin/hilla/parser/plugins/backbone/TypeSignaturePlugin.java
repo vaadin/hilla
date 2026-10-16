@@ -19,8 +19,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,7 +39,6 @@ import com.vaadin.hilla.parser.models.ArraySignatureModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.ReflectionSignatureModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
-import com.vaadin.hilla.parser.models.SpecializedModel;
 import com.vaadin.hilla.parser.models.TypeArgumentModel;
 import com.vaadin.hilla.parser.models.TypeParameterModel;
 import com.vaadin.hilla.parser.models.TypeVariableModel;
@@ -207,7 +204,8 @@ public final class TypeSignaturePlugin
      * <li>Type argument of an optional and iterable types</li>
      * <li>Item type for a map</li>
      * <li>Known type parameter for a type variable</li>
-     * <li>Known bounds for a type parameter</li>
+     * <li>Known bounds for a type parameter, except the ones leading back to
+     * it</li>
      * </ul>
      *
      * <p>
@@ -260,13 +258,8 @@ public final class TypeSignaturePlugin
                 items = List.of(associatedTypes.get(0));
             }
         } else if (signature.isTypeParameter()) {
-            var bounds = ((TypeParameterModel) signature).getBounds();
-
-            if (!bounds.isEmpty()) {
-                items = bounds.stream().filter(Objects::nonNull)
-                        .filter(Predicate.not(SpecializedModel::isNativeObject))
-                        .collect(Collectors.toList());
-            }
+            items = TypeParameters
+                    .getEffectiveBounds((TypeParameterModel) signature);
         } else if (signature.isTypeVariable()) {
             items = List.of(((TypeVariableModel) signature).resolve());
         } else if (signature.isClassRef()) {
