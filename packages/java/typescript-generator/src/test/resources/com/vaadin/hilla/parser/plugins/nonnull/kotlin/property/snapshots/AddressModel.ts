@@ -24,6 +24,11 @@ class AddressModel<T extends Address = Address> extends AbstractEntityModel<T> {
     return this[_getPropertyModel]('city', (parent, key) =>
       new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }));
   }
+
+  get label(): StringModel {
+    return this[_getPropertyModel]('label', (parent, key) =>
+      new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }));
+  }
 }
 
 export default AddressModel;
