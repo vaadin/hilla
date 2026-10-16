@@ -1,8 +1,8 @@
-import type AbstractEntity_1 from "./AbstractEntity.js";
-import type Employee_1 from "./Employee.js";
-import type Manager_1 from "./Manager.js";
-interface Team<E = unknown, M = unknown> extends AbstractEntity_1 {
-    employees?: Array<Employee_1>;
-    manager?: Manager_1;
+import type AbstractEntity from "./AbstractEntity.js";
+import type Employee from "./Employee.js";
+import type Manager from "./Manager.js";
+interface Team<E = unknown, M = unknown> extends AbstractEntity {
+    employees?: Array<Employee>;
+    manager?: Manager;
 }
 export default Team;

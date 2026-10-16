@@ -48,6 +48,14 @@ describe('SignalsPlugin', () => {
       await expect(await generatedHelloWorldService.text()).toMatchFileSnapshot(`fixtures/HelloWorldService.snap.ts`);
     });
 
+    it('keeps the model path and the signal class when their names are shadowed', async () => {
+      const input = await readFile(new URL('./hilla-openapi-mix.json', import.meta.url), 'utf8');
+      const files = await generator.process(input);
+
+      const generatedShadowedService = files.find((f) => f.name === 'ShadowedSignalService.ts')!;
+      await expect(await generatedShadowedService.text()).toMatchFileSnapshot(`fixtures/ShadowedSignalService.snap.ts`);
+    });
+
     it('correctly generates service with ListSignal returning methods, with and without parameters', async () => {
       const input = await readFile(new URL('./hilla-openapi-mix.json', import.meta.url), 'utf8');
       const files = await generator.process(input);
