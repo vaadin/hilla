@@ -1,2 +1,2 @@
-import * as AnnotationsEndpoint_1 from "./AnnotationsEndpoint.js";
-export { AnnotationsEndpoint_1 as AnnotationsEndpoint };
+import * as AnnotationsEndpoint from "./AnnotationsEndpoint.js";
+export { AnnotationsEndpoint };
