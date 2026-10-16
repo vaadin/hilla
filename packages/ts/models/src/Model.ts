@@ -220,7 +220,7 @@ export type Model<V = unknown, EX extends AnyObject = AnyObject> = EX & {
    *
    * @deprecated Use the `$defaultValue` property instead.
    */
-  createEmptyValue(): V;
+  createEmptyValue(this: void): V;
   toString(): string;
 };
 
@@ -262,8 +262,10 @@ export const Model: Model = Object.create(null, {
     },
   },
   createEmptyValue: {
-    value(this: Model) {
-      return this[$defaultValue];
+    // bound to the model, so that it also works when detached, e.g. passed
+    // as `useState(PersonModel.createEmptyValue)`
+    get(this: Model) {
+      return () => this[$defaultValue];
     },
   },
   toString: {

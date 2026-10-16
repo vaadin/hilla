@@ -226,6 +226,9 @@ describe('@vaadin/hilla-models', () => {
     expect(value).to.deep.equal(PersonModel[$defaultValue]);
     expect(value).not.to.equal(PersonModel.createEmptyValue());
     expect(RoleModel.createEmptyValue()).to.equal(Role.Guest);
+
+    const { createEmptyValue } = PersonModel;
+    expect(createEmptyValue()).to.deep.equal(value);
   });
 
   it('correctly sets the model owner', () => {
