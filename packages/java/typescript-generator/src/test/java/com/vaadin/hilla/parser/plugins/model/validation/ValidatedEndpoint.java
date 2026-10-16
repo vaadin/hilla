@@ -51,6 +51,9 @@ public class ValidatedEndpoint {
         @Pattern(regexp = "[a-z]+", flags = Pattern.Flag.CASE_INSENSITIVE)
         private String code;
 
+        // Known to be wrong: the generated model checks the size of each value
+        // in the array, as Java also reads the annotation as one of String,
+        // while Bean Validation checks the size of the array
         @Size(min = 1)
         private String[] codes;
 
