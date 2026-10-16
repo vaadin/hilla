@@ -20,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -99,7 +101,8 @@ public class EndpointCodeGeneratorTest {
     }
 
     @Test
-    public void should_KnowTheClassesAgainAfterWritingTheTypeScript() {
+    public void should_KnowTheClassesAgainAfterWritingTheTypeScript()
+            throws IOException {
         var applicationContext = mockApplicationContext();
 
         try (var applicationConfiguration = mockApplicationConfiguration();
@@ -119,9 +122,18 @@ public class EndpointCodeGeneratorTest {
                     .when(ApplicationContextProvider::getApplicationContext)
                     .thenReturn(null);
 
-            var endpointCodeGenerator = endpointCodeGenerator();
+            var endpointController = Mockito.mock(EndpointController.class);
+            var endpointCodeGenerator = new EndpointCodeGenerator(
+                    Mockito.mock(VaadinContext.class), endpointController);
             endpointCodeGenerator.update();
 
+            var written = new File(projectFolder,
+                    "frontend/generated/ChangedEndpoint.ts").toPath();
+            assertTrue(Files.isRegularFile(written),
+                    "The TypeScript of the endpoint is written");
+            assertTrue(Files.readString(written).contains(
+                    "client.call('ChangedEndpoint', 'get', {}, init)"));
+            Mockito.verify(endpointController).registerEndpoints();
             assertEquals(
                     Set.of(ChangedEndpoint.class.getName(),
                             Changed.class.getName()),
