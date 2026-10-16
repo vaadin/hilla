@@ -1,3 +1,3 @@
-import type { AgnosticRoute as AgnosticRoute_1 } from "@vaadin/hilla-file-router/types.js";
-const routes: readonly AgnosticRoute_1[] = [];
+import type { AgnosticRoute } from "@vaadin/hilla-file-router/types.js";
+const routes: readonly AgnosticRoute[] = [];
 export default routes;
