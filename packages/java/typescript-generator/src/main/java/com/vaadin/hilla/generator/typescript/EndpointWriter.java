@@ -279,9 +279,7 @@ public final class EndpointWriter {
                 + "?.defaultValue";
 
         return (value.optional() ? given
-                : given + " ?? " + models.className(value)
-                        + ".createEmptyValue()")
-                + ", ";
+                : given + " ?? " + models.defaultValue(value)) + ", ";
     }
 
     /**
