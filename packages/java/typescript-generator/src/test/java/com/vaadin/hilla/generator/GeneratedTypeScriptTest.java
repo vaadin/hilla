@@ -112,6 +112,18 @@ public class GeneratedTypeScriptTest {
     }
 
     @Test
+    public void should_ExportAnEndpointUnderItsOwnName() {
+        var written = new BarrelWriter().write(List.of(
+                new EndpointModel("Record", "com.example.Record", List.of())));
+
+        assertEquals("""
+                import * as Record_1 from './Record.js';
+
+                export { Record_1 as Record };
+                """, written.content());
+    }
+
+    @Test
     public void should_ReExportEveryEndpointInTheSameOrderWhicheverItIsGiven() {
         // Given the other way around than they are written, so that the order
         // is the one the barrel decides rather than the one it was handed
