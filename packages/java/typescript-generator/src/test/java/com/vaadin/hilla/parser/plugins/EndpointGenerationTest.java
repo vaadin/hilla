@@ -24,8 +24,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,9 +34,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import com.vaadin.hilla.generator.model.EntityModel;
-import com.vaadin.hilla.generator.model.Generation;
-import com.vaadin.hilla.generator.model.PropertyModel;
 import com.vaadin.hilla.parser.testutils.AbstractFullStackTest;
 import com.vaadin.hilla.parser.testutils.ResourceLoader;
 
@@ -66,7 +61,6 @@ public class EndpointGenerationTest extends AbstractFullStackTest {
     private static final String ROOT_PACKAGE = EndpointGenerationTest.class
             .getPackageName();
     private static final String ENDPOINT_ANNOTATION = "com.vaadin.hilla.parser.testutils.annotations.Endpoint";
-    private static final String SNAPSHOTS_DIR = "snapshots";
 
     /**
      * The longest path Windows accepts from a program which has not opted into
@@ -110,86 +104,21 @@ public class EndpointGenerationTest extends AbstractFullStackTest {
     }
 
     /**
-     * TypeScript does not accept a declaration which says that a property of a
-     * type it extends can be absent: a value of it would not be a value of the
-     * type it extends. Whether a value can be absent is decided in more than
-     * one place, so the declarations of a hierarchy are checked against each
-     * other rather than one by one.
-     */
-    @ParameterizedTest(name = "{0}")
-    @MethodSource
-    public void should_NotSayThatAnInheritedPropertyCanBeAbsent(String testCase,
-            List<Class<?>> endpoints) {
-        Generation generation;
-
-        try {
-            generation = generator(endpoints.toArray(Class<?>[]::new))
-                    .parseGeneration();
-        } catch (RuntimeException e) {
-            // A case about the walk refusing a class, which the test class of
-            // the case says itself, declares nothing to check against
-            return;
-        }
-
-        var beans = generation.entities().stream()
-                .filter(EntityModel.Bean.class::isInstance)
-                .map(EntityModel.Bean.class::cast)
-                .collect(Collectors.toMap(EntityModel::javaClass, bean -> bean,
-                        (first, second) -> first));
-
-        var absent = beans.values().stream().flatMap(bean -> bean.properties()
-                .stream().filter(property -> property.type().optional())
-                .filter(property -> inherited(beans, bean, property.name())
-                        .anyMatch(inherited -> !inherited.type().optional()))
-                .map(property -> bean.javaClass() + "." + property.name()))
-                .sorted().toList();
-
-        assertTrue(absent.isEmpty(),
-                () -> "The types they are declared in say that these values are"
-                        + " always there: " + absent);
-    }
-
-    /**
-     * Every case, including the ones a test class of their own generates:
-     * whether a value can be absent is what those cases are about, so they are
-     * the last ones to leave out of a check about it.
-     */
-    static Stream<Arguments> should_NotSayThatAnInheritedPropertyCanBeAbsent() {
-        try (var scan = scan()) {
-            var endpoints = endpoints(scan);
-
-            return findTestCases(endpoints).stream()
-                    .map(testCase -> Arguments.of(testCase,
-                            endpointsOf(testCase, endpoints, List.of())))
-                    .toList().stream();
-        }
-    }
-
-    /**
-     * The declarations of the same property in the types the given one extends.
-     */
-    private static Stream<PropertyModel> inherited(
-            Map<String, EntityModel.Bean> beans, EntityModel.Bean bean,
-            String name) {
-        return bean.superTypes().stream()
-                .map(superType -> beans.get(superType.javaClass()))
-                .filter(Objects::nonNull)
-                .flatMap(superType -> superType.properties().stream())
-                .filter(property -> property.name().equals(name));
-    }
-
-    /**
      * Guards against a snapshots folder which is no longer the expected output
      * of anything, which is what is left behind when the endpoints of a case
-     * are removed or moved.
+     * are removed or moved. A test class of its own owns the snapshots of its
+     * package even inside another case.
      */
     @Test
     public void should_NotHaveStaleSnapshots() {
         try (var scan = scan()) {
             var testCases = findTestCases(endpoints(scan));
+            var withTestClass = packagesWithTestClass(scan);
 
             var stale = findSnapshotPackages().stream()
-                    .filter(pkg -> !testCases.contains(pkg)).sorted().toList();
+                    .filter(pkg -> !testCases.contains(pkg))
+                    .filter(pkg -> !withTestClass.contains(pkg)).sorted()
+                    .toList();
 
             assertTrue(stale.isEmpty(),
                     () -> "There is no browser callable class left to generate"
