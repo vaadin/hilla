@@ -3,6 +3,7 @@ import {
   Email,
   Min,
   NotBlank,
+  NotEmpty,
   NumberModel,
   ObjectModel,
   Pattern,
@@ -44,8 +45,17 @@ class ValidatedModel<T extends Validated = Validated> extends ObjectModel<T> {
   get codes(): ArrayModel<StringModel> {
     return this[_getPropertyModel]('codes', (parent, key) =>
       new ArrayModel(parent, key, true,
-        (parent, key) => new StringModel(parent, key, true, { validators: [new Size({ min: 1 })], meta: { javaType: 'java.lang.String' } }),
-        { meta: { javaType: 'java.lang.String[]' } }));
+        (parent, key) => new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }),
+        { validators: [new Size({ min: 1 })], meta: { javaType: 'java.lang.String[]' } }));
+  }
+
+  get rows(): ArrayModel<ArrayModel<StringModel>> {
+    return this[_getPropertyModel]('rows', (parent, key) =>
+      new ArrayModel(parent, key, true,
+        (parent, key) => new ArrayModel(parent, key, true,
+        (parent, key) => new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }),
+        { meta: { javaType: 'java.lang.String[]' } }),
+        { validators: [new NotEmpty()], meta: { javaType: 'java.lang.String[][]' } }));
   }
 
   get tags(): ArrayModel<StringModel> {

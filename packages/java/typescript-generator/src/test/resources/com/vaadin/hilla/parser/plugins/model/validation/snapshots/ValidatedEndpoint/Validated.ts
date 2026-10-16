@@ -5,6 +5,7 @@ interface Validated {
   address?: string;
   code?: string;
   codes?: Array<string | undefined>;
+  rows?: Array<Array<string | undefined> | undefined>;
   tags?: Array<string | undefined>;
 }
 
