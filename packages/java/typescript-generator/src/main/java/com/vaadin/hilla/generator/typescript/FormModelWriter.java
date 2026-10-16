@@ -16,106 +16,116 @@
 package com.vaadin.hilla.generator.typescript;
 
 import java.util.ArrayList;
-import java.util.stream.Collectors;
+import java.util.List;
 
 import com.vaadin.hilla.generator.model.EntityModel;
-import com.vaadin.hilla.generator.model.PropertyModel;
-import com.vaadin.hilla.generator.model.TypeModel;
 
 /**
  * Writes the model a form binds a type through, which is what tells a field
  * which property it edits and what the value of it has to be.
  *
  * <p>
- * The model of a type mirrors the type: a class per declaration, a property of
- * it per property, and the model of the type a property holds as the value of
- * that property.
+ * The model of a type is a constant built with the model library: a model of an
+ * object with a property per property of the type, holding the model of the
+ * value of that property, or a model of an enum. A type alias of the same name
+ * goes with the constant, so that the default export can be used both as a
+ * value and as a type.
  */
 public final class FormModelWriter {
     /**
-     * The suffix both the file and the class of a model go by, on top of the
+     * The suffix both the file and the constant of a model go by, on top of the
      * name of the type the model is of.
      */
     public static final String SUFFIX = "Model";
 
-    private static final String BEAN = """
-            class {{name}}<T extends {{entity}} = {{entity}}> extends {{superModel}}<T> {
-              static override createEmptyValue = {{emptyValue}}({{name}});
-
-            {{properties}}
-            }
-
-            export default {{name}};""";
-
     /**
-     * A type whose properties are all inherited, or which has none at all, so
-     * that the model has nothing of its own to bind.
+     * A model of an object, with each call of the builder on a line of its own.
      */
-    private static final String BEAN_WITHOUT_PROPERTIES = """
-            class {{name}}<T extends {{entity}} = {{entity}}> extends {{superModel}}<T> {
-              static override createEmptyValue = {{emptyValue}}({{name}});
-            }
+    private static final String OBJECT = """
+            const {{name}} = {{m}}
+              {{calls}};
+            type {{name}} = typeof {{name}};
 
             export default {{name}};""";
-
-    private static final String PROPERTY = """
-            get {{property}}(): {{modelType}} {
-              return this[{{getPropertyModel}}]('{{property}}', (parent, key) =>
-                {{model}});
-            }""";
 
     private static final String ENUMERATION = """
-            class {{name}} extends {{enumModel}}<typeof {{entity}}> {
-              static override createEmptyValue = {{emptyValue}}({{name}});
-
-              readonly [{{enumKey}}] = {{entity}};
-            }
+            const {{name}} = {{m}}.enum({{entity}}, {{entityName}});
+            type {{name}} = typeof {{name}};
 
             export default {{name}};""";
 
+    private final ModelCycles cycles;
+
+    /**
+     * @param entities
+     *            every type a model is written for in the same run, which
+     *            decides the references between the models that have to be read
+     *            lazily
+     */
+    public FormModelWriter(List<EntityModel> entities) {
+        this.cycles = ModelCycles.of(entities);
+    }
+
     public GeneratedFile write(EntityModel entity) {
-        return new GeneratedFile(
-                ModulePaths.fileOf(entity.javaClass() + SUFFIX),
-                switch (entity) {
-                case EntityModel.Bean bean -> write(bean);
-                case EntityModel.Enumeration enumeration -> write(enumeration);
-                });
-    }
-
-    private static String write(EntityModel.Bean bean) {
-        var name = ModulePaths.entityName(bean.javaClass()) + SUFFIX;
-        var imports = new ImportRegistry();
-        imports.reserve(name);
-
-        var directory = ModulePaths.directoryOf(bean.javaClass());
-        var types = new TypeWriter(imports, directory);
-        var models = new ModelWriter(imports, directory);
-
-        var body = Template
-                .of(bean.properties().isEmpty() ? BEAN_WITHOUT_PROPERTIES
-                        : BEAN) //
-                .with("name", name) //
-                .with("entity",
-                        types.writeRequired(
-                                TypeModel.EntityRef.of(bean.javaClass()))) //
-                .with("superModel", superModel(bean, models)) //
-                .with("emptyValue", models.emptyValueCreator(false)) //
-                .with("properties", writeProperties(bean, models)) //
-                .fill();
-
-        return file(imports, body);
-    }
-
-    private static String write(EntityModel.Enumeration enumeration) {
-        var name = ModulePaths.entityName(enumeration.javaClass()) + SUFFIX;
+        var name = ModulePaths.entityName(entity.javaClass()) + SUFFIX;
         var imports = new ImportRegistry();
         imports.reserve(name);
 
         var models = new ModelWriter(imports,
-                ModulePaths.directoryOf(enumeration.javaClass()));
+                ModulePaths.directoryOf(entity.javaClass()), entity.javaClass(),
+                cycles);
 
-        // The enum itself is used as a value rather than as a type, since the
-        // model tells the form which constants there are
+        var body = switch (entity) {
+        case EntityModel.Bean bean -> write(bean, name, imports, models);
+        case EntityModel.Enumeration enumeration ->
+            write(enumeration, name, imports, models);
+        };
+
+        var lines = new ArrayList<>(imports.write());
+        lines.add("");
+        lines.add(body);
+
+        return new GeneratedFile(
+                ModulePaths.fileOf(entity.javaClass() + SUFFIX),
+                String.join("\n", lines) + "\n");
+    }
+
+    /**
+     * The model of a type with properties, built on the model of the type it
+     * inherits properties from, so that the inherited ones are bound as well.
+     */
+    private static String write(EntityModel.Bean bean, String name,
+            ImportRegistry imports, ModelWriter models) {
+        var entity = imports.importDefault(
+                ModulePaths.forEntity(bean.javaClass(),
+                        ModulePaths.directoryOf(bean.javaClass())),
+                ModulePaths.entityName(bean.javaClass()), true);
+
+        var calls = new ArrayList<String>();
+        bean.superTypes().stream().findFirst().ifPresent(superType -> calls
+                .add(".extend(" + models.name(superType) + ")"));
+        calls.add(".object<" + entity + ">("
+                + ModelWriter.string(ModulePaths.entityName(bean.javaClass()))
+                + ")");
+        bean.properties()
+                .forEach(property -> calls
+                        .add(".property(" + ModelWriter.string(property.name())
+                                + ", " + models.model(property.type()) + ")"));
+        calls.add(".build()");
+
+        return Template.of(OBJECT) //
+                .with("name", name) //
+                .with("m", models.m()) //
+                .with("calls", String.join("\n", calls)) //
+                .fill();
+    }
+
+    /**
+     * The model of an enum, which is told the enum itself rather than its type,
+     * since it is the constants of the enum which the form accepts.
+     */
+    private static String write(EntityModel.Enumeration enumeration,
+            String name, ImportRegistry imports, ModelWriter models) {
         var entity = imports
                 .importDefault(
                         ModulePaths.forEntity(enumeration.javaClass(),
@@ -123,63 +133,13 @@ public final class FormModelWriter {
                                         .directoryOf(enumeration.javaClass())),
                         ModulePaths.entityName(enumeration.javaClass()), false);
 
-        var body = Template.of(ENUMERATION) //
+        return Template.of(ENUMERATION) //
                 .with("name", name) //
+                .with("m", models.m()) //
                 .with("entity", entity) //
-                .with("enumModel", models.enumModel()) //
-                .with("emptyValue", models.emptyValueCreator(true)) //
-                .with("enumKey", models.enumConstants()) //
+                .with("entityName",
+                        ModelWriter.string(ModulePaths
+                                .entityName(enumeration.javaClass()))) //
                 .fill();
-
-        return file(imports, body);
-    }
-
-    /**
-     * The model the one being written extends, which is the model of the type
-     * holding the inherited properties, or the model every other one is built
-     * on.
-     */
-    private static String superModel(EntityModel.Bean bean,
-            ModelWriter models) {
-        return bean.superTypes().stream().findFirst().map(models::name)
-                .orElseGet(models::objectModel);
-    }
-
-    private static String writeProperties(EntityModel.Bean bean,
-            ModelWriter models) {
-        var getPropertyModel = models.propertyModel();
-
-        return bean.properties().stream()
-                .map(property -> writeProperty(property, getPropertyModel,
-                        models))
-                .map(FormModelWriter::indent)
-                .collect(Collectors.joining("\n\n"));
-    }
-
-    private static String writeProperty(PropertyModel property,
-            String getPropertyModel, ModelWriter models) {
-        return Template.of(PROPERTY) //
-                .with("property", property.name()) //
-                .with("modelType", models.type(property.type())) //
-                .with("getPropertyModel", getPropertyModel) //
-                .with("model", models.instance(property.type())) //
-                .fill();
-    }
-
-    /**
-     * Indents a block of lines by one step, since a template only says where
-     * the block goes rather than how deep.
-     */
-    private static String indent(String block) {
-        return block.lines().map(line -> "  " + line)
-                .collect(Collectors.joining("\n"));
-    }
-
-    private static String file(ImportRegistry imports, String body) {
-        var lines = new ArrayList<>(imports.write());
-        lines.add("");
-        lines.add(body);
-
-        return String.join("\n", lines) + "\n";
     }
 }
