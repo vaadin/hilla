@@ -2,10 +2,10 @@
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import ts from '@typescript/typescript6';
 import Generator from '@vaadin/hilla-generator-core/Generator.js';
 import BackbonePlugin from '@vaadin/hilla-generator-plugin-backbone/index.js';
 import LoggerFactory from '@vaadin/hilla-generator-utils/LoggerFactory.js';
+import { typeCheck } from '@vaadin/hilla-generator-utils/testing/typeCheck.js';
 import { $defaultValue } from '@vaadin/hilla-models';
 import chaiLike from 'chai-like';
 import { beforeAll, chai, describe, expect, it } from 'vitest';
@@ -24,7 +24,9 @@ chai.use(chaiLike);
  * way an application's would, and are pulled in through a single barrel, which
  * is also how an application loads them: one module graph, resolved statically.
  * Importing them one by one instead would let the module runner resolve a cycle
- * in an order no bundler would produce.
+ * in an order no bundler would produce. Vite strips the types rather than
+ * checking them, so type-incorrect output still evaluates; `typeCheck()`
+ * compiles the same files to cover that.
  *
  * `Model.json` deliberately has no unbroken cycle of non-optional object
  * references: reading `$defaultValue` recurses into every one of them, so such
@@ -38,7 +40,7 @@ const barrelName = 'all-models.ts';
 type Model = { readonly [$defaultValue]: unknown };
 type Models = Readonly<Record<string, Model | undefined>>;
 
-async function generate(): Promise<Models> {
+async function generate(): Promise<{ files: readonly File[]; models: Models }> {
   const generator = new Generator([BackbonePlugin, ModelPlugin], {
     logger: new LoggerFactory({ name: 'model-plugin-runtime-test', verbose: true }),
   });
@@ -72,40 +74,15 @@ async function generate(): Promise<Models> {
 
   const module = (await import(pathToFileURL(join(outputDir, barrelName)).href)) as { default: Models };
 
-  return module.default;
-}
-
-/**
- * Compiles what was written to the output directory. The snapshot tests compare
- * text and the evaluation tests run it, so neither notices a model the type
- * checker rejects, which is what an application would hit first.
- */
-function typeCheck(): readonly string[] {
-  const config = {
-    module: ts.ModuleKind.ESNext,
-    moduleResolution: ts.ModuleResolutionKind.Bundler,
-    noEmit: true,
-    skipLibCheck: true,
-    strict: true,
-    target: ts.ScriptTarget.ES2022,
-  };
-
-  const program = ts.createProgram([join(outputDir, barrelName)], config);
-
-  return ts
-    .getPreEmitDiagnostics(program)
-    .filter((diagnostic) => diagnostic.file?.fileName.includes('/.generated/'))
-    .map(
-      (diagnostic) =>
-        `${diagnostic.file!.fileName.slice(outputDir.length + 1)}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, ' ')}`,
-    );
+  return { files, models: module.default };
 }
 
 describe('ModelPlugin', () => {
+  let generated: readonly File[];
   let models: Models;
 
   beforeAll(async () => {
-    models = await generate();
+    ({ files: generated, models } = await generate());
   }, 30000);
 
   it('generates models that can be evaluated', () => {
@@ -116,9 +93,9 @@ describe('ModelPlugin', () => {
     expect(missing).to.deep.equal([]);
   });
 
-  it('generates models that type check', () => {
-    expect(typeCheck()).to.deep.equal([]);
-  }, 60000);
+  it('generates models that type check', async () => {
+    expect(await typeCheck(outputDir, generated)).to.deep.equal([]);
+  }, 60000); // compiling the whole model hierarchy is slow on CI
 
   it('builds a default value out of the generated models', () => {
     // Reading the lazy `$defaultValue` getter is what walks the generated

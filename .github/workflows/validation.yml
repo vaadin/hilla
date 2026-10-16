@@ -21,20 +21,25 @@ on:
   # unaffected: a pull request runs the workflow file from its own merge
   # commit, so a pull request against e.g. 24.9 uses that branch version of
   # this file.
-  # `labeled` is here for the two labels that ask for a job the other events
-  # leave out - `run-windows-tests` and `run-native-build` - so that adding
-  # one starts that job on a pull request that is already open, without a
-  # commit to push. A run started by a label runs only what the label asks
-  # for: what that is, the init job below works out once and the jobs after
-  # it read from its outputs.
   pull_request:
-    types: [opened, synchronize, reopened, labeled]
+    types: [opened, synchronize, reopened]
     paths-ignore:
       - 'hilla-logo.svg'
       - 'README.md'
       - '.github/ISSUE_TEMPLATE/*'
       - 'packages/**/README.md'
       - 'scripts/generator/templates/**/*.md'
+  # Called by validation-label.yml for the two labels that ask for a job the
+  # other events leave out - `run-windows-tests` and `run-native-build` - so
+  # that adding one starts that job on a pull request that is already open,
+  # without a commit to push. The `labeled` event is there rather than here
+  # because it fires for every label: a run of this workflow started by any
+  # other label skipped all of its jobs, which listed skipped copies of the
+  # real checks on the pull request. A called workflow sees the event of its
+  # caller, so a run started by a label runs only what the label asks for:
+  # what that is, the init job below works out once and the jobs after it
+  # read from its outputs.
+  workflow_call:
   workflow_dispatch:
 permissions:
   contents: read
@@ -56,12 +61,6 @@ env:
 jobs:
   init:
     name: Build Java and TypeScript for other tasks
-    # Every job below needs this one, so a label that asks for neither of the
-    # jobs a label can ask for leaves the run empty.
-    if: >-
-      ${{ github.event.action != 'labeled'
-      || github.event.label.name == 'run-windows-tests'
-      || github.event.label.name == 'run-native-build' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -472,17 +471,13 @@ jobs:
             packages/java/tests/spring/native/error-screenshots/*.png
 
   test-all:
-    # A run a label started summarises only the job the label asked for, so it
-    # reports under a name of its own: the summary of the run that validated
-    # the commit is what the pull request keeps.
-    name: >-
-      ${{ github.event.action == 'labeled' && 'Label Summary'
-      || 'Tests Summary' }}
+    # A static name, as this is the required check of a pull request. A run a
+    # label started is called from validation-label.yml, so its summary is
+    # listed as `Requested by label / Tests Summary` and does not replace the
+    # one of the run that validated the commit.
+    name: Tests Summary
     runs-on: ubuntu-latest
-    # Without a job to summarise there is also no artifact to merge, which the
-    # merge below reports as an error, so this stays out of a run that asked
-    # for nothing - the one where init itself is skipped.
-    if: ${{ always() && needs.init.result != 'skipped' }}
+    if: ${{ always() }}
     needs:
       - init
       - check-style
