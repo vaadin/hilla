@@ -91,6 +91,13 @@ export const $constraints = Symbol('constraints');
  */
 export const $members = Symbol('members');
 
+/**
+ * The symbol that holds the provider of a base model that was not available
+ * when the model was built. A lazily extended model keeps its base out of the
+ * prototype chain, so this is the only record of the inheritance.
+ */
+export const $lazyParent = Symbol('lazyParent');
+
 /* eslint-enable tsdoc/syntax */
 
 /**
@@ -218,6 +225,31 @@ export type Model<V = unknown, EX extends AnyObject = AnyObject> = EX & {
  */
 export type DefaultValueProvider<V, EX extends AnyObject = AnyObject> = (model: Model<V, EX>) => V;
 
+/**
+ * Whether the model is reachable from the value through `$lazyParent` links.
+ *
+ * A lazily extended model keeps its base out of the prototype chain, because
+ * the stand-in already serves the base's properties and leaving the base in
+ * would offer them twice. The chain alone therefore cannot answer `instanceof`
+ * for such a base, and the recorded link has to be followed instead.
+ */
+function inheritsLazily(target: object, value: object): boolean {
+  for (let model: object | null = value; model; model = Object.getPrototypeOf(model)) {
+    // an own property: a link read off the prototype belongs to the base itself
+    const provider = Object.getOwnPropertyDescriptor(model, $lazyParent)?.value as (() => Model) | undefined;
+
+    if (provider) {
+      const base = provider();
+
+      if (target === base || Object.prototype.isPrototypeOf.call(target, base) || inheritsLazily(target, base)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 export const Model: Model = Object.create(null, {
   [$key]: {
     value: 'model',
@@ -243,7 +275,12 @@ export const Model: Model = Object.create(null, {
   },
   [Symbol.hasInstance]: {
     value(this: Model, o: unknown) {
-      return typeof o === 'object' && o != null && (this === o || Object.prototype.isPrototypeOf.call(this, o));
+      return (
+        typeof o === 'object' &&
+        o != null &&
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        (this === o || Object.prototype.isPrototypeOf.call(this, o) || inheritsLazily(this, o))
+      );
     },
   },
   toString: {

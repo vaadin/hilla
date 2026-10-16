@@ -2,6 +2,7 @@
 import {
   $defaultValue,
   $key,
+  $lazyParent,
   $meta,
   $name,
   $optional,
@@ -15,9 +16,38 @@ import {
 } from './Model.js';
 import type { ObjectModel } from './models.js';
 
-const { create, defineProperty } = Object;
+const { create, defineProperty, getOwnPropertyDescriptor, getPrototypeOf } = Object;
+const { ownKeys } = Reflect;
 
 const $model = Symbol('model');
+
+/**
+ * A stand-in for a base model that is not available yet, to be used as the
+ * prototype of the model extending it.
+ *
+ * The stand-in serves the base's own properties itself and reports the base's
+ * prototype as its own, which leaves the base out of the chain entirely. Were
+ * it reported instead, anything walking the chain a level at a time would meet
+ * the base's properties twice: once here and once on the base.
+ *
+ * @param provider - Returns the base model, called no earlier than the first
+ * time the extending model is used.
+ */
+function lazyBase(provider: () => Model): Model {
+  return new Proxy(create(null) as Model, {
+    get: (_target, key, receiver) => Reflect.get(provider(), key, receiver),
+    getOwnPropertyDescriptor(_target, key) {
+      const descriptor = getOwnPropertyDescriptor(provider(), key);
+
+      // the target holds nothing of its own, so a descriptor may only be
+      // reported for it as configurable
+      return descriptor && { ...descriptor, configurable: true };
+    },
+    getPrototypeOf: () => getPrototypeOf(provider()),
+    has: (_target, key) => Reflect.has(provider(), key),
+    ownKeys: () => ownKeys(provider()),
+  });
+}
 
 /**
  * The flags for the model constructor that allow to determine specific characteristics of the model.
@@ -42,12 +72,20 @@ export class CoreModelBuilder<V, EX extends AnyObject = AnyObject, F extends Fla
   protected readonly [$model]: Model<V, EX>;
 
   /**
-   * @param base - The base model to extend.
+   * @param base - The base model to extend, or a function returning it. Pass a
+   * function when the base is not initialized yet, as happens when two models
+   * in separate modules refer to each other: the model is then built against a
+   * stand-in and the base is read on first use.
    * @param defaultValueProvider - The function that provides the default value
    * for the model.
    */
-  constructor(base: Model, defaultValueProvider?: (model: Model<V, EX>) => V) {
-    this[$model] = create(base);
+  constructor(base: Model | (() => Model), defaultValueProvider?: (model: Model<V, EX>) => V) {
+    if (typeof base === 'function') {
+      this[$model] = create(lazyBase(base));
+      defineProperty(this[$model], $lazyParent, { value: base });
+    } else {
+      this[$model] = create(base);
+    }
 
     if (defaultValueProvider) {
       this.defaultValueProvider(defaultValueProvider);
@@ -166,7 +204,7 @@ export class ObjectModelBuilder<
   },
   F
 > {
-  constructor(base: Model) {
+  constructor(base: Model | (() => Model)) {
     super(base, (m) => {
       const result: Record<string, unknown> = {};
 
