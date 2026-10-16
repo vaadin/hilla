@@ -159,6 +159,20 @@
               }
             }
           }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "EndpointRequestInit": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }
