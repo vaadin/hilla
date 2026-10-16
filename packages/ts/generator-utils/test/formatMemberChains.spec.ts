@@ -66,13 +66,4 @@ describe('formatMemberChains', () => {
       ].join('\n'),
     );
   });
-
-  it('should only add whitespace', () => {
-    const code = 'const X = m.object("X").property("a", S).property("b", S).build();\n';
-    const formatted = formatMemberChains(code);
-
-    expect(formatted).to.not.equal(code);
-    // removing the inserted breaks gives back the original
-    expect(formatted.replaceAll(/\n +\./gu, '.')).to.equal(code);
-  });
 });

@@ -174,6 +174,22 @@ describe('@vaadin/hilla-models', () => {
     expect(EmployeeModel).to.have.property($defaultValue).which.is.like({ colleagues: undefined });
   });
 
+  it('should allow self-reference with record of optional', () => {
+    interface Employee {
+      reports: Record<string, Employee | undefined>;
+    }
+
+    const EmployeeModel = m
+      .object<Employee>('Employee')
+      .property('reports', m.record(m.optional(m.self)))
+      .build();
+
+    expect(EmployeeModel).to.have.property('reports').which.is.instanceof(RecordModel);
+    expect(EmployeeModel.reports[$valueModel]).to.be.instanceof(EmployeeModel);
+    expect(EmployeeModel.reports[$valueModel]).to.have.property($optional).which.equals(true);
+    expect(EmployeeModel).to.have.property($defaultValue).which.is.like({ reports: {} });
+  });
+
   it('should allow self-reference with array of optional', () => {
     interface Employee {
       colleagues: Array<Employee | undefined>;
