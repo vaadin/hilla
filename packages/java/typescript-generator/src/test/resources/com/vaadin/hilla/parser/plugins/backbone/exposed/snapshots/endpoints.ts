@@ -1,2 +1,3 @@
 import * as ExposedEndpoint from "./ExposedEndpoint.js";
-export { ExposedEndpoint };
+import * as InheritingEndpoint from "./InheritingEndpoint.js";
+export { ExposedEndpoint, InheritingEndpoint };
