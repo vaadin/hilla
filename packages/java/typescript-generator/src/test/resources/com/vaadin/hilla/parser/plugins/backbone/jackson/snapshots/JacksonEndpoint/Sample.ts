@@ -1,5 +1,5 @@
-import type SampleParent_1 from "./SampleParent.js";
-interface Sample extends SampleParent_1 {
+import type SampleParent from "./SampleParent.js";
+interface Sample extends SampleParent {
     privateProp?: string;
     privateTransientPropWithGetter?: string;
     propertyGetterOnly?: string;
