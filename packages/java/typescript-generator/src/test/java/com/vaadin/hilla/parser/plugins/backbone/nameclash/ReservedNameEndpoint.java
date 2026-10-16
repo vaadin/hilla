@@ -13,23 +13,30 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.hilla.generator.fixtures;
-
-import java.util.List;
+package com.vaadin.hilla.parser.plugins.backbone.nameclash;
 
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 /**
- * Has type parameters, of the class and of a method, which nothing in the
- * generated module declares.
+ * Has a method and a parameter named after a word TypeScript reads as part of
+ * the language, and a method going by the name the first of them would take.
  */
 @Endpoint
-public class GenericEndpoint<T> {
-    public T of(T value) {
-        return value;
+public class ReservedNameEndpoint {
+    public void delete(long id) {
     }
 
-    public <V> List<V> all(V value) {
-        return List.of(value);
+    public void _delete(long id) {
+    }
+
+    public void remove(long delete) {
+    }
+
+    public String eval(String arguments) {
+        return arguments;
+    }
+
+    public long size() {
+        return 0;
     }
 }

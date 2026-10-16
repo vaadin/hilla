@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.hilla.generator.fixtures;
+package com.vaadin.hilla.parser.plugins.model.validation;
 
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;

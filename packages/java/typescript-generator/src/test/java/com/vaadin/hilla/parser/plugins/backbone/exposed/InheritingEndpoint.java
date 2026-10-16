@@ -13,22 +13,26 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.hilla.generator.fixtures;
-
-import java.util.Date;
+package com.vaadin.hilla.parser.plugins.backbone.exposed;
 
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 /**
- * Sends a date of a class of its own, which the browser has a value for all the
- * same.
+ * Has the two ways a name can be there more than once: an override of an
+ * exposed method, and an overload.
  */
 @Endpoint
-public class CustomDateEndpoint {
-    public Stamp stamped() {
-        return null;
+public class InheritingEndpoint extends ExposedBase {
+    @Override
+    public String shared() {
+        return "own";
     }
 
-    public static class Stamp extends Date {
+    public String twice(String one) {
+        return one;
+    }
+
+    public String twice(String one, String two) {
+        return one + two;
     }
 }

@@ -13,9 +13,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.hilla.generator.fixtures;
+package com.vaadin.hilla.parser.plugins.sample;
 
 import java.util.List;
+
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.flow.signals.shared.SharedListSignal;
 import com.vaadin.flow.signals.shared.SharedNumberSignal;
@@ -48,13 +50,13 @@ public class SignalsEndpoint {
      * Shares a value which is always there, so that the signal starts from the
      * empty value of the type rather than from nothing.
      */
-    @Nonnull
-    public SharedValueSignal<@Nonnull String> title() {
+    @NonNull
+    public SharedValueSignal<@NonNull String> title() {
         return null;
     }
 
-    @Nonnull
-    public SharedValueSignal<SampleEndpoint.@Nonnull Sample> current() {
+    @NonNull
+    public SharedValueSignal<SampleEndpoint.@NonNull Sample> current() {
         return null;
     }
 
@@ -62,7 +64,7 @@ public class SignalsEndpoint {
      * A signal which is always there, holding a value which is not: whether the
      * signal can be absent and whether the value can are two questions.
      */
-    @Nonnull
+    @NonNull
     public SharedValueSignal<String> pending() {
         return null;
     }
@@ -71,18 +73,18 @@ public class SignalsEndpoint {
      * Values which are always there start from the empty value of the model of
      * their type, whichever model that is.
      */
-    @Nonnull
-    public SharedValueSignal<@Nonnull Integer> limit() {
+    @NonNull
+    public SharedValueSignal<@NonNull Integer> limit() {
         return null;
     }
 
-    @Nonnull
-    public SharedValueSignal<@Nonnull Boolean> enabled() {
+    @NonNull
+    public SharedValueSignal<@NonNull Boolean> enabled() {
         return null;
     }
 
-    @Nonnull
-    public SharedValueSignal<@Nonnull List<SampleEndpoint.Sample>> crowd() {
+    @NonNull
+    public SharedValueSignal<@NonNull List<SampleEndpoint.Sample>> crowd() {
         return null;
     }
 
