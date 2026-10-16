@@ -1,76 +1,76 @@
-import { _getPropertyModel as _getPropertyModel_1, ArrayModel as ArrayModel_1, AssertFalse as AssertFalse_1, AssertTrue as AssertTrue_1, DecimalMax as DecimalMax_1, DecimalMin as DecimalMin_1, Digits as Digits_1, Email as Email_1, Future as Future_1, makeObjectEmptyValueCreator as makeObjectEmptyValueCreator_1, Max as Max_1, Min as Min_1, Negative as Negative_1, NegativeOrZero as NegativeOrZero_1, NotBlank as NotBlank_1, NotEmpty as NotEmpty_1, NotNull as NotNull_1, Null as Null_1, NumberModel as NumberModel_1, ObjectModel as ObjectModel_1, Past as Past_1, Pattern as Pattern_1, Positive as Positive_1, PositiveOrZero as PositiveOrZero_1, Size as Size_1, StringModel as StringModel_1 } from "@vaadin/hilla-lit-form";
-import FormEntityModel_1 from "./FormEntityModel.js";
-import type FormValidationConstraints_1 from "./FormValidationConstraints.js";
-class FormValidationConstraintsModel<T extends FormValidationConstraints_1 = FormValidationConstraints_1> extends ObjectModel_1<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator_1(FormValidationConstraintsModel);
-    get list(): ArrayModel_1<StringModel_1> {
-        return this[_getPropertyModel_1]("list", (parent, key) => new ArrayModel_1(parent, key, false, (parent, key) => new StringModel_1(parent, key, true), { validators: [new NotEmpty_1()] }));
+import { _getPropertyModel, ArrayModel, AssertFalse, AssertTrue, DecimalMax, DecimalMin, Digits, Email, Future, makeObjectEmptyValueCreator, Max, Min, Negative, NegativeOrZero, NotBlank, NotEmpty, NotNull, Null, NumberModel, ObjectModel, Past, Pattern, Positive, PositiveOrZero, Size, StringModel } from "@vaadin/hilla-lit-form";
+import FormEntityModel from "./FormEntityModel.js";
+import type FormValidationConstraints from "./FormValidationConstraints.js";
+class FormValidationConstraintsModel<T extends FormValidationConstraints = FormValidationConstraints> extends ObjectModel<T> {
+    static override createEmptyValue = makeObjectEmptyValueCreator(FormValidationConstraintsModel);
+    get list(): ArrayModel<StringModel> {
+        return this[_getPropertyModel]("list", (parent, key) => new ArrayModel(parent, key, false, (parent, key) => new StringModel(parent, key, true), { validators: [new NotEmpty()] }));
     }
-    get email(): StringModel_1 {
-        return this[_getPropertyModel_1]("email", (parent, key) => new StringModel_1(parent, key, false, { validators: [new Email_1({ message: "foo" })] }));
+    get email(): StringModel {
+        return this[_getPropertyModel]("email", (parent, key) => new StringModel(parent, key, false, { validators: [new Email({ message: "foo" })] }));
     }
-    get isNull(): StringModel_1 {
-        return this[_getPropertyModel_1]("isNull", (parent, key) => new StringModel_1(parent, key, false, { validators: [new Null_1()] }));
+    get isNull(): StringModel {
+        return this[_getPropertyModel]("isNull", (parent, key) => new StringModel(parent, key, false, { validators: [new Null()] }));
     }
-    get notNull(): StringModel_1 {
-        return this[_getPropertyModel_1]("notNull", (parent, key) => new StringModel_1(parent, key, false, { validators: [new NotNull_1()] }));
+    get notNull(): StringModel {
+        return this[_getPropertyModel]("notNull", (parent, key) => new StringModel(parent, key, false, { validators: [new NotNull()] }));
     }
-    get notEmpty(): StringModel_1 {
-        return this[_getPropertyModel_1]("notEmpty", (parent, key) => new StringModel_1(parent, key, false, { validators: [new NotEmpty_1(), new NotNull_1()] }));
+    get notEmpty(): StringModel {
+        return this[_getPropertyModel]("notEmpty", (parent, key) => new StringModel(parent, key, false, { validators: [new NotEmpty(), new NotNull()] }));
     }
-    get notNullEntity(): FormEntityModel_1 {
-        return this[_getPropertyModel_1]("notNullEntity", (parent, key) => new FormEntityModel_1(parent, key, false, { validators: [new NotNull_1()] }));
+    get notNullEntity(): FormEntityModel {
+        return this[_getPropertyModel]("notNullEntity", (parent, key) => new FormEntityModel(parent, key, false, { validators: [new NotNull()] }));
     }
-    get notBlank(): StringModel_1 {
-        return this[_getPropertyModel_1]("notBlank", (parent, key) => new StringModel_1(parent, key, false, { validators: [new NotBlank_1()] }));
+    get notBlank(): StringModel {
+        return this[_getPropertyModel]("notBlank", (parent, key) => new StringModel(parent, key, false, { validators: [new NotBlank()] }));
     }
-    get assertTrue(): StringModel_1 {
-        return this[_getPropertyModel_1]("assertTrue", (parent, key) => new StringModel_1(parent, key, false, { validators: [new AssertTrue_1()] }));
+    get assertTrue(): StringModel {
+        return this[_getPropertyModel]("assertTrue", (parent, key) => new StringModel(parent, key, false, { validators: [new AssertTrue()] }));
     }
-    get assertFalse(): StringModel_1 {
-        return this[_getPropertyModel_1]("assertFalse", (parent, key) => new StringModel_1(parent, key, false, { validators: [new AssertFalse_1()] }));
+    get assertFalse(): StringModel {
+        return this[_getPropertyModel]("assertFalse", (parent, key) => new StringModel(parent, key, false, { validators: [new AssertFalse()] }));
     }
-    get min(): NumberModel_1 {
-        return this[_getPropertyModel_1]("min", (parent, key) => new NumberModel_1(parent, key, false, { validators: [new Min_1({ value: 1, message: "foo" })] }));
+    get min(): NumberModel {
+        return this[_getPropertyModel]("min", (parent, key) => new NumberModel(parent, key, false, { validators: [new Min({ value: 1, message: "foo" })] }));
     }
-    get max(): NumberModel_1 {
-        return this[_getPropertyModel_1]("max", (parent, key) => new NumberModel_1(parent, key, false, { validators: [new Max_1(2)] }));
+    get max(): NumberModel {
+        return this[_getPropertyModel]("max", (parent, key) => new NumberModel(parent, key, false, { validators: [new Max(2)] }));
     }
-    get decimalMin(): NumberModel_1 {
-        return this[_getPropertyModel_1]("decimalMin", (parent, key) => new NumberModel_1(parent, key, false, { validators: [new DecimalMin_1("0.01")] }));
+    get decimalMin(): NumberModel {
+        return this[_getPropertyModel]("decimalMin", (parent, key) => new NumberModel(parent, key, false, { validators: [new DecimalMin("0.01")] }));
     }
-    get decimalMax(): NumberModel_1 {
-        return this[_getPropertyModel_1]("decimalMax", (parent, key) => new NumberModel_1(parent, key, false, { validators: [new DecimalMax_1({ value: "0.01", inclusive: false })] }));
+    get decimalMax(): NumberModel {
+        return this[_getPropertyModel]("decimalMax", (parent, key) => new NumberModel(parent, key, false, { validators: [new DecimalMax({ value: "0.01", inclusive: false })] }));
     }
-    get negative(): NumberModel_1 {
-        return this[_getPropertyModel_1]("negative", (parent, key) => new NumberModel_1(parent, key, false, { validators: [new Negative_1()] }));
+    get negative(): NumberModel {
+        return this[_getPropertyModel]("negative", (parent, key) => new NumberModel(parent, key, false, { validators: [new Negative()] }));
     }
-    get negativeOrZero(): NumberModel_1 {
-        return this[_getPropertyModel_1]("negativeOrZero", (parent, key) => new NumberModel_1(parent, key, false, { validators: [new NegativeOrZero_1()] }));
+    get negativeOrZero(): NumberModel {
+        return this[_getPropertyModel]("negativeOrZero", (parent, key) => new NumberModel(parent, key, false, { validators: [new NegativeOrZero()] }));
     }
-    get positive(): NumberModel_1 {
-        return this[_getPropertyModel_1]("positive", (parent, key) => new NumberModel_1(parent, key, false, { validators: [new Positive_1()] }));
+    get positive(): NumberModel {
+        return this[_getPropertyModel]("positive", (parent, key) => new NumberModel(parent, key, false, { validators: [new Positive()] }));
     }
-    get positiveOrZero(): NumberModel_1 {
-        return this[_getPropertyModel_1]("positiveOrZero", (parent, key) => new NumberModel_1(parent, key, false, { validators: [new PositiveOrZero_1()] }));
+    get positiveOrZero(): NumberModel {
+        return this[_getPropertyModel]("positiveOrZero", (parent, key) => new NumberModel(parent, key, false, { validators: [new PositiveOrZero()] }));
     }
-    get size(): StringModel_1 {
-        return this[_getPropertyModel_1]("size", (parent, key) => new StringModel_1(parent, key, false, { validators: [new Size_1()] }));
+    get size(): StringModel {
+        return this[_getPropertyModel]("size", (parent, key) => new StringModel(parent, key, false, { validators: [new Size()] }));
     }
-    get size1(): StringModel_1 {
-        return this[_getPropertyModel_1]("size1", (parent, key) => new StringModel_1(parent, key, false, { validators: [new Size_1({ min: 1 })] }));
+    get size1(): StringModel {
+        return this[_getPropertyModel]("size1", (parent, key) => new StringModel(parent, key, false, { validators: [new Size({ min: 1 })] }));
     }
-    get digits(): StringModel_1 {
-        return this[_getPropertyModel_1]("digits", (parent, key) => new StringModel_1(parent, key, false, { validators: [new Digits_1({ integer: 5, fraction: 2 })] }));
+    get digits(): StringModel {
+        return this[_getPropertyModel]("digits", (parent, key) => new StringModel(parent, key, false, { validators: [new Digits({ integer: 5, fraction: 2 })] }));
     }
-    get past(): StringModel_1 {
-        return this[_getPropertyModel_1]("past", (parent, key) => new StringModel_1(parent, key, false, { validators: [new Past_1()] }));
+    get past(): StringModel {
+        return this[_getPropertyModel]("past", (parent, key) => new StringModel(parent, key, false, { validators: [new Past()] }));
     }
-    get future(): StringModel_1 {
-        return this[_getPropertyModel_1]("future", (parent, key) => new StringModel_1(parent, key, false, { validators: [new Future_1()] }));
+    get future(): StringModel {
+        return this[_getPropertyModel]("future", (parent, key) => new StringModel(parent, key, false, { validators: [new Future()] }));
     }
-    get pattern(): StringModel_1 {
-        return this[_getPropertyModel_1]("pattern", (parent, key) => new StringModel_1(parent, key, false, { validators: [new Pattern_1({ regexp: "\\d+\\..+" })] }));
+    get pattern(): StringModel {
+        return this[_getPropertyModel]("pattern", (parent, key) => new StringModel(parent, key, false, { validators: [new Pattern({ regexp: "\\d+\\..+" })] }));
     }
 }
 export default FormValidationConstraintsModel;

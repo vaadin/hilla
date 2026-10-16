@@ -67,6 +67,10 @@ export abstract class EntityModelProcessor {
     const modelPath = `${entityPath}Model`;
     this[$dependencies] = new DependencyManager(new PathManager({ extension: '.js', relativeTo: dirname(modelPath) }));
 
+    // the model class is declared with a `T` type parameter, so an entity of
+    // that name has to be imported under a different one
+    this[$dependencies].names.claim('T');
+
     const { exports, imports, paths } = this[$dependencies];
 
     this[$model] = {
