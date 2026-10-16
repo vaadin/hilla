@@ -53,7 +53,7 @@ public class ValidatedEndpoint {
         private String code;
 
         @Size(min = 1)
-        private String[] codes;
+        private java.lang.@NotBlank String[] codes;
 
         @NotEmpty
         private String[][] rows;
