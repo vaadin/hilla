@@ -89,7 +89,7 @@ export default function formatMemberChains(code: string, fileName = 'generated.t
 
   // spliced from the end, so that an insertion does not shift the offsets of
   // the breaks still to come
-  breaks.sort(([a], [b]) => b - a);
-
-  return breaks.reduce((text, [offset, indent]) => `${text.slice(0, offset)}\n${indent}${text.slice(offset)}`, code);
+  return breaks
+    .toSorted(([a], [b]) => b - a)
+    .reduce((text, [offset, indent]) => `${text.slice(0, offset)}\n${indent}${text.slice(offset)}`, code);
 }
