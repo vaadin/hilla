@@ -1,13 +1,10 @@
-import { ObjectModel, StringModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import m, { StringModel } from '@vaadin/hilla-models';
 import type Item from './Item.js';
 
-class ItemModel<T extends Item = Item> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(ItemModel);
-
-  get name(): StringModel {
-    return this[_getPropertyModel]('name', (parent, key) =>
-      new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }));
-  }
-}
+const ItemModel = m
+  .object<Item>('Item')
+  .property('name', m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))
+  .build();
+type ItemModel = typeof ItemModel;
 
 export default ItemModel;

@@ -1,13 +1,10 @@
-import { ObjectModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import m, { Model } from '@vaadin/hilla-models';
 import type Box from './Box.js';
 
-class BoxModel<T extends Box = Box> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(BoxModel);
-
-  get content(): ObjectModel {
-    return this[_getPropertyModel]('content', (parent, key) =>
-      new ObjectModel(parent, key, true));
-  }
-}
+const BoxModel = m
+  .object<Box>('Box')
+  .property('content', m.optional(Model))
+  .build();
+type BoxModel = typeof BoxModel;
 
 export default BoxModel;
