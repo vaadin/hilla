@@ -132,7 +132,8 @@ describe('ValidationConstraintProcessor', () => {
 
   const pattern: AnnotationPack = {
     obj: {
-      attributes: { regexp: '\\d+\\..+' },
+      // the model library does not declare `flags`, so it is left out
+      attributes: { flags: ['CASE_INSENSITIVE'], regexp: '\\d+\\..+' },
       simpleName: 'Pattern',
     },
     str: String.raw`Pattern({ regexp: "\\d+\\..+" })`,

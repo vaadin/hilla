@@ -21,7 +21,7 @@ const ValidationDataModel = m
   .property("notNullEntity", m.constrained(m.optional(m.self), NotNull()))
   .property("past", m.meta(m.constrained(m.optional(StringModel), Past()), { jvmType: "java.time.LocalDate" }))
   .property("pattern", m.meta(m.constrained(m.optional(StringModel), Pattern({ regexp: "\\d+\\..+" })), { jvmType: "java.lang.String" }))
-  .property("patternWithFlags", m.meta(m.constrained(m.optional(StringModel), Pattern({ regexp: "\\d+", flags: ["CASE_INSENSITIVE", "COMMENTS"] })), { jvmType: "java.lang.String" }))
+  .property("patternWithFlags", m.meta(m.constrained(m.optional(StringModel), Pattern({ regexp: "\\d+" })), { jvmType: "java.lang.String" }))
   .property("patternRepeated", m.meta(m.constrained(m.optional(StringModel), Pattern({ regexp: "\\d+" }), Pattern({ regexp: ".+" })), { jvmType: "java.lang.String" }))
   .property("positive", m.meta(m.constrained(NumberModel, Positive()), { jvmType: "int" }))
   .property("positiveOrZero", m.meta(m.constrained(NumberModel, PositiveOrZero()), { jvmType: "int" }))
