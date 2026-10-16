@@ -44,9 +44,14 @@ public final class BarrelWriter {
         var imports = new ImportRegistry();
         var names = new ArrayList<String>();
 
-        endpoints.stream().map(EndpointModel::name).sorted()
-                .forEach(name -> names.add(imports
-                        .importAll(ModulePaths.forEndpoint(name, ""), name)));
+        endpoints.stream().map(EndpointModel::name).sorted().forEach(name -> {
+            var local = imports.importAll(ModulePaths.forEndpoint(name, ""),
+                    name);
+            // An endpoint named like a type of the language is
+            // imported under another name, but still exported as
+            // itself
+            names.add(local.equals(name) ? name : local + " as " + name);
+        });
 
         var lines = new ArrayList<>(imports.write());
 
