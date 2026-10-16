@@ -18,9 +18,11 @@ package com.vaadin.hilla.parser.plugins.model;
 import java.lang.reflect.AnnotatedArrayType;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import io.swagger.v3.oas.models.media.Schema;
 import org.jspecify.annotations.NonNull;
@@ -32,10 +34,13 @@ import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.models.AnnotatedModel;
 import com.vaadin.hilla.parser.models.AnnotationInfoModel;
+import com.vaadin.hilla.parser.models.AnnotationParameterEnumValueModel;
 import com.vaadin.hilla.parser.models.AnnotationParameterModel;
 import com.vaadin.hilla.parser.models.ArraySignatureModel;
 import com.vaadin.hilla.parser.models.BaseSignatureModel;
+import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
+import com.vaadin.hilla.parser.models.Model;
 import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.AnnotatedNode;
@@ -62,23 +67,82 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
             AnnotationInfoModel annotation) {
         var simpleName = extractSimpleName(annotation.getName());
 
-        var attributes = annotation.getParameters().stream()
-                .filter(Predicate.not(AnnotationParameterModel::isDefault))
-                .collect(Collectors.toMap(AnnotationParameterModel::getName,
-                        AnnotationParameterModel::getValue));
-
         return new ValidationConstraint(simpleName,
-                !attributes.isEmpty() ? attributes : null);
+                extractAttributes(annotation));
     }
 
     private static Annotation convertAnnotation(
             AnnotationInfoModel annotation) {
-        return new Annotation(annotation.getName(), null);
+        return new Annotation(annotation.getName(),
+                extractAttributes(annotation));
+    }
+
+    private static Map<String, Object> extractAttributes(
+            AnnotationInfoModel annotation) {
+        var attributes = annotation.getParameters().stream()
+                .filter(Predicate.not(AnnotationParameterModel::isDefault))
+                .collect(Collectors.toMap(AnnotationParameterModel::getName,
+                        parameter -> convertAttributeValue(
+                                parameter.getValue())));
+
+        return !attributes.isEmpty() ? attributes : null;
+    }
+
+    /**
+     * Converts an annotation parameter value into something the OpenAPI
+     * document can hold. The parser hands back its own models for enum
+     * constants and class references. An array arrives as a list of such
+     * values.
+     */
+    private static Object convertAttributeValue(Object value) {
+        return switch (value) {
+        case AnnotationParameterEnumValueModel enumValue ->
+            enumValue.getValueName();
+        case ClassInfoModel classInfo -> new JvmTypeRef(classInfo.getName());
+        case Collection<?> collection -> collection.stream()
+                .map(ModelPlugin::convertAttributeValue).toList();
+        // Every other model carries a whole type graph behind it, which the
+        // serializer would write into the document. The only kind left is a
+        // nested annotation, which nothing reaching this plugin has: the
+        // include-list holds none, and a repeated constraint is unwrapped
+        // before it gets here. Adding one means adding its conversion too.
+        case Model model -> throw new IllegalStateException(
+                "No OpenAPI representation for the annotation attribute value "
+                        + model);
+        default -> value;
+        };
     }
 
     private static String extractSimpleName(String fullyQualifiedName) {
         return fullyQualifiedName
                 .substring(fullyQualifiedName.lastIndexOf(".") + 1);
+    }
+
+    /**
+     * Replaces the container the compiler synthesizes for a repeated
+     * constraint, such as {@code @Pattern.List} for two {@code @Pattern}s, with
+     * the constraints it holds. The container has no validator of its own, so
+     * emitting it would ask the form binder for a name it does not export.
+     * <p>
+     * A container is recognized by its shape rather than by its name: a single
+     * {@code value} parameter holding the repeated annotations.
+     */
+    private static Stream<AnnotationInfoModel> unwrapRepeatableContainer(
+            AnnotationInfoModel annotation) {
+        var parameters = annotation.getParameters();
+
+        if (parameters.size() == 1) {
+            var parameter = parameters.iterator().next();
+
+            if ("value".equals(parameter.getName())
+                    && parameter.getValue() instanceof Collection<?> values
+                    && !values.isEmpty() && values.stream()
+                            .allMatch(AnnotationInfoModel.class::isInstance)) {
+                return values.stream().map(AnnotationInfoModel.class::cast);
+            }
+        }
+
+        return Stream.of(annotation);
     }
 
     private static boolean isValidationConstraintAnnotation(
@@ -135,6 +199,7 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
             Schema<?> schema) {
         var constraints = annotatedNode.getAnnotations().stream()
                 .filter(ModelPlugin::isValidationConstraintAnnotation)
+                .flatMap(ModelPlugin::unwrapRepeatableContainer)
                 .map(ModelPlugin::convertValidationConstraintAnnotation)
                 .collect(Collectors.toList());
 
