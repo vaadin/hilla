@@ -1,13 +1,10 @@
-import { ObjectModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import m, { Model } from '@vaadin/hilla-models';
 import type Generic from './Generic.js';
 
-class GenericModel<T extends Generic = Generic> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(GenericModel);
-
-  get genericField(): ObjectModel {
-    return this[_getPropertyModel]('genericField', (parent, key) =>
-      new ObjectModel(parent, key, false));
-  }
-}
+const GenericModel = m
+  .object<Generic>('Generic')
+  .property('genericField', Model)
+  .build();
+type GenericModel = typeof GenericModel;
 
 export default GenericModel;
