@@ -88,6 +88,6 @@ export default function formatMemberChains(code: string, fileName = 'generated.t
   }
 
   return breaks
-    .sort(([a], [b]) => b - a)
+    .toSorted(([a], [b]) => b - a)
     .reduce((text, [offset, indent]) => `${text.slice(0, offset)}\n${indent}${text.slice(offset)}`, code);
 }
