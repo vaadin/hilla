@@ -1,4 +1,4 @@
-import type { AbstractModel, DetachedModelConstructor } from '@vaadin/hilla-lit-form';
+import type { Model } from '@vaadin/hilla-models';
 import { Button } from '@vaadin/react-components/Button.js';
 import { AutoGrid, type CrudService } from '@vaadin/hilla-react-crud';
 import { useState } from 'react';
@@ -7,7 +7,7 @@ import PersonModel from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/Pers
 import { CompanyService, PersonService } from 'Frontend/generated/endpoints.js';
 
 export default function ReadOnlyGridWithHeaderFilters(): React.JSX.Element {
-  const [model, setModel] = useState<Array<DetachedModelConstructor<AbstractModel>>>([PersonModel]);
+  const [model, setModel] = useState<Model[]>([PersonModel]);
   const [service, setService] = useState<CrudService<any>>(PersonService);
   const [noHeaderFilters, setNoHeaderFilters] = useState(false);
   return (

@@ -1,6 +1,7 @@
 import { _getPropertyModel, BooleanModel, NumberModel, ObjectModel, StringModel } from '@vaadin/hilla-lit-form';
+import m, { StringModel as ModelsStringModel } from '@vaadin/hilla-models';
 import { describe, expect, it } from 'vitest';
-import { ModelInfo } from '../src/model-info.js';
+import { getDefaultProperties, ModelInfo } from '../src/model-info.js';
 import { PersonModel } from './test-models-and-services.js';
 
 describe('@vaadin/hilla-react-crud', () => {
@@ -129,6 +130,25 @@ describe('@vaadin/hilla-react-crud', () => {
       it('returns empty array for unknown property paths', () => {
         const modelInfo = new ModelInfo(PersonModel);
         expect(modelInfo.getProperties(['foo', 'address.foo', 'foo.bar'])).to.eql([]);
+      });
+    });
+
+    describe('getDefaultProperties', () => {
+      it('excludes a type discriminator', () => {
+        interface Event {
+          '@type': 'add';
+          name: string;
+        }
+
+        const EventModel = m
+          .object<Event>('Event')
+          .property('@type', m.literal('add'))
+          .property('name', ModelsStringModel)
+          .build();
+
+        const names = getDefaultProperties(new ModelInfo(EventModel)).map((prop) => prop.name);
+
+        expect(names).to.eql(['name']);
       });
     });
   });
