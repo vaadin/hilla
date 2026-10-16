@@ -17,13 +17,11 @@
   "devDependencies": {
     "@babel/core": "7.29.7",
     "@babel/plugin-transform-react-jsx-development": "7.29.7",
-    "@babel/preset-react": "7.29.7",
     "@babel/types": "7.29.8",
     "@preact/signals-react": "3.12.0",
     "@preact/signals-react-transform": "0.8.3",
     "@rolldown/plugin-babel": "0.2.4",
     "@rollup/plugin-replace": "6.0.3",
-    "@rollup/pluginutils": "5.4.0",
     "@types/node": "26.6.5",
     "@typescript/native": "npm:typescript@7.0.2",
     "@vaadin/hilla-generator-cli": "file:../../../ts/generator-cli",
@@ -63,13 +61,11 @@
     "devDependencies": {
       "@babel/core": "7.29.7",
       "@babel/plugin-transform-react-jsx-development": "7.29.7",
-      "@babel/preset-react": "7.29.7",
       "@babel/types": "7.29.8",
       "@preact/signals-react": "3.12.0",
       "@preact/signals-react-transform": "0.8.3",
       "@rolldown/plugin-babel": "0.2.4",
       "@rollup/plugin-replace": "6.0.3",
-      "@rollup/pluginutils": "5.4.0",
       "@types/node": "26.6.5",
       "@typescript/native": "npm:typescript@7.0.2",
       "@vaadin/hilla-generator-cli": "25.4.0-alpha3",
@@ -93,7 +89,7 @@
       "vite": "8.3.4",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "1eee31dea700125419a2c9c7a720cd50dd5edafb2789790d5a1ce57e8a21c11b"
+    "hash": "9c412e2dfff799b9299d812ad9cbf5c191c49333d7c52d05f77431c8d319eb6c"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
