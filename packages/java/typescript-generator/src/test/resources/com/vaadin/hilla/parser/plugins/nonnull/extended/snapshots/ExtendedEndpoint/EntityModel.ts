@@ -1,9 +1,8 @@
-import { _getPropertyModel, ArrayModel, makeObjectEmptyValueCreator, ObjectModel, StringModel } from "@vaadin/hilla-lit-form";
+import m, { StringModel } from "@vaadin/hilla-models";
 import type Entity from "./Entity.js";
-class EntityModel<T extends Entity = Entity> extends ObjectModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(EntityModel);
-    get nonnullListOfNullableStrings(): ArrayModel<StringModel> {
-        return this[_getPropertyModel]("nonnullListOfNullableStrings", (parent, key) => new ArrayModel(parent, key, false, (parent, key) => new StringModel(parent, key, true, { meta: { javaType: "java.lang.String" } }), { meta: { javaType: "java.util.List" } }));
-    }
-}
+const EntityModel = m
+  .object<Entity>("Entity")
+  .property("nonnullListOfNullableStrings", m.meta(m.array(m.meta(m.optional(StringModel), { jvmType: "java.lang.String" })), { jvmType: "java.util.List" }))
+  .build();
+type EntityModel = typeof EntityModel;
 export default EntityModel;
