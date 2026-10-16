@@ -1,13 +1,10 @@
-import { ObjectModel, StringModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import m, { StringModel } from '@vaadin/hilla-models';
 import type MultiEndpointsSharedModel from './MultiEndpointsSharedModel.js';
 
-class MultiEndpointsSharedModelModel<T extends MultiEndpointsSharedModel = MultiEndpointsSharedModel> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(MultiEndpointsSharedModelModel);
-
-  get id(): StringModel {
-    return this[_getPropertyModel]('id', (parent, key) =>
-      new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }));
-  }
-}
+const MultiEndpointsSharedModelModel = m
+  .object<MultiEndpointsSharedModel>('MultiEndpointsSharedModel')
+  .property('id', m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))
+  .build();
+type MultiEndpointsSharedModelModel = typeof MultiEndpointsSharedModelModel;
 
 export default MultiEndpointsSharedModelModel;
