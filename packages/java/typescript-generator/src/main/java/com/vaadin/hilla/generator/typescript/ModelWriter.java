@@ -16,34 +16,38 @@
 package com.vaadin.hilla.generator.typescript;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.vaadin.hilla.generator.model.AnnotationModel;
 import com.vaadin.hilla.generator.model.ConstraintModel;
 import com.vaadin.hilla.generator.model.TypeModel;
-import com.vaadin.hilla.parser.models.AnnotationParameterEnumValueModel;
-import com.vaadin.hilla.parser.models.ClassInfoModel;
+import com.vaadin.hilla.parser.plugins.model.JvmTypeRef;
 
 /**
- * Writes the model of a type: the class a form binds a value of that type
- * through, and the way one of them is built.
+ * Writes the model of a value: the expression which builds it out of the models
+ * and the converters of the model library.
  *
  * <p>
- * A model is named after the type it is of, so the model of a generated type is
- * a generated class of its own, while the model of everything else is one of
- * the classes the form library provides.
+ * The converters wrap the model of the type from the inside out: the model of
+ * the values of an array or of a map is wrapped by {@code m.array} or
+ * {@code m.record}, then by {@code m.optional} when the value can be absent,
+ * then by {@code m.constrained} and last by {@code m.meta}.
  */
 final class ModelWriter {
-    private static final String LIT_FORM = "@vaadin/hilla-lit-form";
-    private static final String OBJECT_MODEL = "ObjectModel";
+    static final String MODULE = "@vaadin/hilla-models";
     private static final Set<String> PRIMITIVES = Set.of("boolean", "byte",
             "char", "double", "float", "int", "long", "short");
+    private static final Pattern IDENTIFIER = Pattern
+            .compile("[A-Za-z_$][A-Za-z0-9_$]*");
 
     private final ImportRegistry imports;
-    private final TypeWriter types;
     private final String directory;
+    private final String owner;
+    private final ModelCycles cycles;
 
     /**
      * @param imports
@@ -53,53 +57,60 @@ final class ModelWriter {
      *            folder, which decides how the other models are referred to
      */
     ModelWriter(ImportRegistry imports, String directory) {
+        this(imports, directory, null, ModelCycles.NONE);
+    }
+
+    /**
+     * @param owner
+     *            the fully qualified name of the class whose model is being
+     *            written, which a property holding a value of the same class
+     *            refers to as itself
+     * @param cycles
+     *            the references between the models which have to be read
+     *            lazily, since the modules of the models import each other
+     */
+    ModelWriter(ImportRegistry imports, String directory, String owner,
+            ModelCycles cycles) {
         this.imports = imports;
-        // A model holds values which cannot be changed through it, so an array
-        // it holds is written as a read only one
-        this.types = new TypeWriter(imports, directory).readOnly();
         this.directory = directory;
+        this.owner = owner;
+        this.cycles = cycles;
     }
 
     /**
-     * The type of the model of a value, which is what the property of a form
-     * model is declared as.
+     * How the model of a value is built, which a model of an object is given as
+     * the model of the property holding the value.
      */
-    String type(TypeModel type) {
-        return switch (type) {
+    String model(TypeModel type) {
+        var model = switch (type) {
         case TypeModel.Scalar scalar -> scalarModel(scalar.kind());
-        case TypeModel.ArrayOf array ->
-            arrayModel() + "<" + type(array.items()) + ">";
-        // A map is an object whose properties are the keys, so the model of it
-        // says which values those properties hold
-        case TypeModel.MapOf map -> objectModel() + "<Record<string, "
-                + types.write(map.values()) + ">>";
-        case TypeModel.EntityRef entity -> name(entity);
-        case TypeModel.TypeVariable variable -> objectModel();
-        };
-    }
-
-    /**
-     * How a model of a value is built, which a form model hands to the binding
-     * of the property holding it.
-     */
-    String instance(TypeModel type) {
-        return switch (type) {
-        case TypeModel.Scalar scalar -> instance(scalarModel(scalar.kind()),
-                scalar.optional(), options(scalar, scalar.javaType()));
-        // The model of the items goes on a line of its own, since a model
-        // holding a model holding a model is unreadable as one line
-        case TypeModel.ArrayOf array -> instance(arrayModel(), array.optional(),
-                "\n  (parent, key) => " + instance(array.items()),
-                "\n  " + options(array, array.javaType()));
-        case TypeModel.MapOf map -> instance(objectModel(), map.optional(),
-                options(map, map.javaType()));
-        case TypeModel.EntityRef entity ->
-            instance(name(entity), entity.optional(), options(entity, null));
+        case TypeModel.ArrayOf array -> call("array", model(array.items()));
+        case TypeModel.MapOf map -> call("record", model(map.values()));
+        case TypeModel.EntityRef entity -> reference(entity);
         // A type variable holds whatever the declaration is used with, which
         // is nothing the model can be told about
-        case TypeModel.TypeVariable variable -> instance(objectModel(),
-                variable.optional(), options(variable, null));
+        case TypeModel.TypeVariable variable -> named("Model");
         };
+
+        if (type.optional()) {
+            model = call("optional", model);
+        }
+
+        var constraints = type
+                .constraints().stream().filter(constraint -> ModelConstraints
+                        .isApplicable(constraint, kind(type)))
+                .map(this::constraint).toList();
+
+        if (!constraints.isEmpty()) {
+            var arguments = new ArrayList<String>();
+            arguments.add(model);
+            arguments.addAll(constraints);
+            model = call("constrained", arguments.toArray(String[]::new));
+        }
+
+        var meta = meta(type);
+
+        return meta.isEmpty() ? model : call("meta", model, meta);
     }
 
     /**
@@ -116,93 +127,119 @@ final class ModelWriter {
                 name, false);
     }
 
-    String objectModel() {
-        return imports.importNamed(LIT_FORM, OBJECT_MODEL, false);
+    /**
+     * The namespace of the model library, which holds the builders and the
+     * converters.
+     */
+    String m() {
+        return imports.importDefault(MODULE, "m", false);
     }
 
     /**
-     * The model of an enum, which binds the constants it accepts rather than
-     * properties, and what tells it which those are.
+     * A named export of the model library, such as {@code StringModel}.
      */
-    String enumModel() {
-        return imports.importNamed(LIT_FORM, "EnumModel", false);
-    }
-
-    String enumConstants() {
-        return imports.importNamed(LIT_FORM, "_enum", false);
+    String named(String name) {
+        return imports.importNamed(MODULE, name, false);
     }
 
     /**
-     * What a model asks for the model of one of its properties by, which is
-     * what keeps one model per property rather than one per read.
+     * A model referring to the model of a generated type. The model of the
+     * class being written is itself, which needs no import, and a model which
+     * refers back to the one being written, at any depth, is read only once it
+     * is used, since the modules of both import each other.
      */
-    String propertyModel() {
-        return imports.importNamed(LIT_FORM, "_getPropertyModel", false);
-    }
+    private String reference(TypeModel.EntityRef entity) {
+        if (entity.javaClass().equals(owner)) {
+            return m() + ".self";
+        }
 
-    /**
-     * What builds the empty value a form starts from, which differs between a
-     * type with properties and an enum.
-     */
-    String emptyValueCreator(boolean enumeration) {
-        return imports.importNamed(LIT_FORM,
-                enumeration ? "makeEnumEmptyValueCreator"
-                        : "makeObjectEmptyValueCreator",
-                false);
-    }
+        var model = name(entity);
 
-    private String arrayModel() {
-        return imports.importNamed(LIT_FORM, "ArrayModel", false);
+        if (!cycles.isDeferred(owner, entity.javaClass())) {
+            return model;
+        }
+
+        // The provider says what it returns, since the type of a model cannot
+        // be inferred from a model whose type is inferred from it in turn
+        var type = imports.importDefault(
+                ModulePaths.forEntity(entity.javaClass(), directory),
+                ModulePaths.entityName(entity.javaClass()), true);
+
+        return call("lazy",
+                "(): " + named("ObjectModel") + "<" + type + "> => " + model);
     }
 
     private String scalarModel(TypeModel.ScalarKind kind) {
         return switch (kind) {
-        case STRING -> imports.importNamed(LIT_FORM, "StringModel", false);
-        case NUMBER -> imports.importNamed(LIT_FORM, "NumberModel", false);
-        case BOOLEAN -> imports.importNamed(LIT_FORM, "BooleanModel", false);
-        case UNKNOWN, VOID -> objectModel();
+        case STRING -> named("StringModel");
+        case NUMBER -> named("NumberModel");
+        case BOOLEAN -> named("BooleanModel");
+        case UNKNOWN, VOID -> named("Model");
         };
     }
 
     /**
-     * What a model is told about the value it holds: what the value has to
-     * satisfy, the annotations of the value which a form or a grid built from
-     * the model reads, and the Java type it comes in, which TypeScript has no
-     * way of telling apart. A model which is told nothing is built without it.
-     *
-     * @param javaType
-     *            the Java type of the value, or {@code null} for a model which
-     *            holds whatever the type it is of holds
+     * The kind of model the one of a value is, which decides the constraints
+     * the model library accepts on it.
      */
-    private String options(TypeModel type, String javaType) {
+    private static ModelConstraints.Kind kind(TypeModel type) {
+        return switch (type) {
+        case TypeModel.Scalar scalar -> switch (scalar.kind()) {
+        case STRING -> ModelConstraints.Kind.STRING;
+        case NUMBER -> ModelConstraints.Kind.NUMBER;
+        case BOOLEAN -> ModelConstraints.Kind.BOOLEAN;
+        case UNKNOWN, VOID -> ModelConstraints.Kind.UNKNOWN;
+        };
+        case TypeModel.ArrayOf array -> ModelConstraints.Kind.ARRAY;
+        case TypeModel.MapOf map -> ModelConstraints.Kind.RECORD;
+        case TypeModel.EntityRef entity -> ModelConstraints.Kind.OBJECT;
+        case TypeModel.TypeVariable variable -> ModelConstraints.Kind.UNKNOWN;
+        };
+    }
+
+    /**
+     * What a model is told about the value it holds: the annotations of the
+     * value which a form or a grid built from the model reads, and the Java
+     * type it comes in, which TypeScript has no way of telling apart. Nothing
+     * at all when the model is told nothing.
+     */
+    private String meta(TypeModel type) {
         var written = new ArrayList<String>();
 
-        if (!type.constraints().isEmpty()) {
-            written.add("validators: [" + type.constraints().stream()
-                    .map(this::validator).collect(Collectors.joining(", "))
-                    + "]");
-        }
-
-        var meta = new ArrayList<String>();
-
         if (!type.annotations().isEmpty()) {
-            meta.add("annotations: [" + type.annotations().stream()
-                    .map(annotation -> "{ name: '" + annotation + "' }")
-                    .collect(Collectors.joining(", ")) + "]");
+            written.add("annotations: "
+                    + type.annotations().stream().map(ModelWriter::annotation)
+                            .collect(Collectors.joining(", ", "[", "]")));
         }
+
+        var javaType = switch (type) {
+        case TypeModel.Scalar scalar -> scalar.javaType();
+        case TypeModel.ArrayOf array -> array.javaType();
+        case TypeModel.MapOf map -> map.javaType();
+        // A model of a generated type, or of whatever a type variable holds,
+        // is what tells which type it is
+        case TypeModel.EntityRef entity -> null;
+        case TypeModel.TypeVariable variable -> null;
+        };
 
         if (isJavaTypeWritten(javaType)) {
-            meta.add("javaType: '" + javaType + "'");
-        }
-
-        if (!meta.isEmpty()) {
-            written.add(meta.stream()
-                    .collect(Collectors.joining(", ", "meta: { ", " }")));
+            written.add("jvmType: " + string(javaType));
         }
 
         return written.isEmpty() ? ""
                 : written.stream()
                         .collect(Collectors.joining(", ", "{ ", " }"));
+    }
+
+    private static String annotation(AnnotationModel annotation) {
+        var written = new ArrayList<String>();
+        written.add("jvmType: " + string(annotation.name()));
+
+        if (!annotation.attributes().isEmpty()) {
+            written.add("attributes: " + value(annotation.attributes()));
+        }
+
+        return written.stream().collect(Collectors.joining(", ", "{ ", " }"));
     }
 
     /**
@@ -225,35 +262,30 @@ final class ModelWriter {
     }
 
     /**
-     * How a constraint is built, which is the validator the form library knows
-     * by the name of the annotation: with what the annotation says, as the one
-     * value it says when that is all there is to it.
+     * How a constraint is declared, which is the function the model library
+     * exports under the name of the annotation: with what the annotation says,
+     * as the one value it says when that is all there is to it. An attribute
+     * the model library does not declare is left out, since a constraint takes
+     * exactly the attributes it declares.
      */
-    private String validator(ConstraintModel constraint) {
-        var name = imports.importNamed(LIT_FORM, constraint.name(), false);
-        var attributes = constraint.attributes();
+    private String constraint(ConstraintModel constraint) {
+        var name = named(constraint.name());
+        var attributes = ModelConstraints.declaredAttributes(constraint);
 
         if (attributes.isEmpty()) {
-            return "new " + name + "()";
+            return name + "()";
         }
 
         if (attributes.size() == 1 && attributes.containsKey("value")) {
-            return "new " + name + "(" + value(attributes.get("value")) + ")";
+            return name + "(" + value(attributes.get("value")) + ")";
         }
 
-        return "new " + name + "("
-                + attributes.entrySet().stream()
-                        .map(attribute -> attribute.getKey() + ": "
-                                + value(attribute.getValue()))
-                        .collect(Collectors.joining(", ", "{ ", " }"))
-                + ")";
+        return name + "(" + value(attributes) + ")";
     }
 
     /**
-     * A value of an annotation as TypeScript writes it. Anything the language
-     * has no literal of goes as the string it reads as, which is what the
-     * validators of the form library are given as well: an enum constant by its
-     * name, and a class by the name of the class.
+     * A value of an annotation as TypeScript writes it. An enum constant comes
+     * as its name, and a class as the reference to it the model library reads.
      */
     private static String value(Object value) {
         if (value instanceof Boolean || value instanceof Number) {
@@ -265,46 +297,34 @@ final class ModelWriter {
                     .collect(Collectors.joining(", ", "[", "]"));
         }
 
-        if (value instanceof Object[] values) {
-            return Arrays.stream(values).map(ModelWriter::value)
-                    .collect(Collectors.joining(", ", "[", "]"));
+        if (value instanceof Map<?, ?> attributes) {
+            return attributes.entrySet().stream()
+                    .map(attribute -> key(String.valueOf(attribute.getKey()))
+                            + ": " + value(attribute.getValue()))
+                    .collect(Collectors.joining(", ", "{ ", " }"));
         }
 
-        if (value instanceof AnnotationParameterEnumValueModel constant) {
-            return string(constant.getValueName());
-        }
-
-        if (value instanceof ClassInfoModel javaClass) {
-            return string(javaClass.getName());
+        if (value instanceof JvmTypeRef type) {
+            return "{ jvmType: " + string(type.getJvmType()) + " }";
         }
 
         return string(String.valueOf(value));
+    }
+
+    private static String key(String name) {
+        return IDENTIFIER.matcher(name).matches() ? name : string(name);
     }
 
     /**
      * A string as TypeScript reads it, with what the language would otherwise
      * read as the end of it, or as another line, written as it says itself.
      */
-    private static String string(String value) {
+    static String string(String value) {
         return "'" + value.replace("\\", "\\\\").replace("'", "\\'")
                 .replace("\n", "\\n").replace("\r", "\\r") + "'";
     }
 
-    private static String instance(String model, boolean optional,
-            String... arguments) {
-        var builder = new StringBuilder("new ").append(model)
-                .append("(parent, key, ").append(optional);
-
-        for (var argument : arguments) {
-            if (argument.isBlank()) {
-                continue;
-            }
-
-            // An argument of its own line brings the space with it
-            builder.append(argument.startsWith("\n") ? "," : ", ")
-                    .append(argument);
-        }
-
-        return builder.append(')').toString();
+    private String call(String converter, String... arguments) {
+        return m() + "." + converter + "(" + String.join(", ", arguments) + ")";
     }
 }
