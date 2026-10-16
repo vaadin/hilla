@@ -102,10 +102,11 @@ function fixSubType(sources: SourceFile[], subKey: string, discriminator: Discri
   const fixedSource = new TypeFixProcessor(subSource, discriminatorPropertyName, typeValues).process();
   sources.splice(sources.indexOf(subSource), 1, fixedSource);
 
-  // fix the model to remove the discriminator property
+  // pin the discriminator of the model to the same values, so that the empty
+  // value it builds carries the type the server needs to deserialize it
   const modelFn = `${convertFullyQualifiedNameToRelativePath(subKey)}Model.ts`;
   const modelSource = sources.find(({ fileName }) => fileName === modelFn)!;
-  const fixedModelSource = new ModelFixProcessor(modelSource, discriminatorPropertyName).process();
+  const fixedModelSource = new ModelFixProcessor(modelSource, discriminatorPropertyName, typeValues).process();
   sources.splice(sources.indexOf(modelSource), 1, fixedModelSource);
 }
 
