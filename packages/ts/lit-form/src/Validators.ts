@@ -340,6 +340,10 @@ export class Size extends AbstractValidator<string> {
     if (value == null || (value as { length?: number }).length === 0) {
       return this.min <= 0;
     }
+    if (typeof value !== 'string') {
+      const { length } = value as readonly unknown[];
+      return length >= this.min && length <= this.max;
+    }
     // eslint-disable-next-line sort-keys
     return isLength(value, { min: this.min, max: this.max });
   }
