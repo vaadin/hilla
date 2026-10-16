@@ -1,12 +1,9 @@
-import { _getPropertyModel, ArrayModel, makeObjectEmptyValueCreator, ObjectModel } from "@vaadin/hilla-lit-form";
+import m, { StringModel } from "@vaadin/hilla-models";
 import type ComplexTypeModel from "./ComplexTypeModel.js";
-class ComplexTypeModelModel<T extends ComplexTypeModel = ComplexTypeModel> extends ObjectModel<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator(ComplexTypeModelModel);
-    get complexList(): ArrayModel<ObjectModel<Record<string, ReadonlyArray<string | undefined> | undefined>>> {
-        return this[_getPropertyModel]("complexList", (parent, key) => new ArrayModel(parent, key, true, (parent, key) => new ObjectModel(parent, key, true, { meta: { javaType: "java.util.Map" } }), { meta: { javaType: "java.util.List" } }));
-    }
-    get complexMap(): ObjectModel<Record<string, ReadonlyArray<string | undefined> | undefined>> {
-        return this[_getPropertyModel]("complexMap", (parent, key) => new ObjectModel(parent, key, true, { meta: { javaType: "java.util.Map" } }));
-    }
-}
+const ComplexTypeModelModel = m
+  .object<ComplexTypeModel>("ComplexTypeModel")
+  .property("complexList", m.meta(m.optional(m.array(m.meta(m.optional(m.record(m.meta(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: "java.lang.String" }))), { jvmType: "java.util.List" }))), { jvmType: "java.util.Map" }))), { jvmType: "java.util.List" }))
+  .property("complexMap", m.meta(m.optional(m.record(m.meta(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: "java.lang.String" }))), { jvmType: "java.util.List" }))), { jvmType: "java.util.Map" }))
+  .build();
+type ComplexTypeModelModel = typeof ComplexTypeModelModel;
 export default ComplexTypeModelModel;
