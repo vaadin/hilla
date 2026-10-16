@@ -498,7 +498,8 @@ public final class EndpointModelPlugin
      */
     private static TypeModel provided(String javaClass,
             List<TypeModel> typeArguments, boolean optional,
-            List<ConstraintModel> constraints, List<String> annotations) {
+            List<ConstraintModel> constraints,
+            List<AnnotationModel> annotations) {
         var provided = PROVIDED_TYPES.get(javaClass);
 
         return new TypeModel.Provided(provided.name(), provided.module(),
@@ -532,9 +533,12 @@ public final class EndpointModelPlugin
      * plugin picking them out of the ones the property declares has already
      * noted on the type of it.
      */
-    private static List<String> annotationsOf(TypeFacts type) {
+    private static List<AnnotationModel> annotationsOf(TypeFacts type) {
         return notes(type, TypeFacts.ANNOTATIONS, Annotation.class)
-                .map(Annotation::getName).toList();
+                .map(annotation -> new AnnotationModel(annotation.getName(),
+                        annotation.getAttributes() == null ? Map.of()
+                                : annotation.getAttributes()))
+                .toList();
     }
 
     /**
