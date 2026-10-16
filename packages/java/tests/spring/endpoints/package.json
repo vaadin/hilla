@@ -6,6 +6,7 @@
     "@vaadin/common-frontend": "0.0.24",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
+    "@vaadin/hilla-models": "file:../../../../ts/models",
     "@vaadin/icon": "25.3.3",
     "@vaadin/icons": "25.3.3",
     "@vaadin/router": "2.0.1",
@@ -17,13 +18,11 @@
   "devDependencies": {
     "@babel/core": "7.29.7",
     "@babel/plugin-transform-react-jsx-development": "7.29.7",
-    "@babel/preset-react": "7.29.7",
     "@babel/types": "7.29.8",
     "@preact/signals-react": "3.12.0",
     "@preact/signals-react-transform": "0.8.3",
     "@rolldown/plugin-babel": "0.2.4",
     "@rollup/plugin-replace": "6.0.3",
-    "@rollup/pluginutils": "5.4.0",
     "@types/node": "26.6.5",
     "@typescript/native": "npm:typescript@7.0.2",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
@@ -58,13 +57,11 @@
     "devDependencies": {
       "@babel/core": "7.29.7",
       "@babel/plugin-transform-react-jsx-development": "7.29.7",
-      "@babel/preset-react": "7.29.7",
       "@babel/types": "7.29.8",
       "@preact/signals-react": "3.12.0",
       "@preact/signals-react-transform": "0.8.3",
       "@rolldown/plugin-babel": "0.2.4",
       "@rollup/plugin-replace": "6.0.3",
-      "@rollup/pluginutils": "5.4.0",
       "@types/node": "26.6.5",
       "@typescript/native": "npm:typescript@7.0.2",
       "@vaadin/hilla-generator-utils": "25.4.0-alpha3",
@@ -83,7 +80,7 @@
       "workbox-routing": "7.4.1",
       "workbox-strategies": "7.4.1"
     },
-    "hash": "aad0e6dddb3e8f9ac80b74d6f9dbbffad1cc7f0d2e1dd0c390c4ff030422914d"
+    "hash": "158c6e688e4a0a9653b8d9a65ba2b88bbb23533cffbb0815819251ed1ad1b969"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",

@@ -45,6 +45,11 @@ export declare enum Enum {}
 
 export type AnyObject = Readonly<Record<never, never>>; // {}
 
+/**
+ * The value types a model can be pinned to a single instance of.
+ */
+export type Literal = boolean | number | string;
+
 /* eslint-disable tsdoc/syntax */
 /**
  * The symbol that represents the {@link Model[$key]} property.
@@ -104,13 +109,24 @@ export type Extensions<M extends Model> = M extends Model<unknown, infer EX> ? E
 export const $assertSupportedModel = Symbol('assertSupportedModel');
 
 /**
+ * The symbol that represents the names of the attributes a
+ * {@link NonAttributedConstraint} declares, including those without a default
+ * value.
+ */
+export const $attributeNames = Symbol('attributeNames');
+
+/**
  * The constraint function type.
  */
-export type ConstraintFn<V = unknown, A extends AnyObject = AnyObject> = EmptyObject extends A
-  ? (attributes?: A) => Constraint<V>
+export type ConstraintFn<
+  V = unknown,
+  N extends string = string,
+  A extends AnyObject = AnyObject,
+> = EmptyObject extends A
+  ? (attributes?: A) => Constraint<V, N, A>
   : { readonly value: never } extends A
-    ? (valueOrAttributes: (A & { readonly value: unknown })['value'] | A) => Constraint<V>
-    : (attributes: A) => Constraint<V>;
+    ? (valueOrAttributes: (A & { readonly value: unknown })['value'] | A) => Constraint<V, N, A>
+    : (attributes: A) => Constraint<V, N, A>;
 
 /**
  * The constraint type that doesn't necessarily have attributes specified.
@@ -123,11 +139,12 @@ export type NonAttributedConstraint<
   V = unknown,
   N extends string = string,
   A extends AnyObject = AnyObject,
-> = ConstraintFn<V, A> &
+> = ConstraintFn<V, N, A> &
   Readonly<{
     attributes: A;
     name: N;
     [$assertSupportedModel](model: Model<V>): void;
+    [$attributeNames]: ReadonlyArray<string & keyof A>;
   }>;
 
 /**
@@ -138,7 +155,7 @@ export type NonAttributedConstraint<
  * @typeParam A - The attributes of the constraint.
  */
 export type Constraint<V = unknown, N extends string = string, A extends AnyObject = AnyObject> = Readonly<{
-  attributes: EmptyObject extends A ? A : Required<A>;
+  attributes: A;
   name: N;
   [$assertSupportedModel](model: Model<V>): void;
 }>;
@@ -197,6 +214,13 @@ export type Model<V = unknown, EX extends AnyObject = AnyObject> = EX & {
   readonly [$defaultValue]: V;
   readonly [Symbol.toStringTag]: string;
   [Symbol.hasInstance](value: any): value is Model<V, EX>;
+
+  /**
+   * Creates the default value of the model.
+   *
+   * @deprecated Use the `$defaultValue` property instead.
+   */
+  createEmptyValue(this: void): V;
   toString(): string;
 };
 
@@ -235,6 +259,13 @@ export const Model: Model = Object.create(null, {
   [Symbol.hasInstance]: {
     value(this: Model, o: unknown) {
       return typeof o === 'object' && o != null && (this === o || Object.prototype.isPrototypeOf.call(this, o));
+    },
+  },
+  createEmptyValue: {
+    // bound to the model, so that it also works when detached, e.g. passed
+    // as `useState(PersonModel.createEmptyValue)`
+    get(this: Model) {
+      return () => this[$defaultValue];
     },
   },
   toString: {
