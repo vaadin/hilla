@@ -153,14 +153,6 @@ public final class FullStackGenerator {
     }
 
     /**
-     * Runs the generator and returns the generated files, keyed by their path
-     * relative to the output folder.
-     */
-    public Map<String, String> generate() {
-        return write(parseGeneration());
-    }
-
-    /**
      * Writes the TypeScript of a generation and returns the files, keyed by
      * their path relative to the output folder.
      */
