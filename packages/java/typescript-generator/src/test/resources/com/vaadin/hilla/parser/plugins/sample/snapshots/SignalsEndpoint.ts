@@ -1,4 +1,4 @@
-import { ArrayModel, BooleanModel, NumberModel, StringModel } from '@vaadin/hilla-lit-form';
+import { $defaultValue, ArrayModel, BooleanModel, NumberModel, StringModel } from '@vaadin/hilla-models';
 import type { SignalMethodOptions } from '@vaadin/hilla-react-signals';
 import { ListSignal, NumberSignal, ValueSignal } from '@vaadin/hilla-react-signals';
 import type Sample from './com/vaadin/hilla/parser/plugins/sample/SampleEndpoint/Sample.js';
@@ -46,7 +46,7 @@ export function counterOf(name: string | undefined): NumberSignal | undefined {
 export function crowd(
   options?: SignalMethodOptions<Array<Sample | undefined>>,
 ): ValueSignal<Array<Sample | undefined>> {
-  return new ValueSignal(options?.defaultValue ?? ArrayModel.createEmptyValue(), {
+  return new ValueSignal(options?.defaultValue ?? ArrayModel[$defaultValue], {
     client: client,
     endpoint: 'SignalsEndpoint',
     method: 'crowd',
@@ -54,7 +54,7 @@ export function crowd(
 }
 
 export function current(options?: SignalMethodOptions<Sample>): ValueSignal<Sample> {
-  return new ValueSignal(options?.defaultValue ?? SampleModel.createEmptyValue(), {
+  return new ValueSignal(options?.defaultValue ?? SampleModel[$defaultValue], {
     client: client,
     endpoint: 'SignalsEndpoint',
     method: 'current',
@@ -62,7 +62,7 @@ export function current(options?: SignalMethodOptions<Sample>): ValueSignal<Samp
 }
 
 export function enabled(options?: SignalMethodOptions<boolean>): ValueSignal<boolean> {
-  return new ValueSignal(options?.defaultValue ?? BooleanModel.createEmptyValue(), {
+  return new ValueSignal(options?.defaultValue ?? BooleanModel[$defaultValue], {
     client: client,
     endpoint: 'SignalsEndpoint',
     method: 'enabled',
@@ -70,7 +70,7 @@ export function enabled(options?: SignalMethodOptions<boolean>): ValueSignal<boo
 }
 
 export function limit(options?: SignalMethodOptions<number>): ValueSignal<number> {
-  return new ValueSignal(options?.defaultValue ?? NumberModel.createEmptyValue(), {
+  return new ValueSignal(options?.defaultValue ?? NumberModel[$defaultValue], {
     client: client,
     endpoint: 'SignalsEndpoint',
     method: 'limit',
@@ -114,7 +114,7 @@ export function sample(
 }
 
 export function title(options?: SignalMethodOptions<string>): ValueSignal<string> {
-  return new ValueSignal(options?.defaultValue ?? StringModel.createEmptyValue(), {
+  return new ValueSignal(options?.defaultValue ?? StringModel[$defaultValue], {
     client: client,
     endpoint: 'SignalsEndpoint',
     method: 'title',

@@ -1,9 +1,12 @@
-import { _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import m from '@vaadin/hilla-models';
 import ShadedModel from '../ShadedModel.js';
 import type Pale from './Pale.js';
 
-class PaleModel<T extends Pale = Pale> extends ShadedModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(PaleModel);
-}
+const PaleModel = m
+  .extend(ShadedModel)
+  .object<Pale>('Pale')
+  .property('shade', m.literal('pale'))
+  .build();
+type PaleModel = typeof PaleModel;
 
 export default PaleModel;

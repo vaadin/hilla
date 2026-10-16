@@ -1,14 +1,13 @@
-import { NumberModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import m, { NumberModel } from '@vaadin/hilla-models';
 import type Ring from './Ring.js';
 import RoundModel from './RoundModel.js';
 
-class RingModel<T extends Ring = Ring> extends RoundModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(RingModel);
-
-  get hole(): NumberModel {
-    return this[_getPropertyModel]('hole', (parent, key) =>
-      new NumberModel(parent, key, false, { meta: { javaType: 'double' } }));
-  }
-}
+const RingModel = m
+  .extend(RoundModel)
+  .object<Ring>('Ring')
+  .property('hole', m.meta(NumberModel, { jvmType: 'double' }))
+  .property('@type', m.literal('ring'))
+  .build();
+type RingModel = typeof RingModel;
 
 export default RingModel;
