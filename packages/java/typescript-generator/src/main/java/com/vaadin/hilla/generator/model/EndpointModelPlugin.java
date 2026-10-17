@@ -391,9 +391,9 @@ public final class EndpointModelPlugin
         }
 
         // A type argument, such as the String of a List<String>, stands for
-        // the type it is bound to as well. Its schema is the one of that type,
-        // which the parser hands up in place of its own, so whether the value
-        // can be absent is read after what the plugins said of either
+        // the type it is bound to as well. What the walk says of it is what it
+        // says of that type, which the parser hands up in place of its own, so
+        // whether the value can be absent is read after the plugins said it
         if (signature.isTypeArgument() || signature.isTypeVariable()
                 || signature.isTypeParameter()) {
             return only(referred).withOptional(optional);
