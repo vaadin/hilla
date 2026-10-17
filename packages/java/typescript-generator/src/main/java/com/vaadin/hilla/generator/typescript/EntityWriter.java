@@ -103,7 +103,8 @@ public final class EntityWriter {
      */
     private static String writeProperty(PropertyModel property,
             TypeWriter types) {
-        return property.name() + (property.type().optional() ? "?" : "") + ": "
+        return Names.property(property.name())
+                + (property.type().optional() ? "?" : "") + ": "
                 + types.writeRequired(property.type()) + ";";
     }
 
