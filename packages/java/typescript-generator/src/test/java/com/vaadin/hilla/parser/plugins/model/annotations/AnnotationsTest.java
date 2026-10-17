@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.hilla.generator.model.AnnotationModel;
 import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.generator.model.Generation;
-import com.vaadin.hilla.parser.plugins.model.JvmTypeRef;
 import com.vaadin.hilla.parser.testutils.AbstractFullStackTest;
 
 /**
@@ -67,9 +66,10 @@ public class AnnotationsTest extends AbstractFullStackTest {
         var attributes = annotationsOf("oneToManyWithTargetEntity").get(0)
                 .attributes();
 
-        var targetEntity = (JvmTypeRef) attributes.get("targetEntity");
-        assertEquals(AnnotationsEndpoint.NestedEntity.class.getName(),
-                targetEntity.getJvmType());
+        assertEquals(
+                Map.of("jvmType",
+                        AnnotationsEndpoint.NestedEntity.class.getName()),
+                attributes.get("targetEntity"));
     }
 
     @Test

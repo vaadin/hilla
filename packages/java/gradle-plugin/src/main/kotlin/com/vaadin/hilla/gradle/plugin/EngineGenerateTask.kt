@@ -15,13 +15,12 @@
  */
 package com.vaadin.hilla.gradle.plugin
 
-import java.io.IOException
 import com.vaadin.flow.gradle.PluginEffectiveConfiguration
 import com.vaadin.flow.gradle.VaadinFlowPluginExtension
+import com.vaadin.hilla.engine.BrowserCallableFinderException
 import com.vaadin.hilla.engine.GeneratorException
 import com.vaadin.hilla.engine.TypeScriptProcessor
 import com.vaadin.hilla.engine.ParserException
-import com.vaadin.hilla.engine.ParserProcessor
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -122,17 +121,9 @@ public abstract class EngineGenerateTask : DefaultTask() {
         logger.info("Running the engineGenerate task with effective Vaadin configuration ${effectiveConfig.get()}")
 
         try {
-            val conf = engineConfigurationSettings.get().toEngineConfiguration()
-
-            val parserProcessor = ParserProcessor(conf)
-            val typeScriptProcessor = TypeScriptProcessor(conf)
-
-            val endpoints = conf.browserCallableFinder.find(conf);
-            typeScriptProcessor.process(parserProcessor.parse(endpoints))
-        } catch (e: IOException) {
-            throw GradleException("Endpoint collection failed", e)
-        } catch (e: InterruptedException) {
-            throw GradleException("Endpoint collection failed", e)
+            TypeScriptProcessor.generate(engineConfigurationSettings.get().toEngineConfiguration())
+        } catch (e: BrowserCallableFinderException) {
+            throw GradleException("Execution failed", e)
         } catch (e: GeneratorException) {
             throw GradleException("Execution failed", e)
         } catch (e: ParserException) {
