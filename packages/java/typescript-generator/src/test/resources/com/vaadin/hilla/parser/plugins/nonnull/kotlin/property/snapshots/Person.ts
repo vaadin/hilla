@@ -8,11 +8,11 @@ interface Person extends AbstractEntity {
   email?: string;
   phone: string;
   important: boolean;
+  age?: number;
   luckyNumber: number;
   addresses: Record<string, Address>;
   profilePicture?: string;
-  fullName?: string;
-  age?: number;
+  fullName: string;
 }
 
 export default Person;
