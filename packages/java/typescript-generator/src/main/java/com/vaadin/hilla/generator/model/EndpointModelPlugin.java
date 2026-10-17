@@ -406,10 +406,12 @@ public final class EndpointModelPlugin
         var constraints = constraintsOf(type);
         var annotations = annotationsOf(type);
 
-        // A type parameter bound to something else than an object stands for
-        // that bound, which the walk visits below it, since the declaration
-        // does not keep such a parameter
-        if (signature.isTypeVariable() || signature.isTypeParameter()) {
+        // A type variable or parameter of an entity is declared by it, so it
+        // is written as its name, unless it is bound to something else than
+        // an object: it then stands for that bound, which the walk visits
+        // below it, since the declaration does not keep such a parameter
+        if ((signature.isTypeVariable() || signature.isTypeParameter())
+                && isInEntity()) {
             return referred.isEmpty()
                     ? new TypeModel.TypeVariable(name(signature), optional,
                             constraints, annotations)
@@ -417,12 +419,12 @@ public final class EndpointModelPlugin
                             : only(referred);
         }
 
-        // A type argument, such as the String of a List<String>, stands for the
-        // type it is bound to, which the walk visits below it
-        if (signature.isTypeArgument()) {
-            // What the walk says about the type argument decides whether its
-            // value can be absent, since that is where an annotation on it
-            // belongs
+        // A type argument, such as the String of a List<String>, stands for
+        // the type it is bound to as well. What the walk says of it is what it
+        // says of that type, which the parser hands up in place of its own, so
+        // whether the value can be absent is read after the plugins said it
+        if (signature.isTypeArgument() || signature.isTypeVariable()
+                || signature.isTypeParameter()) {
             return only(referred).withOptional(optional);
         }
 
@@ -457,6 +459,15 @@ public final class EndpointModelPlugin
                 name(signature), constraints, annotations);
     }
 
+    /**
+     * Whether the walk is inside an entity, where the parser keeps type
+     * variables and parameters as they are rather than resolving them.
+     */
+    private boolean isInEntity() {
+        return frames.stream()
+                .anyMatch(frame -> frame.node() instanceof EntityNode);
+    }
+
     private static TypeModel.ScalarKind scalarKind(SignatureModel signature) {
         if (signature.isBoolean()) {
             return TypeModel.ScalarKind.BOOLEAN;
@@ -471,7 +482,8 @@ public final class EndpointModelPlugin
 
         if (signature.isString() || signature.isCharacter()
                 || signature.isDate() || signature.isDateTime()
-                || signature.isEnum()) {
+                // An enum of the application is declared on its own instead
+                || (signature.isEnum() && !isEntity(signature))) {
             return TypeModel.ScalarKind.STRING;
         }
 
@@ -512,8 +524,9 @@ public final class EndpointModelPlugin
     }
 
     /**
-     * Whether the type is generated as a declaration of its own, which every
-     * type outside the JDK is, an enum included: an enum becomes a TypeScript
+     * Whether the type comes from outside the JDK, which is what makes it a
+     * declaration of its own unless it is a scalar, such as a class extending a
+     * date. An enum of the application is declared too: it becomes a TypeScript
      * enum of its own, not the string it is serialized as.
      */
     private static boolean isEntity(SignatureModel signature) {
