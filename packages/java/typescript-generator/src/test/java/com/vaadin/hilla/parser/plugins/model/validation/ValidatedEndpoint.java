@@ -58,6 +58,8 @@ public class ValidatedEndpoint {
         @NotEmpty
         private String[][] rows;
 
+        private String[] labels;
+
         @Size(min = 1, max = 10)
         private List<@NotBlank String> tags;
 
@@ -87,6 +89,10 @@ public class ValidatedEndpoint {
 
         public String[][] getRows() {
             return rows;
+        }
+
+        public @Size(min = 1) String[] getLabels() {
+            return labels;
         }
 
         public List<String> getTags() {

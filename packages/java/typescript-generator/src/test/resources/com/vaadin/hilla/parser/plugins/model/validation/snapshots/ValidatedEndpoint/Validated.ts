@@ -6,6 +6,7 @@ interface Validated {
   code?: string;
   codes?: Array<string | undefined>;
   rows?: Array<Array<string | undefined> | undefined>;
+  labels?: Array<string | undefined>;
   tags?: Array<string | undefined>;
 }
 export default Validated;
