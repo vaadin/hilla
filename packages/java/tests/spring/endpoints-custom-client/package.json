@@ -22,7 +22,6 @@
     "@preact/signals-react": "3.12.0",
     "@preact/signals-react-transform": "0.8.3",
     "@rolldown/plugin-babel": "0.2.4",
-    "@rollup/plugin-replace": "6.0.3",
     "@types/node": "26.6.5",
     "@typescript/native": "npm:typescript@7.0.2",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
@@ -66,7 +65,6 @@
       "@preact/signals-react": "3.12.0",
       "@preact/signals-react-transform": "0.8.3",
       "@rolldown/plugin-babel": "0.2.4",
-      "@rollup/plugin-replace": "6.0.3",
       "@types/node": "26.6.5",
       "@typescript/native": "npm:typescript@7.0.2",
       "@vaadin/hilla-generator-cli": "25.4.0-alpha3",
@@ -90,7 +88,7 @@
       "vite": "8.3.4",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "40dba1fa8fdc697e3d154cad72982b55e2f1244d2f69aab040d8851e5a1d0887"
+    "hash": "c2d382749e5d2f97588550d97427e1e9baf0c9a62cffc0db7488c56af6cb92b5"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
