@@ -13,23 +13,30 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.hilla.generator.fixtures;
+package com.vaadin.hilla.parser.plugins.backbone.nameclash;
 
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 /**
- * Has parameters named after what the generated file needs for itself.
+ * Has a method and a parameter named after a word TypeScript reads as part of
+ * the language, and a method going by the name the first of them would take.
  */
 @Endpoint
-public class ShadowingEndpoint {
-    public String echo(String client, String init) {
-        return client + init;
+public class ReservedNameEndpoint {
+    public void delete(long id) {
     }
 
-    /**
-     * Named after the client the generated file calls the server with.
-     */
-    public String client() {
-        return "";
+    public void _delete(long id) {
+    }
+
+    public void remove(long delete) {
+    }
+
+    public String eval(String arguments) {
+        return arguments;
+    }
+
+    public long size() {
+        return 0;
     }
 }
