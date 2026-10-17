@@ -87,98 +87,95 @@ public class GeneratedTypeScriptTest {
                         import type Wrapper from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Wrapper.js';
                         import client from './connect-client.default.js';
 
-                        export async function all(init?: EndpointRequestInit): Promise<Array<Sample | undefined> | undefined> {
+                        async function all(init?: EndpointRequestInit): Promise<Array<Sample | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'all', {}, init);
                         }
 
-                        export async function bounded(init?: EndpointRequestInit): Promise<Bounded | undefined> {
+                        async function bounded(init?: EndpointRequestInit): Promise<Bounded | undefined> {
                           return client.call('SampleEndpoint', 'bounded', {}, init);
                         }
 
-                        export async function count(init?: EndpointRequestInit): Promise<number> {
+                        async function count(init?: EndpointRequestInit): Promise<number> {
                           return client.call('SampleEndpoint', 'count', {}, init);
                         }
 
-                        export async function counts(init?: EndpointRequestInit): Promise<Record<string, number | undefined> | undefined> {
+                        async function counts(init?: EndpointRequestInit): Promise<Record<string, number | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'counts', {}, init);
                         }
 
-                        export async function describe(
-                          firstName: string | undefined,
-                          lastName: string | undefined,
-                          age: number,
-                          init?: EndpointRequestInit,
-                        ): Promise<string | undefined> {
+                        async function describe(firstName: string | undefined, lastName: string | undefined, age: number, init?: EndpointRequestInit): Promise<string | undefined> {
                           return client.call('SampleEndpoint', 'describe', { firstName, lastName, age }, init);
                         }
 
-                        export async function detailed(init?: EndpointRequestInit): Promise<Detailed | undefined> {
+                        async function detailed(init?: EndpointRequestInit): Promise<Detailed | undefined> {
                           return client.call('SampleEndpoint', 'detailed', {}, init);
                         }
 
-                        export async function figure(init?: EndpointRequestInit): Promise<Figure | undefined> {
+                        async function figure(init?: EndpointRequestInit): Promise<Figure | undefined> {
                           return client.call('SampleEndpoint', 'figure', {}, init);
                         }
 
-                        export async function find(id: string | undefined, init?: EndpointRequestInit): Promise<Sample | undefined> {
+                        async function find(id: string | undefined, init?: EndpointRequestInit): Promise<Sample | undefined> {
                           return client.call('SampleEndpoint', 'find', { id }, init);
                         }
 
-                        export async function greet(name: string | undefined, init?: EndpointRequestInit): Promise<string | undefined> {
+                        async function greet(name: string | undefined, init?: EndpointRequestInit): Promise<string | undefined> {
                           return client.call('SampleEndpoint', 'greet', { name }, init);
                         }
 
-                        export async function kind(init?: EndpointRequestInit): Promise<Kind | undefined> {
+                        async function kind(init?: EndpointRequestInit): Promise<Kind | undefined> {
                           return client.call('SampleEndpoint', 'kind', {}, init);
                         }
 
-                        export async function marker(init?: EndpointRequestInit): Promise<Marker | undefined> {
+                        async function marker(init?: EndpointRequestInit): Promise<Marker | undefined> {
                           return client.call('SampleEndpoint', 'marker', {}, init);
                         }
 
-                        export async function maybe(init?: EndpointRequestInit): Promise<string | undefined> {
+                        async function maybe(init?: EndpointRequestInit): Promise<string | undefined> {
                           return client.call('SampleEndpoint', 'maybe', {}, init);
                         }
 
-                        export async function maybeCounts(init?: EndpointRequestInit): Promise<Record<string, number | undefined> | undefined> {
+                        async function maybeCounts(init?: EndpointRequestInit): Promise<Record<string, number | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'maybeCounts', {}, init);
                         }
 
-                        export async function maybeNames(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
+                        async function maybeNames(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'maybeNames', {}, init);
                         }
 
-                        export async function mixed(init?: EndpointRequestInit): Promise<Mixed | undefined> {
+                        async function mixed(init?: EndpointRequestInit): Promise<Mixed | undefined> {
                           return client.call('SampleEndpoint', 'mixed', {}, init);
                         }
 
-                        export async function names(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
+                        async function names(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'names', {}, init);
                         }
 
-                        export async function ping(init?: EndpointRequestInit): Promise<void> {
+                        async function ping(init?: EndpointRequestInit): Promise<void> {
                           return client.call('SampleEndpoint', 'ping', {}, init);
                         }
 
-                        export async function required(name: string, init?: EndpointRequestInit): Promise<string> {
+                        async function required(name: string, init?: EndpointRequestInit): Promise<string> {
                           return client.call('SampleEndpoint', 'required', { name }, init);
                         }
 
-                        export async function shaded(init?: EndpointRequestInit): Promise<Shaded | undefined> {
+                        async function shaded(init?: EndpointRequestInit): Promise<Shaded | undefined> {
                           return client.call('SampleEndpoint', 'shaded', {}, init);
                         }
 
-                        export function stream(count: number): Subscription<string | undefined> {
+                        function stream(count: number): Subscription<string | undefined> {
                           return client.subscribe('SampleEndpoint', 'stream', { count });
                         }
 
-                        export function watch(): Subscription<Sample | undefined> {
+                        function watch(): Subscription<Sample | undefined> {
                           return client.subscribe('SampleEndpoint', 'watch', {});
                         }
 
-                        export async function wrapped(init?: EndpointRequestInit): Promise<Wrapper<Sample | undefined> | undefined> {
+                        async function wrapped(init?: EndpointRequestInit): Promise<Wrapper<Sample | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'wrapped', {}, init);
                         }
+
+                        export { all, bounded, count, counts, describe, detailed, figure, find, greet, kind, marker, maybe, maybeCounts, maybeNames, mixed, names, ping, required, shaded, stream, watch, wrapped };
                         """,
                 file.content());
     }
@@ -192,17 +189,15 @@ public class GeneratedTypeScriptTest {
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
                         import client_1 from './connect-client.default.js';
 
-                        export async function client(init?: EndpointRequestInit): Promise<string | undefined> {
+                        async function client(init?: EndpointRequestInit): Promise<string | undefined> {
                           return client_1.call('ShadowingEndpoint', 'client', {}, init);
                         }
 
-                        export async function echo(
-                          client: string | undefined,
-                          init: string | undefined,
-                          _init?: EndpointRequestInit,
-                        ): Promise<string | undefined> {
+                        async function echo(client: string | undefined, init: string | undefined, _init?: EndpointRequestInit): Promise<string | undefined> {
                           return client_1.call('ShadowingEndpoint', 'echo', { client, init }, _init);
                         }
+
+                        export { client, echo };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpoint).content());
@@ -219,7 +214,7 @@ public class GeneratedTypeScriptTest {
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
                         import client from './connect-client.default.js';
 
-                        export async function _delete(id: number, init?: EndpointRequestInit): Promise<void> {
+                        async function _delete(id: number, init?: EndpointRequestInit): Promise<void> {
                           return client.call('ReservedNameEndpoint', '_delete', { id }, init);
                         }
 
@@ -227,15 +222,15 @@ public class GeneratedTypeScriptTest {
                           return client.call('ReservedNameEndpoint', 'delete', { id }, init);
                         }
 
-                        export async function remove(_delete: number, init?: EndpointRequestInit): Promise<void> {
+                        async function remove(_delete: number, init?: EndpointRequestInit): Promise<void> {
                           return client.call('ReservedNameEndpoint', 'remove', { delete: _delete }, init);
                         }
 
-                        export async function size(init?: EndpointRequestInit): Promise<number> {
+                        async function size(init?: EndpointRequestInit): Promise<number> {
                           return client.call('ReservedNameEndpoint', 'size', {}, init);
                         }
 
-                        export { __delete as delete };
+                        export { _delete, __delete as delete, remove, size };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpointsOf(ReservedNameEndpoint.class).get(0))
@@ -252,13 +247,15 @@ public class GeneratedTypeScriptTest {
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
                         import client from './connect-client.default.js';
 
-                        export async function all(value: unknown, init?: EndpointRequestInit): Promise<Array<unknown> | undefined> {
+                        async function all(value: unknown, init?: EndpointRequestInit): Promise<Array<unknown> | undefined> {
                           return client.call('GenericEndpoint', 'all', { value }, init);
                         }
 
-                        export async function of(value: unknown, init?: EndpointRequestInit): Promise<unknown> {
+                        async function of(value: unknown, init?: EndpointRequestInit): Promise<unknown> {
                           return client.call('GenericEndpoint', 'of', { value }, init);
                         }
+
+                        export { all, of };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpointsOf(GenericEndpoint.class).get(0))
@@ -275,9 +272,11 @@ public class GeneratedTypeScriptTest {
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
                         import client from './connect-client.default.js';
 
-                        export async function stamped(init?: EndpointRequestInit): Promise<string | undefined> {
+                        async function stamped(init?: EndpointRequestInit): Promise<string | undefined> {
                           return client.call('CustomDateEndpoint', 'stamped', {}, init);
                         }
+
+                        export { stamped };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(generator.parseModel().get(0)).content());
@@ -310,7 +309,7 @@ public class GeneratedTypeScriptTest {
                         import SampleModel from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/SampleModel.js';
                         import client from './connect-client.default.js';
 
-                        export function channel(name: string | undefined): ListSignal<Sample | undefined> | undefined {
+                        function channel(name: string | undefined): ListSignal<Sample | undefined> | undefined {
                           return new ListSignal({
                             client: client,
                             endpoint: 'SignalsEndpoint',
@@ -319,10 +318,7 @@ public class GeneratedTypeScriptTest {
                           });
                         }
 
-                        export function chosen(
-                          options: string | undefined,
-                          _options?: SignalMethodOptions<string | undefined>,
-                        ): ValueSignal<string | undefined> | undefined {
+                        function chosen(options: string | undefined, _options?: SignalMethodOptions<string | undefined>): ValueSignal<string | undefined> | undefined {
                           return new ValueSignal(_options?.defaultValue, {
                             client: client,
                             endpoint: 'SignalsEndpoint',
@@ -331,7 +327,7 @@ public class GeneratedTypeScriptTest {
                           });
                         }
 
-                        export function counter(): NumberSignal | undefined {
+                        function counter(): NumberSignal | undefined {
                           return new NumberSignal(0, {
                             client: client,
                             endpoint: 'SignalsEndpoint',
@@ -339,7 +335,7 @@ public class GeneratedTypeScriptTest {
                           });
                         }
 
-                        export function counterOf(name: string | undefined): NumberSignal | undefined {
+                        function counterOf(name: string | undefined): NumberSignal | undefined {
                           return new NumberSignal(0, {
                             client: client,
                             endpoint: 'SignalsEndpoint',
@@ -348,9 +344,7 @@ public class GeneratedTypeScriptTest {
                           });
                         }
 
-                        export function crowd(
-                          options?: SignalMethodOptions<Array<Sample | undefined>>,
-                        ): ValueSignal<Array<Sample | undefined>> {
+                        function crowd(options?: SignalMethodOptions<Array<Sample | undefined>>): ValueSignal<Array<Sample | undefined>> {
                           return new ValueSignal(options?.defaultValue ?? ArrayModel[$defaultValue], {
                             client: client,
                             endpoint: 'SignalsEndpoint',
@@ -358,7 +352,7 @@ public class GeneratedTypeScriptTest {
                           });
                         }
 
-                        export function current(options?: SignalMethodOptions<Sample>): ValueSignal<Sample> {
+                        function current(options?: SignalMethodOptions<Sample>): ValueSignal<Sample> {
                           return new ValueSignal(options?.defaultValue ?? SampleModel[$defaultValue], {
                             client: client,
                             endpoint: 'SignalsEndpoint',
@@ -366,7 +360,7 @@ public class GeneratedTypeScriptTest {
                           });
                         }
 
-                        export function enabled(options?: SignalMethodOptions<boolean>): ValueSignal<boolean> {
+                        function enabled(options?: SignalMethodOptions<boolean>): ValueSignal<boolean> {
                           return new ValueSignal(options?.defaultValue ?? BooleanModel[$defaultValue], {
                             client: client,
                             endpoint: 'SignalsEndpoint',
@@ -374,7 +368,7 @@ public class GeneratedTypeScriptTest {
                           });
                         }
 
-                        export function limit(options?: SignalMethodOptions<number>): ValueSignal<number> {
+                        function limit(options?: SignalMethodOptions<number>): ValueSignal<number> {
                           return new ValueSignal(options?.defaultValue ?? NumberModel[$defaultValue], {
                             client: client,
                             endpoint: 'SignalsEndpoint',
@@ -382,7 +376,7 @@ public class GeneratedTypeScriptTest {
                           });
                         }
 
-                        export function name(options?: SignalMethodOptions<string | undefined>): ValueSignal<string | undefined> | undefined {
+                        function name(options?: SignalMethodOptions<string | undefined>): ValueSignal<string | undefined> | undefined {
                           return new ValueSignal(options?.defaultValue, {
                             client: client,
                             endpoint: 'SignalsEndpoint',
@@ -390,7 +384,7 @@ public class GeneratedTypeScriptTest {
                           });
                         }
 
-                        export function names(): ListSignal<string | undefined> | undefined {
+                        function names(): ListSignal<string | undefined> | undefined {
                           return new ListSignal({
                             client: client,
                             endpoint: 'SignalsEndpoint',
@@ -398,7 +392,7 @@ public class GeneratedTypeScriptTest {
                           });
                         }
 
-                        export function pending(options?: SignalMethodOptions<string | undefined>): ValueSignal<string | undefined> {
+                        function pending(options?: SignalMethodOptions<string | undefined>): ValueSignal<string | undefined> {
                           return new ValueSignal(options?.defaultValue, {
                             client: client,
                             endpoint: 'SignalsEndpoint',
@@ -406,10 +400,7 @@ public class GeneratedTypeScriptTest {
                           });
                         }
 
-                        export function sample(
-                          detailed: boolean,
-                          options?: SignalMethodOptions<Sample | undefined>,
-                        ): ValueSignal<Sample | undefined> | undefined {
+                        function sample(detailed: boolean, options?: SignalMethodOptions<Sample | undefined>): ValueSignal<Sample | undefined> | undefined {
                           return new ValueSignal(options?.defaultValue, {
                             client: client,
                             endpoint: 'SignalsEndpoint',
@@ -418,13 +409,15 @@ public class GeneratedTypeScriptTest {
                           });
                         }
 
-                        export function title(options?: SignalMethodOptions<string>): ValueSignal<string> {
+                        function title(options?: SignalMethodOptions<string>): ValueSignal<string> {
                           return new ValueSignal(options?.defaultValue ?? StringModel[$defaultValue], {
                             client: client,
                             endpoint: 'SignalsEndpoint',
                             method: 'title',
                           });
                         }
+
+                        export { channel, chosen, counter, counterOf, crowd, current, enabled, limit, name, names, pending, sample, title };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpoint).content());
@@ -443,13 +436,15 @@ public class GeneratedTypeScriptTest {
                         import type { Subscription } from '@vaadin/hilla-frontend';
                         import client from './connect-client.default.js';
 
-                        export function messages(): Subscription<string | undefined> {
+                        function messages(): Subscription<string | undefined> {
                           return client.subscribe('PushingEndpoint', 'messages', {});
                         }
 
-                        export function nonNullMessages(): Subscription<string> {
+                        function nonNullMessages(): Subscription<string> {
                           return client.subscribe('PushingEndpoint', 'nonNullMessages', {});
                         }
+
+                        export { messages, nonNullMessages };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpoint).content());
@@ -474,13 +469,15 @@ public class GeneratedTypeScriptTest {
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
                         import client from './connect-client.default.js';
 
-                        export async function shared(init?: EndpointRequestInit): Promise<string | undefined> {
+                        async function shared(init?: EndpointRequestInit): Promise<string | undefined> {
                           return client.call('InheritingEndpoint', 'shared', {}, init);
                         }
 
-                        export async function twice(one: string | undefined, init?: EndpointRequestInit): Promise<string | undefined> {
+                        async function twice(one: string | undefined, init?: EndpointRequestInit): Promise<string | undefined> {
                           return client.call('InheritingEndpoint', 'twice', { one }, init);
                         }
+
+                        export { shared, twice };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpoint).content());
@@ -499,13 +496,15 @@ public class GeneratedTypeScriptTest {
                         import type { Signal } from '@vaadin/hilla-react-signals';
                         import client from './connect-client.default.js';
 
-                        export async function signal(init?: EndpointRequestInit): Promise<Signal<string | undefined> | undefined> {
+                        async function signal(init?: EndpointRequestInit): Promise<Signal<string | undefined> | undefined> {
                           return client.call('ProvidedTypesEndpoint', 'signal', {}, init);
                         }
 
-                        export async function upload(file: File | undefined, init?: EndpointRequestInit): Promise<void> {
+                        async function upload(file: File | undefined, init?: EndpointRequestInit): Promise<void> {
                           return client.call('ProvidedTypesEndpoint', 'upload', { file }, init);
                         }
+
+                        export { signal, upload };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(generator.parseModel().get(0)).content());
@@ -683,7 +682,8 @@ public class GeneratedTypeScriptTest {
     @Test
     public void should_WriteAnEntityWithoutProperties() {
         assertEquals("""
-                interface Marker {}
+                interface Marker {
+                }
 
                 export default Marker;
                 """, write(entity(SampleEndpoint.Marker.class)).content());
