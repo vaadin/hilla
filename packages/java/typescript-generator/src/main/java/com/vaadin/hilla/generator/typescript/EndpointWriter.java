@@ -31,15 +31,8 @@ public final class EndpointWriter {
     private static final String INIT_TYPE = "EndpointRequestInit";
     private static final String INIT_PARAMETER = "init";
 
-    /**
-     * The width beyond which the parameters of a method go on lines of their
-     * own, keeping a long signature readable. Same as the width the sources of
-     * the project are formatted to.
-     */
-    private static final int MAX_WIDTH = 120;
-
     private static final String METHOD = """
-            export async function {{method}}({{parameters}}): Promise<{{returnType}}> {
+            async function {{method}}({{parameters}}): Promise<{{returnType}}> {
               return {{client}}.call('{{endpoint}}', '{{method}}', {{arguments}}, {{init}});
             }""";
 
@@ -70,12 +63,11 @@ public final class EndpointWriter {
                 method -> writeMethod(endpoint, method, imports, types, client))
                 .toList();
 
-        var lines = new ArrayList<>(imports.write());
-        lines.add("");
-        lines.add(String.join("\n\n", methods));
+        var exports = GeneratedFile.exportList(
+                endpoint.methods().stream().map(MethodModel::name).toList());
 
-        return new GeneratedFile(endpoint.name() + ".ts",
-                String.join("\n", lines) + "\n");
+        return GeneratedFile.of(endpoint.name(), imports,
+                String.join("\n\n", methods) + "\n\n" + exports);
     }
 
     private String writeMethod(EndpointModel endpoint, MethodModel method,
@@ -83,36 +75,15 @@ public final class EndpointWriter {
         var init = initParameter(method);
         var declared = declaredParameters(method, init, imports, types);
 
-        var written = fill(endpoint, method, String.join(", ", declared), types,
-                client, init);
-
-        // Written again with the parameters on a line each when the first line
-        // came out too wide to read
-        if (firstLineOf(written).length() <= MAX_WIDTH) {
-            return written;
-        }
-
-        return fill(endpoint, method,
-                declared.stream()
-                        .collect(Collectors.joining(",\n  ", "\n  ", ",\n")),
-                types, client, init);
-    }
-
-    private String fill(EndpointModel endpoint, MethodModel method,
-            String parameters, TypeWriter types, String client, String init) {
         return Template.of(METHOD) //
                 .with("method", method.name()) //
-                .with("parameters", parameters) //
+                .with("parameters", String.join(", ", declared)) //
                 .with("returnType", types.write(method.returnType())) //
                 .with("client", client) //
                 .with("endpoint", endpoint.name()) //
                 .with("arguments", packParameters(method.parameters())) //
                 .with("init", init) //
                 .fill();
-    }
-
-    private static String firstLineOf(String method) {
-        return method.lines().findFirst().orElse("");
     }
 
     /**
