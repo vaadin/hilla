@@ -4,7 +4,7 @@ This module consolidates the Java-to-TypeScript code generation functionality fo
 
 ## What's Inside
 
-This module consolidates the following previously separate modules:
+The module is made of these parts:
 
 - **parser-jvm-core** - Core parsing infrastructure using ClassGraph
 - **parser-jvm-utils** - Jackson and reflection utilities
@@ -40,12 +40,8 @@ replacing what the run before it wrote and leaving alone what it did not.
 
 A build or a development server writes it all from the classes the parser has
 just walked, in the task which walks them: that is the run which has what the
-writers need. The task which used to run the generator of the same name in
-Node has nothing left to do, so the two are one task now.
-
-The npm packages of that generator are gone, along with the way of configuring
-which of its plugins to generate with. What is left of it is the file router,
-which the pipeline still runs, and the utilities it shares with it.
+writers need. The Maven goal, the Gradle task, the Flow task and the
+development server all do it through `TypeScriptProcessor.generate`.
 
 The TypeScript of the applications the integration tests run is compiled by
 their own frontend build, which is where the generated files are type checked

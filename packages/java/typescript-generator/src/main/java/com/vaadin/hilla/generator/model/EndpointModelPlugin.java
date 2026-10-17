@@ -17,6 +17,7 @@ package com.vaadin.hilla.generator.model;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -49,6 +50,7 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 import com.vaadin.hilla.parser.plugins.model.Annotation;
+import com.vaadin.hilla.parser.plugins.model.JvmTypeRef;
 import com.vaadin.hilla.parser.plugins.model.ValidationConstraint;
 import com.vaadin.hilla.parser.plugins.subtypes.SubTypesPlugin;
 import com.vaadin.hilla.transfertypes.annotations.FromModule;
@@ -526,8 +528,7 @@ public final class EndpointModelPlugin
         return notes(type, TypeFacts.CONSTRAINTS, ValidationConstraint.class)
                 .map(constraint -> new ConstraintModel(
                         constraint.getSimpleName(),
-                        constraint.getAttributes() == null ? Map.of()
-                                : constraint.getAttributes()))
+                        attributesOf(constraint.getAttributes())))
                 .toList();
     }
 
@@ -539,9 +540,42 @@ public final class EndpointModelPlugin
     private static List<AnnotationModel> annotationsOf(TypeFacts type) {
         return notes(type, TypeFacts.ANNOTATIONS, Annotation.class)
                 .map(annotation -> new AnnotationModel(annotation.getName(),
-                        annotation.getAttributes() == null ? Map.of()
-                                : annotation.getAttributes()))
+                        attributesOf(annotation.getAttributes())))
                 .toList();
+    }
+
+    /**
+     * The attributes of an annotation as plain values, so that what writes them
+     * only meets strings, numbers, booleans, lists and maps: a class an
+     * attribute holds is the map naming it which the model library reads.
+     */
+    private static Map<String, Object> attributesOf(
+            Map<String, Object> attributes) {
+        if (attributes == null) {
+            return Map.of();
+        }
+
+        var plain = new LinkedHashMap<String, Object>();
+        attributes.forEach((name, value) -> plain.put(name, plain(value)));
+        return plain;
+    }
+
+    private static Object plain(Object value) {
+        if (value instanceof JvmTypeRef type) {
+            return Map.of("jvmType", type.getJvmType());
+        }
+
+        if (value instanceof Collection<?> values) {
+            return values.stream().map(EndpointModelPlugin::plain).toList();
+        }
+
+        if (value instanceof Map<?, ?> map) {
+            var plain = new LinkedHashMap<Object, Object>();
+            map.forEach((key, item) -> plain.put(key, plain(item)));
+            return plain;
+        }
+
+        return value;
     }
 
     /**
