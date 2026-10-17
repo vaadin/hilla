@@ -38,11 +38,11 @@ final class ModulePaths {
     }
 
     /**
-     * The path of the file an entity is generated into, relative to the output
-     * folder.
+     * The module an entity is generated into, relative to the output folder and
+     * without the extension.
      */
-    static String fileOf(String javaClass) {
-        return javaClass.replace('.', '/').replace('$', '/') + ".ts";
+    static String moduleOf(String javaClass) {
+        return javaClass.replace('.', '/').replace('$', '/');
     }
 
     /**
@@ -50,7 +50,7 @@ final class ModulePaths {
      * decides how the entity refers to the other files.
      */
     static String directoryOf(String javaClass) {
-        var path = fileOf(javaClass);
+        var path = moduleOf(javaClass);
         var separator = path.lastIndexOf('/');
 
         // A class of the default package is written to the output folder
