@@ -51,42 +51,39 @@ public class GeneratedTypeScriptTest {
                         import type Sample from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Sample.js';
                         import client from './connect-client.default.js';
 
-                        export async function box(init?: EndpointRequestInit): Promise<Box<string | undefined> | undefined> {
+                        async function box(init?: EndpointRequestInit): Promise<Box<string | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'box', {}, init);
                         }
 
-                        export async function count(init?: EndpointRequestInit): Promise<number> {
+                        async function count(init?: EndpointRequestInit): Promise<number> {
                           return client.call('SampleEndpoint', 'count', {}, init);
                         }
 
-                        export async function counts(init?: EndpointRequestInit): Promise<Record<string, number | undefined> | undefined> {
+                        async function counts(init?: EndpointRequestInit): Promise<Record<string, number | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'counts', {}, init);
                         }
 
-                        export async function describe(
-                          firstName: string | undefined,
-                          lastName: string | undefined,
-                          age: number,
-                          init?: EndpointRequestInit,
-                        ): Promise<string | undefined> {
+                        async function describe(firstName: string | undefined, lastName: string | undefined, age: number, init?: EndpointRequestInit): Promise<string | undefined> {
                           return client.call('SampleEndpoint', 'describe', { firstName, lastName, age }, init);
                         }
 
-                        export async function find(id: string | undefined, init?: EndpointRequestInit): Promise<Sample | undefined> {
+                        async function find(id: string | undefined, init?: EndpointRequestInit): Promise<Sample | undefined> {
                           return client.call('SampleEndpoint', 'find', { id }, init);
                         }
 
-                        export async function greet(name: string | undefined, init?: EndpointRequestInit): Promise<string | undefined> {
+                        async function greet(name: string | undefined, init?: EndpointRequestInit): Promise<string | undefined> {
                           return client.call('SampleEndpoint', 'greet', { name }, init);
                         }
 
-                        export async function names(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
+                        async function names(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'names', {}, init);
                         }
 
-                        export async function ping(init?: EndpointRequestInit): Promise<void> {
+                        async function ping(init?: EndpointRequestInit): Promise<void> {
                           return client.call('SampleEndpoint', 'ping', {}, init);
                         }
+
+                        export { box, count, counts, describe, find, greet, names, ping };
                         """,
                 file.content());
     }
@@ -100,13 +97,11 @@ public class GeneratedTypeScriptTest {
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
                         import client_1 from './connect-client.default.js';
 
-                        export async function echo(
-                          client: string | undefined,
-                          init: string | undefined,
-                          _init?: EndpointRequestInit,
-                        ): Promise<string | undefined> {
+                        async function echo(client: string | undefined, init: string | undefined, _init?: EndpointRequestInit): Promise<string | undefined> {
                           return client_1.call('ShadowingEndpoint', 'echo', { client, init }, _init);
                         }
+
+                        export { echo };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpoint).content());
