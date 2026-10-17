@@ -35,6 +35,11 @@ public sealed interface TypeModel {
     boolean optional();
 
     /**
+     * The same type, said to be absent or not as given.
+     */
+    TypeModel withOptional(boolean optional);
+
+    /**
      * The types which TypeScript expresses without a declaration of their own.
      */
     enum ScalarKind {
@@ -57,17 +62,32 @@ public sealed interface TypeModel {
         public static Scalar of(ScalarKind kind, String javaType) {
             return new Scalar(kind, false, javaType);
         }
+
+        @Override
+        public Scalar withOptional(boolean optional) {
+            return new Scalar(kind, optional, javaType);
+        }
     }
 
     record ArrayOf(TypeModel items, boolean optional) implements TypeModel {
         public ArrayOf {
             Objects.requireNonNull(items);
         }
+
+        @Override
+        public ArrayOf withOptional(boolean optional) {
+            return new ArrayOf(items, optional);
+        }
     }
 
     record MapOf(TypeModel values, boolean optional) implements TypeModel {
         public MapOf {
             Objects.requireNonNull(values);
+        }
+
+        @Override
+        public MapOf withOptional(boolean optional) {
+            return new MapOf(values, optional);
         }
     }
 
@@ -88,6 +108,11 @@ public sealed interface TypeModel {
         public static EntityRef of(String javaClass) {
             return new EntityRef(javaClass, List.of(), false);
         }
+
+        @Override
+        public EntityRef withOptional(boolean optional) {
+            return new EntityRef(javaClass, typeArguments, optional);
+        }
     }
 
     /**
@@ -102,6 +127,15 @@ public sealed interface TypeModel {
         @Override
         public boolean optional() {
             return false;
+        }
+
+        /**
+         * The variable itself, whatever is asked: whether its value can be
+         * absent is for the type it is bound to to say.
+         */
+        @Override
+        public TypeVariable withOptional(boolean optional) {
+            return this;
         }
     }
 }

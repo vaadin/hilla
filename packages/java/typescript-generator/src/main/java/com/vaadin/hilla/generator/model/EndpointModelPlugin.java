@@ -15,12 +15,12 @@
  */
 package com.vaadin.hilla.generator.model;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
+import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
@@ -60,10 +60,23 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
  */
 public final class EndpointModelPlugin
         extends AbstractPlugin<PluginConfiguration> {
-    private final Map<Node<?, ?>, List<TypeModel>> types = new IdentityHashMap<>();
-    private final Map<Node<?, ?>, List<ParameterModel>> parameters = new IdentityHashMap<>();
-    private final Map<Node<?, ?>, Map<String, MethodModel>> methods = new IdentityHashMap<>();
+    /**
+     * What has been built below each node the walk is in, the innermost first.
+     */
+    private final Deque<Frame> frames = new ArrayDeque<>();
     private final List<EndpointModel> endpoints = new ArrayList<>();
+
+    /**
+     * What has been built below one node, which the node is built from once the
+     * walk leaves it.
+     */
+    private record Frame(Node<?, ?> node, List<TypeModel> types,
+            List<ParameterModel> parameters, Map<String, MethodModel> methods) {
+        Frame(Node<?, ?> node) {
+            this(node, new ArrayList<>(), new ArrayList<>(),
+                    new LinkedHashMap<>());
+        }
+    }
 
     /**
      * The endpoints built by the last run of the parser.
@@ -77,27 +90,29 @@ public final class EndpointModelPlugin
         if (nodePath.getNode() instanceof RootNode) {
             // The plugin can be handed to more than one run of the parser, and
             // each of them describes the whole set of endpoints
-            types.clear();
-            parameters.clear();
-            methods.clear();
+            frames.clear();
             endpoints.clear();
         }
+
+        frames.push(new Frame(nodePath.getNode()));
     }
 
     @Override
     public void exit(NodePath<?> nodePath) {
-        var node = nodePath.getNode();
+        var own = frames.pop();
+        var parent = frames.peek();
 
-        if (node instanceof TypeSignatureNode type) {
-            collect(parentOf(nodePath), buildType(type, taken(node)));
-        } else if (node instanceof MethodParameterNode parameter) {
-            collect(parentOf(nodePath), parameter, taken(node));
-        } else if (node instanceof MethodNode method) {
-            collectMethod(nodePath, method);
-        } else if (node instanceof EndpointNode endpoint) {
+        if (own.node() instanceof TypeSignatureNode type) {
+            parent.types().add(buildType(type, own.types()));
+        } else if (own.node() instanceof MethodParameterNode parameter) {
+            parent.parameters().add(new ParameterModel(parameter.getTarget(),
+                    only(own.types())));
+        } else if (own.node() instanceof MethodNode method) {
+            collectMethod(method, own);
+        } else if (own.node() instanceof EndpointNode endpoint) {
             endpoints.add(new EndpointModel(endpoint.getTarget().getName(),
-                    endpoint.getSource().getName(), List.copyOf(
-                            methods.getOrDefault(node, Map.of()).values())));
+                    endpoint.getSource().getName(),
+                    List.copyOf(own.methods().values())));
         }
     }
 
@@ -112,28 +127,16 @@ public final class EndpointModelPlugin
      * TypeScript does not. The last one wins, which is what the endpoint is
      * called with, since a call names the method rather than its signature.
      */
-    private void collectMethod(NodePath<?> nodePath, MethodNode node) {
-        var returnType = taken(node).stream().findFirst().orElseGet(
+    private void collectMethod(MethodNode node, Frame own) {
+        var returnType = own.types().stream().findFirst().orElseGet(
                 () -> TypeModel.Scalar.of(TypeModel.ScalarKind.VOID, "void"));
 
         var method = new MethodModel(node.getSource().getName(),
-                parameters.getOrDefault(node, List.of()), returnType);
+                List.copyOf(own.parameters()), returnType);
 
-        findEndpoint(nodePath).ifPresent(endpoint -> methods
-                .computeIfAbsent(endpoint, key -> new LinkedHashMap<>())
-                .put(method.name(), method));
-    }
-
-    private void collect(Node<?, ?> parent, TypeModel type) {
-        types.computeIfAbsent(parent, key -> new ArrayList<>()).add(type);
-    }
-
-    private void collect(Node<?, ?> parent, MethodParameterNode node,
-            List<TypeModel> ownTypes) {
-        var type = only(ownTypes);
-
-        parameters.computeIfAbsent(parent, key -> new ArrayList<>())
-                .add(new ParameterModel(node.getTarget(), type));
+        frames.stream().filter(frame -> frame.node() instanceof EndpointNode)
+                .findFirst().ifPresent(endpoint -> endpoint.methods()
+                        .put(method.name(), method));
     }
 
     /**
@@ -154,13 +157,14 @@ public final class EndpointModelPlugin
         // A type argument, such as the String of a List<String>, stands for the
         // type it is bound to, which the walk visits below it
         if (signature.isTypeArgument()) {
-            return optional ? asOptional(only(referred)) : only(referred);
+            return optional ? only(referred).withOptional(true)
+                    : only(referred);
         }
 
         // An Optional is written as the type it holds, which can be absent:
         // TypeScript has nothing of its own for it
         if (signature.isOptional()) {
-            return asOptional(only(referred));
+            return only(referred).withOptional(true);
         }
 
         if (signature.isArray() || signature.isIterable()) {
@@ -177,19 +181,6 @@ public final class EndpointModelPlugin
 
         return new TypeModel.Scalar(scalarKind(signature), optional,
                 name(signature));
-    }
-
-    private static TypeModel asOptional(TypeModel type) {
-        return switch (type) {
-        case TypeModel.Scalar scalar ->
-            new TypeModel.Scalar(scalar.kind(), true, scalar.javaType());
-        case TypeModel.ArrayOf array ->
-            new TypeModel.ArrayOf(array.items(), true);
-        case TypeModel.MapOf map -> new TypeModel.MapOf(map.values(), true);
-        case TypeModel.EntityRef entity -> new TypeModel.EntityRef(
-                entity.javaClass(), entity.typeArguments(), true);
-        case TypeModel.TypeVariable variable -> variable;
-        };
     }
 
     private static TypeModel.ScalarKind scalarKind(SignatureModel signature) {
@@ -235,20 +226,4 @@ public final class EndpointModelPlugin
         return types.stream().findFirst().orElseGet(() -> TypeModel.Scalar
                 .of(TypeModel.ScalarKind.UNKNOWN, Object.class.getName()));
     }
-
-    private List<TypeModel> taken(Node<?, ?> node) {
-        var own = types.remove(node);
-        return own == null ? List.of() : own;
-    }
-
-    private static Node<?, ?> parentOf(NodePath<?> nodePath) {
-        return nodePath.getParentPath().getNode();
-    }
-
-    private static Optional<Node<?, ?>> findEndpoint(NodePath<?> nodePath) {
-        return nodePath.getParentPath().stream()
-                .<Node<?, ?>> map(NodePath::getNode)
-                .filter(node -> node instanceof EndpointNode).findFirst();
-    }
-
 }
