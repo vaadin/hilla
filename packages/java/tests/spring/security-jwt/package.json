@@ -29,7 +29,6 @@
     "@preact/signals-react": "3.12.0",
     "@preact/signals-react-transform": "0.8.3",
     "@rolldown/plugin-babel": "0.2.4",
-    "@rollup/plugin-replace": "6.0.3",
     "@types/node": "26.6.5",
     "@typescript/native": "npm:typescript@7.0.2",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
@@ -65,7 +64,6 @@
       "@preact/signals-react": "3.12.0",
       "@preact/signals-react-transform": "0.8.3",
       "@rolldown/plugin-babel": "0.2.4",
-      "@rollup/plugin-replace": "6.0.3",
       "@types/node": "26.6.5",
       "@typescript/native": "npm:typescript@7.0.2",
       "@vaadin/hilla-generator-utils": "25.4.0-alpha3",
@@ -79,7 +77,7 @@
       "vite": "8.3.4",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "f8bb1f3736d1ced39cc12e22d21bbea3f540016a73943cf1aaa027bb45237667"
+    "hash": "a1f91af939435aff41cf530a83d56c1b207b6133186dc8587cda3db0de9cd828"
   },
   "overrides": {
     "@adobe/lit-mobx": "$@adobe/lit-mobx",
