@@ -184,14 +184,8 @@ public final class EndpointWriter {
         var declared = new LinkedHashMap<String, String>();
 
         for (var name : names) {
-            var own = name;
-
-            while (Names.isReserved(own)
-                    || (!own.equals(name) && names.contains(own))) {
-                own = "_" + own;
-            }
-
-            declared.put(name, own);
+            declared.put(name, Names.free(name, own -> Names.isReserved(own)
+                    || (!own.equals(name) && names.contains(own))));
         }
 
         return declared;
@@ -265,13 +259,7 @@ public final class EndpointWriter {
      */
     private static String ownName(Map<String, String> parameterNames,
             String preferred) {
-        var name = preferred;
-
-        while (parameterNames.containsValue(name)) {
-            name = "_" + name;
-        }
-
-        return name;
+        return Names.free(preferred, parameterNames::containsValue);
     }
 
     /**
