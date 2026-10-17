@@ -57,13 +57,15 @@ public class TaskGenerateTypeScriptTest extends TaskTest {
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
                         import client from './connect-client.default.js';
 
-                        export async function bar(baz: string | undefined, init?: EndpointRequestInit): Promise<string | undefined> {
+                        async function bar(baz: string | undefined, init?: EndpointRequestInit): Promise<string | undefined> {
                           return client.call('MyEndpoint', 'bar', { baz }, init);
                         }
 
-                        export async function foo(bar: string | undefined, init?: EndpointRequestInit): Promise<void> {
+                        async function foo(bar: string | undefined, init?: EndpointRequestInit): Promise<void> {
                           return client.call('MyEndpoint', 'foo', { bar }, init);
                         }
+
+                        export { bar, foo };
                         """,
                 read("MyEndpoint.ts"));
         assertEquals("""
