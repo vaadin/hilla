@@ -32,11 +32,11 @@ async function simpleType(str: string, init?: EndpointRequestInit): Promise<stri
   return client.call('BasicEndpoint', 'simpleType', { str }, init);
 }
 
-async function typeArgumentWildcard(list: Array<string | undefined> | undefined, init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
+async function typeArgumentWildcard(list: Array<string> | undefined, init?: EndpointRequestInit): Promise<Array<string> | undefined> {
   return client.call('BasicEndpoint', 'typeArgumentWildcard', { list }, init);
 }
 
-async function typeParameter(list: Array<string | undefined> | undefined, init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
+async function typeParameter(list: Array<string> | undefined, init?: EndpointRequestInit): Promise<Array<string> | undefined> {
   return client.call('BasicEndpoint', 'typeParameter', { list }, init);
 }
 
