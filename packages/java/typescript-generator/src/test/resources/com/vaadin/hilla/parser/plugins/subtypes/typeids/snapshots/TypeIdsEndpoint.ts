@@ -4,14 +4,16 @@ import type NameBase from './com/vaadin/hilla/parser/plugins/subtypes/typeids/Na
 import type SimpleBase from './com/vaadin/hilla/parser/plugins/subtypes/typeids/SimpleBase.js';
 import client from './connect-client.default.js';
 
-export async function sendMinimal(init?: EndpointRequestInit): Promise<MinimalBase | undefined> {
+async function sendMinimal(init?: EndpointRequestInit): Promise<MinimalBase | undefined> {
   return client.call('TypeIdsEndpoint', 'sendMinimal', {}, init);
 }
 
-export async function sendNamed(init?: EndpointRequestInit): Promise<NameBase | undefined> {
+async function sendNamed(init?: EndpointRequestInit): Promise<NameBase | undefined> {
   return client.call('TypeIdsEndpoint', 'sendNamed', {}, init);
 }
 
-export async function sendSimple(init?: EndpointRequestInit): Promise<SimpleBase | undefined> {
+async function sendSimple(init?: EndpointRequestInit): Promise<SimpleBase | undefined> {
   return client.call('TypeIdsEndpoint', 'sendSimple', {}, init);
 }
+
+export { sendMinimal, sendNamed, sendSimple };
