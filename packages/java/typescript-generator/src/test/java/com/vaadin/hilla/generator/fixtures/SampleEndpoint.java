@@ -154,10 +154,14 @@ public class SampleEndpoint {
 
     /**
      * An entity which inherits the properties of another one rather than
-     * declaring them again.
+     * declaring them again, and which also holds a value of it: the type is
+     * both what the entity is written from and what one of its properties is
+     * written as.
      */
     public static class Detailed extends Sample {
         private String note;
+
+        private Sample basis;
 
         public String getNote() {
             return note;
@@ -165,6 +169,14 @@ public class SampleEndpoint {
 
         public void setNote(String note) {
             this.note = note;
+        }
+
+        public Sample getBasis() {
+            return basis;
+        }
+
+        public void setBasis(Sample basis) {
+            this.basis = basis;
         }
     }
 
