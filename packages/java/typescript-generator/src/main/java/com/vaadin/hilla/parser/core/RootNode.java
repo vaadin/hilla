@@ -17,11 +17,10 @@ package com.vaadin.hilla.parser.core;
 
 import java.util.List;
 
-import io.swagger.v3.oas.models.OpenAPI;
 import org.jspecify.annotations.NonNull;
 
-public final class RootNode extends AbstractNode<List<Class<?>>, OpenAPI> {
-    RootNode(@NonNull List<Class<?>> source, @NonNull OpenAPI target) {
-        super(source, target);
+public final class RootNode extends AbstractNode<List<Class<?>>, Void> {
+    RootNode(@NonNull List<Class<?>> source) {
+        super(source, null);
     }
 }
