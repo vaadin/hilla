@@ -27,6 +27,8 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.internal.FileIOUtils;
+
 /**
  * The folder the generated TypeScript is written to.
  *
@@ -79,9 +81,9 @@ public final class OutputFolder {
             return;
         }
 
-        Files.createDirectories(folder);
-        Files.writeString(folder.resolve(FILE_LIST), files.stream()
-                .map(file -> file.path() + "\n").collect(Collectors.joining()));
+        FileIOUtils.writeIfChanged(folder.resolve(FILE_LIST).toFile(),
+                files.stream().map(file -> file.path() + "\n")
+                        .collect(Collectors.joining()));
 
         var written = new LinkedHashSet<String>();
 
@@ -95,16 +97,8 @@ public final class OutputFolder {
     }
 
     private void write(GeneratedFile file) throws IOException {
-        var path = folder.resolve(file.path());
-
-        if (Files.exists(path)
-                && Files.readString(path).equals(file.content())) {
-            LOGGER.debug("The generated file {} stayed the same", path);
-            return;
-        }
-
-        Files.createDirectories(path.getParent());
-        Files.writeString(path, file.content());
+        FileIOUtils.writeIfChanged(folder.resolve(file.path()).toFile(),
+                file.content());
     }
 
     /**
@@ -126,20 +120,11 @@ public final class OutputFolder {
 
     private void removeIfEmpty(Path directory) throws IOException {
         while (directory.startsWith(folder) && !directory.equals(folder)
-                && isEmpty(directory)) {
+                && Files.isDirectory(directory)
+                && FileIOUtils.isEmptyDirectory(directory)) {
             Files.delete(directory);
             LOGGER.debug("Removed the empty folder {}", directory);
             directory = directory.getParent();
-        }
-    }
-
-    private static boolean isEmpty(Path directory) throws IOException {
-        if (!Files.isDirectory(directory)) {
-            return false;
-        }
-
-        try (var entries = Files.list(directory)) {
-            return entries.findAny().isEmpty();
         }
     }
 

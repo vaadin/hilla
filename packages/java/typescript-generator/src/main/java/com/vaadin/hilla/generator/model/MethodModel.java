@@ -35,6 +35,23 @@ public record MethodModel(String name, List<ParameterModel> parameters,
     }
 
     /**
+     * The signal the value of a method is shared through, which is the type it
+     * returns.
+     *
+     * @throws IllegalStateException
+     *             if the method shares no value through a signal
+     */
+    public TypeModel.Provided signal() {
+        if (returnType instanceof TypeModel.Provided provided
+                && kind != Kind.CALLED && kind != Kind.SUBSCRIBED) {
+            return provided;
+        }
+
+        throw new IllegalStateException(
+                "The method " + name + " shares no value through a signal");
+    }
+
+    /**
      * How the client reaches a method: it calls most of them, subscribes to the
      * ones sending a series of values, and builds a signal of its own for the
      * ones sharing a value with the server.
