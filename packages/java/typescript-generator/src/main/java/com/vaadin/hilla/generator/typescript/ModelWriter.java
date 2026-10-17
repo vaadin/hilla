@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 import com.vaadin.hilla.generator.model.AnnotationModel;
 import com.vaadin.hilla.generator.model.ConstraintModel;
 import com.vaadin.hilla.generator.model.TypeModel;
-import com.vaadin.hilla.parser.plugins.model.JvmTypeRef;
 
 /**
  * Writes the model of a value: the expression which builds it out of the models
@@ -290,7 +289,7 @@ final class ModelWriter {
 
     /**
      * A value of an annotation as TypeScript writes it. An enum constant comes
-     * as its name, and a class as the reference to it the model library reads.
+     * as its name.
      */
     private static String value(Object value) {
         if (value instanceof Boolean || value instanceof Number) {
@@ -307,10 +306,6 @@ final class ModelWriter {
                     .map(attribute -> key(String.valueOf(attribute.getKey()))
                             + ": " + value(attribute.getValue()))
                     .collect(Collectors.joining(", ", "{ ", " }"));
-        }
-
-        if (value instanceof JvmTypeRef type) {
-            return "{ jvmType: " + string(type.getJvmType()) + " }";
         }
 
         return string(String.valueOf(value));
