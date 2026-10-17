@@ -15,8 +15,10 @@
  */
 package com.vaadin.hilla.generator.typescript;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -62,45 +64,48 @@ final class Template {
     }
 
     /**
+     * Fills every hole, keeping the layout of the template: the lines of a
+     * value which spans lines are lined up under the hole it fills, and a hole
+     * which is alone on its line and is filled with nothing takes the line with
+     * it. A template thereby says where a block goes, without saying how deep
+     * it sits or whether there is one at all.
+     *
      * @throws IllegalArgumentException
      *             if the template has a hole which was given no value, which is
      *             a typo in one of the two
      */
     String fill() {
+        return Arrays.stream(template.split("\n", -1)).map(this::fillLine)
+                .filter(Objects::nonNull).collect(Collectors.joining("\n"));
+    }
+
+    private String fillLine(String line) {
         var result = new StringBuilder();
-        var matcher = HOLE.matcher(template);
+        var matcher = HOLE.matcher(line);
 
         while (matcher.find()) {
-            var name = matcher.group(1);
-            var value = values.get(name);
+            var value = valueOf(matcher.group(1));
 
-            if (value == null) {
-                throw new IllegalArgumentException(
-                        "Nothing to fill {{" + name + "}} with");
+            if (value.isEmpty() && line.strip().equals(matcher.group())) {
+                return null;
             }
 
+            var indent = " ".repeat(matcher.start());
             matcher.appendReplacement(result, Matcher
-                    .quoteReplacement(alignedTo(matcher.start(), value)));
+                    .quoteReplacement(value.replace("\n", "\n" + indent)));
         }
 
         return matcher.appendTail(result).toString();
     }
 
-    /**
-     * A value which spans lines, lined up under the hole it fills, so that a
-     * template says where a block goes without saying how deep it sits.
-     *
-     * <p>
-     * A value starting on a line of its own says where its lines go itself, so
-     * it is left as it is.
-     */
-    private String alignedTo(int hole, String value) {
-        if (!value.contains("\n") || value.startsWith("\n")) {
-            return value;
+    private String valueOf(String name) {
+        var value = values.get(name);
+
+        if (value == null) {
+            throw new IllegalArgumentException(
+                    "Nothing to fill {{" + name + "}} with");
         }
 
-        var indent = " ".repeat(hole - template.lastIndexOf('\n', hole) - 1);
-
-        return value.lines().collect(Collectors.joining("\n" + indent));
+        return value;
     }
 }
