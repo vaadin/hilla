@@ -56,5 +56,8 @@ public interface Plugin {
         return nodeDependencies;
     }
 
-    void setStorage(SharedStorage storage);
+    /**
+     * Hands the plugin the configuration of the parser running it.
+     */
+    void setParserConfig(Parser.Config parserConfig);
 }

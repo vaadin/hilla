@@ -125,9 +125,8 @@ This is an Nx-based monorepo with:
 
 #### Generating the endpoint TypeScript
 The TypeScript of the endpoints is written in Java, by
-`packages/java/typescript-generator`: see its README. The generator which
-used to do it in Node is gone, along with its packages; `generator-utils`
-stays, since the file router writes its routes with it.
+`packages/java/typescript-generator`: see its README. The file router writes
+its routes with `generator-utils`.
 
 #### Frontend Utilities
 - **frontend** (`packages/ts/frontend`): Core utilities (Authentication, Connect client, Cookie management)
@@ -207,8 +206,8 @@ Key points:
 - **Maven**: >= 3
 
 ### Key Java Dependencies
-- Spring Boot 4.1.1
-- Jackson 3.1.5
+- Spring Boot 4
+- Jackson 3
 - Vaadin Flow 25.4-SNAPSHOT
 
 ### Key TypeScript Dependencies
