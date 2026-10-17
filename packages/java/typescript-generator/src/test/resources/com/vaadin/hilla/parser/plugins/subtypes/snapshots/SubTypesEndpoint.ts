@@ -4,18 +4,20 @@ import type Notification from './com/vaadin/hilla/parser/plugins/subtypes/Notifi
 import type Shape from './com/vaadin/hilla/parser/plugins/subtypes/Shape.js';
 import client from './connect-client.default.js';
 
-export async function receiveEvent(event: BaseEvent | undefined, init?: EndpointRequestInit): Promise<void> {
+async function receiveEvent(event: BaseEvent | undefined, init?: EndpointRequestInit): Promise<void> {
   return client.call('SubTypesEndpoint', 'receiveEvent', { event }, init);
 }
 
-export async function sendEvent(init?: EndpointRequestInit): Promise<BaseEvent | undefined> {
+async function sendEvent(init?: EndpointRequestInit): Promise<BaseEvent | undefined> {
   return client.call('SubTypesEndpoint', 'sendEvent', {}, init);
 }
 
-export async function sendNotification(init?: EndpointRequestInit): Promise<Notification | undefined> {
+async function sendNotification(init?: EndpointRequestInit): Promise<Notification | undefined> {
   return client.call('SubTypesEndpoint', 'sendNotification', {}, init);
 }
 
-export async function sendShape(init?: EndpointRequestInit): Promise<Shape | undefined> {
+async function sendShape(init?: EndpointRequestInit): Promise<Shape | undefined> {
   return client.call('SubTypesEndpoint', 'sendShape', {}, init);
 }
+
+export { receiveEvent, sendEvent, sendNotification, sendShape };
