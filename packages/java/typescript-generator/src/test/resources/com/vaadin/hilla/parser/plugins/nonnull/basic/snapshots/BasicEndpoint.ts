@@ -41,17 +41,11 @@ export async function simpleType(str: string, init?: EndpointRequestInit): Promi
   return client.call('BasicEndpoint', 'simpleType', { str }, init);
 }
 
-export async function typeArgumentWildcard(
-  list: Array<string | undefined> | undefined,
-  init?: EndpointRequestInit,
-): Promise<Array<string | undefined> | undefined> {
+async function typeArgumentWildcard(list: Array<string> | undefined, init?: EndpointRequestInit): Promise<Array<string> | undefined> {
   return client.call('BasicEndpoint', 'typeArgumentWildcard', { list }, init);
 }
 
-export async function typeParameter(
-  list: Array<string | undefined> | undefined,
-  init?: EndpointRequestInit,
-): Promise<Array<string | undefined> | undefined> {
+async function typeParameter(list: Array<string> | undefined, init?: EndpointRequestInit): Promise<Array<string> | undefined> {
   return client.call('BasicEndpoint', 'typeParameter', { list }, init);
 }
 
