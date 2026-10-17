@@ -27,7 +27,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = NameBase.Listed.class, name = "listed"),
         @JsonSubTypes.Type(value = NameBase.Named.class),
-        @JsonSubTypes.Type(value = NameBase.Nested.class) })
+        @JsonSubTypes.Type(value = NameBase.Nested.class),
+        @JsonSubTypes.Type(value = NameBase.Aliased.class, names = { "aliased",
+                "alias" }) })
 public class NameBase {
     public String id;
 
@@ -53,5 +55,13 @@ public class NameBase {
      */
     public static class Nested extends NameBase {
         public String note;
+    }
+
+    /**
+     * A subtype listed with several names, which Jackson reads them all by but
+     * writes it as one of.
+     */
+    public static class Aliased extends NameBase {
+        public String alias;
     }
 }

@@ -20,10 +20,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.hilla.generator.fixtures.ClientMethodEndpoint;
 import com.vaadin.hilla.generator.fixtures.CustomDateEndpoint;
 import com.vaadin.hilla.generator.fixtures.EmptyEndpoint;
 import com.vaadin.hilla.generator.fixtures.GenericEndpoint;
@@ -42,6 +44,8 @@ import com.vaadin.hilla.generator.model.EndpointModel;
 import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.generator.model.Generation;
 import com.vaadin.hilla.generator.model.MethodModel;
+import com.vaadin.hilla.generator.model.PropertyModel;
+import com.vaadin.hilla.generator.model.TypeModel;
 import com.vaadin.hilla.generator.model.UnionModel;
 import com.vaadin.hilla.generator.typescript.BarrelWriter;
 import com.vaadin.hilla.generator.typescript.ClientWriter;
@@ -192,18 +196,32 @@ public class GeneratedTypeScriptTest {
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
                         import client_1 from './connect-client.default.js';
 
-                        async function client(init?: EndpointRequestInit): Promise<string | undefined> {
-                          return client_1.call('ShadowingEndpoint', 'client', {}, init);
-                        }
-
                         async function echo(client: string | undefined, init: string | undefined, _init?: EndpointRequestInit): Promise<string | undefined> {
                           return client_1.call('ShadowingEndpoint', 'echo', { client, init }, _init);
                         }
 
-                        export { client, echo };
+                        export { echo };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpoint).content());
+    }
+
+    @Test
+    public void should_NotLetAMethodShadowWhatTheFileNeedsForItself() {
+        assertEquals(
+                """
+                        import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
+                        import client_1 from './connect-client.default.js';
+
+                        async function client(init?: EndpointRequestInit): Promise<string | undefined> {
+                          return client_1.call('ClientMethodEndpoint', 'client', {}, init);
+                        }
+
+                        export { client };
+                        """,
+                new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
+                        .write(endpointsOf(ClientMethodEndpoint.class).get(0))
+                        .content());
     }
 
     @Test
@@ -671,8 +689,14 @@ public class GeneratedTypeScriptTest {
         var generator = new FullStackGenerator(GeneratedTypeScriptTest.class,
                 SampleEndpoint.class);
         generator.parseModel();
+        var generation = generator.parseGeneration();
 
-        assertEquals(1, generator.parseModel().size());
+        assertEquals(1, generation.endpoints().size());
+        assertEquals(
+                new FullStackGenerator(GeneratedTypeScriptTest.class,
+                        SampleEndpoint.class).parseGeneration(),
+                generation,
+                "What the first run found is not found again by the second");
     }
 
     @Test
@@ -976,6 +1000,31 @@ public class GeneratedTypeScriptTest {
 
                 export default KindModel;
                 """, file.content());
+    }
+
+    @Test
+    public void should_NotLetTheModelOfATypeShadowAModelItUses() {
+        // The model of a type called String is called as the model of the
+        // model library it holds, which it then imports under another name
+        assertEquals(
+                """
+                        import m, { StringModel as StringModel_1 } from '@vaadin/hilla-models';
+                        import type String from './String.js';
+
+                        const StringModel = m
+                          .object<String>('String')
+                          .property('value', m.meta(StringModel_1, { jvmType: 'java.lang.String' }))
+                          .build();
+                        type StringModel = typeof StringModel;
+
+                        export default StringModel;
+                        """,
+                writeModel(new EntityModel.Bean("com.example.String", List.of(),
+                        List.of(),
+                        List.of(new PropertyModel("value",
+                                TypeModel.Scalar.of(TypeModel.ScalarKind.STRING,
+                                        "java.lang.String"))),
+                        Optional.empty())).content());
     }
 
     @Test

@@ -44,7 +44,7 @@ public class TypeIdsTest extends AbstractFullStackTest {
      * {@code @JsonSubTypes} annotation of the package.
      */
     private static final List<Object> SUBTYPES = List.of(new NameBase.Listed(),
-            new NameBase.Named(), new NameBase.Nested(),
+            new NameBase.Named(), new NameBase.Nested(), new NameBase.Aliased(),
             new SimpleBase.Nested(), new SimpleBase.FromInterface(),
             new SimpleBase.FromSuperclass(), new MinimalBase.Subtype(),
             new MinimalBase.OtherSubtype());
