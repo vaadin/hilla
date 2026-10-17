@@ -136,6 +136,14 @@ public final class EndpointModelPlugin
                     .getName());
 
     /**
+     * Everything the last run of the parser found, which is what one generation
+     * of TypeScript is written from.
+     */
+    public Generation getGeneration() {
+        return new Generation(getEndpoints(), getEntities(), getUnions());
+    }
+
+    /**
      * What has been built below one node, which the node is built from once the
      * walk leaves it.
      */
