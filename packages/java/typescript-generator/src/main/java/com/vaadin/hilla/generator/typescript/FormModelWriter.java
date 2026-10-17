@@ -82,13 +82,9 @@ public final class FormModelWriter {
             write(enumeration, name, imports, models);
         };
 
-        var lines = new ArrayList<>(imports.write());
-        lines.add("");
-        lines.add(body);
-
-        return new GeneratedFile(
-                ModulePaths.fileOf(entity.javaClass() + SUFFIX),
-                String.join("\n", lines) + "\n");
+        return GeneratedFile.of(
+                ModulePaths.moduleOf(entity.javaClass() + SUFFIX), imports,
+                body);
     }
 
     /**
