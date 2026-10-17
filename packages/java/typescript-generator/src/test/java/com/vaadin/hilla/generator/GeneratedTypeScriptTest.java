@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.hilla.generator.fixtures.EmptyEndpoint;
 import com.vaadin.hilla.generator.fixtures.GenericMethodsEndpoint;
 import com.vaadin.hilla.generator.fixtures.InheritingEndpoint;
+import com.vaadin.hilla.generator.fixtures.PushingEndpoint;
 import com.vaadin.hilla.generator.fixtures.SampleEndpoint;
 import com.vaadin.hilla.generator.fixtures.ShadowingEndpoint;
 import com.vaadin.hilla.generator.fixtures.ValidatedEndpoint;
@@ -60,7 +61,7 @@ public class GeneratedTypeScriptTest {
         assertEquals("SampleEndpoint.ts", file.path());
         assertEquals(
                 """
-                        import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
+                        import type { EndpointRequestInit, Subscription } from '@vaadin/hilla-frontend';
                         import type Bounded from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Bounded.js';
                         import type Detailed from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Detailed.js';
                         import type Figure from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Figure.js';
@@ -148,11 +149,19 @@ public class GeneratedTypeScriptTest {
                           return client.call('SampleEndpoint', 'shaded', {}, init);
                         }
 
+                        function stream(count: number): Subscription<string | undefined> {
+                          return client.subscribe('SampleEndpoint', 'stream', { count });
+                        }
+
+                        function watch(): Subscription<Sample | undefined> {
+                          return client.subscribe('SampleEndpoint', 'watch', {});
+                        }
+
                         async function wrapped(init?: EndpointRequestInit): Promise<Wrapper<Sample | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'wrapped', {}, init);
                         }
 
-                        export { all, bounded, count, counts, describe, detailed, figure, find, greet, kind, marker, maybe, maybeCounts, maybeNames, mixed, names, ping, required, shaded, wrapped };
+                        export { all, bounded, count, counts, describe, detailed, figure, find, greet, kind, marker, maybe, maybeCounts, maybeNames, mixed, names, ping, required, shaded, stream, watch, wrapped };
                         """,
                 file.content());
     }
@@ -186,6 +195,33 @@ public class GeneratedTypeScriptTest {
      * the barrel able to name every endpoint; whether the file is worth writing
      * is for the step which puts these writers in the pipeline.
      */
+    @Test
+    public void should_TakeNoRequestOptionsWhenEveryMethodSendsASeries() {
+        // The options are those of a single request, so a file with nothing
+        // but subscriptions in it has no use for the type of them either. A
+        // value of the series which cannot be absent is not written as one
+        // which can
+        var endpoint = endpointsOf(PushingEndpoint.class).get(0);
+
+        assertEquals(
+                """
+                        import type { Subscription } from '@vaadin/hilla-frontend';
+                        import client from './connect-client.default.js';
+
+                        function messages(): Subscription<string | undefined> {
+                          return client.subscribe('PushingEndpoint', 'messages', {});
+                        }
+
+                        function nonNullMessages(): Subscription<string> {
+                          return client.subscribe('PushingEndpoint', 'nonNullMessages', {});
+                        }
+
+                        export { messages, nonNullMessages };
+                        """,
+                new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
+                        .write(endpoint).content());
+    }
+
     @Test
     public void should_WriteAModuleForAnEndpointWithoutMethods() {
         var endpoint = endpointsOf(EmptyEndpoint.class).get(0);
