@@ -26,23 +26,14 @@ import com.vaadin.hilla.generator.model.PropertyModel;
 public final class EntityWriter {
     private static final String BEAN = """
             interface {{declaration}} {
-            {{properties}}
+              {{properties}}
             }
-
-            export default {{name}};""";
-
-    /**
-     * A type whose properties are all inherited, or which has none at all,
-     * which TypeScript still needs the braces of.
-     */
-    private static final String EMPTY_BEAN = """
-            interface {{declaration}} {}
 
             export default {{name}};""";
 
     private static final String ENUMERATION = """
             enum {{name}} {
-            {{constants}}
+              {{constants}}
             }
 
             export default {{name}};""";
@@ -73,7 +64,7 @@ public final class EntityWriter {
                 .map(property -> writeProperty(property, types))
                 .collect(Collectors.joining("\n"));
 
-        var body = Template.of(bean.properties().isEmpty() ? EMPTY_BEAN : BEAN) //
+        var body = Template.of(BEAN) //
                 .with("declaration", declaration) //
                 .with("properties", properties) //
                 .with("name", name) //
@@ -87,7 +78,7 @@ public final class EntityWriter {
         var name = ModulePaths.entityName(enumeration.javaClass());
 
         var constants = enumeration.constants().stream()
-                .map(constant -> "  " + constant + " = '" + constant + "',")
+                .map(constant -> constant + " = '" + constant + "',")
                 .collect(Collectors.joining("\n"));
 
         return GeneratedFile.of(module, new ImportRegistry(),
@@ -103,8 +94,8 @@ public final class EntityWriter {
      */
     private static String writeProperty(PropertyModel property,
             TypeWriter types) {
-        return "  " + property.name() + (property.type().optional() ? "?" : "")
-                + ": " + types.writeRequired(property.type()) + ";";
+        return property.name() + (property.type().optional() ? "?" : "") + ": "
+                + types.writeRequired(property.type()) + ";";
     }
 
     /**
