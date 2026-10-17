@@ -30,6 +30,7 @@ import com.vaadin.hilla.parser.core.RootNode;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointNode;
+import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
@@ -150,15 +151,25 @@ public final class EndpointModelPlugin
         var optional = schema != null
                 && Boolean.TRUE.equals(schema.getNullable());
 
-        if (signature.isTypeVariable() || signature.isTypeParameter()) {
+        // A type variable or parameter of an entity is declared by it, so it
+        // is written as its name. Anywhere else nothing declares it: the
+        // parser resolves it to what it stands for, the type it is bound to
+        // or the bound it has, and the walk visits that below it
+        if ((signature.isTypeVariable() || signature.isTypeParameter())
+                && isInEntity()) {
             return new TypeModel.TypeVariable(name(signature));
         }
 
-        // A type argument, such as the String of a List<String>, stands for the
-        // type it is bound to, which the walk visits below it
-        if (signature.isTypeArgument()) {
-            return optional ? only(referred).withOptional(true)
-                    : only(referred);
+        // A type argument, such as the String of a List<String>, stands for
+        // the type it is bound to as well. Its schema is the one of that type,
+        // which the parser hands up in place of its own, so whether the value
+        // can be absent is read after what the plugins said of either
+        if (signature.isTypeArgument() || signature.isTypeVariable()
+                || signature.isTypeParameter()) {
+            return referred.isEmpty()
+                    ? new TypeModel.Scalar(TypeModel.ScalarKind.UNKNOWN,
+                            optional, Object.class.getName())
+                    : only(referred).withOptional(optional);
         }
 
         // An Optional is written as the type it holds, which can be absent:
@@ -175,12 +186,26 @@ public final class EndpointModelPlugin
             return new TypeModel.MapOf(only(referred), optional);
         }
 
-        if (signature.isClassRef() && isEntity(signature)) {
+        var kind = scalarKind(signature);
+
+        // A scalar is checked for first, as the parser does, so that a class
+        // of the application extending one, such as a Date, is written as
+        // what it is serialized as rather than declared on its own
+        if (kind == TypeModel.ScalarKind.UNKNOWN && signature.isClassRef()
+                && isEntity(signature)) {
             return new TypeModel.EntityRef(name(signature), referred, optional);
         }
 
-        return new TypeModel.Scalar(scalarKind(signature), optional,
-                name(signature));
+        return new TypeModel.Scalar(kind, optional, name(signature));
+    }
+
+    /**
+     * Whether the walk is inside an entity, where the parser keeps type
+     * variables and parameters as they are rather than resolving them.
+     */
+    private boolean isInEntity() {
+        return frames.stream()
+                .anyMatch(frame -> frame.node() instanceof EntityNode);
     }
 
     private static TypeModel.ScalarKind scalarKind(SignatureModel signature) {
@@ -188,16 +213,15 @@ public final class EndpointModelPlugin
             return TypeModel.ScalarKind.BOOLEAN;
         }
 
-        if (signature.isInteger() || signature.isFloat() || signature.isLong()
-                || signature.isShort() || signature.isByte()
-                || signature.isDouble() || signature.isBigDecimal()
-                || signature.isBigInteger()) {
+        if (signature.hasIntegerType() || signature.hasFloatType()
+                || signature.isBigDecimal() || signature.isBigInteger()) {
             return TypeModel.ScalarKind.NUMBER;
         }
 
         if (signature.isString() || signature.isCharacter()
                 || signature.isDate() || signature.isDateTime()
-                || signature.isEnum()) {
+                // An enum of the application is declared on its own instead
+                || (signature.isEnum() && !isEntity(signature))) {
             return TypeModel.ScalarKind.STRING;
         }
 
