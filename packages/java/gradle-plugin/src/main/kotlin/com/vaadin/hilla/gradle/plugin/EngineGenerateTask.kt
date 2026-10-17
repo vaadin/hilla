@@ -123,11 +123,15 @@ public abstract class EngineGenerateTask : DefaultTask() {
         try {
             TypeScriptProcessor.generate(engineConfigurationSettings.get().toEngineConfiguration())
         } catch (e: BrowserCallableFinderException) {
-            throw GradleException("Execution failed", e)
+            throw GradleException(EXECUTION_FAILED, e)
         } catch (e: GeneratorException) {
-            throw GradleException("Execution failed", e)
+            throw GradleException(EXECUTION_FAILED, e)
         } catch (e: ParserException) {
-            throw GradleException("Execution failed", e)
+            throw GradleException(EXECUTION_FAILED, e)
         }
+    }
+
+    private companion object {
+        const val EXECUTION_FAILED = "Execution failed"
     }
 }
