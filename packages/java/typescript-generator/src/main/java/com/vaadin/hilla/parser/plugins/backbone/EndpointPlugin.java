@@ -76,8 +76,7 @@ public final class EndpointPlugin
     }
 
     private String getEndpointName(ClassInfoModel endpointCls) {
-        var endpointAnnotations = getStorage().getParserConfig()
-                .getEndpointAnnotations();
+        var endpointAnnotations = getParserConfig().getEndpointAnnotations();
         var endpointAnnotation = endpointCls.getAnnotations().stream()
                 .filter(annotation -> endpointAnnotations.contains(
                         ((Annotation) annotation.get()).annotationType()))
