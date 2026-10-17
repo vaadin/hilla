@@ -48,14 +48,22 @@ public final class EndpointWriter {
     }
 
     public GeneratedFile write(EndpointModel endpoint) {
+        // An endpoint without a callable method still gets a file, so that
+        // whatever imports it finds a module rather than nothing
+        if (endpoint.methods().isEmpty()) {
+            return new GeneratedFile(endpoint.name() + ".ts", "export {};\n");
+        }
+
         var imports = new ImportRegistry();
         var types = new TypeWriter(imports, "");
 
-        // The parameters are named by the Java method, so the imports have to
-        // give way to them rather than the other way around
-        endpoint.methods().stream().map(MethodModel::parameters)
-                .flatMap(List::stream).map(ParameterModel::name)
-                .forEach(imports::reserve);
+        // The methods and their parameters are named by the Java class, so the
+        // imports have to give way to them rather than the other way around
+        endpoint.methods().forEach(method -> {
+            imports.reserve(method.name());
+            method.parameters().stream().map(ParameterModel::name)
+                    .forEach(imports::reserve);
+        });
 
         var client = imports.importDefault(clientModule, "client", false);
 
