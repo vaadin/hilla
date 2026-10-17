@@ -116,6 +116,23 @@ final class ModelWriter {
     }
 
     /**
+     * The empty value of a type, which the model of the type holds: what a
+     * signal sharing a value of it starts from.
+     */
+    String defaultValue(TypeModel type) {
+        var model = switch (type) {
+        case TypeModel.Scalar scalar -> scalarModel(scalar.kind());
+        case TypeModel.ArrayOf array -> named("ArrayModel");
+        case TypeModel.MapOf map -> named("RecordModel");
+        case TypeModel.EntityRef entity -> name(entity);
+        case TypeModel.Provided provided -> named("ObjectModel");
+        case TypeModel.TypeVariable variable -> named("ObjectModel");
+        };
+
+        return model + "[" + named("$defaultValue") + "]";
+    }
+
+    /**
      * The name the model of a generated type goes by, importing it as the value
      * it is used as.
      */

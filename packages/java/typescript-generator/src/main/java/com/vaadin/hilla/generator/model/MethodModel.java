@@ -20,12 +20,43 @@ import java.util.Objects;
 
 /**
  * A method of a browser callable class.
+ *
+ * @param returnType
+ *            what a call returns, or the values a subscription sends, or the
+ *            signal a value is shared through
  */
 public record MethodModel(String name, List<ParameterModel> parameters,
-        TypeModel returnType, boolean pushes) {
+        TypeModel returnType, Kind kind) {
     public MethodModel {
         Objects.requireNonNull(name);
         Objects.requireNonNull(returnType);
+        Objects.requireNonNull(kind);
         parameters = List.copyOf(parameters);
+    }
+
+    /**
+     * The signal the value of a method is shared through, which is the type it
+     * returns.
+     *
+     * @throws IllegalStateException
+     *             if the method shares no value through a signal
+     */
+    public TypeModel.Provided signal() {
+        if (returnType instanceof TypeModel.Provided provided
+                && kind != Kind.CALLED && kind != Kind.SUBSCRIBED) {
+            return provided;
+        }
+
+        throw new IllegalStateException(
+                "The method " + name + " shares no value through a signal");
+    }
+
+    /**
+     * How the client reaches a method: it calls most of them, subscribes to the
+     * ones sending a series of values, and builds a signal of its own for the
+     * ones sharing a value with the server.
+     */
+    public enum Kind {
+        CALLED, SUBSCRIBED, NUMBER_SIGNAL, VALUE_SIGNAL, LIST_SIGNAL
     }
 }
