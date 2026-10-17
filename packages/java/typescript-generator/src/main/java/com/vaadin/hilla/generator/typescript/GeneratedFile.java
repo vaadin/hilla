@@ -15,6 +15,8 @@
  */
 package com.vaadin.hilla.generator.typescript;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -28,5 +30,40 @@ public record GeneratedFile(String path, String content) {
     public GeneratedFile {
         Objects.requireNonNull(path);
         Objects.requireNonNull(content);
+    }
+
+    /**
+     * A file of the given module made of its imports, then a blank line, then
+     * the body, which is how every generated file is laid out.
+     *
+     * @param module
+     *            the module relative to the output folder, without the
+     *            extension
+     */
+    static GeneratedFile of(String module, ImportRegistry imports,
+            String body) {
+        var lines = new ArrayList<>(imports.write());
+
+        if (!lines.isEmpty()) {
+            lines.add("");
+        }
+
+        lines.add(body);
+
+        return new GeneratedFile(module + ".ts",
+                String.join("\n", lines) + "\n");
+    }
+
+    /**
+     * The one statement a file exports what it declares with, which still makes
+     * the file a module when there is nothing to export.
+     *
+     * @param specifiers
+     *            what is exported, each as a name or as
+     *            <code>local as exported</code>
+     */
+    static String exportList(List<String> specifiers) {
+        return specifiers.isEmpty() ? "export {};"
+                : "export { " + String.join(", ", specifiers) + " };";
     }
 }
