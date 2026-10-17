@@ -1,3 +1,4 @@
-interface ExposedInterfaceEntity {}
+interface ExposedInterfaceEntity {
+}
 
 export default ExposedInterfaceEntity;

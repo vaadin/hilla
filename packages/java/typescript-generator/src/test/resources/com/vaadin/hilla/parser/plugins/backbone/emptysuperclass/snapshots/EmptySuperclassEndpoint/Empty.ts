@@ -1,3 +1,4 @@
-interface Empty {}
+interface Empty {
+}
 
 export default Empty;
