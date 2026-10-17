@@ -24,11 +24,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.hilla.generator.model.EndpointModelPlugin;
+import com.vaadin.hilla.generator.model.Generation;
 import com.vaadin.hilla.parser.core.OpenAPIFileType;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.core.PluginManager;
@@ -41,6 +44,13 @@ public final class ParserProcessor {
     private final Set<Path> classPath;
     private final Path openAPIFile;
     private final ParserConfiguration.PluginsProcessor pluginsProcessor = new ParserConfiguration.PluginsProcessor();
+
+    /**
+     * Builds what the TypeScript of a run is written from while the parser
+     * walks the classes, where that is what it is written from. It only
+     * collects: the OpenAPI definition is what it would be without it.
+     */
+    private final EndpointModelPlugin modelPlugin = new EndpointModelPlugin();
     private List<Class<? extends Annotation>> endpointAnnotations = List.of();
     private List<Class<? extends Annotation>> endpointExposedAnnotations = List
             .of();
@@ -70,6 +80,17 @@ public final class ParserProcessor {
         var openAPI = parser.execute(endpoints);
 
         return new JsonPrinter().pretty().writeAsString(openAPI);
+    }
+
+    /**
+     * Everything the last run of the parser found, which is what the TypeScript
+     * of the endpoints is written from. There is nothing to find unless that is
+     * where it is written, since building it is work for nothing then.
+     *
+     * @see GeneratorProcessor#writesTypeScriptInJava()
+     */
+    public Generation getGeneration() {
+        return modelPlugin.getGeneration();
     }
 
     public void process(List<Class<?>> endpoints) throws ParserException {
@@ -154,10 +175,18 @@ public final class ParserProcessor {
     }
 
     private void preparePlugins(Parser parser) {
-        var loadedPlugins = pluginsProcessor.process().stream()
+        var configuredPlugins = pluginsProcessor.process().stream()
                 .map((plugin) -> PluginManager.load(plugin.getName(),
-                        plugin.getConfiguration()))
-                .collect(Collectors.toList());
+                        plugin.getConfiguration()));
+
+        // The plugin building the model only runs where the model is what the
+        // TypeScript is written from. It belongs first: a composite plugin
+        // exits its plugins in the opposite order, so the first one is the
+        // last to see a node, once the others have said everything about it
+        var loadedPlugins = GeneratorProcessor.writesTypeScriptInJava()
+                ? Stream.concat(Stream.of(modelPlugin), configuredPlugins)
+                        .toList()
+                : configuredPlugins.toList();
 
         parser.plugins(loadedPlugins);
     }

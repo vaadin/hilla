@@ -93,6 +93,21 @@ public class OutputFolderTest {
     }
 
     @Test
+    public void should_LeaveNoListBehindWhenThereIsNothingToGenerate()
+            throws IOException {
+        output.write(List.of(new GeneratedFile("endpoints.ts", "export {};\n"),
+                new GeneratedFile("com/example/Person.ts",
+                        "interface P {}\n")));
+
+        output.write(List.of());
+
+        assertFalse(Files.exists(folder.resolve("endpoints.ts")),
+                "There is nothing to call");
+        assertFalse(Files.exists(folder.resolve(OutputFolder.FILE_LIST)),
+                "Nothing in the folder was generated");
+    }
+
+    @Test
     public void should_RemoveNothingWhenItHasNeverGeneratedHereBefore()
             throws IOException {
         Files.writeString(folder.resolve("of-the-application.ts"), "// mine\n");

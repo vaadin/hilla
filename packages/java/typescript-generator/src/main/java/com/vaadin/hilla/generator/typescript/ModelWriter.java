@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.vaadin.hilla.generator.model.AnnotationModel;
@@ -40,8 +39,6 @@ final class ModelWriter {
     static final String MODULE = "@vaadin/hilla-models";
     private static final Set<String> PRIMITIVES = Set.of("boolean", "byte",
             "char", "double", "float", "int", "long", "short");
-    private static final Pattern IDENTIFIER = Pattern
-            .compile("[A-Za-z_$][A-Za-z0-9_$]*");
 
     private final ImportRegistry imports;
     private final String directory;
@@ -244,7 +241,7 @@ final class ModelWriter {
         };
 
         if (isJavaTypeWritten(javaType)) {
-            written.add("jvmType: " + string(javaType));
+            written.add("jvmType: " + Names.string(javaType));
         }
 
         return written.isEmpty() ? ""
@@ -254,7 +251,7 @@ final class ModelWriter {
 
     private static String annotation(AnnotationModel annotation) {
         var written = new ArrayList<String>();
-        written.add("jvmType: " + string(annotation.name()));
+        written.add("jvmType: " + Names.string(annotation.name()));
 
         if (!annotation.attributes().isEmpty()) {
             written.add("attributes: " + value(annotation.attributes()));
@@ -320,25 +317,13 @@ final class ModelWriter {
 
         if (value instanceof Map<?, ?> attributes) {
             return attributes.entrySet().stream()
-                    .map(attribute -> key(String.valueOf(attribute.getKey()))
-                            + ": " + value(attribute.getValue()))
+                    .map(attribute -> Names
+                            .property(String.valueOf(attribute.getKey())) + ": "
+                            + value(attribute.getValue()))
                     .collect(Collectors.joining(", ", "{ ", " }"));
         }
 
-        return string(String.valueOf(value));
-    }
-
-    private static String key(String name) {
-        return IDENTIFIER.matcher(name).matches() ? name : string(name);
-    }
-
-    /**
-     * A string as TypeScript reads it, with what the language would otherwise
-     * read as the end of it, or as another line, written as it says itself.
-     */
-    static String string(String value) {
-        return "'" + value.replace("\\", "\\\\").replace("'", "\\'")
-                .replace("\n", "\\n").replace("\r", "\\r") + "'";
+        return Names.string(String.valueOf(value));
     }
 
     private String call(String converter, String... arguments) {
