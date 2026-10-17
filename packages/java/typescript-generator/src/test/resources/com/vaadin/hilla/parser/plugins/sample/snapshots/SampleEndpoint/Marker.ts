@@ -1,3 +1,4 @@
-interface Marker {}
+interface Marker {
+}
 
 export default Marker;
