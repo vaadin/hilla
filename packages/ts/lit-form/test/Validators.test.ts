@@ -274,6 +274,9 @@ describe('@vaadin/hilla-lit-form', () => {
       // `Size` is also generated for array properties
       assert.isTrue(noMinValidator.validate([] as never));
       assert.isFalse(validator.validate([] as never));
+      assert.isFalse(validator.validate(['a'] as never));
+      assert.isTrue(validator.validate(['a', 'b'] as never));
+      assert.isFalse(validator.validate(['a', 'b', 'c', 'd', 'e'] as never));
       // eslint-disable-next-line sort-keys
       const minZeroValidator = new Size({ min: 0, max: 3 });
       assert.isNotTrue(minZeroValidator.impliesRequired);
