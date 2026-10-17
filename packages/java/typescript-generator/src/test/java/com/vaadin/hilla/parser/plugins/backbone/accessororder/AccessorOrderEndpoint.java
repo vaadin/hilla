@@ -15,12 +15,24 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.accessororder;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
 public class AccessorOrderEndpoint {
     public Ordered get() {
         return new Ordered();
+    }
+
+    public PartlyOrdered getPartlyOrdered() {
+        return new PartlyOrdered();
+    }
+
+    public Range getRange() {
+        return new Range(2, 1);
     }
 
     /**
@@ -41,6 +53,50 @@ public class AccessorOrderEndpoint {
 
         public String getMiddle() {
             return "";
+        }
+    }
+
+    /**
+     * An order which names only some of the properties: those keep their place,
+     * and the ones it leaves out without a field come after them in the order
+     * of their names.
+     */
+    @JsonPropertyOrder({ "zeta", "field" })
+    public static class PartlyOrdered {
+        public String field;
+
+        public String getZeta() {
+            return "";
+        }
+
+        public String getMiddle() {
+            return "";
+        }
+
+        public String getAlpha() {
+            return "";
+        }
+    }
+
+    /**
+     * Properties a constructor takes and no field keeps, which stay in the
+     * order of the constructor rather than of their names.
+     */
+    public static class Range {
+        private final int[] bounds;
+
+        @JsonCreator
+        public Range(@JsonProperty("upper") int upper,
+                @JsonProperty("lower") int lower) {
+            this.bounds = new int[] { lower, upper };
+        }
+
+        public int getUpper() {
+            return bounds[1];
+        }
+
+        public int getLower() {
+            return bounds[0];
         }
     }
 }

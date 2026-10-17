@@ -13,6 +13,7 @@ interface Person extends AbstractEntity {
   addresses: Record<string, Address>;
   profilePicture?: string;
   alias: string;
+  badge: string;
   fullName: string;
 }
 
