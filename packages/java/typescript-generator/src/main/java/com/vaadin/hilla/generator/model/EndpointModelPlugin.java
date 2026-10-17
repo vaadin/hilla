@@ -36,7 +36,6 @@ import com.vaadin.hilla.parser.models.ArraySignatureModel;
 import com.vaadin.hilla.parser.models.BaseSignatureModel;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
-import com.vaadin.hilla.parser.models.FieldInfoModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.models.SpecializedModel;
 import com.vaadin.hilla.parser.models.TypeParameterModel;
@@ -340,8 +339,10 @@ public final class EndpointModelPlugin
 
         if (cls.isEnum()) {
             return new EntityModel.Enumeration(cls.getName(),
-                    cls.getFields().stream().filter(FieldInfoModel::isPublic)
-                            .map(FieldInfoModel::getName).toList());
+                    node.getTarget().getEnumValues().entrySet().stream()
+                            .map(constant -> new EntityModel.Constant(
+                                    constant.getKey(), constant.getValue()))
+                            .toList());
         }
 
         var discriminator = discriminator(node.getTarget());

@@ -17,6 +17,8 @@ package com.vaadin.hilla.parser.plugins.backbone.enumtype;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
@@ -37,6 +39,20 @@ public class EnumTypeEndpoint {
 
     public void setEnum(EnumEntity value) {
         this.value = value;
+    }
+
+    public RenamedEnum echoRenamed(RenamedEnum value) {
+        return value;
+    }
+
+    /**
+     * Constants Jackson writes under a name of their own, one of which
+     * TypeScript only accepts as a string.
+     */
+    public enum RenamedEnum {
+        @JsonProperty("very-low")
+        VERY_LOW, @JsonProperty("it's high")
+        HIGH, UNCHANGED
     }
 
     public enum EnumEntity {
