@@ -1,2 +1,3 @@
-import * as SimpleTypeEndpoint from "./SimpleTypeEndpoint.js";
+import * as SimpleTypeEndpoint from './SimpleTypeEndpoint.js';
+
 export { SimpleTypeEndpoint };

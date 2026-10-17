@@ -1,5 +1,7 @@
-import type ComplexHierarchyGrandParentModel from "./ComplexHierarchyGrandParentModel.js";
+import type ComplexHierarchyGrandParentModel from './ComplexHierarchyGrandParentModel.js';
+
 interface ComplexHierarchyParentModel extends ComplexHierarchyGrandParentModel {
-    id?: string;
+  id?: string;
 }
+
 export default ComplexHierarchyParentModel;

@@ -25,10 +25,17 @@ import org.mockito.Answers;
 import org.mockito.Mockito;
 
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
-import com.vaadin.hilla.engine.GeneratorProcessor;
 import com.vaadin.hilla.engine.ParserProcessor;
+import com.vaadin.hilla.engine.TypeScriptProcessor;
+import com.vaadin.hilla.generator.model.Generation;
 
 public class EngineGenerateMojoTest extends AbstractMojoTest {
+    /**
+     * What a run of the parser is made to return, which is what the mojo has to
+     * hand the writers.
+     */
+    private static final Generation GENERATION = new Generation(List.of(),
+            List.of(), List.of());
 
     @Test
     public void should_RunParserAndGenerator() throws Exception {
@@ -44,14 +51,18 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                     var conf = (EngineAutoConfiguration) context.arguments()
                             .getFirst();
                     assertEquals(conf.getBaseDir(), getTemporaryDirectory());
+
+                    // What the parser found, so that the test says which
+                    // generation the writers are handed rather than none
+                    Mockito.doReturn(GENERATION).when(mock).getGeneration();
                 });
                 var mockedConstructionGenerator = Mockito.mockConstruction(
-                        GeneratorProcessor.class, Mockito.withSettings()
+                        TypeScriptProcessor.class, Mockito.withSettings()
                                 .defaultAnswer(Answers.RETURNS_SELF),
                         ((mock, context) -> {
-                            // Verify GeneratorProcessor arguments
+                            // Verify TypeScriptProcessor arguments
                             assertEquals(1, context.arguments().size(),
-                                    "expected 1 GeneratorProcessor argument");
+                                    "expected 1 TypeScriptProcessor argument");
 
                             // Verify configuration argument
                             var conf = (EngineAutoConfiguration) context
@@ -73,15 +84,15 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                     .getFirst();
 
             assertEquals(1, mockedConstructionGenerator.constructed().size(),
-                    "expected to construct " + "GeneratorProcessor");
-            var generatorProcessor = mockedConstructionGenerator.constructed()
+                    "expected to construct " + "TypeScriptProcessor");
+            var typeScriptProcessor = mockedConstructionGenerator.constructed()
                     .getFirst();
 
-            var inOrder = Mockito.inOrder(parserProcessor, generatorProcessor);
+            var inOrder = Mockito.inOrder(parserProcessor, typeScriptProcessor);
             inOrder.verify(parserProcessor).process(List.of());
-            // The generator is handed what the parser found, which is what it
-            // writes the TypeScript of the endpoints from
-            inOrder.verify(generatorProcessor).process(parserProcessor);
+            // The writers are handed what the parser found, which is what the
+            // TypeScript of the endpoints is written from
+            inOrder.verify(typeScriptProcessor).process(GENERATION);
         }
     }
 
@@ -108,12 +119,12 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                             conf.getSourceClasses());
                 });
                 var mockedConstructionGenerator = Mockito.mockConstruction(
-                        GeneratorProcessor.class, Mockito.withSettings()
+                        TypeScriptProcessor.class, Mockito.withSettings()
                                 .defaultAnswer(Answers.RETURNS_SELF),
                         ((mock, context) -> {
-                            // Verify GeneratorProcessor arguments
+                            // Verify TypeScriptProcessor arguments
                             assertEquals(1, context.arguments().size(),
-                                    "expected 1 GeneratorProcessor argument");
+                                    "expected 1 TypeScriptProcessor argument");
 
                             // Verify configuration argument
                             var conf = (EngineAutoConfiguration) context

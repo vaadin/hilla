@@ -1,4 +1,5 @@
 interface File {
-    name?: string;
+  name?: string;
 }
+
 export default File;

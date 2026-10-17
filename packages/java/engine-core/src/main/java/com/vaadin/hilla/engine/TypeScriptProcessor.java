@@ -33,10 +33,6 @@ import com.vaadin.hilla.generator.typescript.TypeScriptWriter;
 /**
  * Writes the TypeScript of the endpoints, which is what the browser calls the
  * server through, into the folder the application reads it from.
- *
- * <p>
- * This is the Java side of what the Node generator does, which it is replacing
- * one step at a time.
  */
 public final class TypeScriptProcessor {
     /**
@@ -51,6 +47,10 @@ public final class TypeScriptProcessor {
             .getLogger(TypeScriptProcessor.class);
 
     private final Path outputDirectory;
+
+    public TypeScriptProcessor(EngineAutoConfiguration conf) {
+        this(conf.getBaseDir(), conf.getOutputDir());
+    }
 
     /**
      * @param baseDir

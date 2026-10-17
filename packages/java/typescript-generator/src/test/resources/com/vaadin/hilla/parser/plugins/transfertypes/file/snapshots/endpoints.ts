@@ -1,2 +1,3 @@
-import * as MultipartFileEndpoint from "./MultipartFileEndpoint.js";
+import * as MultipartFileEndpoint from './MultipartFileEndpoint.js';
+
 export { MultipartFileEndpoint };

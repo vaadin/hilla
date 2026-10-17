@@ -1,2 +1,3 @@
-import * as BasicEndpoint from "./BasicEndpoint.js";
+import * as BasicEndpoint from './BasicEndpoint.js';
+
 export { BasicEndpoint };
