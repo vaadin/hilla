@@ -172,11 +172,6 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
     }
 
     @Override
-    public void exit(NodePath<?> nodePath) {
-
-    }
-
-    @Override
     public Collection<Class<? extends Plugin>> getRequiredPlugins() {
         return List.of(BackbonePlugin.class);
     }
