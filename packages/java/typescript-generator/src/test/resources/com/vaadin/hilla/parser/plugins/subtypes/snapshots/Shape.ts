@@ -1,3 +1,4 @@
-interface Shape {}
+interface Shape {
+}
 
 export default Shape;
