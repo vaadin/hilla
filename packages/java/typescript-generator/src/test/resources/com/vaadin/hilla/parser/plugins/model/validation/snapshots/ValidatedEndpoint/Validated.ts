@@ -7,6 +7,7 @@ interface Validated {
   codes?: Array<string | undefined>;
   rows?: Array<Array<string | undefined> | undefined>;
   labels?: Array<string | undefined>;
+  notes?: Array<string | undefined>;
   tags?: Array<string | undefined>;
 }
 
