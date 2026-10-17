@@ -29,7 +29,6 @@ import com.vaadin.hilla.generator.model.ConstraintModel;
 import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.generator.model.PropertyModel;
 import com.vaadin.hilla.generator.model.TypeModel;
-import com.vaadin.hilla.parser.plugins.model.JvmTypeRef;
 
 public class ModelWriterTest {
     private static final TypeModel.Scalar STRING = new TypeModel.Scalar(
@@ -99,7 +98,7 @@ public class ModelWriterTest {
         // A class is written as the reference to it the model library reads,
         // and the attributes go in the order the annotation gives them
         var attributes = new LinkedHashMap<String, Object>();
-        attributes.put("targetEntity", new JvmTypeRef("com.example.Item"));
+        attributes.put("targetEntity", Map.of("jvmType", "com.example.Item"));
         attributes.put("cascade", List.of("PERSIST", "MERGE"));
 
         assertEquals(
