@@ -26,12 +26,14 @@ import com.vaadin.hilla.generator.fixtures.GenericMethodsEndpoint;
 import com.vaadin.hilla.generator.fixtures.InheritingEndpoint;
 import com.vaadin.hilla.generator.fixtures.SampleEndpoint;
 import com.vaadin.hilla.generator.fixtures.ShadowingEndpoint;
+import com.vaadin.hilla.generator.fixtures.ValidatedEndpoint;
 import com.vaadin.hilla.generator.model.EndpointModel;
 import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.generator.typescript.BarrelWriter;
 import com.vaadin.hilla.generator.typescript.ClientWriter;
 import com.vaadin.hilla.generator.typescript.EndpointWriter;
 import com.vaadin.hilla.generator.typescript.EntityWriter;
+import com.vaadin.hilla.generator.typescript.FormModelWriter;
 import com.vaadin.hilla.generator.typescript.GeneratedFile;
 import com.vaadin.hilla.parser.testutils.FullStackGenerator;
 
@@ -59,6 +61,7 @@ public class GeneratedTypeScriptTest {
                         import type Detailed from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Detailed.js';
                         import type Kind from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Kind.js';
                         import type Marker from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Marker.js';
+                        import type Mixed from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Mixed.js';
                         import type Sample from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Sample.js';
                         import type Wrapper from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Wrapper.js';
                         import client from './connect-client.default.js';
@@ -115,6 +118,10 @@ public class GeneratedTypeScriptTest {
                           return client.call('SampleEndpoint', 'maybeNames', {}, init);
                         }
 
+                        async function mixed(init?: EndpointRequestInit): Promise<Mixed | undefined> {
+                          return client.call('SampleEndpoint', 'mixed', {}, init);
+                        }
+
                         async function names(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'names', {}, init);
                         }
@@ -131,7 +138,7 @@ public class GeneratedTypeScriptTest {
                           return client.call('SampleEndpoint', 'wrapped', {}, init);
                         }
 
-                        export { all, bounded, count, counts, describe, detailed, find, greet, kind, marker, maybe, maybeCounts, maybeNames, names, ping, required, wrapped };
+                        export { all, bounded, count, counts, describe, detailed, find, greet, kind, marker, maybe, maybeCounts, maybeNames, mixed, names, ping, required, wrapped };
                         """,
                 file.content());
     }
@@ -359,7 +366,8 @@ public class GeneratedTypeScriptTest {
     @Test
     public void should_WriteAnEntityWithoutProperties() {
         assertEquals("""
-                interface Marker {}
+                interface Marker {
+                }
 
                 export default Marker;
                 """, write(entity(SampleEndpoint.Marker.class)).content());
@@ -377,8 +385,207 @@ public class GeneratedTypeScriptTest {
                 """, write(entity(SampleEndpoint.Kind.class)).content());
     }
 
+    @Test
+    public void should_WriteTheModelOfAnEntity() {
+        var file = writeModel(entity(SampleEndpoint.Sample.class));
+
+        assertEquals(
+                "com/vaadin/hilla/generator/fixtures/SampleEndpoint/SampleModel.ts",
+                file.path());
+        assertEquals(
+                """
+                        import m, { StringModel } from '@vaadin/hilla-models';
+                        import type Sample from './Sample.js';
+
+                        const SampleModel = m
+                          .object<Sample>('Sample')
+                          .property('name', m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))
+                          .property('parent', m.optional(m.self))
+                          .property('label', m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))
+                          .build();
+                        type SampleModel = typeof SampleModel;
+
+                        export default SampleModel;
+                        """,
+                file.content());
+    }
+
+    @Test
+    public void should_WriteTheModelOfEveryKindOfProperty() {
+        // The model of a value is the model of the type it holds, which is one
+        // of the form library for everything but a generated type
+        var file = writeModel(entity(SampleEndpoint.Mixed.class));
+
+        assertEquals(
+                "com/vaadin/hilla/generator/fixtures/SampleEndpoint/MixedModel.ts",
+                file.path());
+        assertEquals(
+                """
+                        import m, { BooleanModel, NumberModel, StringModel } from '@vaadin/hilla-models';
+                        import KindModel from './KindModel.js';
+                        import type Mixed from './Mixed.js';
+                        import SampleModel from './SampleModel.js';
+
+                        const MixedModel = m
+                          .object<Mixed>('Mixed')
+                          .property('count', m.meta(NumberModel, { jvmType: 'int' }))
+                          .property('active', m.meta(BooleanModel, { jvmType: 'boolean' }))
+                          .property('tags', m.meta(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))), { jvmType: 'java.util.List' }))
+                          .property('counts', m.meta(m.optional(m.record(m.meta(m.optional(NumberModel), { jvmType: 'java.lang.Integer' }))), { jvmType: 'java.util.Map' }))
+                          .property('kind', m.optional(KindModel))
+                          .property('sample', m.optional(SampleModel))
+                          .property('words', m.meta(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))), { jvmType: 'java.lang.String[]' }))
+                          .property('unique', m.meta(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))), { jvmType: 'java.util.Set' }))
+                          .property('grouped', m.meta(m.optional(m.record(m.meta(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))), { jvmType: 'java.util.List' }))), { jvmType: 'java.util.Map' }))
+                          .property('maybeTags', m.meta(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))), { jvmType: 'java.util.List' }))
+                          .build();
+                        type MixedModel = typeof MixedModel;
+
+                        export default MixedModel;
+                        """,
+                file.content());
+    }
+
+    @Test
+    public void should_BindWhatTheValuesOfATypeHaveToSatisfy() {
+        // The constraints are named after the annotations, and are given what
+        // the annotation says: the one value it says when that is all of it,
+        // and everything else the constraint declares otherwise, which leaves
+        // out the flags of a pattern. The values of a collection are
+        // constrained on their own, as the collection is. What a value is to
+        // the persistence API is written along with its Java type, which is
+        // how a grid tells an id from a value worth showing
+        assertEquals(
+                """
+                        import m, { Email, Min, NotBlank, NumberModel, Pattern, Size, StringModel } from '@vaadin/hilla-models';
+                        import type Validated from './Validated.js';
+
+                        const ValidatedModel = m
+                          .object<Validated>('Validated')
+                          .property('id', m.meta(m.optional(NumberModel), { annotations: [{ jvmType: 'jakarta.persistence.Id' }], jvmType: 'long' }))
+                          .property('name', m.meta(m.constrained(m.optional(StringModel), NotBlank()), { jvmType: 'java.lang.String' }))
+                          .property('count', m.meta(m.constrained(NumberModel, Min(1)), { jvmType: 'int' }))
+                          .property('address', m.meta(m.constrained(m.optional(StringModel), Email({ message: 'that isn\\'t an address' })), { jvmType: 'java.lang.String' }))
+                          .property('code', m.meta(m.constrained(m.optional(StringModel), Pattern({ regexp: '[a-z]+' })), { jvmType: 'java.lang.String' }))
+                          .property('codes', m.meta(m.optional(m.array(m.meta(m.constrained(m.optional(StringModel), Size({ min: 1 })), { jvmType: 'java.lang.String' }))), { jvmType: 'java.lang.String[]' }))
+                          .property('tags', m.meta(m.constrained(m.optional(m.array(m.meta(m.constrained(m.optional(StringModel), NotBlank()), { jvmType: 'java.lang.String' }))), Size({ max: 10, min: 1 })), { jvmType: 'java.util.List' }))
+                          .build();
+                        type ValidatedModel = typeof ValidatedModel;
+
+                        export default ValidatedModel;
+                        """,
+                new FormModelWriter(List.of(validated())).write(validated())
+                        .content());
+    }
+
+    @Test
+    public void should_WriteTheModelOfATypeInheritingProperties() {
+        // Built on the model of the type the properties come from, so that the
+        // inherited ones are bound as well
+        var file = writeModel(entity(SampleEndpoint.Detailed.class));
+
+        assertEquals(
+                "com/vaadin/hilla/generator/fixtures/SampleEndpoint/DetailedModel.ts",
+                file.path());
+        assertEquals(
+                """
+                        import m, { StringModel } from '@vaadin/hilla-models';
+                        import type Detailed from './Detailed.js';
+                        import SampleModel from './SampleModel.js';
+
+                        const DetailedModel = m
+                          .extend(SampleModel)
+                          .object<Detailed>('Detailed')
+                          .property('note', m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))
+                          .build();
+                        type DetailedModel = typeof DetailedModel;
+
+                        export default DetailedModel;
+                        """,
+                file.content());
+    }
+
+    @Test
+    public void should_WriteTheModelOfAGenericEntity() {
+        var file = writeModel(entity(SampleEndpoint.Wrapper.class));
+
+        assertEquals(
+                "com/vaadin/hilla/generator/fixtures/SampleEndpoint/WrapperModel.ts",
+                file.path());
+        assertEquals("""
+                import m, { Model } from '@vaadin/hilla-models';
+                import type Wrapper from './Wrapper.js';
+
+                const WrapperModel = m
+                  .object<Wrapper>('Wrapper')
+                  .property('value', m.optional(Model))
+                  .build();
+                type WrapperModel = typeof WrapperModel;
+
+                export default WrapperModel;
+                """, file.content());
+    }
+
+    @Test
+    public void should_WriteTheModelOfAnEntityWithoutProperties() {
+        var file = writeModel(entity(SampleEndpoint.Marker.class));
+
+        assertEquals(
+                "com/vaadin/hilla/generator/fixtures/SampleEndpoint/MarkerModel.ts",
+                file.path());
+        assertEquals("""
+                import m from '@vaadin/hilla-models';
+                import type Marker from './Marker.js';
+
+                const MarkerModel = m
+                  .object<Marker>('Marker')
+                  .build();
+                type MarkerModel = typeof MarkerModel;
+
+                export default MarkerModel;
+                """, file.content());
+    }
+
+    @Test
+    public void should_WriteTheModelOfAnEnum() {
+        // An enum is bound as the constants it accepts rather than as
+        // properties
+        var file = writeModel(entity(SampleEndpoint.Kind.class));
+
+        assertEquals(
+                "com/vaadin/hilla/generator/fixtures/SampleEndpoint/KindModel.ts",
+                file.path());
+        assertEquals("""
+                import m from '@vaadin/hilla-models';
+                import Kind from './Kind.js';
+
+                const KindModel = m.enum(Kind, 'Kind');
+                type KindModel = typeof KindModel;
+
+                export default KindModel;
+                """, file.content());
+    }
+
     private static GeneratedFile write(EntityModel entity) {
         return new EntityWriter().write(entity);
+    }
+
+    private static GeneratedFile writeModel(EntityModel entity) {
+        return new FormModelWriter(entities).write(entity);
+    }
+
+    /**
+     * The type whose values the annotations of the validation API constrain,
+     * which is generated on its own since nothing else of the fixtures is
+     * constrained.
+     */
+    private static EntityModel validated() {
+        return new FullStackGenerator(GeneratedTypeScriptTest.class,
+                ValidatedEndpoint.class)
+                .parseEntities().stream()
+                .filter(entity -> entity.javaClass()
+                        .equals(ValidatedEndpoint.Validated.class.getName()))
+                .findFirst().orElseThrow();
     }
 
     private static EntityModel entity(Class<?> javaClass) {

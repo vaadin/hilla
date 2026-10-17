@@ -35,6 +35,21 @@ public sealed interface TypeModel {
     boolean optional();
 
     /**
+     * What a value of the type has to satisfy, which a form model binds as the
+     * validators of the property holding it. The constraints belong to the type
+     * rather than to the property, since the values of a collection can be
+     * constrained as well as the collection itself.
+     */
+    List<ConstraintModel> constraints();
+
+    /**
+     * The annotations of a value which a form model is told about: whether a
+     * value is the id of an entity is nothing TypeScript can see, and a form or
+     * a grid built from the model decides with it what to do with the value.
+     */
+    List<AnnotationModel> annotations();
+
+    /**
      * The same type, said to be absent or not as given.
      */
     TypeModel withOptional(boolean optional);
@@ -52,11 +67,18 @@ public sealed interface TypeModel {
      *            from, which TypeScript has no way of telling apart: a date and
      *            an instant are both written as a string
      */
-    record Scalar(ScalarKind kind, boolean optional,
-            String javaType) implements TypeModel {
+    record Scalar(ScalarKind kind, boolean optional, String javaType,
+            List<ConstraintModel> constraints,
+            List<AnnotationModel> annotations) implements TypeModel {
         public Scalar {
             Objects.requireNonNull(kind);
             Objects.requireNonNull(javaType);
+            constraints = List.copyOf(constraints);
+            annotations = List.copyOf(annotations);
+        }
+
+        public Scalar(ScalarKind kind, boolean optional, String javaType) {
+            this(kind, optional, javaType, List.of(), List.of());
         }
 
         public static Scalar of(ScalarKind kind, String javaType) {
@@ -65,29 +87,61 @@ public sealed interface TypeModel {
 
         @Override
         public Scalar withOptional(boolean optional) {
-            return new Scalar(kind, optional, javaType);
+            return new Scalar(kind, optional, javaType, constraints,
+                    annotations);
         }
     }
 
-    record ArrayOf(TypeModel items, boolean optional) implements TypeModel {
+    /**
+     * @param javaType
+     *            the fully qualified name of the Java type the values come in,
+     *            which a form model tells its bindings about: an array, a list
+     *            and a set are all an array in TypeScript
+     */
+    record ArrayOf(TypeModel items, boolean optional, String javaType,
+            List<ConstraintModel> constraints,
+            List<AnnotationModel> annotations) implements TypeModel {
         public ArrayOf {
             Objects.requireNonNull(items);
+            Objects.requireNonNull(javaType);
+            constraints = List.copyOf(constraints);
+            annotations = List.copyOf(annotations);
+        }
+
+        public ArrayOf(TypeModel items, boolean optional, String javaType) {
+            this(items, optional, javaType, List.of(), List.of());
         }
 
         @Override
         public ArrayOf withOptional(boolean optional) {
-            return new ArrayOf(items, optional);
+            return new ArrayOf(items, optional, javaType, constraints,
+                    annotations);
         }
     }
 
-    record MapOf(TypeModel values, boolean optional) implements TypeModel {
+    /**
+     * @param javaType
+     *            the fully qualified name of the Java type the values come in,
+     *            as for an array
+     */
+    record MapOf(TypeModel values, boolean optional, String javaType,
+            List<ConstraintModel> constraints,
+            List<AnnotationModel> annotations) implements TypeModel {
         public MapOf {
             Objects.requireNonNull(values);
+            Objects.requireNonNull(javaType);
+            constraints = List.copyOf(constraints);
+            annotations = List.copyOf(annotations);
+        }
+
+        public MapOf(TypeModel values, boolean optional, String javaType) {
+            this(values, optional, javaType, List.of(), List.of());
         }
 
         @Override
         public MapOf withOptional(boolean optional) {
-            return new MapOf(values, optional);
+            return new MapOf(values, optional, javaType, constraints,
+                    annotations);
         }
     }
 
@@ -99,10 +153,18 @@ public sealed interface TypeModel {
      *            the name and the location of the generated file
      */
     record EntityRef(String javaClass, List<TypeModel> typeArguments,
-            boolean optional) implements TypeModel {
+            boolean optional, List<ConstraintModel> constraints,
+            List<AnnotationModel> annotations) implements TypeModel {
         public EntityRef {
             Objects.requireNonNull(javaClass);
             typeArguments = List.copyOf(typeArguments);
+            constraints = List.copyOf(constraints);
+            annotations = List.copyOf(annotations);
+        }
+
+        public EntityRef(String javaClass, List<TypeModel> typeArguments,
+                boolean optional) {
+            this(javaClass, typeArguments, optional, List.of(), List.of());
         }
 
         public static EntityRef of(String javaClass) {
@@ -111,7 +173,8 @@ public sealed interface TypeModel {
 
         @Override
         public EntityRef withOptional(boolean optional) {
-            return new EntityRef(javaClass, typeArguments, optional);
+            return new EntityRef(javaClass, typeArguments, optional,
+                    constraints, annotations);
         }
     }
 
@@ -119,9 +182,17 @@ public sealed interface TypeModel {
      * A reference to a type parameter of the declaration being written, which
      * is written as it is.
      */
-    record TypeVariable(String name, boolean optional) implements TypeModel {
+    record TypeVariable(String name, boolean optional,
+            List<ConstraintModel> constraints,
+            List<AnnotationModel> annotations) implements TypeModel {
         public TypeVariable {
             Objects.requireNonNull(name);
+            constraints = List.copyOf(constraints);
+            annotations = List.copyOf(annotations);
+        }
+
+        public TypeVariable(String name, boolean optional) {
+            this(name, optional, List.of(), List.of());
         }
 
         public static TypeVariable of(String name) {
@@ -130,7 +201,7 @@ public sealed interface TypeModel {
 
         @Override
         public TypeVariable withOptional(boolean optional) {
-            return new TypeVariable(name, optional);
+            return new TypeVariable(name, optional, constraints, annotations);
         }
     }
 }

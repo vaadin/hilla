@@ -49,6 +49,38 @@ public class TemplateTest {
     }
 
     @Test
+    public void should_LineUpTheLinesOfAValueUnderTheHole() {
+        assertEquals("""
+                class Person {
+                  get name() {
+                    return 'name';
+                  }
+                }""", Template.of("""
+                class Person {
+                  {{body}}
+                }""").with("body", """
+                get name() {
+                  return 'name';
+                }""").fill());
+    }
+
+    @Test
+    public void should_DropTheLineOfAHoleFilledWithNothing() {
+        assertEquals("""
+                interface Person {
+                }""", Template.of("""
+                interface Person {
+                  {{properties}}
+                }""").with("properties", "").fill());
+    }
+
+    @Test
+    public void should_KeepTheLineOfAHoleWhichIsNotAloneOnIt() {
+        assertEquals("call();", Template.of("call({{arguments}});")
+                .with("arguments", "").fill());
+    }
+
+    @Test
     public void should_RefuseAHoleWithoutAValue() {
         var template = Template.of("{{known}} and {{forgotten}}").with("known",
                 "one");

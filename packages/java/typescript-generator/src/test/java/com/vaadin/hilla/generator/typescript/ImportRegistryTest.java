@@ -63,8 +63,17 @@ public class ImportRegistryTest {
         imports.importNamed("./client.js", "ConnectClient", true);
 
         assertEquals(
-                List.of("import client from './client.js';",
-                        "import { ConnectClient } from './client.js';"),
+                List.of("import client, { ConnectClient } from './client.js';"),
+                imports.write());
+    }
+
+    @Test
+    public void should_ImportTheNamesOfAModuleOnOneLine() {
+        imports.importNamed("@example/shapes", "Circle", false);
+        imports.importNamed("@example/shapes", "Square", false);
+
+        assertEquals(
+                List.of("import { Circle, Square } from '@example/shapes';"),
                 imports.write());
     }
 

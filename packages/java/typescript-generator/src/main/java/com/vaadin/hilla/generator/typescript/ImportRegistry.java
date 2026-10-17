@@ -165,17 +165,23 @@ final class ImportRegistry {
                         + "';");
             }
 
-            if (defaultName != null) {
-                lines.add("import " + (defaultTypeOnly ? "type " : "")
-                        + defaultName + " from '" + path + "';");
+            // A default import which is a value goes on the line of the named
+            // values, as in import m, { StringModel } from 'module'
+            var defaultValue = defaultName != null && !defaultTypeOnly
+                    ? defaultName
+                    : null;
+
+            if (defaultName != null && defaultTypeOnly) {
+                lines.add(
+                        "import type " + defaultName + " from '" + path + "';");
             }
 
-            writeNamed(path, lines, true);
-            writeNamed(path, lines, false);
+            writeNamed(path, lines, true, null);
+            writeNamed(path, lines, false, defaultValue);
         }
 
         private void writeNamed(String path, List<String> lines,
-                boolean typeOnly) {
+                boolean typeOnly, String defaultValue) {
             var specifiers = named.entrySet().stream().filter(
                     entry -> typeOnlyNames.contains(entry.getKey()) == typeOnly)
                     .map(entry -> entry.getKey().equals(entry.getValue())
@@ -183,11 +189,19 @@ final class ImportRegistry {
                             : entry.getKey() + " as " + entry.getValue())
                     .toList();
 
-            if (!specifiers.isEmpty()) {
-                lines.add("import " + (typeOnly ? "type " : "") + "{ "
-                        + String.join(", ", specifiers) + " } from '" + path
-                        + "';");
+            if (specifiers.isEmpty()) {
+                if (defaultValue != null) {
+                    lines.add(
+                            "import " + defaultValue + " from '" + path + "';");
+                }
+
+                return;
             }
+
+            lines.add("import " + (typeOnly ? "type " : "")
+                    + (defaultValue != null ? defaultValue + ", " : "") + "{ "
+                    + String.join(", ", specifiers) + " } from '" + path
+                    + "';");
         }
     }
 }

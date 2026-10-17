@@ -17,17 +17,23 @@ package com.vaadin.hilla.generator.model;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
+
+import io.swagger.v3.oas.models.media.Schema;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.core.RootNode;
+import com.vaadin.hilla.parser.models.ArraySignatureModel;
+import com.vaadin.hilla.parser.models.BaseSignatureModel;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.FieldInfoModel;
@@ -40,6 +46,9 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
+import com.vaadin.hilla.parser.plugins.model.Annotation;
+import com.vaadin.hilla.parser.plugins.model.JvmTypeRef;
+import com.vaadin.hilla.parser.plugins.model.ValidationConstraint;
 
 /**
  * Builds the model the TypeScript generator works from out of the browser
@@ -67,6 +76,18 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
  */
 public final class EndpointModelPlugin
         extends AbstractPlugin<PluginConfiguration> {
+    /**
+     * Where the plugin building the OpenAPI definition leaves what the
+     * annotations of the validation API say about a value.
+     */
+    private static final String VALIDATION_CONSTRAINTS = "x-validation-constraints";
+
+    /**
+     * Where the plugin building the OpenAPI definition leaves the annotations
+     * of a value which a form model is told about.
+     */
+    private static final String ANNOTATIONS = "x-annotations";
+
     /**
      * What has been built below each node the walk is in, the innermost first.
      */
@@ -215,6 +236,8 @@ public final class EndpointModelPlugin
         var schema = node.getTarget();
         var optional = schema != null
                 && Boolean.TRUE.equals(schema.getNullable());
+        var constraints = constraintsOf(schema);
+        var annotations = annotationsOf(schema);
 
         // A type variable or parameter of an entity is declared by it, so it
         // is written as its name, unless it is bound to something else than
@@ -223,7 +246,8 @@ public final class EndpointModelPlugin
         if ((signature.isTypeVariable() || signature.isTypeParameter())
                 && isInEntity()) {
             return referred.isEmpty()
-                    ? new TypeModel.TypeVariable(name(signature), optional)
+                    ? new TypeModel.TypeVariable(name(signature), optional,
+                            constraints, annotations)
                     : optional ? only(referred).withOptional(true)
                             : only(referred);
         }
@@ -244,11 +268,13 @@ public final class EndpointModelPlugin
         }
 
         if (signature.isArray() || signature.isIterable()) {
-            return new TypeModel.ArrayOf(only(referred), optional);
+            return new TypeModel.ArrayOf(only(referred), optional,
+                    name(signature), constraints, annotations);
         }
 
         if (signature.isMap()) {
-            return new TypeModel.MapOf(only(referred), optional);
+            return new TypeModel.MapOf(only(referred), optional,
+                    name(signature), constraints, annotations);
         }
 
         var kind = scalarKind(signature);
@@ -258,10 +284,12 @@ public final class EndpointModelPlugin
         // what it is serialized as rather than declared on its own
         if (kind == TypeModel.ScalarKind.UNKNOWN && signature.isClassRef()
                 && isEntity(signature)) {
-            return new TypeModel.EntityRef(name(signature), referred, optional);
+            return new TypeModel.EntityRef(name(signature), referred, optional,
+                    constraints, annotations);
         }
 
-        return new TypeModel.Scalar(kind, optional, name(signature));
+        return new TypeModel.Scalar(kind, optional, name(signature),
+                constraints, annotations);
     }
 
     /**
@@ -305,9 +333,95 @@ public final class EndpointModelPlugin
         return signature.isNonJDKClass();
     }
 
+    /**
+     * What the annotations of the validation API say about a value, which the
+     * plugin building the OpenAPI definition has already read off the walk and
+     * left on the schema of the value.
+     */
+    private static List<ConstraintModel> constraintsOf(Schema<?> schema) {
+        return extensions(schema, VALIDATION_CONSTRAINTS,
+                ValidationConstraint.class)
+                .map(constraint -> new ConstraintModel(
+                        constraint.getSimpleName(),
+                        attributesOf(constraint.getAttributes())))
+                .toList();
+    }
+
+    /**
+     * The annotations of a value which a form model is told about, which the
+     * plugin building the OpenAPI definition has already picked out of the ones
+     * the property declares.
+     */
+    private static List<AnnotationModel> annotationsOf(Schema<?> schema) {
+        return extensions(schema, ANNOTATIONS, Annotation.class)
+                .map(annotation -> new AnnotationModel(annotation.getName(),
+                        attributesOf(annotation.getAttributes())))
+                .toList();
+    }
+
+    /**
+     * The attributes of an annotation as plain values, so that what writes them
+     * only meets strings, numbers, booleans, lists and maps: a class an
+     * attribute holds is the map naming it which the model library reads.
+     */
+    private static Map<String, Object> attributesOf(
+            Map<String, Object> attributes) {
+        if (attributes == null) {
+            return Map.of();
+        }
+
+        var plain = new LinkedHashMap<String, Object>();
+        attributes.forEach((name, value) -> plain.put(name, plain(value)));
+        return plain;
+    }
+
+    private static Object plain(Object value) {
+        if (value instanceof JvmTypeRef type) {
+            return Map.of("jvmType", type.getJvmType());
+        }
+
+        if (value instanceof Collection<?> values) {
+            return values.stream().map(EndpointModelPlugin::plain).toList();
+        }
+
+        if (value instanceof Map<?, ?> map) {
+            var plain = new LinkedHashMap<Object, Object>();
+            map.forEach((key, item) -> plain.put(key, plain(item)));
+            return plain;
+        }
+
+        return value;
+    }
+
+    /**
+     * What another plugin has left on the schema of a value under the given
+     * name, which is nothing at all where the plugin had nothing to say.
+     */
+    private static <T> Stream<T> extensions(Schema<?> schema, String name,
+            Class<T> type) {
+        var extensions = schema == null ? null : schema.getExtensions();
+
+        return extensions != null
+                && extensions.get(name) instanceof List<?> values
+                        ? values.stream().filter(type::isInstance).map(
+                                type::cast)
+                        : Stream.of();
+    }
+
     private static String name(SignatureModel signature) {
         if (signature instanceof ClassRefSignatureModel classRef) {
             return classRef.getClassInfo().getName();
+        }
+
+        // A primitive and an array say their own name, which is all of it:
+        // what they are annotated with belongs to the value rather than to the
+        // type, and reads as part of the name otherwise
+        if (signature instanceof BaseSignatureModel base) {
+            return base.getType().getName();
+        }
+
+        if (signature instanceof ArraySignatureModel array) {
+            return name(array.getNestedType()) + "[]";
         }
 
         return signature.get() == null ? Object.class.getName()
