@@ -265,7 +265,8 @@ final class ModelWriter {
      * primitive or a type of the JDK, or an array of one. A class of the
      * application, or an array of arrays, is left out, so that the client is
      * not told the names of the classes behind it, and a grid falls back to the
-     * model it is built from.
+     * model it is built from. So is {@code Object}, which says nothing about
+     * the value.
      */
     private static boolean isJavaTypeWritten(String javaType) {
         if (javaType == null) {
@@ -276,7 +277,8 @@ final class ModelWriter {
                 ? javaType.substring(0, javaType.length() - 2)
                 : javaType;
 
-        return PRIMITIVES.contains(type) || type.startsWith("java.");
+        return PRIMITIVES.contains(type) || (type.startsWith("java.")
+                && !type.equals(Object.class.getName()));
     }
 
     /**
