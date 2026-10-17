@@ -24,6 +24,7 @@ const ValidatedModel = m
   .property('codes', m.meta(m.constrained(m.optional(m.array(m.meta(m.constrained(m.optional(StringModel), NotBlank()), { jvmType: 'java.lang.String' }))), Size({ min: 1 })), { jvmType: 'java.lang.String[]' }))
   .property('rows', m.meta(m.constrained(m.optional(m.array(m.meta(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))), { jvmType: 'java.lang.String[]' }))), NotEmpty()), { jvmType: 'java.lang.String[][]' }))
   .property('labels', m.meta(m.constrained(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))), Size({ min: 1 })), { jvmType: 'java.lang.String[]' }))
+  .property('notes', m.meta(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))), { jvmType: 'java.lang.String[]' }))
   .property('tags', m.meta(m.constrained(m.optional(m.array(m.meta(m.constrained(m.optional(StringModel), NotBlank()), { jvmType: 'java.lang.String' }))), Size({ max: 10, min: 1 })), { jvmType: 'java.util.List' }))
   .build();
 type ValidatedModel = typeof ValidatedModel;
