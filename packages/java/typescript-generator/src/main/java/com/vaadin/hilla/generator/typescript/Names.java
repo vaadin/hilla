@@ -16,6 +16,7 @@
 package com.vaadin.hilla.generator.typescript;
 
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 /**
@@ -54,6 +55,20 @@ final class Names {
      */
     static boolean isReserved(String name) {
         return RESERVED.contains(name);
+    }
+
+    /**
+     * The given name, or the first one free of it with underscores in front,
+     * which is how a generated name gives way to one that is taken.
+     */
+    static String free(String name, Predicate<String> taken) {
+        var free = name;
+
+        while (taken.test(free)) {
+            free = "_" + free;
+        }
+
+        return free;
     }
 
     /**
