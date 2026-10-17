@@ -1,3 +1,2 @@
-import * as NonNullApiEndpoint from './NonNullApiEndpoint.js';
-
+import * as NonNullApiEndpoint from "./NonNullApiEndpoint.js";
 export { NonNullApiEndpoint };

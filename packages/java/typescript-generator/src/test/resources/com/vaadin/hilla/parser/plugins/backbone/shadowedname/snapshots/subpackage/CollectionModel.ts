@@ -1,26 +1,9 @@
-import {
-  ArrayModel,
-  ObjectModel,
-  StringModel,
-  _getPropertyModel,
-  makeObjectEmptyValueCreator,
-} from '@vaadin/hilla-lit-form';
-import type Collection from './Collection.js';
-
-class CollectionModel<T extends Collection = Collection> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(CollectionModel);
-
-  get items(): ArrayModel<ObjectModel> {
-    return this[_getPropertyModel]('items', (parent, key) =>
-      new ArrayModel(parent, key, true,
-        (parent, key) => new ObjectModel(parent, key, true),
-        { meta: { javaType: 'java.util.List' } }));
-  }
-
-  get name(): StringModel {
-    return this[_getPropertyModel]('name', (parent, key) =>
-      new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }));
-  }
-}
-
+import m, { Model, StringModel } from "@vaadin/hilla-models";
+import type Collection from "./Collection.js";
+const CollectionModel = m
+  .object<Collection>("Collection")
+  .property("items", m.meta(m.optional(m.array(m.optional(Model))), { jvmType: "java.util.List" }))
+  .property("name", m.meta(m.optional(StringModel), { jvmType: "java.lang.String" }))
+  .build();
+type CollectionModel = typeof CollectionModel;
 export default CollectionModel;

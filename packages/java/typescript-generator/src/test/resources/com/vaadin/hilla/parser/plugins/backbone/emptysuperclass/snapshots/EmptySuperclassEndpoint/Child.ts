@@ -1,7 +1,5 @@
-import type Empty from './Empty.js';
-
+import type Empty from "./Empty.js";
 interface Child extends Empty {
-  name?: string;
+    name?: string;
 }
-
 export default Child;

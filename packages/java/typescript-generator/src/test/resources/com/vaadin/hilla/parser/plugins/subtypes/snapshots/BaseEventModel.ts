@@ -1,13 +1,8 @@
-import { NumberModel, ObjectModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
-import type BaseEvent from './BaseEvent.js';
-
-class BaseEventModel<T extends BaseEvent = BaseEvent> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(BaseEventModel);
-
-  get id(): NumberModel {
-    return this[_getPropertyModel]('id', (parent, key) =>
-      new NumberModel(parent, key, false, { meta: { javaType: 'int' } }));
-  }
-}
-
+import m, { NumberModel } from "@vaadin/hilla-models";
+import type BaseEvent from "./BaseEvent.js";
+const BaseEventModel = m
+  .object<BaseEvent>("BaseEvent")
+  .property("id", m.meta(NumberModel, { jvmType: "int" }))
+  .build();
+type BaseEventModel = typeof BaseEventModel;
 export default BaseEventModel;

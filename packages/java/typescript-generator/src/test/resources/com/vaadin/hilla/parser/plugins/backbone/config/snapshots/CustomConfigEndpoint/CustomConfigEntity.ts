@@ -1,6 +1,5 @@
 interface CustomConfigEntity {
-  bar: number;
-  foo?: string;
+    bar: number;
+    foo?: string;
 }
-
 export default CustomConfigEntity;

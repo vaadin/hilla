@@ -1,3 +1,2 @@
-import * as ExtendedEndpoint from './ExtendedEndpoint.js';
-
+import * as ExtendedEndpoint from "./ExtendedEndpoint.js";
 export { ExtendedEndpoint };

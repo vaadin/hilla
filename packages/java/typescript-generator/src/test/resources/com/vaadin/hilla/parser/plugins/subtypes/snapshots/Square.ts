@@ -1,6 +1,5 @@
 interface Square {
-  side: number;
-  shape: 'square';
+    side: number;
+    shape: "square";
 }
-
 export default Square;

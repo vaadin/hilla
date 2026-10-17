@@ -1,3 +1,2 @@
-import * as SignalEndpoint from './SignalEndpoint.js';
-
+import * as SignalEndpoint from "./SignalEndpoint.js";
 export { SignalEndpoint };

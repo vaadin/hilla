@@ -1,3 +1,2 @@
-import * as JsonValueEndpoint from './JsonValueEndpoint.js';
-
+import * as JsonValueEndpoint from "./JsonValueEndpoint.js";
 export { JsonValueEndpoint };

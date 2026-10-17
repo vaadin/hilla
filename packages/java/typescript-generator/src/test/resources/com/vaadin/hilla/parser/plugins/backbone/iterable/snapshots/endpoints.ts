@@ -1,3 +1,2 @@
-import * as IterableEndpoint from './IterableEndpoint.js';
-
+import * as IterableEndpoint from "./IterableEndpoint.js";
 export { IterableEndpoint };

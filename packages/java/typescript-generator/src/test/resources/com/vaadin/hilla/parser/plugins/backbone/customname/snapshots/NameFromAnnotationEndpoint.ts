@@ -1,6 +1,4 @@
-import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
-import client from './connect-client.default.js';
-
-export async function doSomething(init?: EndpointRequestInit): Promise<void> {
-  return client.call('NameFromAnnotationEndpoint', 'doSomething', {}, init);
-}
+import { EndpointRequestInit } from "@vaadin/hilla-frontend";
+import client from "./connect-client.default.js";
+async function doSomething(init?: EndpointRequestInit): Promise<void> { return client.call("NameFromAnnotationEndpoint", "doSomething", {}, init); }
+export { doSomething };

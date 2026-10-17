@@ -1,5 +1,4 @@
 interface CustomEntity {
-  value?: string;
+    value?: string;
 }
-
 export default CustomEntity;

@@ -1,10 +1,5 @@
-import { EnumModel, _enum, makeEnumEmptyValueCreator } from '@vaadin/hilla-lit-form';
-import EnumEntity from './EnumEntity.js';
-
-class EnumEntityModel extends EnumModel<typeof EnumEntity> {
-  static override createEmptyValue = makeEnumEmptyValueCreator(EnumEntityModel);
-
-  readonly [_enum] = EnumEntity;
-}
-
+import m from "@vaadin/hilla-models";
+import EnumEntity from "./EnumEntity.js";
+const EnumEntityModel = m.enum(EnumEntity, "EnumEntity");
+type EnumEntityModel = typeof EnumEntityModel;
 export default EnumEntityModel;

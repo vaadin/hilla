@@ -1,5 +1,4 @@
 interface NestedEntity {
-  name?: string;
+    name?: string;
 }
-
 export default NestedEntity;

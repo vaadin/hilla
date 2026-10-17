@@ -1,3 +1,2 @@
-import * as BareTypeEndpoint from './BareTypeEndpoint.js';
-
+import * as BareTypeEndpoint from "./BareTypeEndpoint.js";
 export { BareTypeEndpoint };

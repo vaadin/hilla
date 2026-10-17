@@ -1,6 +1,5 @@
 interface User {
-  name?: string;
-  age: number;
+    name?: string;
+    age: number;
 }
-
 export default User;

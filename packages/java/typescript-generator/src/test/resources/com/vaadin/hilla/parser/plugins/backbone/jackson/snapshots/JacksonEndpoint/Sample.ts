@@ -1,14 +1,12 @@
-import type SampleParent from './SampleParent.js';
-
+import type SampleParent from "./SampleParent.js";
 interface Sample extends SampleParent {
-  publicProp?: string;
-  privateProp?: string;
-  privateTransientPropWithGetter?: string;
-  propertyGetterOnly?: string;
-  propertyWithDifferentField?: string;
-  propertySetterOnly?: string;
-  renamedPublicProp0?: string;
-  renamedPrivateProp0?: string;
+    privateProp?: string;
+    privateTransientPropWithGetter?: string;
+    propertyGetterOnly?: string;
+    propertySetterOnly?: string;
+    propertyWithDifferentField?: string;
+    publicProp?: string;
+    renamedPrivateProp0?: string;
+    renamedPublicProp0?: string;
 }
-
 export default Sample;

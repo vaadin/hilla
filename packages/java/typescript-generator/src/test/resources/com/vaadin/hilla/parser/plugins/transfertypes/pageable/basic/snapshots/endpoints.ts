@@ -1,3 +1,2 @@
-import * as PageableEndpoint from './PageableEndpoint.js';
-
+import * as PageableEndpoint from "./PageableEndpoint.js";
 export { PageableEndpoint };
