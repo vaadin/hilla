@@ -22,6 +22,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.hilla.generator.fixtures.EmptyEndpoint;
+import com.vaadin.hilla.generator.fixtures.GenericMethodsEndpoint;
 import com.vaadin.hilla.generator.fixtures.InheritingEndpoint;
 import com.vaadin.hilla.generator.fixtures.ProvidedTypesEndpoint;
 import com.vaadin.hilla.generator.fixtures.PushingEndpoint;
@@ -250,6 +251,48 @@ public class GeneratedTypeScriptTest {
                         }
 
                         export { shared, twice };
+                        """,
+                new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
+                        .write(endpoint).content());
+    }
+
+    /**
+     * Nothing in the file declares a type parameter or variable of a method, so
+     * it is written as what the parser resolves it to: the bound it has, the
+     * type the endpoint gives it, or an unknown type when there is neither. A
+     * class extending a date is written as the string it is serialized as, not
+     * declared on its own.
+     */
+    @Test
+    public void should_WriteTheTypesAMethodIsResolvedTo() {
+        var endpoint = endpointsOf(GenericMethodsEndpoint.class).get(0);
+
+        assertEquals(
+                """
+                        import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
+                        import client from './connect-client.default.js';
+
+                        async function echo(value: number | undefined, init?: EndpointRequestInit): Promise<number | undefined> {
+                          return client.call('GenericMethodsEndpoint', 'echo', { value }, init);
+                        }
+
+                        async function anything(value: unknown, init?: EndpointRequestInit): Promise<unknown> {
+                          return client.call('GenericMethodsEndpoint', 'anything', { value }, init);
+                        }
+
+                        async function names(names: Array<string | undefined> | undefined, init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
+                          return client.call('GenericMethodsEndpoint', 'names', { names }, init);
+                        }
+
+                        async function present(values: Array<string> | undefined, init?: EndpointRequestInit): Promise<Array<string> | undefined> {
+                          return client.call('GenericMethodsEndpoint', 'present', { values }, init);
+                        }
+
+                        async function stamp(init?: EndpointRequestInit): Promise<string | undefined> {
+                          return client.call('GenericMethodsEndpoint', 'stamp', {}, init);
+                        }
+
+                        export { echo, anything, names, present, stamp };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpoint).content());
