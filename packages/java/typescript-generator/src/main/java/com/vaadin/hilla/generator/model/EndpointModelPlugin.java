@@ -166,10 +166,7 @@ public final class EndpointModelPlugin
         // can be absent is read after what the plugins said of either
         if (signature.isTypeArgument() || signature.isTypeVariable()
                 || signature.isTypeParameter()) {
-            return referred.isEmpty()
-                    ? new TypeModel.Scalar(TypeModel.ScalarKind.UNKNOWN,
-                            optional, Object.class.getName())
-                    : only(referred).withOptional(optional);
+            return only(referred).withOptional(optional);
         }
 
         // An Optional is written as the type it holds, which can be absent:
@@ -213,8 +210,10 @@ public final class EndpointModelPlugin
             return TypeModel.ScalarKind.BOOLEAN;
         }
 
-        if (signature.hasIntegerType() || signature.hasFloatType()
-                || signature.isBigDecimal() || signature.isBigInteger()) {
+        if (signature.isInteger() || signature.isFloat() || signature.isLong()
+                || signature.isShort() || signature.isByte()
+                || signature.isDouble() || signature.isBigDecimal()
+                || signature.isBigInteger()) {
             return TypeModel.ScalarKind.NUMBER;
         }
 
@@ -229,8 +228,9 @@ public final class EndpointModelPlugin
     }
 
     /**
-     * Whether the type is generated as a declaration of its own, which every
-     * type outside the JDK is, an enum included: an enum becomes a TypeScript
+     * Whether the type comes from outside the JDK, which is what makes it a
+     * declaration of its own unless it is a scalar, such as a class extending a
+     * date. An enum of the application is declared too: it becomes a TypeScript
      * enum of its own, not the string it is serialized as.
      */
     private static boolean isEntity(SignatureModel signature) {
