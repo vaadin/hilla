@@ -205,9 +205,8 @@ public final class EndpointWriter {
      */
     private static String signalClass(MethodModel method,
             ImportRegistry imports) {
-        var signal = (TypeModel.Provided) method.returnType();
-
-        return imports.importNamed(signal.module(), signal.name(), false);
+        return imports.importNamed(method.signal().module(),
+                method.signal().name(), false);
     }
 
     /**
@@ -238,8 +237,8 @@ public final class EndpointWriter {
      * is used with.
      */
     private static TypeModel sharedValue(MethodModel method) {
-        return ((TypeModel.Provided) method.returnType()).typeArguments()
-                .stream().findFirst().orElseGet(() -> TypeModel.Scalar
+        return method.signal().typeArguments().stream().findFirst()
+                .orElseGet(() -> TypeModel.Scalar
                         .of(TypeModel.ScalarKind.NUMBER, "double"));
     }
 
@@ -282,7 +281,7 @@ public final class EndpointWriter {
         // from, which a number signal decides itself
         case VALUE_SIGNAL ->
             declared.add(ownName(parameterNames, OPTIONS_PARAMETER) + "?: "
-                    + imports.importNamed(signalsModule(method),
+                    + imports.importNamed(method.signal().module(),
                             SIGNAL_OPTIONS_TYPE, true)
                     + "<" + types.write(sharedValue(method)) + ">");
         default -> {
@@ -290,10 +289,6 @@ public final class EndpointWriter {
         }
 
         return declared;
-    }
-
-    private static String signalsModule(MethodModel method) {
-        return ((TypeModel.Provided) method.returnType()).module();
     }
 
     /**
