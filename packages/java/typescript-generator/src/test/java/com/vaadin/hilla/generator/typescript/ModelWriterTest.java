@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -146,7 +147,7 @@ public class ModelWriterTest {
             properties.add(new PropertyModel("p" + index, types[index]));
         }
 
-        return new EntityModel.Bean(javaClass, List.of(), List.of(),
-                properties);
+        return new EntityModel.Bean(javaClass, List.of(), List.of(), properties,
+                Optional.empty());
     }
 }
