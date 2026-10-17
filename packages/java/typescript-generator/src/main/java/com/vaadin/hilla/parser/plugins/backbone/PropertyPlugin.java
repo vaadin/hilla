@@ -212,7 +212,8 @@ public final class PropertyPlugin
             var named = Optional
                     .ofNullable(introspector.findSerializationPropertyOrder(
                             serializationConfig, annotatedClass))
-                    .map(Set::of).orElseGet(Set::of);
+                    .map(names -> Set.copyOf(List.of(names)))
+                    .orElseGet(Set::of);
             Predicate<BeanPropertyDefinition> ordered = property -> property
                     .hasField() || property.hasConstructorParameter()
                     || named.contains(property.getName());

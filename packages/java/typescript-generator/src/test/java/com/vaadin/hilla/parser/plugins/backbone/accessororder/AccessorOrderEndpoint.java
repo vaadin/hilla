@@ -59,9 +59,10 @@ public class AccessorOrderEndpoint {
     /**
      * An order which names only some of the properties: those keep their place,
      * and the ones it leaves out without a field come after them in the order
-     * of their names.
+     * of their names. A name the order repeats is taken once, as Jackson takes
+     * it.
      */
-    @JsonPropertyOrder({ "zeta", "field" })
+    @JsonPropertyOrder({ "zeta", "field", "zeta" })
     public static class PartlyOrdered {
         public String field;
 
