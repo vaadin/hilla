@@ -93,35 +93,33 @@ public class ImportRegistryTest {
 
     @Test
     public void should_ImportOneNamePerLineWhenTheyDoNotFitOnOne() {
-        var module = "@vaadin/hilla-lit-form";
+        var module = "@example/shapes";
 
-        imports.importNamed(module, "ArrayModel", false);
-        imports.importNamed(module, "BooleanModel", false);
-        imports.importNamed(module, "NumberModel", false);
-        imports.importNamed(module, "ObjectModel", false);
-        imports.importNamed(module, "StringModel", false);
-        imports.importNamed(module, "_getPropertyModel", false);
-        imports.importNamed(module, "makeObjectEmptyValueCreator", false);
+        for (var name : List.of("Circle", "Ellipse", "Hexagon", "Octagon",
+                "Polygon", "Rectangle", "Triangle", "createShapeFromOutline")) {
+            imports.importNamed(module, name, false);
+        }
 
         assertEquals(List.of("""
                 import {
-                  ArrayModel,
-                  BooleanModel,
-                  NumberModel,
-                  ObjectModel,
-                  StringModel,
-                  _getPropertyModel,
-                  makeObjectEmptyValueCreator,
-                } from '@vaadin/hilla-lit-form';"""), imports.write());
+                  Circle,
+                  Ellipse,
+                  Hexagon,
+                  Octagon,
+                  Polygon,
+                  Rectangle,
+                  Triangle,
+                  createShapeFromOutline,
+                } from '@example/shapes';"""), imports.write());
     }
 
     @Test
     public void should_ImportAsOneLineWhatFitsOnOne() {
-        imports.importNamed("@vaadin/hilla-lit-form", "ObjectModel", false);
-        imports.importNamed("@vaadin/hilla-lit-form", "StringModel", false);
+        imports.importNamed("@example/shapes", "Circle", false);
+        imports.importNamed("@example/shapes", "Square", false);
 
-        assertEquals(List.of(
-                "import { ObjectModel, StringModel } from '@vaadin/hilla-lit-form';"),
+        assertEquals(
+                List.of("import { Circle, Square } from '@example/shapes';"),
                 imports.write());
     }
 
