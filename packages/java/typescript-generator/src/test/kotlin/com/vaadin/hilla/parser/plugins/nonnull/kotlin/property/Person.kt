@@ -14,9 +14,6 @@ open class Person(
     private var dateOfBirth: LocalDate?,
     var important: Boolean,
 ): AbstractEntity<Long?>() {
-    // Backed by a field, so that fullName stays the only property here that
-    // exists as getter and setter alone: the JVM does not keep the order of
-    // methods, and two such properties could swap places in the output
     var age: Int? = null
         set(value) {
             field = value
@@ -30,6 +27,10 @@ open class Person(
         firstName = parts[0]
         lastName = parts[1]
     }
+    // A second property without a field, declared after fullName: the JVM
+    // lists methods in no particular order, so such properties are written
+    // in the order of their names, which puts this one first
+    fun getAlias() = firstName.lowercase()
     var luckyNumber by Delegates.notNull<Int>()
     lateinit var addresses: Map<String, Address>
     val profilePicture: String? by lazy {

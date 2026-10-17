@@ -16,12 +16,15 @@
 package com.vaadin.hilla.parser.plugins.backbone;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import org.jspecify.annotations.NonNull;
 import tools.jackson.databind.BeanDescription;
@@ -167,7 +170,7 @@ public final class PropertyPlugin
         }
 
         public Stream<JacksonPropertyModel> stream() {
-            var properties = description.findProperties().stream()
+            var properties = inStableOrder(description.findProperties())
                     .map((BeanPropertyDefinition prop) -> JacksonPropertyModel
                             .of(prop));
             properties = filterPrivateProperties(properties);
@@ -181,6 +184,30 @@ public final class PropertyPlugin
             }
 
             return filterIgnoredProperties(properties);
+        }
+
+        /**
+         * The properties in the order Jackson finds them, except for those
+         * without a field, which come after the others in the order the JVM
+         * lists the methods of the class in. That order is not the one they are
+         * declared in, and changes from one run to another, so they are put in
+         * the order of their names instead: what is generated from the same
+         * classes is then the same every time. A class saying the order of its
+         * properties with {@code @JsonPropertyOrder} keeps that order.
+         */
+        private Stream<BeanPropertyDefinition> inStableOrder(
+                List<BeanPropertyDefinition> properties) {
+            if (description.getClassAnnotations()
+                    .has(JsonPropertyOrder.class)) {
+                return properties.stream();
+            }
+
+            return Stream.concat(
+                    properties.stream()
+                            .filter(BeanPropertyDefinition::hasField),
+                    properties.stream().filter(property -> !property.hasField())
+                            .sorted(Comparator.comparing(
+                                    BeanPropertyDefinition::getName)));
         }
 
         /**
