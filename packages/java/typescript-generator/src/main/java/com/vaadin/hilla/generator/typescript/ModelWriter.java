@@ -86,6 +86,9 @@ final class ModelWriter {
         case TypeModel.ArrayOf array -> call("array", model(array.items()));
         case TypeModel.MapOf map -> call("record", model(map.values()));
         case TypeModel.EntityRef entity -> reference(entity);
+        // A value the framework provides is not bound as properties: it is
+        // whatever the module exporting it makes of it
+        case TypeModel.Provided provided -> named("ObjectModel");
         // A type variable holds whatever the declaration is used with, which
         // is nothing the model can be told about
         case TypeModel.TypeVariable variable -> named("Model");
@@ -192,6 +195,7 @@ final class ModelWriter {
         case TypeModel.ArrayOf array -> ModelConstraints.Kind.ARRAY;
         case TypeModel.MapOf map -> ModelConstraints.Kind.RECORD;
         case TypeModel.EntityRef entity -> ModelConstraints.Kind.OBJECT;
+        case TypeModel.Provided provided -> ModelConstraints.Kind.OBJECT;
         case TypeModel.TypeVariable variable -> ModelConstraints.Kind.UNKNOWN;
         };
     }
@@ -215,9 +219,10 @@ final class ModelWriter {
         case TypeModel.Scalar scalar -> scalar.javaType();
         case TypeModel.ArrayOf array -> array.javaType();
         case TypeModel.MapOf map -> map.javaType();
-        // A model of a generated type, or of whatever a type variable holds,
-        // is what tells which type it is
+        // A model of a generated type, of a type the framework provides, or
+        // of whatever a type variable holds, is what tells which type it is
         case TypeModel.EntityRef entity -> null;
+        case TypeModel.Provided provided -> null;
         case TypeModel.TypeVariable variable -> null;
         };
 

@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.hilla.generator.fixtures.EmptyEndpoint;
 import com.vaadin.hilla.generator.fixtures.GenericMethodsEndpoint;
 import com.vaadin.hilla.generator.fixtures.InheritingEndpoint;
+import com.vaadin.hilla.generator.fixtures.ProvidedTypesEndpoint;
 import com.vaadin.hilla.generator.fixtures.PushingEndpoint;
 import com.vaadin.hilla.generator.fixtures.SampleEndpoint;
 import com.vaadin.hilla.generator.fixtures.ShadowingEndpoint;
@@ -298,6 +299,34 @@ public class GeneratedTypeScriptTest {
     }
 
     @Test
+    public void should_ReferToATypeItDoesNotDeclareByName() {
+        // The browser has a file, and a module of the framework exports the
+        // signals, so nothing is generated for either of them
+        var generator = new FullStackGenerator(GeneratedTypeScriptTest.class,
+                ProvidedTypesEndpoint.class);
+
+        assertEquals(
+                """
+                        import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
+                        import type { Signal } from '@vaadin/hilla-react-signals';
+                        import client from './connect-client.default.js';
+
+                        async function signal(init?: EndpointRequestInit): Promise<Signal<string | undefined> | undefined> {
+                          return client.call('ProvidedTypesEndpoint', 'signal', {}, init);
+                        }
+
+                        async function upload(file: File | undefined, init?: EndpointRequestInit): Promise<void> {
+                          return client.call('ProvidedTypesEndpoint', 'upload', { file }, init);
+                        }
+
+                        export { signal, upload };
+                        """,
+                new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
+                        .write(generator.parseModel().get(0)).content());
+        assertEquals(List.of(), generator.parseEntities());
+    }
+
+    @Test
     public void should_WriteTheClient() {
         assertEquals("""
                 import { ConnectClient } from '@vaadin/hilla-frontend';
@@ -397,6 +426,36 @@ public class GeneratedTypeScriptTest {
     }
 
     @Test
+    public void should_WriteAPropertyOfEveryKind() {
+        // A property of a type which is not generated is referred to by name,
+        // as everywhere else, and the model of it is the one of an object: the
+        // module exporting the type is what makes a value of it
+        assertEquals(
+                """
+                        import type { Signal } from '@vaadin/hilla-react-signals';
+                        import type Kind from './Kind.js';
+                        import type Sample from './Sample.js';
+
+                        interface Mixed {
+                          count: number;
+                          active: boolean;
+                          tags?: Array<string | undefined>;
+                          counts?: Record<string, number | undefined>;
+                          kind?: Kind;
+                          sample?: Sample;
+                          words?: Array<string | undefined>;
+                          unique?: Array<string | undefined>;
+                          grouped?: Record<string, Array<string | undefined> | undefined>;
+                          maybeTags?: Array<string | undefined>;
+                          signal?: Signal<string | undefined>;
+                        }
+
+                        export default Mixed;
+                        """,
+                write(entity(SampleEndpoint.Mixed.class)).content());
+    }
+
+    @Test
     public void should_WriteWhatATypeParameterIsBoundToInsteadOfItsName() {
         // The declaration does not keep a parameter bound to something else
         // than an object, so nothing would declare the name it goes by. Of
@@ -471,7 +530,7 @@ public class GeneratedTypeScriptTest {
                 file.path());
         assertEquals(
                 """
-                        import m, { BooleanModel, NumberModel, StringModel } from '@vaadin/hilla-models';
+                        import m, { BooleanModel, NumberModel, ObjectModel, StringModel } from '@vaadin/hilla-models';
                         import KindModel from './KindModel.js';
                         import type Mixed from './Mixed.js';
                         import SampleModel from './SampleModel.js';
@@ -488,6 +547,7 @@ public class GeneratedTypeScriptTest {
                           .property('unique', m.meta(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))), { jvmType: 'java.util.Set' }))
                           .property('grouped', m.meta(m.optional(m.record(m.meta(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))), { jvmType: 'java.util.List' }))), { jvmType: 'java.util.Map' }))
                           .property('maybeTags', m.meta(m.optional(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))), { jvmType: 'java.util.List' }))
+                          .property('signal', m.optional(ObjectModel))
                           .build();
                         type MixedModel = typeof MixedModel;
 
