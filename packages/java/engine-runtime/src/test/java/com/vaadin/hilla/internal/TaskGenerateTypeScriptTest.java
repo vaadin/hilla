@@ -23,14 +23,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
 import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.hilla.ApplicationContextProvider;
+import com.vaadin.hilla.EndpointCodeGenerator;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.internal.fixtures.CustomEndpoint;
 import com.vaadin.hilla.internal.fixtures.EndpointNoValue;
@@ -79,6 +83,38 @@ public class TaskGenerateTypeScriptTest extends TaskTest {
                 Files.isRegularFile(
                         output().resolve("connect-client.default.ts")),
                 "The endpoints call the server through the generated client");
+    }
+
+    @Test
+    public void should_HandTheGenerationToTheGeneratorOfTheRunningApplication()
+            throws Exception {
+        var codeGenerator = Mockito.mock(EndpointCodeGenerator.class);
+        var applicationContext = Mockito.mock(ApplicationContext.class);
+        ObjectProvider<EndpointCodeGenerator> provider = Mockito
+                .mock(ObjectProvider.class);
+        Mockito.doReturn(codeGenerator).when(provider).getIfAvailable();
+        Mockito.doReturn(provider).when(applicationContext)
+                .getBeanProvider(EndpointCodeGenerator.class);
+
+        try (var contextProvider = Mockito
+                .mockStatic(ApplicationContextProvider.class)) {
+            contextProvider
+                    .when(() -> ApplicationContextProvider
+                            .runOnContext(Mockito.any()))
+                    .thenAnswer(invocation -> {
+                        invocation.<Consumer<ApplicationContext>> getArgument(0)
+                                .accept(applicationContext);
+                        return null;
+                    });
+
+            var configuration = getEngineConfiguration();
+            new TaskGenerateTypeScriptImpl(configuration).execute();
+
+            // The generator remembers what the TypeScript is written from, so
+            // the first change to a class needs no walk of its own
+            Mockito.verify(codeGenerator).generate(configuration,
+                    applicationContext);
+        }
     }
 
     @Test
