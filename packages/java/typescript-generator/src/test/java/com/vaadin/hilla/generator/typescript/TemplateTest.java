@@ -65,19 +65,19 @@ public class TemplateTest {
     }
 
     @Test
-    public void should_LeaveAValueStartingOnALineOfItsOwnAsItIs() {
-        // Such a value says where its own lines go, as the parameters of a
-        // method too wide for one line do
+    public void should_DropTheLineOfAHoleFilledWithNothing() {
         assertEquals("""
-                call(
-                  first,
-                  second,
-                );""",
-                Template.of("call({{parameters}});").with("parameters", """
+                interface Person {
+                }""", Template.of("""
+                interface Person {
+                  {{properties}}
+                }""").with("properties", "").fill());
+    }
 
-                          first,
-                          second,
-                        """).fill());
+    @Test
+    public void should_KeepTheLineOfAHoleWhichIsNotAloneOnIt() {
+        assertEquals("call();", Template.of("call({{arguments}});")
+                .with("arguments", "").fill());
     }
 
     @Test
