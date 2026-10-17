@@ -3,7 +3,7 @@ import type { Signal, SignalMethodOptions } from '@vaadin/hilla-react-signals';
 import { ListSignal, NumberSignal, ValueSignal } from '@vaadin/hilla-react-signals';
 import client from './connect-client.default.js';
 
-export function getNumberSignal(): NumberSignal | undefined {
+function getNumberSignal(): NumberSignal | undefined {
   return new NumberSignal(0, {
     client: client,
     endpoint: 'SignalEndpoint',
@@ -11,7 +11,7 @@ export function getNumberSignal(): NumberSignal | undefined {
   });
 }
 
-export function getStringListSignal(): ListSignal<string | undefined> | undefined {
+function getStringListSignal(): ListSignal<string | undefined> | undefined {
   return new ListSignal({
     client: client,
     endpoint: 'SignalEndpoint',
@@ -19,16 +19,16 @@ export function getStringListSignal(): ListSignal<string | undefined> | undefine
   });
 }
 
-export async function getStringSignal(init?: EndpointRequestInit): Promise<Signal<string | undefined> | undefined> {
+async function getStringSignal(init?: EndpointRequestInit): Promise<Signal<string | undefined> | undefined> {
   return client.call('SignalEndpoint', 'getStringSignal', {}, init);
 }
 
-export function getStringValueSignal(
-  options?: SignalMethodOptions<string | undefined>,
-): ValueSignal<string | undefined> | undefined {
+function getStringValueSignal(options?: SignalMethodOptions<string | undefined>): ValueSignal<string | undefined> | undefined {
   return new ValueSignal(options?.defaultValue, {
     client: client,
     endpoint: 'SignalEndpoint',
     method: 'getStringValueSignal',
   });
 }
+
+export { getNumberSignal, getStringListSignal, getStringSignal, getStringValueSignal };

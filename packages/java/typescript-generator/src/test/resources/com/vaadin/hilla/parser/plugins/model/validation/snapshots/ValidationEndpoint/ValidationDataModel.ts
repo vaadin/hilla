@@ -1,25 +1,4 @@
-import m, {
-  DecimalMax,
-  DecimalMin,
-  Digits,
-  Email,
-  Future,
-  Max,
-  Min,
-  Negative,
-  NegativeOrZero,
-  NotBlank,
-  NotEmpty,
-  NotNull,
-  Null,
-  NumberModel,
-  Past,
-  Pattern,
-  Positive,
-  PositiveOrZero,
-  Size,
-  StringModel,
-} from '@vaadin/hilla-models';
+import m, { DecimalMax, DecimalMin, Digits, Email, Future, Max, Min, Negative, NegativeOrZero, NotBlank, NotEmpty, NotNull, Null, NumberModel, Past, Pattern, Positive, PositiveOrZero, Size, StringModel } from '@vaadin/hilla-models';
 import type ValidationData from './ValidationData.js';
 
 const ValidationDataModel = m

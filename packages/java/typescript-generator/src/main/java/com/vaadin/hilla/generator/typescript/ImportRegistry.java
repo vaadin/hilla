@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 /**
  * Collects the imports of one generated file and writes them out.
@@ -199,18 +198,10 @@ final class ImportRegistry {
                 return;
             }
 
-            var start = "import " + (typeOnly ? "type " : "")
-                    + (defaultValue != null ? defaultValue + ", " : "");
-            var end = " from '" + path + "';";
-            var line = start + "{ " + String.join(", ", specifiers) + " }"
-                    + end;
-
-            // A file importing a lot from one module, which the models of a
-            // form do, reads better with a name per line than as one long one
-            lines.add(line.length() <= Layout.MAX_WIDTH ? line
-                    : start + specifiers.stream().collect(
-                            Collectors.joining(",\n  ", "{\n  ", ",\n}"))
-                            + end);
+            lines.add("import " + (typeOnly ? "type " : "")
+                    + (defaultValue != null ? defaultValue + ", " : "") + "{ "
+                    + String.join(", ", specifiers) + " } from '" + path
+                    + "';");
         }
     }
 }
