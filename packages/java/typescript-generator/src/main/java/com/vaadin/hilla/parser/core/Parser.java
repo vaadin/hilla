@@ -253,13 +253,10 @@ public final class Parser {
                 cls -> !INTERNAL_BROWSER_CALLABLES.contains(cls.getName()))
                 .toList();
 
-        var storage = new SharedStorage(config);
-
         validateEndpointExposedClassesForAclAnnotations(browserCallables);
         var rootNode = new RootNode(browserCallables);
-        var pluginManager = new PluginManager(
-                storage.getParserConfig().getPlugins());
-        pluginManager.setStorage(storage);
+        var pluginManager = new PluginManager(config.getPlugins());
+        pluginManager.setParserConfig(config);
         var pluginExecutor = new PluginExecutor(pluginManager, rootNode);
         pluginExecutor.execute();
 

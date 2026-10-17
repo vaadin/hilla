@@ -67,6 +67,30 @@ public final class TypeScriptProcessor {
     }
 
     /**
+     * Finds the browser callable classes the configuration says how to find,
+     * walks them and writes their TypeScript, which is what a build does.
+     *
+     * @return what the walk found
+     */
+    public static Generation generate(EngineAutoConfiguration conf)
+            throws BrowserCallableFinderException {
+        return generate(conf, conf.getBrowserCallableFinder().find(conf));
+    }
+
+    /**
+     * Walks the given browser callable classes and writes their TypeScript.
+     *
+     * @return what the walk found, which tells what the TypeScript is written
+     *         from
+     */
+    public static Generation generate(EngineAutoConfiguration conf,
+            List<Class<?>> browserCallables) {
+        var generation = new ParserProcessor(conf).parse(browserCallables);
+        new TypeScriptProcessor(conf).process(generation);
+        return generation;
+    }
+
+    /**
      * Writes the files of one generation, and removes what the run before it
      * left behind.
      *
