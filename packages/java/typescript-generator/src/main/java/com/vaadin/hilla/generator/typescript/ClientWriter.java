@@ -15,8 +15,6 @@
  */
 package com.vaadin.hilla.generator.typescript;
 
-import java.util.ArrayList;
-
 /**
  * Writes the client the generated endpoints call the server with, which is
  * generated unless the application provides one of its own.
@@ -43,15 +41,8 @@ public final class ClientWriter {
         var connectClient = imports.importNamed("@vaadin/hilla-frontend",
                 "ConnectClient", false);
 
-        var body = Template.of(BODY) //
+        return GeneratedFile.of(MODULE, imports, Template.of(BODY) //
                 .with("connectClient", connectClient) //
-                .fill();
-
-        var lines = new ArrayList<>(imports.write());
-        lines.add("");
-        lines.add(body);
-
-        return new GeneratedFile(MODULE + ".ts",
-                String.join("\n", lines) + "\n");
+                .fill());
     }
 }
