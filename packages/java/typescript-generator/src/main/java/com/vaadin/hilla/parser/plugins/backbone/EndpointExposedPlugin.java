@@ -99,7 +99,7 @@ public final class EndpointExposedPlugin
     private Node<?, ?> createEndpointHierarchyClassNode(
             ClassInfoModel classInfo) {
         // annotations are compared by name as Gradle can proxy them
-        var endpointExposedAnnotations = getStorage().getParserConfig()
+        var endpointExposedAnnotations = getParserConfig()
                 .getEndpointExposedAnnotations().stream().map(Class::getName)
                 .toList();
         var exposed = classInfo.getAnnotations().stream()
