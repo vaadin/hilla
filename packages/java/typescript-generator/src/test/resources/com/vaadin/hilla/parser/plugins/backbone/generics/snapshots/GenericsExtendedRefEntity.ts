@@ -1,7 +1,5 @@
-import type GenericsBareRefEntity from './GenericsBareRefEntity.js';
-
+import type GenericsBareRefEntity from "./GenericsBareRefEntity.js";
 interface GenericsExtendedRefEntity {
-  extendedGenericTypeReference?: GenericsBareRefEntity<string | undefined>;
+    extendedGenericTypeReference?: GenericsBareRefEntity<string | undefined>;
 }
-
 export default GenericsExtendedRefEntity;

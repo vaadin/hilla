@@ -1,5 +1,4 @@
 interface SubPackageDependency {
-  defaultField?: string;
+    defaultField?: string;
 }
-
 export default SubPackageDependency;

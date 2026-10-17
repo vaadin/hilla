@@ -1,6 +1,5 @@
 interface Collection<T = unknown> {
-  items?: Array<T>;
-  name?: string;
+    items?: Array<T>;
+    name?: string;
 }
-
 export default Collection;

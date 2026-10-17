@@ -1,18 +1,9 @@
-import { ObjectModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
-import type GenericsRecord from './GenericsRecord.js';
-
-class GenericsRecordModel<T extends GenericsRecord = GenericsRecord> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(GenericsRecordModel);
-
-  get first(): ObjectModel {
-    return this[_getPropertyModel]('first', (parent, key) =>
-      new ObjectModel(parent, key, true));
-  }
-
-  get second(): ObjectModel {
-    return this[_getPropertyModel]('second', (parent, key) =>
-      new ObjectModel(parent, key, true));
-  }
-}
-
+import m, { Model } from "@vaadin/hilla-models";
+import type GenericsRecord from "./GenericsRecord.js";
+const GenericsRecordModel = m
+  .object<GenericsRecord>("GenericsRecord")
+  .property("first", m.optional(Model))
+  .property("second", m.optional(Model))
+  .build();
+type GenericsRecordModel = typeof GenericsRecordModel;
 export default GenericsRecordModel;

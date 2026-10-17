@@ -1,5 +1,4 @@
 interface BaseEvent {
-  id: number;
+    id: number;
 }
-
 export default BaseEvent;

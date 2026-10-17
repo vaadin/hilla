@@ -1,7 +1,5 @@
-import type Order from './Order.js';
-
+import type Order from "./Order.js";
 interface Sort {
-  orders: Array<Order | undefined>;
+    orders: Array<Order | undefined>;
 }
-
 export default Sort;

@@ -1,6 +1,5 @@
 interface SampleParent {
-  publicParentProperty?: string;
-  privateParentProperty?: string;
+    privateParentProperty?: string;
+    publicParentProperty?: string;
 }
-
 export default SampleParent;
