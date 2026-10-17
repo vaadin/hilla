@@ -72,10 +72,10 @@ public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
     }
 
     @Override
-    public void setStorage(SharedStorage storage) {
-        super.setStorage(storage);
-        plugins.iterator()
-                .forEachRemaining(plugin -> plugin.setStorage(storage));
+    public void setParserConfig(Parser.Config parserConfig) {
+        super.setParserConfig(parserConfig);
+        plugins.iterator().forEachRemaining(
+                plugin -> plugin.setParserConfig(parserConfig));
     }
 
     private void verifyPluginsOrder() {
