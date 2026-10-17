@@ -50,6 +50,11 @@ public sealed interface TypeModel {
     List<AnnotationModel> annotations();
 
     /**
+     * The same type, said to be absent or not as given.
+     */
+    TypeModel withOptional(boolean optional);
+
+    /**
      * The types which TypeScript expresses without a declaration of their own.
      */
     enum ScalarKind {
@@ -79,6 +84,12 @@ public sealed interface TypeModel {
         public static Scalar of(ScalarKind kind, String javaType) {
             return new Scalar(kind, false, javaType);
         }
+
+        @Override
+        public Scalar withOptional(boolean optional) {
+            return new Scalar(kind, optional, javaType, constraints,
+                    annotations);
+        }
     }
 
     /**
@@ -100,6 +111,12 @@ public sealed interface TypeModel {
         public ArrayOf(TypeModel items, boolean optional, String javaType) {
             this(items, optional, javaType, List.of(), List.of());
         }
+
+        @Override
+        public ArrayOf withOptional(boolean optional) {
+            return new ArrayOf(items, optional, javaType, constraints,
+                    annotations);
+        }
     }
 
     /**
@@ -119,6 +136,12 @@ public sealed interface TypeModel {
 
         public MapOf(TypeModel values, boolean optional, String javaType) {
             this(values, optional, javaType, List.of(), List.of());
+        }
+
+        @Override
+        public MapOf withOptional(boolean optional) {
+            return new MapOf(values, optional, javaType, constraints,
+                    annotations);
         }
     }
 
@@ -147,6 +170,12 @@ public sealed interface TypeModel {
         public static EntityRef of(String javaClass) {
             return new EntityRef(javaClass, List.of(), false);
         }
+
+        @Override
+        public EntityRef withOptional(boolean optional) {
+            return new EntityRef(javaClass, typeArguments, optional,
+                    constraints, annotations);
+        }
     }
 
     /**
@@ -168,6 +197,11 @@ public sealed interface TypeModel {
 
         public static TypeVariable of(String name) {
             return new TypeVariable(name, false);
+        }
+
+        @Override
+        public TypeVariable withOptional(boolean optional) {
+            return new TypeVariable(name, optional, constraints, annotations);
         }
     }
 }
