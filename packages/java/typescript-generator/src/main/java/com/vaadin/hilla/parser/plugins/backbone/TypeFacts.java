@@ -31,8 +31,20 @@ import com.vaadin.hilla.parser.models.SignatureModel;
  * of.
  */
 public final class TypeFacts {
+    /**
+     * The name the plugin reading the annotations of the validation API says
+     * what they mean for a value under.
+     */
+    public static final String CONSTRAINTS = "constraints";
+
+    /**
+     * The name the annotations of a value which a form model is told about are
+     * said under.
+     */
+    public static final String ANNOTATIONS = "annotations";
+
     private final List<TypeFacts> typeArguments = new ArrayList<>();
-    private final Map<String, Object> notes = new LinkedHashMap<>();
+    private final Map<String, List<?>> notes = new LinkedHashMap<>();
     private final boolean collectsTypeArguments;
     private boolean optional;
 
@@ -96,11 +108,11 @@ public final class TypeFacts {
 
     /**
      * Says something about the type under the given name, which the plugin
-     * reading it back knows the shape of. Saying it again replaces what was
-     * said before.
+     * reading it back knows the shape of the values of. Saying it again
+     * replaces what was said before.
      */
-    public void note(String name, Object value) {
-        notes.put(name, value);
+    public void note(String name, List<?> values) {
+        notes.put(name, values);
     }
 
     /**
@@ -108,9 +120,8 @@ public final class TypeFacts {
      * the given type, which is nothing at all where nothing was said.
      */
     public <T> Stream<T> notes(String name, Class<T> type) {
-        return notes.get(name) instanceof List<?> values
-                ? values.stream().filter(type::isInstance).map(type::cast)
-                : Stream.of();
+        return notes.getOrDefault(name, List.of()).stream()
+                .filter(type::isInstance).map(type::cast);
     }
 
     private static boolean canBeAbsent(SignatureModel type,
