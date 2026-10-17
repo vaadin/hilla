@@ -27,10 +27,11 @@ open class Person(
         firstName = parts[0]
         lastName = parts[1]
     }
-    // A second property without a field, declared after fullName: the JVM
-    // lists methods in no particular order, so such properties are written
-    // in the order of their names, which puts this one first
+    // More properties without a field, declared so that neither their order
+    // nor its reverse is the order of their names: the JVM lists methods in
+    // no particular order, so such properties are written by their names
     fun getAlias() = firstName.lowercase()
+    fun getBadge() = lastName.uppercase()
     var luckyNumber by Delegates.notNull<Int>()
     lateinit var addresses: Map<String, Address>
     val profilePicture: String? by lazy {
