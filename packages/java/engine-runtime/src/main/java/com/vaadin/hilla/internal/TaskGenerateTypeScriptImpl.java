@@ -15,14 +15,13 @@
  */
 package com.vaadin.hilla.internal;
 
-import java.util.List;
+import java.util.Objects;
 
 import com.vaadin.flow.server.frontend.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 import com.vaadin.hilla.ApplicationContextProvider;
 import com.vaadin.hilla.EndpointCodeGenerator;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
-import com.vaadin.hilla.engine.ParserProcessor;
 import com.vaadin.hilla.engine.TypeScriptProcessor;
 
 /**
@@ -35,8 +34,8 @@ import com.vaadin.hilla.engine.TypeScriptProcessor;
  * writers have what they need. The task of the endpoints is left with nothing
  * to do.
  */
-public class TaskGenerateTypeScriptImpl extends AbstractTaskEndpointGenerator
-        implements TaskGenerateOpenAPI {
+public class TaskGenerateTypeScriptImpl implements TaskGenerateOpenAPI {
+    private final EngineAutoConfiguration engineConfiguration;
 
     /**
      * Create a task for writing the TypeScript of the endpoints.
@@ -45,7 +44,8 @@ public class TaskGenerateTypeScriptImpl extends AbstractTaskEndpointGenerator
      *            Hilla engine configuration instance
      */
     TaskGenerateTypeScriptImpl(EngineAutoConfiguration engineConfiguration) {
-        super(engineConfiguration);
+        this.engineConfiguration = Objects.requireNonNull(engineConfiguration,
+                "Engine configuration cannot be null");
     }
 
     /**
@@ -55,35 +55,31 @@ public class TaskGenerateTypeScriptImpl extends AbstractTaskEndpointGenerator
      */
     @Override
     public void execute() throws ExecutionFailedException {
-        var engineConfiguration = getEngineConfiguration();
         if (engineConfiguration.isProductionMode()) {
             try {
-                var browserCallables = engineConfiguration
-                        .getBrowserCallableFinder().find(engineConfiguration);
-                write(engineConfiguration, browserCallables);
+                TypeScriptProcessor.generate(engineConfiguration);
             } catch (Exception e) {
                 throw new ExecutionFailedException(
                         "Failed to write the TypeScript of the endpoints", e);
             }
         } else {
+            // The generator of the running application is told what the
+            // TypeScript is written from, which spares it a walk of its own
+            // on the first change to a class
             ApplicationContextProvider.runOnContext(applicationContext -> {
-                List<Class<?>> browserCallables = EndpointCodeGenerator
-                        .findBrowserCallables(engineConfiguration,
-                                applicationContext);
-                write(engineConfiguration, browserCallables);
+                var codeGenerator = applicationContext
+                        .getBeanProvider(EndpointCodeGenerator.class)
+                        .getIfAvailable();
+
+                if (codeGenerator != null) {
+                    codeGenerator.generate(engineConfiguration,
+                            applicationContext);
+                } else {
+                    TypeScriptProcessor.generate(engineConfiguration,
+                            EndpointCodeGenerator.findBrowserCallables(
+                                    engineConfiguration, applicationContext));
+                }
             });
         }
-    }
-
-    /**
-     * Runs the parser over the browser callable classes and writes the
-     * TypeScript of the endpoints out of what it found.
-     */
-    private static void write(EngineAutoConfiguration engineConfiguration,
-            List<Class<?>> browserCallables) {
-        var generation = new ParserProcessor(engineConfiguration)
-                .parse(browserCallables);
-
-        new TypeScriptProcessor(engineConfiguration).process(generation);
     }
 }
