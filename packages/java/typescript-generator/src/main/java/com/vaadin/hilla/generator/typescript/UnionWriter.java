@@ -15,7 +15,6 @@
  */
 package com.vaadin.hilla.generator.typescript;
 
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import com.vaadin.hilla.generator.model.UnionModel;
@@ -50,17 +49,12 @@ public final class UnionWriter {
                 .map(member -> writeMember(member, types))
                 .collect(Collectors.joining(SEPARATOR));
 
-        var body = Template.of(UNION) //
-                .with("name", name) //
-                .with("subTypes", subTypes) //
-                .fill();
-
-        var lines = new ArrayList<>(imports.write());
-        lines.add("");
-        lines.add(body);
-
-        return new GeneratedFile(ModulePaths.fileOf(union.javaClass() + SUFFIX),
-                String.join("\n", lines) + "\n");
+        return GeneratedFile.of(
+                ModulePaths.moduleOf(union.javaClass() + SUFFIX), imports,
+                Template.of(UNION) //
+                        .with("name", name) //
+                        .with("subTypes", subTypes) //
+                        .fill());
     }
 
     /**
