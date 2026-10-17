@@ -33,7 +33,7 @@ public final class EndpointWriter {
     private static final String SUBSCRIPTION_TYPE = "Subscription";
 
     private static final String METHOD = """
-            export async function {{method}}({{parameters}}): Promise<{{returnType}}> {
+            async function {{method}}({{parameters}}): Promise<{{returnType}}> {
               return {{client}}.call('{{endpoint}}', '{{method}}', {{arguments}}, {{init}});
             }""";
 
@@ -43,7 +43,7 @@ public final class EndpointWriter {
      * the options of a single request.
      */
     private static final String SUBSCRIPTION = """
-            export function {{method}}({{parameters}}): {{subscription}}<{{returnType}}> {
+            function {{method}}({{parameters}}): {{subscription}}<{{returnType}}> {
               return {{client}}.subscribe('{{endpoint}}', '{{method}}', {{arguments}});
             }""";
 
@@ -59,12 +59,10 @@ public final class EndpointWriter {
     }
 
     public GeneratedFile write(EndpointModel endpoint) {
-        var path = endpoint.name() + ".ts";
-
         // An endpoint without a callable method still gets a file, so that
         // whatever imports it finds a module rather than nothing
         if (endpoint.methods().isEmpty()) {
-            return new GeneratedFile(path, "export {};\n");
+            return new GeneratedFile(endpoint.name() + ".ts", "export {};\n");
         }
 
         var imports = new ImportRegistry();
@@ -88,11 +86,11 @@ public final class EndpointWriter {
                 method -> writeMethod(endpoint, method, imports, types, client))
                 .toList();
 
-        var lines = new ArrayList<>(imports.write());
-        lines.add("");
-        lines.add(String.join("\n\n", methods));
+        var exports = GeneratedFile.exportList(
+                endpoint.methods().stream().map(MethodModel::name).toList());
 
-        return new GeneratedFile(path, String.join("\n", lines) + "\n");
+        return GeneratedFile.of(endpoint.name(), imports,
+                String.join("\n\n", methods) + "\n\n" + exports);
     }
 
     private String writeMethod(EndpointModel endpoint, MethodModel method,
@@ -100,27 +98,9 @@ public final class EndpointWriter {
         var init = initParameter(method);
         var declared = declaredParameters(method, init, imports, types);
 
-        var written = fill(endpoint, method, String.join(", ", declared), types,
-                client, init, imports);
-
-        // Written again with the parameters on a line each when the first line
-        // came out too wide to read
-        if (firstLineOf(written).length() <= Layout.MAX_WIDTH) {
-            return written;
-        }
-
-        return fill(endpoint, method,
-                declared.stream()
-                        .collect(Collectors.joining(",\n  ", "\n  ", ",\n")),
-                types, client, init, imports);
-    }
-
-    private String fill(EndpointModel endpoint, MethodModel method,
-            String parameters, TypeWriter types, String client, String init,
-            ImportRegistry imports) {
         var template = Template.of(method.pushes() ? SUBSCRIPTION : METHOD) //
                 .with("method", method.name()) //
-                .with("parameters", parameters) //
+                .with("parameters", String.join(", ", declared)) //
                 .with("returnType", types.write(method.returnType())) //
                 .with("client", client) //
                 .with("endpoint", endpoint.name()) //
@@ -132,10 +112,6 @@ public final class EndpointWriter {
                                 imports.importNamed(HILLA_FRONTEND,
                                         SUBSCRIPTION_TYPE, true))
                 : template.with("init", init)).fill();
-    }
-
-    private static String firstLineOf(String method) {
-        return method.lines().findFirst().orElse("");
     }
 
     /**
