@@ -12,6 +12,8 @@ interface Person extends AbstractEntity {
   luckyNumber: number;
   addresses: Record<string, Address>;
   profilePicture?: string;
+  alias: string;
+  badge: string;
   fullName: string;
 }
 
