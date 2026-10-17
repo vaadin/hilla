@@ -21,19 +21,25 @@ import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.core.RootNode;
+import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
+import com.vaadin.hilla.parser.models.FieldInfoModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
+import com.vaadin.hilla.parser.models.SpecializedModel;
+import com.vaadin.hilla.parser.models.TypeParameterModel;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
-import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
+import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
+import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 
 /**
  * Builds the model the TypeScript generator works from out of the browser
@@ -66,16 +72,18 @@ public final class EndpointModelPlugin
      */
     private final Deque<Frame> frames = new ArrayDeque<>();
     private final List<EndpointModel> endpoints = new ArrayList<>();
+    private final List<EntityModel> entities = new ArrayList<>();
 
     /**
      * What has been built below one node, which the node is built from once the
      * walk leaves it.
      */
     private record Frame(Node<?, ?> node, List<TypeModel> types,
-            List<ParameterModel> parameters, Map<String, MethodModel> methods) {
+            List<ParameterModel> parameters, Map<String, MethodModel> methods,
+            List<PropertyModel> properties) {
         Frame(Node<?, ?> node) {
             this(node, new ArrayList<>(), new ArrayList<>(),
-                    new LinkedHashMap<>());
+                    new LinkedHashMap<>(), new ArrayList<>());
         }
     }
 
@@ -86,6 +94,14 @@ public final class EndpointModelPlugin
         return List.copyOf(endpoints);
     }
 
+    /**
+     * The types the endpoints of the last run refer to, in the order the walk
+     * reached them.
+     */
+    public List<EntityModel> getEntities() {
+        return List.copyOf(entities);
+    }
+
     @Override
     public void enter(NodePath<?> nodePath) {
         if (nodePath.getNode() instanceof RootNode) {
@@ -93,6 +109,7 @@ public final class EndpointModelPlugin
             // each of them describes the whole set of endpoints
             frames.clear();
             endpoints.clear();
+            entities.clear();
         }
 
         frames.push(new Frame(nodePath.getNode()));
@@ -103,13 +120,18 @@ public final class EndpointModelPlugin
         var own = frames.pop();
         var parent = frames.peek();
 
-        if (own.node() instanceof TypeSignatureNode type) {
+        if (own.node() instanceof TypedNode type) {
             parent.types().add(buildType(type, own.types()));
         } else if (own.node() instanceof MethodParameterNode parameter) {
             parent.parameters().add(new ParameterModel(parameter.getTarget(),
                     only(own.types())));
         } else if (own.node() instanceof MethodNode method) {
             collectMethod(method, own);
+        } else if (own.node() instanceof PropertyNode property) {
+            parent.properties().add(
+                    new PropertyModel(property.getTarget(), only(own.types())));
+        } else if (own.node() instanceof EntityNode entity) {
+            entities.add(buildEntity(entity, List.copyOf(own.properties())));
         } else if (own.node() instanceof EndpointNode endpoint) {
             endpoints.add(new EndpointModel(endpoint.getTarget().getName(),
                     endpoint.getSource().getName(),
@@ -141,23 +163,69 @@ public final class EndpointModelPlugin
     }
 
     /**
+     * Builds the declaration of a type the endpoints refer to. An enum is the
+     * constants it is serialized as; anything else is the properties it
+     * declares, on top of the ones it inherits from the types it extends.
+     */
+    private static EntityModel buildEntity(EntityNode node,
+            List<PropertyModel> ownProperties) {
+        var cls = node.getSource();
+
+        if (cls.isEnum()) {
+            return new EntityModel.Enumeration(cls.getName(),
+                    cls.getFields().stream().filter(FieldInfoModel::isPublic)
+                            .map(FieldInfoModel::getName).toList());
+        }
+
+        return new EntityModel.Bean(cls.getName(), typeParameters(cls),
+                superTypes(cls), ownProperties);
+    }
+
+    /**
+     * The type parameters of a declaration, which are the ones the generated
+     * TypeScript can express: a parameter bound to something else than an
+     * object stands for that bound instead.
+     */
+    private static List<String> typeParameters(ClassInfoModel cls) {
+        return cls.getTypeParameters().stream()
+                .filter(parameter -> parameter.getBounds().stream()
+                        .filter(Objects::nonNull)
+                        .allMatch(SpecializedModel::isNativeObject))
+                .map(TypeParameterModel::getName).toList();
+    }
+
+    /**
+     * The types a declaration extends, which are the ones generated as
+     * declarations themselves: the properties of a JDK superclass are the
+     * properties of the type itself as far as the generator is concerned.
+     */
+    private static List<TypeModel.EntityRef> superTypes(ClassInfoModel cls) {
+        return cls.getSuperClass().filter(ClassRefSignatureModel::isNonJDKClass)
+                .map(ref -> TypeModel.EntityRef
+                        .of(ref.getClassInfo().getName()))
+                .map(List::of).orElseGet(List::of);
+    }
+
+    /**
      * Builds the type of one signature out of the types built for the
      * signatures it refers to, such as the items of an array.
      */
-    private TypeModel buildType(TypeSignatureNode node,
-            List<TypeModel> referred) {
+    private TypeModel buildType(TypedNode node, List<TypeModel> referred) {
         var signature = node.getType();
         var schema = node.getTarget();
         var optional = schema != null
                 && Boolean.TRUE.equals(schema.getNullable());
 
         // A type variable or parameter of an entity is declared by it, so it
-        // is written as its name. Anywhere else nothing declares it: the
-        // parser resolves it to what it stands for, the type it is bound to
-        // or the bound it has, and the walk visits that below it
+        // is written as its name, unless it is bound to something else than
+        // an object: it then stands for that bound, which the walk visits
+        // below it, since the declaration does not keep such a parameter
         if ((signature.isTypeVariable() || signature.isTypeParameter())
                 && isInEntity()) {
-            return new TypeModel.TypeVariable(name(signature));
+            return referred.isEmpty()
+                    ? new TypeModel.TypeVariable(name(signature), optional)
+                    : optional ? only(referred).withOptional(true)
+                            : only(referred);
         }
 
         // A type argument, such as the String of a List<String>, stands for

@@ -40,7 +40,23 @@ final class TypeWriter {
     }
 
     String write(TypeModel type) {
-        var written = switch (type) {
+        var written = writeRequired(type);
+
+        // A type variable stands for whatever the declaration is used with,
+        // which says for itself whether it can be absent
+        var union = type.optional()
+                && !(type instanceof TypeModel.TypeVariable);
+
+        return union ? written + " | undefined" : written;
+    }
+
+    /**
+     * Writes the type without the union with {@code undefined} which an
+     * optional value is written as, for the places saying the same thing
+     * another way, such as the {@code ?} marker of an optional property.
+     */
+    String writeRequired(TypeModel type) {
+        return switch (type) {
         case TypeModel.Scalar scalar -> write(scalar.kind());
         case TypeModel.ArrayOf array -> "Array<" + write(array.items()) + ">";
         case TypeModel.MapOf map ->
@@ -48,8 +64,6 @@ final class TypeWriter {
         case TypeModel.EntityRef entity -> write(entity);
         case TypeModel.TypeVariable variable -> variable.name();
         };
-
-        return type.optional() ? written + " | undefined" : written;
     }
 
     private static String write(TypeModel.ScalarKind kind) {
