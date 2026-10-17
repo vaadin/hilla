@@ -15,7 +15,6 @@
  */
 package com.vaadin.hilla.generator.typescript;
 
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,36 +27,28 @@ import com.vaadin.hilla.generator.model.PropertyModel;
 public final class EntityWriter {
     private static final String BEAN = """
             interface {{declaration}} {
-            {{properties}}
+              {{properties}}
             }
-
-            export default {{name}};""";
-
-    /**
-     * A type whose properties are all inherited, or which has none at all,
-     * which TypeScript still needs the braces of.
-     */
-    private static final String EMPTY_BEAN = """
-            interface {{declaration}} {}
 
             export default {{name}};""";
 
     private static final String ENUMERATION = """
             enum {{name}} {
-            {{constants}}
+              {{constants}}
             }
 
             export default {{name}};""";
 
     public GeneratedFile write(EntityModel entity) {
-        return new GeneratedFile(ModulePaths.fileOf(entity.javaClass()),
-                switch (entity) {
-                case EntityModel.Bean bean -> write(bean);
-                case EntityModel.Enumeration enumeration -> write(enumeration);
-                });
+        var module = ModulePaths.moduleOf(entity.javaClass());
+
+        return switch (entity) {
+        case EntityModel.Bean bean -> write(module, bean);
+        case EntityModel.Enumeration enumeration -> write(module, enumeration);
+        };
     }
 
-    private static String write(EntityModel.Bean bean) {
+    private static GeneratedFile write(String module, EntityModel.Bean bean) {
         var name = ModulePaths.entityName(bean.javaClass());
         var imports = new ImportRegistry();
 
@@ -82,26 +73,28 @@ public final class EntityWriter {
                                 .map(EntityWriter::writeDiscriminator))
                 .collect(Collectors.joining("\n"));
 
-        var body = Template.of(properties.isEmpty() ? EMPTY_BEAN : BEAN) //
+        var body = Template.of(BEAN) //
                 .with("declaration", declaration) //
                 .with("properties", properties) //
                 .with("name", name) //
                 .fill();
 
-        return file(imports, body);
+        return GeneratedFile.of(module, imports, body);
     }
 
-    private static String write(EntityModel.Enumeration enumeration) {
+    private static GeneratedFile write(String module,
+            EntityModel.Enumeration enumeration) {
         var name = ModulePaths.entityName(enumeration.javaClass());
 
         var constants = enumeration.constants().stream()
-                .map(constant -> "  " + constant + " = '" + constant + "',")
+                .map(constant -> constant + " = '" + constant + "',")
                 .collect(Collectors.joining("\n"));
 
-        return file(new ImportRegistry(), Template.of(ENUMERATION) //
-                .with("name", name) //
-                .with("constants", constants) //
-                .fill());
+        return GeneratedFile.of(module, new ImportRegistry(),
+                Template.of(ENUMERATION) //
+                        .with("name", name) //
+                        .with("constants", constants) //
+                        .fill());
     }
 
     /**
@@ -110,8 +103,8 @@ public final class EntityWriter {
      */
     private static String writeProperty(PropertyModel property,
             TypeWriter types) {
-        return "  " + property.name() + (property.type().optional() ? "?" : "")
-                + ": " + types.writeRequired(property.type()) + ";";
+        return property.name() + (property.type().optional() ? "?" : "") + ": "
+                + types.writeRequired(property.type()) + ";";
     }
 
     /**
@@ -121,7 +114,7 @@ public final class EntityWriter {
      */
     private static String writeDiscriminator(
             EntityModel.Discriminator discriminator) {
-        return "  " + Names.property(discriminator.name()) + ": "
+        return Names.property(discriminator.name()) + ": "
                 + discriminator.acceptedValues().stream()
                         .map(value -> "'" + value + "'")
                         .collect(Collectors.joining(" | "))
@@ -147,17 +140,5 @@ public final class EntityWriter {
 
         return bean.superTypes().stream().map(types::writeRequired)
                 .collect(Collectors.joining(", ", " extends ", ""));
-    }
-
-    private static String file(ImportRegistry imports, String body) {
-        var lines = new ArrayList<>(imports.write());
-
-        if (!lines.isEmpty()) {
-            lines.add("");
-        }
-
-        lines.add(body);
-
-        return String.join("\n", lines) + "\n";
     }
 }
