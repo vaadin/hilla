@@ -323,7 +323,8 @@ public class GeneratedTypeScriptTest {
     @Test
     public void should_WriteAnEntityWithoutProperties() {
         assertEquals("""
-                interface Marker {}
+                interface Marker {
+                }
 
                 export default Marker;
                 """, write(entity(SampleEndpoint.Marker.class)).content());
