@@ -182,8 +182,10 @@ public class TypeScriptComparator {
 
     /**
      * The content with what only the layout of a file decides taken out: the
-     * quotes a string is written in, whitespace, whether an import of types
-     * says so, and trailing commas.
+     * quotes a string is written in, whitespace outside strings, whether an
+     * import of types says so, and trailing commas. A string is read as the
+     * value it stands for and written again in one way, so one which would not
+     * parse still differs from one which would.
      *
      * <p>
      * Temporary: most snapshots are still laid out the way the Node generator
@@ -193,9 +195,48 @@ public class TypeScriptComparator {
      * alone goes unnoticed.
      */
     private static String withoutFormatting(String content) {
-        return content.replace("\\'", "'").replace("\\\"", "\"")
-                .replace('"', '\'').replace("import type {", "import {")
-                .replaceAll(",(\\s*[}\\])])", "$1").replaceAll("\\s+", "");
+        var result = new StringBuilder();
+        var i = 0;
+
+        while (i < content.length()) {
+            var c = content.charAt(i);
+
+            if (c == '\'' || c == '"') {
+                var value = new StringBuilder();
+                var end = i + 1;
+
+                while (end < content.length() && content.charAt(end) != c) {
+                    var next = content.charAt(end);
+
+                    // An escaped quote stands for the quote; any other escape
+                    // is kept as it is written
+                    if (next == '\\' && end + 1 < content.length()) {
+                        var escaped = content.charAt(++end);
+
+                        if (escaped != '\'' && escaped != '"') {
+                            value.append('\\');
+                        }
+
+                        next = escaped;
+                    }
+
+                    value.append(next);
+                    end++;
+                }
+
+                result.append('\'').append(value.toString().replace("'", "\\'"))
+                        .append('\'');
+                i = end + 1;
+            } else if (!Character.isWhitespace(c)) {
+                result.append(c);
+                i++;
+            } else {
+                i++;
+            }
+        }
+
+        return result.toString().replace("importtype{", "import{")
+                .replaceAll(",([}\\])])", "$1");
     }
 
     private String normalizeLineEndings(String content) {
