@@ -68,12 +68,6 @@
       <artifactId>jakarta.annotation-api</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>io.swagger.parser.v3</groupId>
-      <artifactId>swagger-parser-v3</artifactId>
-      <version>${swagger.parser.v3.version}</version>
-      <scope>test</scope>
-    </dependency>
     <!-- The tasks write the TypeScript of the endpoints themselves now,
          so the generator is needed where they are compiled as well -->
     <dependency>

@@ -34,6 +34,7 @@ import org.springframework.context.ApplicationContext;
 
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 
 /**
  * Verifies what a change has to touch to be worth generating the TypeScript of
@@ -141,6 +142,39 @@ public class EndpointCodeGeneratorTest {
                             .orElse(Set.of()),
                     "Writing the TypeScript says anew what a change has to"
                             + " touch");
+        }
+    }
+
+    @Test
+    public void should_KnowTheClassesOfTheGenerationOfTheBuild() {
+        var applicationContext = mockApplicationContext();
+
+        try (var applicationConfiguration = mockApplicationConfiguration();
+                var contextProvider = Mockito
+                        .mockStatic(ApplicationContextProvider.class)) {
+            // Nothing to ask a context for: what is known has to come from the
+            // generation the build ran
+            contextProvider
+                    .when(ApplicationContextProvider::getApplicationContext)
+                    .thenReturn(null);
+
+            var endpointCodeGenerator = endpointCodeGenerator();
+            endpointCodeGenerator
+                    .generate(
+                            new EngineAutoConfiguration.Builder()
+                                    .baseDir(projectFolder.toPath())
+                                    .outputDir(projectFolder.toPath()
+                                            .resolve("generated"))
+                                    .withDefaultAnnotations().build(),
+                            applicationContext);
+
+            assertEquals(
+                    Set.of(ChangedEndpoint.class.getName(),
+                            Changed.class.getName()),
+                    endpointCodeGenerator.getClassesUsedInEndpoints()
+                            .orElse(Set.of()),
+                    "The first change is compared against the generation"
+                            + " the build wrote");
         }
     }
 

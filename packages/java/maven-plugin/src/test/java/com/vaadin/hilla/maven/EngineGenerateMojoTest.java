@@ -54,7 +54,8 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
 
                     // What the parser found, so that the test says which
                     // generation the writers are handed rather than none
-                    Mockito.doReturn(GENERATION).when(mock).getGeneration();
+                    Mockito.doReturn(GENERATION).when(mock)
+                            .parse(Mockito.anyList());
                 });
                 var mockedConstructionGenerator = Mockito.mockConstruction(
                         TypeScriptProcessor.class, Mockito.withSettings()
@@ -89,7 +90,7 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                     .getFirst();
 
             var inOrder = Mockito.inOrder(parserProcessor, typeScriptProcessor);
-            inOrder.verify(parserProcessor).process(List.of());
+            inOrder.verify(parserProcessor).parse(List.of());
             // The writers are handed what the parser found, which is what the
             // TypeScript of the endpoints is written from
             inOrder.verify(typeScriptProcessor).process(GENERATION);
