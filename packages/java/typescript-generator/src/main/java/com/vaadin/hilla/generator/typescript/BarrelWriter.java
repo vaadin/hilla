@@ -30,16 +30,6 @@ public final class BarrelWriter {
      */
     public static final String MODULE = "endpoints";
 
-    private static final String EXPORTS = """
-            export { {{endpoints}} };""";
-
-    /**
-     * What a barrel with no endpoint to re-export says, which keeps the file a
-     * module.
-     */
-    private static final String NOTHING = """
-            export {};""";
-
     public GeneratedFile write(List<EndpointModel> endpoints) {
         var imports = new ImportRegistry();
         var names = new ArrayList<String>();
@@ -53,18 +43,7 @@ public final class BarrelWriter {
             names.add(local.equals(name) ? name : local + " as " + name);
         });
 
-        var lines = new ArrayList<>(imports.write());
-
-        if (names.isEmpty()) {
-            lines.add(NOTHING);
-        } else {
-            lines.add("");
-            lines.add(Template.of(EXPORTS) //
-                    .with("endpoints", String.join(", ", names)) //
-                    .fill());
-        }
-
-        return new GeneratedFile(MODULE + ".ts",
-                String.join("\n", lines) + "\n");
+        return GeneratedFile.of(MODULE, imports,
+                GeneratedFile.exportList(names));
     }
 }

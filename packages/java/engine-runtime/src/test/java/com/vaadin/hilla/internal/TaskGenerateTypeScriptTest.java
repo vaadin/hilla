@@ -23,14 +23,23 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
 import com.vaadin.flow.di.Lookup;
+import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.hilla.ApplicationContextProvider;
+import com.vaadin.hilla.Endpoint;
+import com.vaadin.hilla.EndpointCodeGenerator;
+import com.vaadin.hilla.EndpointController;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.internal.fixtures.CustomEndpoint;
 import com.vaadin.hilla.internal.fixtures.EndpointNoValue;
@@ -57,13 +66,15 @@ public class TaskGenerateTypeScriptTest extends TaskTest {
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
                         import client from './connect-client.default.js';
 
-                        export async function bar(baz: string | undefined, init?: EndpointRequestInit): Promise<string | undefined> {
+                        async function bar(baz: string | undefined, init?: EndpointRequestInit): Promise<string | undefined> {
                           return client.call('MyEndpoint', 'bar', { baz }, init);
                         }
 
-                        export async function foo(bar: string | undefined, init?: EndpointRequestInit): Promise<void> {
+                        async function foo(bar: string | undefined, init?: EndpointRequestInit): Promise<void> {
                           return client.call('MyEndpoint', 'foo', { bar }, init);
                         }
+
+                        export { bar, foo };
                         """,
                 read("MyEndpoint.ts"));
         assertEquals("""
@@ -77,6 +88,44 @@ public class TaskGenerateTypeScriptTest extends TaskTest {
                 Files.isRegularFile(
                         output().resolve("connect-client.default.ts")),
                 "The endpoints call the server through the generated client");
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void should_TellTheGeneratorOfTheApplicationWhatItWrote()
+            throws Exception {
+        var codeGenerator = new EndpointCodeGenerator(
+                Mockito.mock(VaadinContext.class),
+                Mockito.mock(EndpointController.class));
+        ObjectProvider<EndpointCodeGenerator> provider = Mockito
+                .mock(ObjectProvider.class);
+        Mockito.doReturn(codeGenerator).when(provider).getIfAvailable();
+        var applicationContext = Mockito.mock(ApplicationContext.class);
+        Mockito.doReturn(provider).when(applicationContext)
+                .getBeanProvider(EndpointCodeGenerator.class);
+        Mockito.doReturn(Map.of("myEndpoint", new MyEndpoint()))
+                .when(applicationContext)
+                .getBeansWithAnnotation(Endpoint.class);
+
+        try (var contextProvider = Mockito
+                .mockStatic(ApplicationContextProvider.class)) {
+            contextProvider
+                    .when(() -> ApplicationContextProvider
+                            .runOnContext(Mockito.any()))
+                    .thenAnswer(invocation -> {
+                        invocation.<Consumer<ApplicationContext>> getArgument(0)
+                                .accept(applicationContext);
+                        return null;
+                    });
+
+            new TaskGenerateTypeScriptImpl(getEngineConfiguration()).execute();
+        }
+
+        assertTrue(Files.isRegularFile(output().resolve("MyEndpoint.ts")),
+                "The generator of the application writes the TypeScript");
+        assertEquals(Set.of(MyEndpoint.class.getName()),
+                codeGenerator.getClassesUsedInEndpoints().orElse(Set.of()),
+                "The first change is compared against what the build wrote");
     }
 
     @Test

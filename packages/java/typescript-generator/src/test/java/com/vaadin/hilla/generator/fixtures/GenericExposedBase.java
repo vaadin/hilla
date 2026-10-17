@@ -13,16 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.hilla.parser.core;
+package com.vaadin.hilla.generator.fixtures;
 
-public final class SharedStorage {
-    private final Parser.Config parserConfig;
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 
-    SharedStorage(Parser.Config parserConfig) {
-        this.parserConfig = parserConfig;
-    }
-
-    public Parser.Config getParserConfig() {
-        return parserConfig;
+/**
+ * Exposes a method whose types are given by the endpoint extending it.
+ */
+@EndpointExposed
+public abstract class GenericExposedBase<T> {
+    public T echo(T value) {
+        return value;
     }
 }

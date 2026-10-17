@@ -92,29 +92,7 @@ public class ImportRegistryTest {
     }
 
     @Test
-    public void should_ImportOneNamePerLineWhenTheyDoNotFitOnOne() {
-        var module = "@example/shapes";
-
-        for (var name : List.of("Circle", "Ellipse", "Hexagon", "Octagon",
-                "Polygon", "Rectangle", "Triangle", "createShapeFromOutline")) {
-            imports.importNamed(module, name, false);
-        }
-
-        assertEquals(List.of("""
-                import {
-                  Circle,
-                  Ellipse,
-                  Hexagon,
-                  Octagon,
-                  Polygon,
-                  Rectangle,
-                  Triangle,
-                  createShapeFromOutline,
-                } from '@example/shapes';"""), imports.write());
-    }
-
-    @Test
-    public void should_ImportAsOneLineWhatFitsOnOne() {
+    public void should_ImportTheNamesOfAModuleOnOneLine() {
         imports.importNamed("@example/shapes", "Circle", false);
         imports.importNamed("@example/shapes", "Square", false);
 

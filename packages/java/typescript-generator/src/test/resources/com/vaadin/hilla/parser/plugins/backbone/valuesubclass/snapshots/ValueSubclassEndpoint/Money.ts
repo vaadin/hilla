@@ -1,3 +1,4 @@
-interface Money {}
+interface Money {
+}
 
 export default Money;

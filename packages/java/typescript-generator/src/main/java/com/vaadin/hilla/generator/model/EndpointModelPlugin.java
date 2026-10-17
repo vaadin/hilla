@@ -15,8 +15,10 @@
  */
 package com.vaadin.hilla.generator.model;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
+import java.util.Collection;
+import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +50,7 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 import com.vaadin.hilla.parser.plugins.model.Annotation;
+import com.vaadin.hilla.parser.plugins.model.JvmTypeRef;
 import com.vaadin.hilla.parser.plugins.model.ValidationConstraint;
 import com.vaadin.hilla.parser.plugins.subtypes.SubTypesPlugin;
 import com.vaadin.hilla.transfertypes.annotations.FromModule;
@@ -77,10 +80,10 @@ import com.vaadin.hilla.transfertypes.annotations.FromModule;
  */
 public final class EndpointModelPlugin
         extends AbstractPlugin<PluginConfiguration> {
-    private final Map<Node<?, ?>, List<TypeModel>> types = new IdentityHashMap<>();
-    private final Map<Node<?, ?>, List<ParameterModel>> parameters = new IdentityHashMap<>();
-    private final Map<Node<?, ?>, Map<String, MethodModel>> methods = new IdentityHashMap<>();
-    private final Map<Node<?, ?>, List<PropertyModel>> properties = new IdentityHashMap<>();
+    /**
+     * What has been built below each node the walk is in, the innermost first.
+     */
+    private final Deque<Frame> frames = new ArrayDeque<>();
     /**
      * The endpoints by the name the client calls them by, which is what tells
      * one from another: two classes of the same name, in packages of their own,
@@ -132,6 +135,19 @@ public final class EndpointModelPlugin
      */
     public Generation getGeneration() {
         return new Generation(getEndpoints(), getEntities(), getUnions());
+    }
+
+    /**
+     * What has been built below one node, which the node is built from once the
+     * walk leaves it.
+     */
+    private record Frame(Node<?, ?> node, List<TypeModel> types,
+            List<ParameterModel> parameters, Map<String, MethodModel> methods,
+            List<PropertyModel> properties) {
+        Frame(Node<?, ?> node) {
+            this(node, new ArrayList<>(), new ArrayList<>(),
+                    new LinkedHashMap<>(), new ArrayList<>());
+        }
     }
 
     /**
@@ -196,40 +212,40 @@ public final class EndpointModelPlugin
         if (nodePath.getNode() instanceof RootNode) {
             // The plugin can be handed to more than one run of the parser, and
             // each of them describes the whole set of endpoints
-            types.clear();
-            parameters.clear();
-            methods.clear();
-            properties.clear();
+            frames.clear();
             endpoints.clear();
             entities.clear();
             unions.clear();
         }
+
+        frames.push(new Frame(nodePath.getNode()));
     }
 
     @Override
     public void exit(NodePath<?> nodePath) {
-        var node = nodePath.getNode();
+        var own = frames.pop();
+        var parent = frames.peek();
 
-        if (node instanceof TypedNode type) {
-            collect(parentOf(nodePath), buildType(type, taken(node)));
-        } else if (node instanceof MethodParameterNode parameter) {
-            collect(parentOf(nodePath), parameter, taken(node));
-        } else if (node instanceof MethodNode method) {
-            collectMethod(nodePath, method);
-        } else if (node instanceof PropertyNode property) {
-            collect(parentOf(nodePath), property, taken(node));
-        } else if (node instanceof EntityNode entity
+        if (own.node() instanceof TypedNode type) {
+            parent.types().add(buildType(type, own.types()));
+        } else if (own.node() instanceof MethodParameterNode parameter) {
+            parent.parameters().add(new ParameterModel(parameter.getTarget(),
+                    only(own.types())));
+        } else if (own.node() instanceof MethodNode method) {
+            collectMethod(method, own);
+        } else if (own.node() instanceof PropertyNode property) {
+            parent.properties().add(buildProperty(property, own.types()));
+        } else if (own.node() instanceof EntityNode entity
                 && !isProvided(entity.getSource().getName())) {
-            entities.add(buildEntity(entity,
-                    properties.getOrDefault(node, List.of())));
-        } else if (node instanceof SubTypesPlugin.UnionNode union) {
+            entities.add(buildEntity(entity, List.copyOf(own.properties())));
+        } else if (own.node() instanceof SubTypesPlugin.UnionNode union) {
             unions.put(union.getSource().getName(), union.getTarget());
-        } else if (node instanceof EndpointNode endpoint) {
+        } else if (own.node() instanceof EndpointNode endpoint) {
             var name = endpoint.getTarget();
 
-            endpoints.put(name, new EndpointModel(name,
-                    endpoint.getSource().getName(), List.copyOf(
-                            methods.getOrDefault(node, Map.of()).values())));
+            endpoints.put(name,
+                    new EndpointModel(name, endpoint.getSource().getName(),
+                            List.copyOf(own.methods().values())));
         }
     }
 
@@ -244,21 +260,20 @@ public final class EndpointModelPlugin
      * TypeScript does not. The last one wins, which is what the endpoint is
      * called with, since a call names the method rather than its signature.
      */
-    private void collectMethod(NodePath<?> nodePath, MethodNode node) {
-        var returnType = taken(node).stream().findFirst().orElseGet(
+    private void collectMethod(MethodNode node, Frame own) {
+        var returnType = own.types().stream().findFirst().orElseGet(
                 () -> TypeModel.Scalar.of(TypeModel.ScalarKind.VOID, "void"));
 
         var pushed = pushedValue(returnType);
 
         var method = new MethodModel(node.getSource().getName(),
-                parameters.getOrDefault(node, List.of()),
-                pushed.orElse(returnType),
+                List.copyOf(own.parameters()), pushed.orElse(returnType),
                 pushed.map(values -> MethodModel.Kind.SUBSCRIBED)
                         .orElseGet(() -> kindOf(returnType)));
 
-        findEndpoint(nodePath).ifPresent(endpoint -> methods
-                .computeIfAbsent(endpoint, key -> new LinkedHashMap<>())
-                .put(method.name(), method));
+        frames.stream().filter(frame -> frame.node() instanceof EndpointNode)
+                .findFirst().ifPresent(endpoint -> endpoint.methods()
+                        .put(method.name(), method));
     }
 
     /**
@@ -285,19 +300,7 @@ public final class EndpointModelPlugin
                 : MethodModel.Kind.CALLED;
     }
 
-    private void collect(Node<?, ?> parent, TypeModel type) {
-        types.computeIfAbsent(parent, key -> new ArrayList<>()).add(type);
-    }
-
-    private void collect(Node<?, ?> parent, MethodParameterNode node,
-            List<TypeModel> ownTypes) {
-        var type = only(ownTypes);
-
-        parameters.computeIfAbsent(parent, key -> new ArrayList<>())
-                .add(new ParameterModel(node.getTarget(), type));
-    }
-
-    private void collect(Node<?, ?> parent, PropertyNode node,
+    private static PropertyModel buildProperty(PropertyNode node,
             List<TypeModel> ownTypes) {
         var type = only(ownTypes);
 
@@ -312,10 +315,9 @@ public final class EndpointModelPlugin
         var absent = isOptional(node.getSource())
                 || node.getValueType().isOptional();
 
-        properties.computeIfAbsent(parent, key -> new ArrayList<>())
-                .add(new PropertyModel(node.getTarget(),
-                        type instanceof TypeModel.TypeVariable && !absent ? type
-                                : asAbsent(type, absent)));
+        return new PropertyModel(node.getTarget(),
+                type instanceof TypeModel.TypeVariable && !absent ? type
+                        : type.withOptional(absent));
     }
 
     /**
@@ -404,26 +406,32 @@ public final class EndpointModelPlugin
         var constraints = constraintsOf(type);
         var annotations = annotationsOf(type);
 
-        // A type parameter bound to something else than an object stands for
-        // that bound, which the walk visits below it, since the declaration
-        // does not keep such a parameter
-        if (signature.isTypeVariable() || signature.isTypeParameter()) {
+        // A type variable or parameter of an entity is declared by it, so it
+        // is written as its name, unless it is bound to something else than
+        // an object: it then stands for that bound, which the walk visits
+        // below it, since the declaration does not keep such a parameter
+        if ((signature.isTypeVariable() || signature.isTypeParameter())
+                && isInEntity()) {
             return referred.isEmpty()
                     ? new TypeModel.TypeVariable(name(signature), optional,
                             constraints, annotations)
-                    : optional ? asOptional(only(referred)) : only(referred);
+                    : optional ? only(referred).withOptional(true)
+                            : only(referred);
         }
 
-        // A type argument, such as the String of a List<String>, stands for the
-        // type it is bound to, which the walk visits below it
-        if (signature.isTypeArgument()) {
-            return asAbsent(only(referred), optional);
+        // A type argument, such as the String of a List<String>, stands for
+        // the type it is bound to as well. What the walk says of it is what it
+        // says of that type, which the parser hands up in place of its own, so
+        // whether the value can be absent is read after the plugins said it
+        if (signature.isTypeArgument() || signature.isTypeVariable()
+                || signature.isTypeParameter()) {
+            return only(referred).withOptional(optional);
         }
 
         // An Optional is written as the type it holds, which can be absent:
         // TypeScript has nothing of its own for it
         if (signature.isOptional()) {
-            return asOptional(only(referred));
+            return only(referred).withOptional(true);
         }
 
         if (signature.isArray() || signature.isIterable()) {
@@ -452,35 +460,12 @@ public final class EndpointModelPlugin
     }
 
     /**
-     * The type a signature standing for another one is written as: what the
-     * walk says about the standing signature decides whether a value of it can
-     * be absent, since that is where an annotation on a type argument, a
-     * wildcard or a type parameter belongs.
+     * Whether the walk is inside an entity, where the parser keeps type
+     * variables and parameters as they are rather than resolving them.
      */
-    private static TypeModel asAbsent(TypeModel type, boolean optional) {
-        return switch (type) {
-        case TypeModel.Scalar scalar ->
-            new TypeModel.Scalar(scalar.kind(), optional, scalar.javaType(),
-                    scalar.constraints(), scalar.annotations());
-        case TypeModel.ArrayOf array ->
-            new TypeModel.ArrayOf(array.items(), optional, array.javaType(),
-                    array.constraints(), array.annotations());
-        case TypeModel.MapOf map -> new TypeModel.MapOf(map.values(), optional,
-                map.javaType(), map.constraints(), map.annotations());
-        case TypeModel.EntityRef entity ->
-            new TypeModel.EntityRef(entity.javaClass(), entity.typeArguments(),
-                    optional, entity.constraints(), entity.annotations());
-        case TypeModel.Provided provided -> new TypeModel.Provided(
-                provided.name(), provided.module(), provided.typeArguments(),
-                optional, provided.constraints(), provided.annotations());
-        case TypeModel.TypeVariable variable ->
-            new TypeModel.TypeVariable(variable.name(), optional,
-                    variable.constraints(), variable.annotations());
-        };
-    }
-
-    private static TypeModel asOptional(TypeModel type) {
-        return asAbsent(type, true);
+    private boolean isInEntity() {
+        return frames.stream()
+                .anyMatch(frame -> frame.node() instanceof EntityNode);
     }
 
     private static TypeModel.ScalarKind scalarKind(SignatureModel signature) {
@@ -497,7 +482,8 @@ public final class EndpointModelPlugin
 
         if (signature.isString() || signature.isCharacter()
                 || signature.isDate() || signature.isDateTime()
-                || signature.isEnum()) {
+                // An enum of the application is declared on its own instead
+                || (signature.isEnum() && !isEntity(signature))) {
             return TypeModel.ScalarKind.STRING;
         }
 
@@ -546,8 +532,9 @@ public final class EndpointModelPlugin
     }
 
     /**
-     * Whether the type is generated as a declaration of its own, which every
-     * type outside the JDK is, an enum included: an enum becomes a TypeScript
+     * Whether the type comes from outside the JDK, which is what makes it a
+     * declaration of its own unless it is a scalar, such as a class extending a
+     * date. An enum of the application is declared too: it becomes a TypeScript
      * enum of its own, not the string it is serialized as.
      */
     private static boolean isEntity(SignatureModel signature) {
@@ -562,8 +549,7 @@ public final class EndpointModelPlugin
         return notes(type, TypeFacts.CONSTRAINTS, ValidationConstraint.class)
                 .map(constraint -> new ConstraintModel(
                         constraint.getSimpleName(),
-                        constraint.getAttributes() == null ? Map.of()
-                                : constraint.getAttributes()))
+                        attributesOf(constraint.getAttributes())))
                 .toList();
     }
 
@@ -575,9 +561,42 @@ public final class EndpointModelPlugin
     private static List<AnnotationModel> annotationsOf(TypeFacts type) {
         return notes(type, TypeFacts.ANNOTATIONS, Annotation.class)
                 .map(annotation -> new AnnotationModel(annotation.getName(),
-                        annotation.getAttributes() == null ? Map.of()
-                                : annotation.getAttributes()))
+                        attributesOf(annotation.getAttributes())))
                 .toList();
+    }
+
+    /**
+     * The attributes of an annotation as plain values, so that what writes them
+     * only meets strings, numbers, booleans, lists and maps: a class an
+     * attribute holds is the map naming it which the model library reads.
+     */
+    private static Map<String, Object> attributesOf(
+            Map<String, Object> attributes) {
+        if (attributes == null) {
+            return Map.of();
+        }
+
+        var plain = new LinkedHashMap<String, Object>();
+        attributes.forEach((name, value) -> plain.put(name, plain(value)));
+        return plain;
+    }
+
+    private static Object plain(Object value) {
+        if (value instanceof JvmTypeRef type) {
+            return Map.of("jvmType", type.getJvmType());
+        }
+
+        if (value instanceof Collection<?> values) {
+            return values.stream().map(EndpointModelPlugin::plain).toList();
+        }
+
+        if (value instanceof Map<?, ?> map) {
+            var plain = new LinkedHashMap<Object, Object>();
+            map.forEach((key, item) -> plain.put(key, plain(item)));
+            return plain;
+        }
+
+        return value;
     }
 
     /**
@@ -628,20 +647,4 @@ public final class EndpointModelPlugin
         return types.stream().findFirst().orElseGet(() -> TypeModel.Scalar
                 .of(TypeModel.ScalarKind.UNKNOWN, Object.class.getName()));
     }
-
-    private List<TypeModel> taken(Node<?, ?> node) {
-        var own = types.remove(node);
-        return own == null ? List.of() : own;
-    }
-
-    private static Node<?, ?> parentOf(NodePath<?> nodePath) {
-        return nodePath.getParentPath().getNode();
-    }
-
-    private static Optional<Node<?, ?>> findEndpoint(NodePath<?> nodePath) {
-        return nodePath.getParentPath().stream()
-                .<Node<?, ?>> map(NodePath::getNode)
-                .filter(node -> node instanceof EndpointNode).findFirst();
-    }
-
 }
