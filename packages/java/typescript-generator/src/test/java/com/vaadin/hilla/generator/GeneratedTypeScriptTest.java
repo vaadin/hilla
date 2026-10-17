@@ -29,12 +29,14 @@ import com.vaadin.hilla.generator.fixtures.ShadowingEndpoint;
 import com.vaadin.hilla.generator.fixtures.ValidatedEndpoint;
 import com.vaadin.hilla.generator.model.EndpointModel;
 import com.vaadin.hilla.generator.model.EntityModel;
+import com.vaadin.hilla.generator.model.UnionModel;
 import com.vaadin.hilla.generator.typescript.BarrelWriter;
 import com.vaadin.hilla.generator.typescript.ClientWriter;
 import com.vaadin.hilla.generator.typescript.EndpointWriter;
 import com.vaadin.hilla.generator.typescript.EntityWriter;
 import com.vaadin.hilla.generator.typescript.FormModelWriter;
 import com.vaadin.hilla.generator.typescript.GeneratedFile;
+import com.vaadin.hilla.generator.typescript.UnionWriter;
 import com.vaadin.hilla.parser.testutils.FullStackGenerator;
 
 /**
@@ -47,6 +49,8 @@ public class GeneratedTypeScriptTest {
     private static final List<EntityModel> entities = new FullStackGenerator(
             GeneratedTypeScriptTest.class, SampleEndpoint.class)
             .parseEntities();
+    private static final List<UnionModel> unions = new FullStackGenerator(
+            GeneratedTypeScriptTest.class, SampleEndpoint.class).parseUnions();
 
     @Test
     public void should_WriteTheEndpoint() {
@@ -59,10 +63,12 @@ public class GeneratedTypeScriptTest {
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
                         import type Bounded from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Bounded.js';
                         import type Detailed from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Detailed.js';
+                        import type Figure from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Figure.js';
                         import type Kind from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Kind.js';
                         import type Marker from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Marker.js';
                         import type Mixed from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Mixed.js';
                         import type Sample from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Sample.js';
+                        import type Shaded from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Shaded.js';
                         import type Wrapper from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Wrapper.js';
                         import client from './connect-client.default.js';
 
@@ -88,6 +94,10 @@ public class GeneratedTypeScriptTest {
 
                         async function detailed(init?: EndpointRequestInit): Promise<Detailed | undefined> {
                           return client.call('SampleEndpoint', 'detailed', {}, init);
+                        }
+
+                        async function figure(init?: EndpointRequestInit): Promise<Figure | undefined> {
+                          return client.call('SampleEndpoint', 'figure', {}, init);
                         }
 
                         async function find(id: string | undefined, init?: EndpointRequestInit): Promise<Sample | undefined> {
@@ -134,11 +144,15 @@ public class GeneratedTypeScriptTest {
                           return client.call('SampleEndpoint', 'required', { name }, init);
                         }
 
+                        async function shaded(init?: EndpointRequestInit): Promise<Shaded | undefined> {
+                          return client.call('SampleEndpoint', 'shaded', {}, init);
+                        }
+
                         async function wrapped(init?: EndpointRequestInit): Promise<Wrapper<Sample | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'wrapped', {}, init);
                         }
 
-                        export { all, bounded, count, counts, describe, detailed, find, greet, kind, marker, maybe, maybeCounts, maybeNames, mixed, names, ping, required, wrapped };
+                        export { all, bounded, count, counts, describe, detailed, figure, find, greet, kind, marker, maybe, maybeCounts, maybeNames, mixed, names, ping, required, shaded, wrapped };
                         """,
                 file.content());
     }
@@ -566,6 +580,112 @@ public class GeneratedTypeScriptTest {
                 """, file.content());
     }
 
+    @Test
+    public void should_WriteWhichSubtypeAValueOfAPolymorphicTypeCanBe() {
+        // A subtype accepting the discriminator of the one below it is
+        // narrowed to its own value, or a value of it would be a value of both
+        var file = new UnionWriter().write(union(SampleEndpoint.Figure.class));
+
+        assertEquals(
+                "com/vaadin/hilla/generator/fixtures/SampleEndpoint/FigureUnion.ts",
+                file.path());
+        assertEquals(
+                """
+                        import type Blank from './Figure/Blank.js';
+                        import type Ring from './Figure/Ring.js';
+                        import type Round from './Figure/Round.js';
+
+                        type FigureUnion = (Round & { '@type': 'round' }) | Ring | Blank;
+
+                        export default FigureUnion;
+                        """,
+                file.content());
+    }
+
+    @Test
+    public void should_WriteTheDiscriminatorOfASubtypeAsTheValuesItAccepts() {
+        assertEquals("""
+                import type Figure from '../Figure.js';
+
+                interface Round extends Figure {
+                  radius: number;
+                  '@type': 'round' | 'ring';
+                }
+
+                export default Round;
+                """,
+                write(entity(SampleEndpoint.Figure.Round.class)).content());
+    }
+
+    @Test
+    public void should_PinTheDiscriminatorOfTheModelOfASubtype() {
+        // The empty value of a subtype has to say which subtype it is for the
+        // server to read it back, so the model holds the ids the type accepts:
+        // one of its own, or its own and the ones of the subtypes below it
+        assertEquals(
+                """
+                        import m, { NumberModel } from '@vaadin/hilla-models';
+                        import FigureModel from '../FigureModel.js';
+                        import type Round from './Round.js';
+
+                        const RoundModel = m
+                          .extend(FigureModel)
+                          .object<Round>('Round')
+                          .property('radius', m.meta(NumberModel, { jvmType: 'double' }))
+                          .property('@type', m.union(m.literal('round'), m.literal('ring')))
+                          .build();
+                        type RoundModel = typeof RoundModel;
+
+                        export default RoundModel;
+                        """,
+                writeModel(entity(SampleEndpoint.Figure.Round.class))
+                        .content());
+        assertEquals("""
+                import m from '@vaadin/hilla-models';
+                import FigureModel from '../FigureModel.js';
+                import type Blank from './Blank.js';
+
+                const BlankModel = m
+                  .extend(FigureModel)
+                  .object<Blank>('Blank')
+                  .property('@type', m.literal('blank'))
+                  .build();
+                type BlankModel = typeof BlankModel;
+
+                export default BlankModel;
+                """, writeModel(entity(SampleEndpoint.Figure.Blank.class))
+                .content());
+    }
+
+    @Test
+    public void should_WriteASubtypeWithNothingOfItsOwnAsItsIdAlone() {
+        assertEquals("""
+                import type Figure from '../Figure.js';
+
+                interface Blank extends Figure {
+                  '@type': 'blank';
+                }
+
+                export default Blank;
+                """,
+                write(entity(SampleEndpoint.Figure.Blank.class)).content());
+    }
+
+    @Test
+    public void should_WriteADeclaredDiscriminatorAsTheIdRatherThanTwice() {
+        // The property is declared by the type of the hierarchy which holds
+        // it, so the subtype has it as the id it accepts and nothing else
+        assertEquals("""
+                import type Shaded from '../Shaded.js';
+
+                interface Pale extends Shaded {
+                  shade: 'pale';
+                }
+
+                export default Pale;
+                """, write(entity(SampleEndpoint.Shaded.Pale.class)).content());
+    }
+
     private static GeneratedFile write(EntityModel entity) {
         return new EntityWriter().write(entity);
     }
@@ -586,6 +706,13 @@ public class GeneratedTypeScriptTest {
                 .filter(entity -> entity.javaClass()
                         .equals(ValidatedEndpoint.Validated.class.getName()))
                 .findFirst().orElseThrow();
+    }
+
+    private static UnionModel union(Class<?> javaClass) {
+        return unions.stream()
+                .filter(union -> union.javaClass().equals(javaClass.getName()))
+                .findFirst().orElseThrow(() -> new AssertionError(
+                        "Nothing was generated for " + javaClass));
     }
 
     private static EntityModel entity(Class<?> javaClass) {
