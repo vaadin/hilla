@@ -17,6 +17,7 @@ package com.vaadin.hilla.parser.plugins.backbone.enumtype;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
@@ -45,6 +46,10 @@ public class EnumTypeEndpoint {
         return value;
     }
 
+    public NumberedEnum echoNumbered(NumberedEnum value) {
+        return value;
+    }
+
     /**
      * Constants Jackson writes under a name of their own, one of which
      * TypeScript only accepts as a string.
@@ -53,6 +58,15 @@ public class EnumTypeEndpoint {
         @JsonProperty("very-low")
         VERY_LOW, @JsonProperty("it's high")
         HIGH, UNCHANGED
+    }
+
+    /**
+     * Constants Jackson writes as numbers, which keep their names in the
+     * generated enum, since that holds strings.
+     */
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
+    public enum NumberedEnum {
+        FIRST, SECOND
     }
 
     public enum EnumEntity {

@@ -1,5 +1,6 @@
 import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
 import type EnumEntity from './com/vaadin/hilla/parser/plugins/backbone/enumtype/EnumTypeEndpoint/EnumEntity.js';
+import type NumberedEnum from './com/vaadin/hilla/parser/plugins/backbone/enumtype/EnumTypeEndpoint/NumberedEnum.js';
 import type RenamedEnum from './com/vaadin/hilla/parser/plugins/backbone/enumtype/EnumTypeEndpoint/RenamedEnum.js';
 import client from './connect-client.default.js';
 
@@ -9,6 +10,10 @@ async function echoEnum(value: EnumEntity | undefined, init?: EndpointRequestIni
 
 async function echoListEnum(enumList: Array<EnumEntity | undefined> | undefined, init?: EndpointRequestInit): Promise<Array<EnumEntity | undefined> | undefined> {
   return client.call('EnumTypeEndpoint', 'echoListEnum', { enumList }, init);
+}
+
+async function echoNumbered(value: NumberedEnum | undefined, init?: EndpointRequestInit): Promise<NumberedEnum | undefined> {
+  return client.call('EnumTypeEndpoint', 'echoNumbered', { value }, init);
 }
 
 async function echoRenamed(value: RenamedEnum | undefined, init?: EndpointRequestInit): Promise<RenamedEnum | undefined> {
@@ -23,4 +28,4 @@ async function setEnum(value: EnumEntity | undefined, init?: EndpointRequestInit
   return client.call('EnumTypeEndpoint', 'setEnum', { value }, init);
 }
 
-export { echoEnum, echoListEnum, echoRenamed, getEnum, setEnum };
+export { echoEnum, echoListEnum, echoNumbered, echoRenamed, getEnum, setEnum };
