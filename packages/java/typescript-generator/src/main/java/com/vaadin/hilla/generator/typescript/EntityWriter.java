@@ -15,7 +15,6 @@
  */
 package com.vaadin.hilla.generator.typescript;
 
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import com.vaadin.hilla.generator.model.EntityModel;
@@ -49,14 +48,15 @@ public final class EntityWriter {
             export default {{name}};""";
 
     public GeneratedFile write(EntityModel entity) {
-        return new GeneratedFile(ModulePaths.fileOf(entity.javaClass()),
-                switch (entity) {
-                case EntityModel.Bean bean -> write(bean);
-                case EntityModel.Enumeration enumeration -> write(enumeration);
-                });
+        var module = ModulePaths.moduleOf(entity.javaClass());
+
+        return switch (entity) {
+        case EntityModel.Bean bean -> write(module, bean);
+        case EntityModel.Enumeration enumeration -> write(module, enumeration);
+        };
     }
 
-    private static String write(EntityModel.Bean bean) {
+    private static GeneratedFile write(String module, EntityModel.Bean bean) {
         var name = ModulePaths.entityName(bean.javaClass());
         var imports = new ImportRegistry();
 
@@ -79,20 +79,22 @@ public final class EntityWriter {
                 .with("name", name) //
                 .fill();
 
-        return file(imports, body);
+        return GeneratedFile.of(module, imports, body);
     }
 
-    private static String write(EntityModel.Enumeration enumeration) {
+    private static GeneratedFile write(String module,
+            EntityModel.Enumeration enumeration) {
         var name = ModulePaths.entityName(enumeration.javaClass());
 
         var constants = enumeration.constants().stream()
                 .map(constant -> "  " + constant + " = '" + constant + "',")
                 .collect(Collectors.joining("\n"));
 
-        return file(new ImportRegistry(), Template.of(ENUMERATION) //
-                .with("name", name) //
-                .with("constants", constants) //
-                .fill());
+        return GeneratedFile.of(module, new ImportRegistry(),
+                Template.of(ENUMERATION) //
+                        .with("name", name) //
+                        .with("constants", constants) //
+                        .fill());
     }
 
     /**
@@ -124,17 +126,5 @@ public final class EntityWriter {
 
         return bean.superTypes().stream().map(types::writeRequired)
                 .collect(Collectors.joining(", ", " extends ", ""));
-    }
-
-    private static String file(ImportRegistry imports, String body) {
-        var lines = new ArrayList<>(imports.write());
-
-        if (!lines.isEmpty()) {
-            lines.add("");
-        }
-
-        lines.add(body);
-
-        return String.join("\n", lines) + "\n";
     }
 }
