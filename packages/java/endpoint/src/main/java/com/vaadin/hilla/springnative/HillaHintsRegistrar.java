@@ -15,16 +15,13 @@
  */
 package com.vaadin.hilla.springnative;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
+import io.github.classgraph.ClassGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aot.hint.MemberCategory;
@@ -34,8 +31,10 @@ import org.springframework.aot.hint.TypeReference;
 
 import com.vaadin.flow.router.MenuData;
 import com.vaadin.flow.server.menu.AvailableViewInfo;
-import com.vaadin.hilla.OpenAPIUtil;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
+import com.vaadin.hilla.engine.ParserProcessor;
+import com.vaadin.hilla.generator.model.EndpointModel;
+import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.push.PushEndpoint;
 import com.vaadin.hilla.push.messages.fromclient.AbstractServerMessage;
 import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
@@ -45,13 +44,17 @@ import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
  */
 public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
 
-    private static final String openApiResourceName = "/"
-            + EngineAutoConfiguration.OPEN_API_PATH;
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
-        registerEndpointTypes(hints);
+        try {
+            registerEndpointTypes(hints, classLoader);
+        } catch (RuntimeException e) {
+            // The rest of the hints are worth registering even where the
+            // classes of the endpoints cannot be walked
+            logger.error("Unable to register the types of the endpoints", e);
+        }
 
         hints.resources().registerPattern("file-routes.json");
         hints.reflection().registerType(MenuData.class,
@@ -70,34 +73,74 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
         }
     }
 
-    private void registerEndpointTypes(RuntimeHints hints) {
-        try {
-            var resource = getClass().getResource(openApiResourceName);
-            if (resource == null) {
-                logger.error("Resource {} is not available",
-                        openApiResourceName);
-                return;
-            } else {
-                logger.info(
-                        "Resource {} is being used for registering endpoint types",
-                        openApiResourceName);
-            }
+    /**
+     * Registers the classes the browser reaches: the browser callable ones and
+     * the types their methods send and take, which are what the values are
+     * serialized from and into at runtime.
+     *
+     * <p>
+     * They are found by walking the classes the way the generator does, which
+     * is what says which types an endpoint exposes.
+     */
+    private void registerEndpointTypes(RuntimeHints hints,
+            ClassLoader classLoader) {
+        var configuration = new EngineAutoConfiguration.Builder()
+                .withDefaultAnnotations().build();
 
-            var reader = new BufferedReader(
-                    new InputStreamReader(resource.openStream()));
-            String openApiAsText = reader.lines()
-                    .collect(Collectors.joining("\n"));
-            Set<String> types = OpenAPIUtil.findOpenApiClasses(openApiAsText);
-            for (String type : types) {
-                hints.reflection().registerType(TypeReference.of(type),
-                        MemberCategory.values());
-            }
-        } catch (IOException e) {
-            logger.error("Error while scanning and registering endpoint types",
-                    e);
+        registerEndpointTypes(hints, configuration,
+                browserCallables(classLoader, configuration));
+    }
+
+    /**
+     * Registers the types the given browser callable classes expose, which is
+     * what walking them says.
+     */
+    void registerEndpointTypes(RuntimeHints hints,
+            EngineAutoConfiguration configuration,
+            List<Class<?>> browserCallables) {
+        if (browserCallables.isEmpty()) {
+            // An application without endpoints is unusual enough to say, and
+            // it is also what a scan which found nothing looks like
+            logger.warn("No browser callable class to register types for");
+            return;
         }
-        hints.resources()
-                .registerPattern(EngineAutoConfiguration.OPEN_API_PATH);
+
+        logger.info("Registering the types of {} browser callable classes",
+                browserCallables.size());
+
+        var generation = new ParserProcessor(configuration)
+                .parse(browserCallables);
+
+        Stream.concat(
+                generation.endpoints().stream().map(EndpointModel::javaClass),
+                generation.entities().stream().map(EntityModel::javaClass))
+                .distinct().forEach(type -> hints.reflection().registerType(
+                        TypeReference.of(type), MemberCategory.values()));
+    }
+
+    /**
+     * The browser callable classes of the application, which are the ones
+     * annotated as such on the classpath being built.
+     *
+     * <p>
+     * They are looked for here rather than through the finder of the
+     * configuration, which neither of the finders it offers can do while a
+     * native image is being built: one asks the running application, which
+     * there is none of, and the other starts a build of its own, which this is
+     * already part of. An application which finds its endpoints its own way
+     * therefore has to say so in a hint of its own as well.
+     */
+    List<Class<?>> browserCallables(ClassLoader classLoader,
+            EngineAutoConfiguration configuration) {
+        // The classes of the application are the ones the loader given here
+        // has, which are not necessarily the ones the process was started with
+        try (var scan = new ClassGraph().overrideClassLoaders(classLoader)
+                .enableAnnotationInfo().enableClassInfo().scan()) {
+            return configuration.getEndpointAnnotations().stream()
+                    .map(Class::getName).map(scan::getClassesWithAnnotation)
+                    .flatMap(classes -> classes.loadClasses().stream())
+                    .distinct().toList();
+        }
     }
 
     private Collection<Class<?>> getMessageTypes(Class<?> cls) {
