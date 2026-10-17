@@ -16,6 +16,7 @@ const PersonModel = m
   .property('luckyNumber', m.meta(NumberModel, { jvmType: 'int' }))
   .property('addresses', m.meta(m.record(AddressModel), { jvmType: 'java.util.Map' }))
   .property('profilePicture', m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))
+  .property('alias', m.meta(StringModel, { jvmType: 'java.lang.String' }))
   .property('fullName', m.meta(StringModel, { jvmType: 'java.lang.String' }))
   .build();
 type PersonModel = typeof PersonModel;
