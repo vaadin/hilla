@@ -17,6 +17,8 @@ package com.vaadin.hilla.parser.plugins.backbone;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -56,6 +58,7 @@ public final class PropertyPlugin
                             JsonAutoDetect.Visibility.PUBLIC_ONLY))
             .disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY).build();
 
+    private ObjectMapper mapper = MAPPER;
     private SerializationConfig serializationConfig = MAPPER
             .serializationConfig();
 
@@ -64,7 +67,30 @@ public final class PropertyPlugin
         if (nodePath.getNode() instanceof PropertyNode) {
             var propertyNode = (PropertyNode) nodePath.getNode();
             propertyNode.setTarget(propertyNode.getSource().getName());
+        } else if (nodePath.getNode() instanceof EntityNode entityNode
+                && entityNode.getSource().isEnum()) {
+            entityNode.getTarget()
+                    .setEnumValues(enumValues(entityNode.getSource()));
         }
+    }
+
+    /**
+     * What each constant of an enum is serialized as, which is its name unless
+     * the enum says otherwise, such as with {@code @JsonProperty} on the
+     * constant. A constant written as something else than a string keeps its
+     * name, since the generated enum holds strings.
+     */
+    private Map<String, String> enumValues(ClassInfoModel model) {
+        var values = new LinkedHashMap<String, String>();
+
+        for (var constant : ((Class<?>) model.get()).getEnumConstants()) {
+            var name = ((Enum<?>) constant).name();
+            var value = mapper.valueToTree(constant);
+
+            values.put(name, value.isString() ? value.stringValue() : name);
+        }
+
+        return values;
     }
 
     @NonNull
@@ -98,6 +124,7 @@ public final class PropertyPlugin
             ObjectMapper jsonMapper = mapper.rebuild()
                     .disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
                     .build();
+            this.mapper = jsonMapper;
             this.serializationConfig = jsonMapper.serializationConfig();
         }
     }
