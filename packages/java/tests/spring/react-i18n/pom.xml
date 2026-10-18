@@ -27,11 +27,13 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- The test reads the chunks of the generated translations with it -->
+        <!-- What the application serializes with, and what the test reads
+             the chunks of the generated translations with: asking for it as a
+             test dependency would take it off the classpath the application
+             runs with -->
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
+            <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
