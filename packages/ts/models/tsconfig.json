@@ -6,5 +6,5 @@
     "lib": ["es2022"]
   },
   "include": ["src", "test"],
-  "exclude": ["test/**/*.snap.ts"]
+  "exclude": ["test/**/*.snap.ts", "test/fixtures/**"]
 }

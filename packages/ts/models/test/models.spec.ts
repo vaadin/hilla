@@ -118,6 +118,58 @@ describe('@vaadin/hilla-models', () => {
     expect(StreetModel).to.have.property('building').which.is.instanceof(NumberModel);
   });
 
+  describe('a deferred base', () => {
+    let LazilyNamedModel: ObjectModel<Named>;
+    let LazyStreetModel: ObjectModel<Street>;
+
+    beforeEach(() => {
+      // the extending model is built first, so its base is still undefined at
+      // that point — which is what a module evaluated before the one holding
+      // its base amounts to
+      LazyStreetModel = m
+        .extend(() => LazilyNamedModel)
+        .object<Street>('Street')
+        .property('building', NumberModel)
+        .build();
+
+      LazilyNamedModel = m.object<Named>('Named').property('name', StringModel).build();
+    });
+
+    it('should serve the properties of the base', () => {
+      expect(LazyStreetModel).to.have.property('name').which.is.instanceof(StringModel);
+      expect(LazyStreetModel).to.have.property('building').which.is.instanceof(NumberModel);
+    });
+
+    it('should include the properties of the base in the default value', () => {
+      expect(LazyStreetModel[$defaultValue]).to.be.deep.equal({ building: NaN, name: '' });
+    });
+
+    it('should be an instance of the base and of what the base derives from', () => {
+      expect(LazyStreetModel).to.be.instanceof(LazilyNamedModel);
+      expect(LazyStreetModel).to.be.instanceof(ObjectModel);
+      expect(LazyStreetModel).to.be.instanceof(Model);
+    });
+
+    it('should stay an instance of the base through a further extension', () => {
+      const AvenueModel = m.extend(LazyStreetModel).object<Street>('Avenue').build();
+
+      expect(AvenueModel).to.be.instanceof(LazyStreetModel);
+      expect(AvenueModel).to.be.instanceof(LazilyNamedModel);
+      expect(AvenueModel).to.have.property('name').which.is.instanceof(StringModel);
+    });
+
+    it('should not report an unrelated model as the base', () => {
+      expect(LazyStreetModel).to.not.be.instanceof(AddressModel);
+    });
+
+    it('should keep the base out of the prototype chain', () => {
+      // the stand-in serves the base's properties, so leaving the base in would
+      // offer them twice to anything walking the chain a level at a time
+      expect(Object.getPrototypeOf(LazyStreetModel)).to.not.be.equal(LazilyNamedModel);
+      expect(Object.getOwnPropertyNames(Object.getPrototypeOf(LazyStreetModel))).to.be.deep.equal(['name']);
+    });
+  });
+
   it('should allow model composition', () => {
     expect(PersonModel).to.have.property('address').which.is.instanceof(AddressModel);
     expect(AddressModel).to.have.property('street').which.is.instanceof(StreetModel);
