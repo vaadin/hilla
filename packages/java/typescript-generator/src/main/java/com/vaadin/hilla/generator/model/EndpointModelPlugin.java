@@ -110,6 +110,19 @@ public final class EndpointModelPlugin
                     .getName());
 
     /**
+     * What has been built below one node, which the node is built from once the
+     * walk leaves it.
+     */
+    private record Frame(Node<?, ?> node, List<TypeModel> types,
+            List<ParameterModel> parameters, Map<String, MethodModel> methods,
+            List<PropertyModel> properties) {
+        Frame(Node<?, ?> node) {
+            this(node, new ArrayList<>(), new ArrayList<>(),
+                    new LinkedHashMap<>(), new ArrayList<>());
+        }
+    }
+
+    /**
      * The endpoints built by the last run of the parser.
      */
     public List<EndpointModel> getEndpoints() {
@@ -224,12 +237,12 @@ public final class EndpointModelPlugin
         var pushed = pushedValue(returnType);
 
         var method = new MethodModel(node.getSource().getName(),
-                parameters.getOrDefault(node, List.of()),
-                pushed.orElse(returnType), pushed.isPresent());
+                List.copyOf(own.parameters()), pushed.orElse(returnType),
+                pushed.isPresent());
 
-        findEndpoint(nodePath).ifPresent(endpoint -> methods
-                .computeIfAbsent(endpoint, key -> new LinkedHashMap<>())
-                .put(method.name(), method));
+        frames.stream().filter(frame -> frame.node() instanceof EndpointNode)
+                .findFirst().ifPresent(endpoint -> endpoint.methods()
+                        .put(method.name(), method));
     }
 
     /**
@@ -244,24 +257,6 @@ public final class EndpointModelPlugin
                 && PUSHED_TYPES.contains(array.javaType())
                         ? Optional.of(array.items())
                         : Optional.empty();
-    }
-
-    private void collect(Node<?, ?> parent, TypeModel type) {
-        types.computeIfAbsent(parent, key -> new ArrayList<>()).add(type);
-    }
-
-    private void collect(Node<?, ?> parent, MethodParameterNode node,
-            List<TypeModel> ownTypes) {
-        var type = only(ownTypes);
-
-        parameters.computeIfAbsent(parent, key -> new ArrayList<>())
-                .add(new ParameterModel(node.getTarget(), type));
-    }
-
-    private void collect(Node<?, ?> parent, PropertyNode node,
-            List<TypeModel> ownTypes) {
-        properties.computeIfAbsent(parent, key -> new ArrayList<>())
-                .add(new PropertyModel(node.getTarget(), only(ownTypes)));
     }
 
     /**

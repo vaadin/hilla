@@ -149,19 +149,19 @@ public class GeneratedTypeScriptTest {
                           return client.call('SampleEndpoint', 'shaded', {}, init);
                         }
 
-                        export function stream(count: number): Subscription<string | undefined> {
+                        function stream(count: number): Subscription<string | undefined> {
                           return client.subscribe('SampleEndpoint', 'stream', { count });
                         }
 
-                        export function watch(): Subscription<Sample | undefined> {
+                        function watch(): Subscription<Sample | undefined> {
                           return client.subscribe('SampleEndpoint', 'watch', {});
                         }
 
-                        export async function wrapped(init?: EndpointRequestInit): Promise<Wrapper<Sample | undefined> | undefined> {
+                        async function wrapped(init?: EndpointRequestInit): Promise<Wrapper<Sample | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'wrapped', {}, init);
                         }
 
-                        export { all, bounded, count, counts, describe, detailed, figure, find, greet, kind, marker, maybe, maybeCounts, maybeNames, mixed, names, ping, required, shaded, wrapped };
+                        export { all, bounded, count, counts, describe, detailed, figure, find, greet, kind, marker, maybe, maybeCounts, maybeNames, mixed, names, ping, required, shaded, stream, watch, wrapped };
                         """,
                 file.content());
     }
@@ -208,13 +208,15 @@ public class GeneratedTypeScriptTest {
                         import type { Subscription } from '@vaadin/hilla-frontend';
                         import client from './connect-client.default.js';
 
-                        export function messages(): Subscription<string | undefined> {
+                        function messages(): Subscription<string | undefined> {
                           return client.subscribe('PushingEndpoint', 'messages', {});
                         }
 
-                        export function nonNullMessages(): Subscription<string> {
+                        function nonNullMessages(): Subscription<string> {
                           return client.subscribe('PushingEndpoint', 'nonNullMessages', {});
                         }
+
+                        export { messages, nonNullMessages };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpoint).content());

@@ -43,7 +43,7 @@ public final class EndpointWriter {
      * the options of a single request.
      */
     private static final String SUBSCRIPTION = """
-            export function {{method}}({{parameters}}): {{subscription}}<{{returnType}}> {
+            function {{method}}({{parameters}}): {{subscription}}<{{returnType}}> {
               return {{client}}.subscribe('{{endpoint}}', '{{method}}', {{arguments}});
             }""";
 
@@ -94,24 +94,6 @@ public final class EndpointWriter {
         var init = initParameter(method);
         var declared = declaredParameters(method, init, imports, types);
 
-        var written = fill(endpoint, method, String.join(", ", declared), types,
-                client, init, imports);
-
-        // Written again with the parameters on a line each when the first line
-        // came out too wide to read
-        if (firstLineOf(written).length() <= Layout.MAX_WIDTH) {
-            return written;
-        }
-
-        return fill(endpoint, method,
-                declared.stream()
-                        .collect(Collectors.joining(",\n  ", "\n  ", ",\n")),
-                types, client, init, imports);
-    }
-
-    private String fill(EndpointModel endpoint, MethodModel method,
-            String parameters, TypeWriter types, String client, String init,
-            ImportRegistry imports) {
         var template = Template.of(method.pushes() ? SUBSCRIPTION : METHOD) //
                 .with("method", method.name()) //
                 .with("parameters", String.join(", ", declared)) //
