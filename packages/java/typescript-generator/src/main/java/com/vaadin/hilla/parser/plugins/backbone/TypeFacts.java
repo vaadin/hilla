@@ -33,13 +33,15 @@ import com.vaadin.hilla.parser.models.SignatureModel;
 public final class TypeFacts {
     /**
      * The name the plugin reading the annotations of the validation API says
-     * what they mean for a value under.
+     * what they mean for a value under. The notes are
+     * {@link com.vaadin.hilla.parser.plugins.model.ValidationConstraint}s.
      */
     public static final String CONSTRAINTS = "constraints";
 
     /**
      * The name the annotations of a value which a form model is told about are
-     * said under.
+     * said under. The notes are
+     * {@link com.vaadin.hilla.parser.plugins.model.Annotation}s.
      */
     public static final String ANNOTATIONS = "annotations";
 
