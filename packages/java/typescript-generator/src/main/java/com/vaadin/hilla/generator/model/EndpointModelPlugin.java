@@ -96,7 +96,13 @@ public final class EndpointModelPlugin
      * What has been built below each node the walk is in, the innermost first.
      */
     private final Deque<Frame> frames = new ArrayDeque<>();
-    private final List<EndpointModel> endpoints = new ArrayList<>();
+    /**
+     * The endpoints by the name the client calls them by, which is what tells
+     * one from another: two classes of the same name, in packages of their own,
+     * are one endpoint as far as the browser is concerned, and the last of them
+     * is the one it reaches, as it is the one the server answers with.
+     */
+    private final Map<String, EndpointModel> endpoints = new LinkedHashMap<>();
     private final List<EntityModel> entities = new ArrayList<>();
     private final Map<String, List<String>> unions = new LinkedHashMap<>();
 
@@ -160,7 +166,7 @@ public final class EndpointModelPlugin
      * The endpoints built by the last run of the parser.
      */
     public List<EndpointModel> getEndpoints() {
-        return List.copyOf(endpoints);
+        return List.copyOf(endpoints.values());
     }
 
     /**
@@ -248,9 +254,11 @@ public final class EndpointModelPlugin
         } else if (own.node() instanceof SubTypesPlugin.UnionNode union) {
             unions.put(union.getSource().getName(), subTypesOf(union));
         } else if (own.node() instanceof EndpointNode endpoint) {
-            endpoints.add(new EndpointModel(endpoint.getTarget().getName(),
-                    endpoint.getSource().getName(),
-                    List.copyOf(own.methods().values())));
+            var name = endpoint.getTarget().getName();
+
+            endpoints.put(name,
+                    new EndpointModel(name, endpoint.getSource().getName(),
+                            List.copyOf(own.methods().values())));
         }
     }
 
