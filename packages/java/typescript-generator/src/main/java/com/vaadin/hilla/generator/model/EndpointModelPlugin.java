@@ -254,7 +254,7 @@ public final class EndpointModelPlugin
             entities.add(buildEntity(entity, List.copyOf(own.properties())));
         } else if (own.node() instanceof SubTypesPlugin.UnionNode union) {
             unions.put(union.getSource().getName(), subTypesOf(union));
-        } else if (node instanceof EndpointNode endpoint) {
+        } else if (own.node() instanceof EndpointNode endpoint) {
             var name = endpoint.getTarget();
 
             endpoints.put(name,
@@ -575,9 +575,45 @@ public final class EndpointModelPlugin
      * plugin picking them out of the ones the property declares has already
      * noted on the type of it.
      */
-    private static List<String> annotationsOf(TypeFacts type) {
+    private static List<AnnotationModel> annotationsOf(TypeFacts type) {
         return notes(type, ANNOTATIONS, Annotation.class)
-                .map(Annotation::getName).toList();
+                .map(annotation -> new AnnotationModel(annotation.getName(),
+                        attributesOf(annotation.getAttributes())))
+                .toList();
+    }
+
+    /**
+     * The attributes of an annotation as plain values, so that what writes them
+     * only meets strings, numbers, booleans, lists and maps: a class an
+     * attribute holds is the map naming it which the model library reads.
+     */
+    private static Map<String, Object> attributesOf(
+            Map<String, Object> attributes) {
+        if (attributes == null) {
+            return Map.of();
+        }
+
+        var plain = new LinkedHashMap<String, Object>();
+        attributes.forEach((name, value) -> plain.put(name, plain(value)));
+        return plain;
+    }
+
+    private static Object plain(Object value) {
+        if (value instanceof JvmTypeRef type) {
+            return Map.of("jvmType", type.getJvmType());
+        }
+
+        if (value instanceof Collection<?> values) {
+            return values.stream().map(EndpointModelPlugin::plain).toList();
+        }
+
+        if (value instanceof Map<?, ?> map) {
+            var plain = new LinkedHashMap<Object, Object>();
+            map.forEach((key, item) -> plain.put(key, plain(item)));
+            return plain;
+        }
+
+        return value;
     }
 
     /**
