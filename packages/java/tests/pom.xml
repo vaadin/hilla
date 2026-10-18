@@ -30,9 +30,6 @@
         <!-- make sure we do not leave webpack-dev-server running after IT -->
         <vaadin.reuseDevServer>false</vaadin.reuseDevServer>
 
-        <!-- enable React 19 feature flag by default -->
-        <vaadin.experimental.react19>true</vaadin.experimental.react19>
-
         <!-- Used in the tests, should be overridden for each module to support
     concurrent running of test modules. -->
         <server.port>8888</server.port>
@@ -279,9 +276,6 @@
                                     <vaadin.devmode.vite.options>
                                         ${vaadin.devmode.vite.options}
                                     </vaadin.devmode.vite.options>
-                                    <vaadin.experimental.react19>
-                                        ${vaadin.experimental.react19}
-                                    </vaadin.experimental.react19>
                                 </properties>
                             </configuration>
                         </execution>
@@ -352,16 +346,6 @@
 
         <profile>
             <id>it-modules-react</id>
-            <modules>
-                <module>spring</module>
-            </modules>
-        </profile>
-
-        <profile>
-            <id>react-18</id>
-            <properties>
-                <vaadin.experimental.react19>false</vaadin.experimental.react19>
-            </properties>
             <modules>
                 <module>spring</module>
             </modules>
