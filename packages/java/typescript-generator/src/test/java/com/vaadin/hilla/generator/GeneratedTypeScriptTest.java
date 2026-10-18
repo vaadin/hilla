@@ -211,7 +211,8 @@ public class GeneratedTypeScriptTest {
         // Neither a function nor a parameter can go by such a name, so it is
         // named something nothing else goes by, and the caller still reaches
         // the method by the name of the Java one while the server is still
-        // told the name of the parameter
+        // told the name of the parameter. A module is read in strict mode,
+        // where eval and arguments are such names as well
         assertEquals(
                 """
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
@@ -225,6 +226,10 @@ public class GeneratedTypeScriptTest {
                           return client.call('ReservedNameEndpoint', 'delete', { id }, init);
                         }
 
+                        async function _eval(_arguments: string | undefined, init?: EndpointRequestInit): Promise<string | undefined> {
+                          return client.call('ReservedNameEndpoint', 'eval', { arguments: _arguments }, init);
+                        }
+
                         async function remove(_delete: number, init?: EndpointRequestInit): Promise<void> {
                           return client.call('ReservedNameEndpoint', 'remove', { delete: _delete }, init);
                         }
@@ -233,7 +238,7 @@ public class GeneratedTypeScriptTest {
                           return client.call('ReservedNameEndpoint', 'size', {}, init);
                         }
 
-                        export { _delete, __delete as delete, remove, size };
+                        export { _delete, __delete as delete, _eval as eval, remove, size };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpointsOf(ReservedNameEndpoint.class).get(0))

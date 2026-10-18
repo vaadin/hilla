@@ -35,7 +35,6 @@ import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.models.AnnotatedModel;
 import com.vaadin.hilla.parser.models.AnnotationInfoModel;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
-import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.PackageInfoModel;
 import com.vaadin.hilla.parser.models.SpecializedModel;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
@@ -87,35 +86,6 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                 computeNullabilityFromAnnotations(annotations)
                         .ifPresent(type::setOptional);
 
-                // For type arguments, it is necessary to apply the same
-                // processing
-                if (nodeSource instanceof ClassRefSignatureModel) {
-                    var args = ((ClassRefSignatureModel) nodeSource)
-                            .getTypeArguments();
-
-                    if (!args.isEmpty() && type.collectsTypeArguments()) {
-                        var argumentTypes = type.getTypeArguments();
-
-                        if (argumentTypes.size() != args.size()) {
-                            throw new IllegalStateException(
-                                    "Number of parameters mismatch for "
-                                            + nodePath);
-                        }
-
-                        var nullables = args.stream()
-                                .map(param -> Stream.concat(
-                                        getPackageAnnotationsStream(nodePath),
-                                        param.getAnnotations().stream()))
-                                .map(this::computeNullabilityFromAnnotations)
-                                .toList();
-
-                        for (var i = 0; i < nullables.size(); i++) {
-                            var argumentType = argumentTypes.get(i);
-                            nullables.get(i)
-                                    .ifPresent(argumentType::setOptional);
-                        }
-                    }
-                }
             }
         }
     }
