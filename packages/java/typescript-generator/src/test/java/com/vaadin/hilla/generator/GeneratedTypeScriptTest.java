@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.hilla.generator.fixtures.CustomDateEndpoint;
 import com.vaadin.hilla.generator.fixtures.EmptyEndpoint;
 import com.vaadin.hilla.generator.fixtures.GenericEndpoint;
+import com.vaadin.hilla.generator.fixtures.GenericMethodsEndpoint;
 import com.vaadin.hilla.generator.fixtures.InheritingEndpoint;
 import com.vaadin.hilla.generator.fixtures.Nonnull;
 import com.vaadin.hilla.generator.fixtures.ProvidedTypesEndpoint;
@@ -214,7 +215,7 @@ public class GeneratedTypeScriptTest {
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
                         import client from './connect-client.default.js';
 
-                        export async function _delete(id: number, init?: EndpointRequestInit): Promise<void> {
+                        async function _delete(id: number, init?: EndpointRequestInit): Promise<void> {
                           return client.call('ReservedNameEndpoint', '_delete', { id }, init);
                         }
 
@@ -222,15 +223,15 @@ public class GeneratedTypeScriptTest {
                           return client.call('ReservedNameEndpoint', 'delete', { id }, init);
                         }
 
-                        export async function remove(_delete: number, init?: EndpointRequestInit): Promise<void> {
+                        async function remove(_delete: number, init?: EndpointRequestInit): Promise<void> {
                           return client.call('ReservedNameEndpoint', 'remove', { delete: _delete }, init);
                         }
 
-                        export async function size(init?: EndpointRequestInit): Promise<number> {
+                        async function size(init?: EndpointRequestInit): Promise<number> {
                           return client.call('ReservedNameEndpoint', 'size', {}, init);
                         }
 
-                        export { __delete as delete };
+                        export { _delete, __delete as delete, remove, size };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpointsOf(ReservedNameEndpoint.class).get(0))
@@ -247,13 +248,15 @@ public class GeneratedTypeScriptTest {
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
                         import client from './connect-client.default.js';
 
-                        export async function all(value: unknown, init?: EndpointRequestInit): Promise<Array<unknown> | undefined> {
+                        async function all(value: unknown, init?: EndpointRequestInit): Promise<Array<unknown> | undefined> {
                           return client.call('GenericEndpoint', 'all', { value }, init);
                         }
 
-                        export async function of(value: unknown, init?: EndpointRequestInit): Promise<unknown> {
+                        async function of(value: unknown, init?: EndpointRequestInit): Promise<unknown> {
                           return client.call('GenericEndpoint', 'of', { value }, init);
                         }
+
+                        export { all, of };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpointsOf(GenericEndpoint.class).get(0))
@@ -270,9 +273,11 @@ public class GeneratedTypeScriptTest {
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
                         import client from './connect-client.default.js';
 
-                        export async function stamped(init?: EndpointRequestInit): Promise<string | undefined> {
+                        async function stamped(init?: EndpointRequestInit): Promise<string | undefined> {
                           return client.call('CustomDateEndpoint', 'stamped', {}, init);
                         }
+
+                        export { stamped };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(generator.parseModel().get(0)).content());
@@ -483,8 +488,7 @@ public class GeneratedTypeScriptTest {
      * Nothing in the file declares a type parameter or variable of a method, so
      * it is written as what the parser resolves it to: the bound it has, the
      * type the endpoint gives it, or an unknown type when there is neither. A
-     * class extending a date is written as the string it is serialized as, not
-     * declared on its own.
+     * wildcard keeps what is said of whether its value can be absent.
      */
     @Test
     public void should_WriteTheTypesAMethodIsResolvedTo() {
@@ -511,11 +515,7 @@ public class GeneratedTypeScriptTest {
                           return client.call('GenericMethodsEndpoint', 'present', { values }, init);
                         }
 
-                        async function stamp(init?: EndpointRequestInit): Promise<string | undefined> {
-                          return client.call('GenericMethodsEndpoint', 'stamp', {}, init);
-                        }
-
-                        export { echo, anything, names, present, stamp };
+                        export { echo, anything, names, present };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpoint).content());

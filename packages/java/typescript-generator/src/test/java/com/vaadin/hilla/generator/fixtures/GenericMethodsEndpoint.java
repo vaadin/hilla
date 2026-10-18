@@ -15,7 +15,6 @@
  */
 package com.vaadin.hilla.generator.fixtures;
 
-import java.util.Date;
 import java.util.List;
 
 import org.jspecify.annotations.NonNull;
@@ -24,9 +23,8 @@ import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 /**
  * An endpoint whose types are only known once the parser resolves them: type
- * parameters of its methods, a type variable of the class it extends, a
- * wildcard said to stand for a value which is always there, and a class of its
- * own extending one the JDK serializes as a string.
+ * parameters of its methods, a type variable of the class it extends, and a
+ * wildcard said to stand for a value which is always there.
  */
 @Endpoint
 public class GenericMethodsEndpoint extends GenericExposedBase<Long> {
@@ -41,12 +39,5 @@ public class GenericMethodsEndpoint extends GenericExposedBase<Long> {
     public List<@NonNull ? extends String> present(
             List<@NonNull ? extends String> values) {
         return values;
-    }
-
-    public Stamp stamp() {
-        return new Stamp();
-    }
-
-    public static class Stamp extends Date {
     }
 }

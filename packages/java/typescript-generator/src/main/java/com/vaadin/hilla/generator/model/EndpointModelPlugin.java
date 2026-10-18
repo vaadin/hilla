@@ -472,8 +472,8 @@ public final class EndpointModelPlugin
                     constraints, annotations);
         }
 
-        return new TypeModel.Scalar(kind, optional, name(signature),
-                constraints, annotations);
+        return new TypeModel.Scalar(scalarKind(signature), optional,
+                name(signature), constraints, annotations);
     }
 
     /**
