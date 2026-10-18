@@ -230,7 +230,7 @@ public class GeneratedTypeScriptTest {
                           return client.call('ReservedNameEndpoint', 'eval', { arguments: _arguments }, init);
                         }
 
-                        export async function remove(_delete: number, init?: EndpointRequestInit): Promise<void> {
+                        async function remove(_delete: number, init?: EndpointRequestInit): Promise<void> {
                           return client.call('ReservedNameEndpoint', 'remove', { delete: _delete }, init);
                         }
 
@@ -238,7 +238,7 @@ public class GeneratedTypeScriptTest {
                           return client.call('ReservedNameEndpoint', 'size', {}, init);
                         }
 
-                        export { __delete as delete, _eval as eval };
+                        export { _delete, __delete as delete, _eval as eval, remove, size };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpointsOf(ReservedNameEndpoint.class).get(0))
