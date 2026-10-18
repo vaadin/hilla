@@ -24,8 +24,9 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.hilla.generator.model.TypeModel;
 
 /**
- * Covers what a type parameter turns into, which no endpoint signature has by
- * itself: it is the entities that declare and use them.
+ * Covers what types turn into where no endpoint signature reaches by itself:
+ * the type parameters the entities declare and use, and the names of the types
+ * the browser has, however deep a type holds them.
  */
 public class TypeWriterTest {
     private final ImportRegistry imports = new ImportRegistry();

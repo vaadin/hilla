@@ -140,6 +140,30 @@ public class ModelWriterTest {
                 "import CModel from './CModel.js';"), imports.write());
     }
 
+    @Test
+    public void should_NotLetTheModelOfATypeShadowAModelItUses() {
+        // The model of a type called String is called as the model of the
+        // model library it holds, which it then imports under another name
+        var string = new EntityModel.Bean("com.example.String", List.of(),
+                List.of(), List.of(new PropertyModel("value", STRING)),
+                Optional.empty());
+
+        assertEquals(
+                """
+                        import m, { StringModel as StringModel_1 } from '@vaadin/hilla-models';
+                        import type String from './String.js';
+
+                        const StringModel = m
+                          .object<String>('String')
+                          .property('value', m.meta(StringModel_1, { jvmType: 'java.lang.String' }))
+                          .build();
+                        type StringModel = typeof StringModel;
+
+                        export default StringModel;
+                        """,
+                new FormModelWriter(List.of(string)).write(string).content());
+    }
+
     private static EntityModel bean(String javaClass, TypeModel... types) {
         var properties = new ArrayList<PropertyModel>();
 

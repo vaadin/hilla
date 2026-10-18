@@ -57,17 +57,6 @@ public class ImportRegistryTest {
     }
 
     @Test
-    public void should_ImportANamedExportUnderTheNameItWasGiven() {
-        imports.reserve("Subscription");
-
-        assertEquals("Subscription_1", imports
-                .importNamed("@vaadin/hilla-frontend", "Subscription", true));
-        assertEquals(List.of(
-                "import type { Subscription as Subscription_1 } from '@vaadin/hilla-frontend';"),
-                imports.write());
-    }
-
-    @Test
     public void should_KeepTheTypesOfTheLanguageFromBeingShadowed() {
         assertEquals("Promise_1",
                 imports.importDefault("./Promise.js", "Promise", true));
@@ -104,10 +93,14 @@ public class ImportRegistryTest {
     @Test
     public void should_RenameANamedImportWhichClashes() {
         imports.reserve("ConnectClient");
+        imports.reserve("Subscription");
 
         assertEquals("ConnectClient_1", imports
                 .importNamed("@vaadin/hilla-frontend", "ConnectClient", false));
+        assertEquals("Subscription_1", imports
+                .importNamed("@vaadin/hilla-frontend", "Subscription", true));
         assertEquals(List.of(
+                "import type { Subscription as Subscription_1 } from '@vaadin/hilla-frontend';",
                 "import { ConnectClient as ConnectClient_1 } from '@vaadin/hilla-frontend';"),
                 imports.write());
     }
