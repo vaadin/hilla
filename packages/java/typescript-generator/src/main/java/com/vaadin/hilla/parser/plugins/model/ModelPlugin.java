@@ -18,6 +18,7 @@ package com.vaadin.hilla.parser.plugins.model;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Predicate;
@@ -165,7 +166,7 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
         }
 
         var type = typedNode.getTarget();
-        noteConstraints(typedNode, type);
+        noteConstraints(constrainingAnnotations(nodePath, typedNode), type);
 
         // The annotations of the property the value belongs to are told to the
         // form model of it as well
@@ -186,8 +187,55 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
         return nodeDependencies;
     }
 
-    private void noteConstraints(AnnotatedNode annotatedNode, TypeFacts type) {
-        var constraints = annotatedNode.getAnnotations().stream()
+    /**
+     * The annotations a value is constrained by. Java reads an annotation
+     * written in front of an array property as one of what the array holds as
+     * well, but Bean Validation checks the array itself with it, so the array
+     * gets the annotations of the property instead of the values in it.
+     */
+    private static List<AnnotationInfoModel> constrainingAnnotations(
+            NodePath<?> nodePath, AnnotatedNode annotatedNode) {
+        var annotations = annotatedNode.getAnnotations();
+        var arrayProperty = findArrayProperty(nodePath);
+        if (arrayProperty.isEmpty()) {
+            return annotations;
+        }
+
+        var declared = arrayProperty.get().getSource().getAnnotations();
+        if (nodePath.getParentPath().getNode() == arrayProperty.get()) {
+            return Stream.concat(annotations.stream(), declared.stream())
+                    .distinct().collect(Collectors.toList());
+        }
+
+        return annotations.stream().filter(Predicate.not(declared::contains))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * The property whose value is the array the node is, or is in.
+     */
+    private static Optional<PropertyNode> findArrayProperty(
+            NodePath<?> nodePath) {
+        var path = nodePath;
+        while (path.getParentPath() != null
+                && path.getParentPath().getNode() instanceof TypedNode parent
+                && parent.getType().isArray()) {
+            path = path.getParentPath();
+        }
+
+        if (path.getNode() instanceof TypedNode typedNode
+                && typedNode.getType().isArray() && path.getParentPath() != null
+                && path.getParentPath()
+                        .getNode() instanceof PropertyNode propertyNode) {
+            return Optional.of(propertyNode);
+        }
+
+        return Optional.empty();
+    }
+
+    private void noteConstraints(List<AnnotationInfoModel> annotations,
+            TypeFacts type) {
+        var constraints = annotations.stream()
                 .filter(ModelPlugin::isValidationConstraintAnnotation)
                 .flatMap(ModelPlugin::unwrapRepeatableContainer)
                 .map(ModelPlugin::convertValidationConstraintAnnotation)
