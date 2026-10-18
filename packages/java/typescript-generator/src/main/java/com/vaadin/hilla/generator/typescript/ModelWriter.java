@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.vaadin.hilla.generator.model.AnnotationModel;
@@ -40,8 +39,6 @@ final class ModelWriter {
     static final String MODULE = "@vaadin/hilla-models";
     private static final Set<String> PRIMITIVES = Set.of("boolean", "byte",
             "char", "double", "float", "int", "long", "short");
-    private static final Pattern IDENTIFIER = Pattern
-            .compile("[A-Za-z_$][A-Za-z0-9_$]*");
 
     private final ImportRegistry imports;
     private final String directory;
@@ -244,7 +241,7 @@ final class ModelWriter {
         };
 
         if (isJavaTypeWritten(javaType)) {
-            written.add("jvmType: " + string(javaType));
+            written.add("jvmType: " + Names.string(javaType));
         }
 
         return written.isEmpty() ? ""
@@ -254,7 +251,7 @@ final class ModelWriter {
 
     private static String annotation(AnnotationModel annotation) {
         var written = new ArrayList<String>();
-        written.add("jvmType: " + string(annotation.name()));
+        written.add("jvmType: " + Names.string(annotation.name()));
 
         if (!annotation.attributes().isEmpty()) {
             written.add("attributes: " + value(annotation.attributes()));
@@ -318,17 +315,12 @@ final class ModelWriter {
                     .collect(Collectors.joining(", ", "[", "]"));
         }
 
-        if (value instanceof Object[] values) {
-            return Arrays.stream(values).map(ModelWriter::value)
-                    .collect(Collectors.joining(", ", "[", "]"));
-        }
-
-        if (value instanceof AnnotationParameterEnumValueModel constant) {
-            return Names.string(constant.getValueName());
-        }
-
-        if (value instanceof ClassInfoModel javaClass) {
-            return Names.string(javaClass.getName());
+        if (value instanceof Map<?, ?> attributes) {
+            return attributes.entrySet().stream()
+                    .map(attribute -> Names
+                            .property(String.valueOf(attribute.getKey())) + ": "
+                            + value(attribute.getValue()))
+                    .collect(Collectors.joining(", ", "{ ", " }"));
         }
 
         return Names.string(String.valueOf(value));

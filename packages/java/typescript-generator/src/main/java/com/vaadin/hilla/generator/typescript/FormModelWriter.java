@@ -102,16 +102,15 @@ public final class FormModelWriter {
         bean.superTypes().stream().findFirst().ifPresent(superType -> calls
                 .add(".extend(" + models.name(superType) + ")"));
         calls.add(".object<" + entity + ">("
-                + ModelWriter.string(ModulePaths.entityName(bean.javaClass()))
-                + ")");
+                + Names.string(ModulePaths.entityName(bean.javaClass())) + ")");
         bean.properties()
                 .forEach(property -> calls
-                        .add(".property(" + ModelWriter.string(property.name())
-                                + ", " + models.model(property.type()) + ")"));
+                        .add(".property(" + Names.string(property.name()) + ", "
+                                + models.model(property.type()) + ")"));
         bean.discriminator()
-                .ifPresent(discriminator -> calls.add(".property("
-                        + ModelWriter.string(discriminator.name()) + ", "
-                        + discriminator(discriminator, models) + ")"));
+                .ifPresent(discriminator -> calls.add(
+                        ".property(" + Names.string(discriminator.name()) + ", "
+                                + discriminator(discriminator, models) + ")"));
         calls.add(".build()");
 
         return Template.of(OBJECT) //
@@ -128,9 +127,8 @@ public final class FormModelWriter {
      */
     private static String discriminator(EntityModel.Discriminator discriminator,
             ModelWriter models) {
-        var literals = discriminator.acceptedValues().stream()
-                .map(value -> models.m() + ".literal("
-                        + ModelWriter.string(value) + ")")
+        var literals = discriminator.acceptedValues().stream().map(
+                value -> models.m() + ".literal(" + Names.string(value) + ")")
                 .toList();
 
         return literals.size() == 1 ? literals.get(0)
@@ -155,7 +153,7 @@ public final class FormModelWriter {
                 .with("m", models.m()) //
                 .with("entity", entity) //
                 .with("entityName",
-                        ModelWriter.string(ModulePaths
+                        Names.string(ModulePaths
                                 .entityName(enumeration.javaClass()))) //
                 .fill();
     }
