@@ -80,6 +80,12 @@ const componentSources = [
   'vaadin-flow-components-shared-parent/vaadin-flow-components-base/src/main/java/com/vaadin/flow/component/shared/internal/TransitiveNpmPackages.java',
   // `@vaadin/vaadin-lumo-styles`, `@vaadin/vaadin-themable-mixin`
   'vaadin-lumo-theme-flow-parent/vaadin-lumo-theme-flow/src/main/java/com/vaadin/flow/theme/lumo/Lumo.java',
+  // `@vaadin/tooltip`
+  'vaadin-flow-components-shared-parent/vaadin-flow-components-base/src/main/java/com/vaadin/flow/component/shared/Tooltip.java',
+  // `@vaadin/icon`
+  'vaadin-icons-flow-parent/vaadin-icons-flow/src/main/java/com/vaadin/flow/component/icon/AbstractIcon.java',
+  // `@vaadin/icons`
+  'vaadin-icons-flow-parent/vaadin-icons-flow/src/main/java/com/vaadin/flow/component/icon/Icon.java',
 ];
 
 export const remote = {
