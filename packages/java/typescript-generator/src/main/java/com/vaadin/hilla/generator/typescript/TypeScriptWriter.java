@@ -56,7 +56,7 @@ public final class TypeScriptWriter {
         var files = new ArrayList<GeneratedFile>();
         var endpoints = new EndpointWriter(clientModule);
         var entities = new EntityWriter();
-        var models = new FormModelWriter();
+        var models = new FormModelWriter(generation.entities());
         var unions = new UnionWriter();
 
         generation.entities().forEach(entity -> {
