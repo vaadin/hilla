@@ -1,4 +1,5 @@
-import type AbstractEntity from "./AbstractEntity.js";
+import type AbstractEntity from './AbstractEntity.js';
+
 interface Address extends AbstractEntity {
   id?: number;
   street: string;
@@ -6,4 +7,5 @@ interface Address extends AbstractEntity {
   city?: string;
   label?: string;
 }
+
 export default Address;

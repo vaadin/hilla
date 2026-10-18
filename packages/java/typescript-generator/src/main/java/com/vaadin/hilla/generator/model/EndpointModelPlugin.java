@@ -234,8 +234,7 @@ public final class EndpointModelPlugin
         } else if (own.node() instanceof MethodNode method) {
             collectMethod(method, own);
         } else if (own.node() instanceof PropertyNode property) {
-            parent.properties().add(
-                    new PropertyModel(property.getTarget(), only(own.types())));
+            parent.properties().add(buildProperty(property, own.types()));
         } else if (own.node() instanceof EntityNode entity
                 && !isProvided(entity.getSource().getName())) {
             entities.add(buildEntity(entity, List.copyOf(own.properties())));
@@ -301,19 +300,7 @@ public final class EndpointModelPlugin
                 : MethodModel.Kind.CALLED;
     }
 
-    private void collect(Node<?, ?> parent, TypeModel type) {
-        types.computeIfAbsent(parent, key -> new ArrayList<>()).add(type);
-    }
-
-    private void collect(Node<?, ?> parent, MethodParameterNode node,
-            List<TypeModel> ownTypes) {
-        var type = only(ownTypes);
-
-        parameters.computeIfAbsent(parent, key -> new ArrayList<>())
-                .add(new ParameterModel(node.getTarget(), type));
-    }
-
-    private void collect(Node<?, ?> parent, PropertyNode node,
+    private static PropertyModel buildProperty(PropertyNode node,
             List<TypeModel> ownTypes) {
         var type = only(ownTypes);
 
@@ -328,10 +315,9 @@ public final class EndpointModelPlugin
         var absent = isOptional(node.getSource())
                 || node.getValueType().isOptional();
 
-        properties.computeIfAbsent(parent, key -> new ArrayList<>())
-                .add(new PropertyModel(node.getTarget(),
-                        type instanceof TypeModel.TypeVariable && !absent ? type
-                                : asAbsent(type, absent)));
+        return new PropertyModel(node.getTarget(),
+                type instanceof TypeModel.TypeVariable && !absent ? type
+                        : type.withOptional(absent));
     }
 
     /**
