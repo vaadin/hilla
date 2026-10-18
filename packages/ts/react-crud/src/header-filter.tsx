@@ -214,9 +214,9 @@ export function EnumHeaderFilter(): ReactElement {
       value: '',
       label: '',
     },
-    ...Object.keys(model[_enum]).map((value) => ({
-      label: convertToTitleCase(value),
-      value,
+    ...Object.entries(model[_enum]).map(([name, value]) => ({
+      label: convertToTitleCase(name),
+      value: String(value),
     })),
   ];
   return (

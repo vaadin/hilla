@@ -192,9 +192,11 @@ function AutoFormDateTimeField(props: FieldRendererProps) {
 
 function AutoFormEnumField(props: FieldRendererProps) {
   const enumModel = props.model as EnumModel<typeof Enum>;
-  const items = Object.keys(enumModel[_enum]).map((value) => ({
-    label: convertToTitleCase(value),
-    value,
+  // The value is what the server sends for a constant, which is not always
+  // its name
+  const items = Object.entries(enumModel[_enum]).map(([name, value]) => ({
+    label: convertToTitleCase(name),
+    value: String(value),
   }));
   return renderFieldElement(Select, props, { items });
 }
