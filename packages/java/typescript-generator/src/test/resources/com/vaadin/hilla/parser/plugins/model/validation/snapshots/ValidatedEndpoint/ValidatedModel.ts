@@ -1,17 +1,4 @@
-import {
-  ArrayModel,
-  Email,
-  Min,
-  NotBlank,
-  NotEmpty,
-  NumberModel,
-  ObjectModel,
-  Pattern,
-  Size,
-  StringModel,
-  _getPropertyModel,
-  makeObjectEmptyValueCreator,
-} from '@vaadin/hilla-lit-form';
+import m, { Email, Min, NotBlank, NotEmpty, NumberModel, Pattern, Size, StringModel } from '@vaadin/hilla-models';
 import type Validated from './Validated.js';
 
 const ValidatedModel = m

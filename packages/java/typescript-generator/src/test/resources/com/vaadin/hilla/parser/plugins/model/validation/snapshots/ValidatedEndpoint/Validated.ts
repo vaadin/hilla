@@ -10,4 +10,5 @@ interface Validated {
   notes?: Array<string | undefined>;
   tags?: Array<string | undefined>;
 }
+
 export default Validated;
