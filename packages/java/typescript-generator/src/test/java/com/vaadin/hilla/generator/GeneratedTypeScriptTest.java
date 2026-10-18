@@ -214,14 +214,14 @@ public class GeneratedTypeScriptTest {
 
         assertEquals(
                 """
-                        import { ArrayModel, BooleanModel, NumberModel, StringModel } from '@vaadin/hilla-lit-form';
+                        import { $defaultValue, ArrayModel, BooleanModel, NumberModel, StringModel } from '@vaadin/hilla-models';
                         import type { SignalMethodOptions } from '@vaadin/hilla-react-signals';
                         import { ListSignal, NumberSignal, ValueSignal } from '@vaadin/hilla-react-signals';
                         import type Sample from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Sample.js';
                         import SampleModel from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/SampleModel.js';
                         import client from './connect-client.default.js';
 
-                        export function channel(name: string | undefined): ListSignal<Sample | undefined> | undefined {
+                        function channel(name: string | undefined): ListSignal<Sample | undefined> | undefined {
                           return new ListSignal({
                             client: client,
                             endpoint: 'SignalsEndpoint',
@@ -230,10 +230,7 @@ public class GeneratedTypeScriptTest {
                           });
                         }
 
-                        export function chosen(
-                          options: string | undefined,
-                          _options?: SignalMethodOptions<string | undefined>,
-                        ): ValueSignal<string | undefined> | undefined {
+                        function chosen(options: string | undefined, _options?: SignalMethodOptions<string | undefined>): ValueSignal<string | undefined> | undefined {
                           return new ValueSignal(_options?.defaultValue, {
                             client: client,
                             endpoint: 'SignalsEndpoint',
@@ -242,7 +239,7 @@ public class GeneratedTypeScriptTest {
                           });
                         }
 
-                        export function counter(): NumberSignal | undefined {
+                        function counter(): NumberSignal | undefined {
                           return new NumberSignal(0, {
                             client: client,
                             endpoint: 'SignalsEndpoint',
@@ -250,7 +247,7 @@ public class GeneratedTypeScriptTest {
                           });
                         }
 
-                        export function counterOf(name: string | undefined): NumberSignal | undefined {
+                        function counterOf(name: string | undefined): NumberSignal | undefined {
                           return new NumberSignal(0, {
                             client: client,
                             endpoint: 'SignalsEndpoint',
@@ -259,41 +256,39 @@ public class GeneratedTypeScriptTest {
                           });
                         }
 
-                        export function crowd(
-                          options?: SignalMethodOptions<Array<Sample | undefined>>,
-                        ): ValueSignal<Array<Sample | undefined>> {
-                          return new ValueSignal(options?.defaultValue ?? ArrayModel.createEmptyValue(), {
+                        function crowd(options?: SignalMethodOptions<Array<Sample | undefined>>): ValueSignal<Array<Sample | undefined>> {
+                          return new ValueSignal(options?.defaultValue ?? ArrayModel[$defaultValue], {
                             client: client,
                             endpoint: 'SignalsEndpoint',
                             method: 'crowd',
                           });
                         }
 
-                        export function current(options?: SignalMethodOptions<Sample>): ValueSignal<Sample> {
-                          return new ValueSignal(options?.defaultValue ?? SampleModel.createEmptyValue(), {
+                        function current(options?: SignalMethodOptions<Sample>): ValueSignal<Sample> {
+                          return new ValueSignal(options?.defaultValue ?? SampleModel[$defaultValue], {
                             client: client,
                             endpoint: 'SignalsEndpoint',
                             method: 'current',
                           });
                         }
 
-                        export function enabled(options?: SignalMethodOptions<boolean>): ValueSignal<boolean> {
-                          return new ValueSignal(options?.defaultValue ?? BooleanModel.createEmptyValue(), {
+                        function enabled(options?: SignalMethodOptions<boolean>): ValueSignal<boolean> {
+                          return new ValueSignal(options?.defaultValue ?? BooleanModel[$defaultValue], {
                             client: client,
                             endpoint: 'SignalsEndpoint',
                             method: 'enabled',
                           });
                         }
 
-                        export function limit(options?: SignalMethodOptions<number>): ValueSignal<number> {
-                          return new ValueSignal(options?.defaultValue ?? NumberModel.createEmptyValue(), {
+                        function limit(options?: SignalMethodOptions<number>): ValueSignal<number> {
+                          return new ValueSignal(options?.defaultValue ?? NumberModel[$defaultValue], {
                             client: client,
                             endpoint: 'SignalsEndpoint',
                             method: 'limit',
                           });
                         }
 
-                        export function name(options?: SignalMethodOptions<string | undefined>): ValueSignal<string | undefined> | undefined {
+                        function name(options?: SignalMethodOptions<string | undefined>): ValueSignal<string | undefined> | undefined {
                           return new ValueSignal(options?.defaultValue, {
                             client: client,
                             endpoint: 'SignalsEndpoint',
@@ -301,7 +296,7 @@ public class GeneratedTypeScriptTest {
                           });
                         }
 
-                        export function names(): ListSignal<string | undefined> | undefined {
+                        function names(): ListSignal<string | undefined> | undefined {
                           return new ListSignal({
                             client: client,
                             endpoint: 'SignalsEndpoint',
@@ -309,7 +304,7 @@ public class GeneratedTypeScriptTest {
                           });
                         }
 
-                        export function pending(options?: SignalMethodOptions<string | undefined>): ValueSignal<string | undefined> {
+                        function pending(options?: SignalMethodOptions<string | undefined>): ValueSignal<string | undefined> {
                           return new ValueSignal(options?.defaultValue, {
                             client: client,
                             endpoint: 'SignalsEndpoint',
@@ -317,10 +312,7 @@ public class GeneratedTypeScriptTest {
                           });
                         }
 
-                        export function sample(
-                          detailed: boolean,
-                          options?: SignalMethodOptions<Sample | undefined>,
-                        ): ValueSignal<Sample | undefined> | undefined {
+                        function sample(detailed: boolean, options?: SignalMethodOptions<Sample | undefined>): ValueSignal<Sample | undefined> | undefined {
                           return new ValueSignal(options?.defaultValue, {
                             client: client,
                             endpoint: 'SignalsEndpoint',
@@ -329,13 +321,15 @@ public class GeneratedTypeScriptTest {
                           });
                         }
 
-                        export function title(options?: SignalMethodOptions<string>): ValueSignal<string> {
-                          return new ValueSignal(options?.defaultValue ?? StringModel.createEmptyValue(), {
+                        function title(options?: SignalMethodOptions<string>): ValueSignal<string> {
+                          return new ValueSignal(options?.defaultValue ?? StringModel[$defaultValue], {
                             client: client,
                             endpoint: 'SignalsEndpoint',
                             method: 'title',
                           });
                         }
+
+                        export { channel, chosen, counter, counterOf, crowd, current, enabled, limit, name, names, pending, sample, title };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpoint).content());
