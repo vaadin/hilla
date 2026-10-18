@@ -39,7 +39,7 @@ public final class EndpointWriter {
     private static final String OPTIONS_PARAMETER = "options";
 
     private static final String METHOD = """
-            {{export}}async function {{name}}({{parameters}}): Promise<{{returnType}}> {
+            async function {{name}}({{parameters}}): Promise<{{returnType}}> {
               return {{client}}.call('{{endpoint}}', '{{method}}', {{arguments}}, {{init}});
             }""";
 
@@ -49,7 +49,7 @@ public final class EndpointWriter {
      * the options of a single request.
      */
     private static final String SUBSCRIPTION = """
-            {{export}}function {{name}}({{parameters}}): {{subscription}}<{{returnType}}> {
+            function {{name}}({{parameters}}): {{subscription}}<{{returnType}}> {
               return {{client}}.subscribe('{{endpoint}}', '{{method}}', {{arguments}});
             }""";
 
@@ -59,7 +59,7 @@ public final class EndpointWriter {
      * the value of the two in step afterwards.
      */
     private static final String SIGNAL = """
-            {{export}}function {{name}}({{parameters}}): {{returnType}} {
+            function {{name}}({{parameters}}): {{returnType}} {
               return new {{signal}}({{defaultValue}}{
                 client: {{client}},
                 endpoint: '{{endpoint}}',
@@ -110,17 +110,16 @@ public final class EndpointWriter {
                         client))
                 .toList();
 
-        var exports = GeneratedFile.exportList(
-                endpoint.methods().stream().map(MethodModel::name).toList());
+        // A function which is not declared under the name of the method is
+        // exported under it instead
+        var exports = GeneratedFile
+                .exportList(endpoint.methods().stream().map(MethodModel::name)
+                        .map(method -> names.get(method).equals(method) ? method
+                                : names.get(method) + " as " + method)
+                        .toList());
 
-        var renamed = exported(endpoint, names);
-
-        if (!renamed.isEmpty()) {
-            lines.add("");
-            lines.add(renamed);
-        }
-
-        return new GeneratedFile(path, String.join("\n", lines) + "\n");
+        return GeneratedFile.of(endpoint.name(), imports,
+                String.join("\n\n", methods) + "\n\n" + exports);
     }
 
     private String writeMethod(EndpointModel endpoint, MethodModel method,
@@ -131,30 +130,7 @@ public final class EndpointWriter {
         var declared = declaredParameters(method, parameters, init, imports,
                 types);
 
-        var written = fill(endpoint, method, name, parameters,
-                String.join(", ", declared), types, models, client, init,
-                imports);
-
-        // Written again with the parameters on a line each when the first line
-        // came out too wide to read
-        if (firstLineOf(written).length() <= Layout.MAX_WIDTH) {
-            return written;
-        }
-
-        return fill(endpoint, method, name, parameters,
-                declared.stream()
-                        .collect(Collectors.joining(",\n  ", "\n  ", ",\n")),
-                types, models, client, init, imports);
-    }
-
-    private String fill(EndpointModel endpoint, MethodModel method, String name,
-            Map<String, String> parameterNames, String parameters,
-            TypeWriter types, ModelWriter models, String client, String init,
-            ImportRegistry imports) {
         var template = Template.of(templateOf(method)) //
-                // A function which is not declared under the name of the
-                // method is exported under it at the end of the file instead
-                .with("export", name.equals(method.name()) ? "export " : "") //
                 .with("name", name) //
                 .with("method", method.name()) //
                 .with("parameters", String.join(", ", declared)) //
@@ -164,16 +140,15 @@ public final class EndpointWriter {
 
         switch (method.kind()) {
         case CALLED ->
-            template.with("arguments", packParameters(method, parameterNames))
+            template.with("arguments", packParameters(method, parameters))
                     .with("init", init);
         case SUBSCRIBED ->
-            template.with("arguments", packParameters(method, parameterNames))
+            template.with("arguments", packParameters(method, parameters))
                     .with("subscription", imports.importNamed(HILLA_FRONTEND,
                             SUBSCRIPTION_TYPE, true));
         default -> template.with("signal", signalClass(method, imports))
-                .with("defaultValue",
-                        defaultValue(method, parameterNames, models))
-                .with("params", sharedParameters(method, parameterNames));
+                .with("defaultValue", defaultValue(method, parameters, models))
+                .with("params", sharedParameters(method, parameters));
         }
 
         return template.fill();
@@ -214,22 +189,6 @@ public final class EndpointWriter {
         }
 
         return declared;
-    }
-
-    /**
-     * Exports the methods which are declared under another name than their own,
-     * which is how the caller still reaches them by the name of the Java
-     * method.
-     */
-    private static String exported(EndpointModel endpoint,
-            Map<String, String> names) {
-        var renamed = endpoint.methods().stream().map(MethodModel::name)
-                .filter(method -> !names.get(method).equals(method))
-                .map(method -> names.get(method) + " as " + method).toList();
-
-        return renamed.isEmpty() ? ""
-                : renamed.stream()
-                        .collect(Collectors.joining(", ", "export { ", " };"));
     }
 
     private static String templateOf(MethodModel method) {
@@ -290,12 +249,7 @@ public final class EndpointWriter {
     private static String sharedParameters(MethodModel method,
             Map<String, String> parameterNames) {
         return method.parameters().isEmpty() ? ""
-                : "\n    params: " + packParameters(method, parameterNames)
-                        + ",";
-    }
-
-    private static String firstLineOf(String method) {
-        return method.lines().findFirst().orElse("");
+                : "params: " + packParameters(method, parameterNames) + ",";
     }
 
     /**
@@ -327,7 +281,7 @@ public final class EndpointWriter {
         // from, which a number signal decides itself
         case VALUE_SIGNAL ->
             declared.add(ownName(parameterNames, OPTIONS_PARAMETER) + "?: "
-                    + imports.importNamed(signalsModule(method),
+                    + imports.importNamed(method.signal().module(),
                             SIGNAL_OPTIONS_TYPE, true)
                     + "<" + types.write(sharedValue(method)) + ">");
         default -> {
