@@ -18,6 +18,7 @@ package com.vaadin.hilla.parser.plugins.model;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Predicate;
@@ -47,7 +48,7 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
     private static final String VALIDATION_CONSTRAINTS_PACKAGE_NAME = "jakarta.validation.constraints";
 
-    // Include-list of annotations that should be added to the schema
+    // Include-list of annotations that should be added to the form model
     private static final Set<String> INCLUDED_ANNOTATIONS = Set.of(
             "jakarta.persistence.Id", "jakarta.persistence.Version",
             "jakarta.persistence.OneToOne", "jakarta.persistence.ManyToOne",
@@ -86,9 +87,9 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
     }
 
     /**
-     * Converts an annotation parameter value into something the OpenAPI
-     * document can hold. The parser hands back its own models for enum
-     * constants and class references. An array arrives as a list of such
+     * Converts an annotation parameter value into something the form model
+     * writer can write as TypeScript. The parser hands back its own models for
+     * enum constants and class references. An array arrives as a list of such
      * values.
      */
     private static Object convertAttributeValue(Object value) {
@@ -98,13 +99,13 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
         case ClassInfoModel classInfo -> new JvmTypeRef(classInfo.getName());
         case Collection<?> collection -> collection.stream()
                 .map(ModelPlugin::convertAttributeValue).toList();
-        // Every other model carries a whole type graph behind it, which the
-        // serializer would write into the document. The only kind left is a
+        // Every other model carries a whole type graph behind it, which has
+        // no TypeScript value to be written as. The only kind left is a
         // nested annotation, which nothing reaching this plugin has: the
         // include-list holds none, and a repeated constraint is unwrapped
         // before it gets here. Adding one means adding its conversion too.
         case Model model -> throw new IllegalStateException(
-                "No OpenAPI representation for the annotation attribute value "
+                "No TypeScript representation for the annotation attribute value "
                         + model);
         default -> value;
         };
@@ -165,7 +166,7 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
         }
 
         var type = typedNode.getTarget();
-        noteConstraints(typedNode, type);
+        noteConstraints(constrainingAnnotations(nodePath, typedNode), type);
 
         // The annotations of the property the value belongs to are told to the
         // form model of it as well
@@ -186,8 +187,55 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
         return nodeDependencies;
     }
 
-    private void noteConstraints(AnnotatedNode annotatedNode, TypeFacts type) {
-        var constraints = annotatedNode.getAnnotations().stream()
+    /**
+     * The annotations a value is constrained by. Java reads an annotation
+     * written in front of an array property as one of what the array holds as
+     * well, but Bean Validation checks the array itself with it, so the array
+     * gets the annotations of the property instead of the values in it.
+     */
+    private static List<AnnotationInfoModel> constrainingAnnotations(
+            NodePath<?> nodePath, AnnotatedNode annotatedNode) {
+        var annotations = annotatedNode.getAnnotations();
+        var arrayProperty = findArrayProperty(nodePath);
+        if (arrayProperty.isEmpty()) {
+            return annotations;
+        }
+
+        var declared = arrayProperty.get().getSource().getAnnotations();
+        if (nodePath.getParentPath().getNode() == arrayProperty.get()) {
+            return Stream.concat(annotations.stream(), declared.stream())
+                    .distinct().collect(Collectors.toList());
+        }
+
+        return annotations.stream().filter(Predicate.not(declared::contains))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * The property whose value is the array the node is, or is in.
+     */
+    private static Optional<PropertyNode> findArrayProperty(
+            NodePath<?> nodePath) {
+        var path = nodePath;
+        while (path.getParentPath() != null
+                && path.getParentPath().getNode() instanceof TypedNode parent
+                && parent.getType().isArray()) {
+            path = path.getParentPath();
+        }
+
+        if (path.getNode() instanceof TypedNode typedNode
+                && typedNode.getType().isArray() && path.getParentPath() != null
+                && path.getParentPath()
+                        .getNode() instanceof PropertyNode propertyNode) {
+            return Optional.of(propertyNode);
+        }
+
+        return Optional.empty();
+    }
+
+    private void noteConstraints(List<AnnotationInfoModel> annotations,
+            TypeFacts type) {
+        var constraints = annotations.stream()
                 .filter(ModelPlugin::isValidationConstraintAnnotation)
                 .flatMap(ModelPlugin::unwrapRepeatableContainer)
                 .map(ModelPlugin::convertValidationConstraintAnnotation)
