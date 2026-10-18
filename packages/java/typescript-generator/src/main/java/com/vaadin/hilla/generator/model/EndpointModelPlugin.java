@@ -79,10 +79,10 @@ import com.vaadin.hilla.transfertypes.annotations.FromModule;
  */
 public final class EndpointModelPlugin
         extends AbstractPlugin<PluginConfiguration> {
-    private final Map<Node<?, ?>, List<TypeModel>> types = new IdentityHashMap<>();
-    private final Map<Node<?, ?>, List<ParameterModel>> parameters = new IdentityHashMap<>();
-    private final Map<Node<?, ?>, Map<String, MethodModel>> methods = new IdentityHashMap<>();
-    private final Map<Node<?, ?>, List<PropertyModel>> properties = new IdentityHashMap<>();
+    /**
+     * What has been built below each node the walk is in, the innermost first.
+     */
+    private final Deque<Frame> frames = new ArrayDeque<>();
     /**
      * The endpoints by the name the client calls them by, which is what tells
      * one from another: two classes of the same name, in packages of their own,
@@ -237,11 +237,10 @@ public final class EndpointModelPlugin
                     new PropertyModel(property.getTarget(), only(own.types())));
         } else if (own.node() instanceof EntityNode entity
                 && !isProvided(entity.getSource().getName())) {
-            entities.add(buildEntity(entity,
-                    properties.getOrDefault(node, List.of())));
-        } else if (node instanceof SubTypesPlugin.UnionNode union) {
+            entities.add(buildEntity(entity, List.copyOf(own.properties())));
+        } else if (own.node() instanceof SubTypesPlugin.UnionNode union) {
             unions.put(union.getSource().getName(), union.getTarget());
-        } else if (node instanceof EndpointNode endpoint) {
+        } else if (own.node() instanceof EndpointNode endpoint) {
             var name = endpoint.getTarget();
 
             endpoints.put(name,
@@ -522,9 +521,45 @@ public final class EndpointModelPlugin
      * plugin picking them out of the ones the property declares has already
      * noted on the type of it.
      */
-    private static List<String> annotationsOf(TypeFacts type) {
+    private static List<AnnotationModel> annotationsOf(TypeFacts type) {
         return notes(type, TypeFacts.ANNOTATIONS, Annotation.class)
-                .map(Annotation::getName).toList();
+                .map(annotation -> new AnnotationModel(annotation.getName(),
+                        attributesOf(annotation.getAttributes())))
+                .toList();
+    }
+
+    /**
+     * The attributes of an annotation as plain values, so that what writes them
+     * only meets strings, numbers, booleans, lists and maps: a class an
+     * attribute holds is the map naming it which the model library reads.
+     */
+    private static Map<String, Object> attributesOf(
+            Map<String, Object> attributes) {
+        if (attributes == null) {
+            return Map.of();
+        }
+
+        var plain = new LinkedHashMap<String, Object>();
+        attributes.forEach((name, value) -> plain.put(name, plain(value)));
+        return plain;
+    }
+
+    private static Object plain(Object value) {
+        if (value instanceof JvmTypeRef type) {
+            return Map.of("jvmType", type.getJvmType());
+        }
+
+        if (value instanceof Collection<?> values) {
+            return values.stream().map(EndpointModelPlugin::plain).toList();
+        }
+
+        if (value instanceof Map<?, ?> map) {
+            var plain = new LinkedHashMap<Object, Object>();
+            map.forEach((key, item) -> plain.put(key, plain(item)));
+            return plain;
+        }
+
+        return value;
     }
 
     /**
