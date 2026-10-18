@@ -134,8 +134,11 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
             EngineAutoConfiguration configuration) {
         // The classes of the application are the ones the loader given here
         // has, which are not necessarily the ones the process was started with
+        // An endpoint need not be public, while a scan only sees the public
+        // classes unless told otherwise
         try (var scan = new ClassGraph().overrideClassLoaders(classLoader)
-                .enableAnnotationInfo().enableClassInfo().scan()) {
+                .enableAnnotationInfo().enableClassInfo()
+                .ignoreClassVisibility().scan()) {
             return configuration.getEndpointAnnotations().stream()
                     .map(Class::getName).map(scan::getClassesWithAnnotation)
                     .flatMap(classes -> classes.loadClasses().stream())

@@ -39,6 +39,14 @@ public class HillaHintsRegistrarTest {
         }
     }
 
+    // An endpoint does not have to be public, as long as Spring can make one
+    @BrowserCallable
+    static class PackagePrivateEndpoint {
+        public String get() {
+            return null;
+        }
+    }
+
     public static class Hinted {
         private String name;
 
@@ -73,6 +81,8 @@ public class HillaHintsRegistrarTest {
 
         assertTrue(found.contains(HintedEndpoint.class),
                 "The endpoint is annotated as browser callable");
+        assertTrue(found.contains(PackagePrivateEndpoint.class),
+                "An endpoint which is not public is called all the same");
     }
 
     @Test
