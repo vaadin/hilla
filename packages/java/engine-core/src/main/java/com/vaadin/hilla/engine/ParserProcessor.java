@@ -21,7 +21,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,20 +34,18 @@ import com.vaadin.hilla.generator.model.Generation;
 import com.vaadin.hilla.parser.core.OpenAPIFileType;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.core.PluginManager;
-import com.vaadin.hilla.parser.utils.JsonPrinter;
 
 public final class ParserProcessor {
     private static final Logger logger = LoggerFactory
             .getLogger(ParserProcessor.class);
     private final Path baseDir;
     private final Set<Path> classPath;
-    private final Path openAPIFile;
     private final ParserConfiguration.PluginsProcessor pluginsProcessor = new ParserConfiguration.PluginsProcessor();
 
     /**
      * Builds what the TypeScript of a run is written from while the parser
-     * walks the classes. It only collects: the OpenAPI definition is what it
-     * would be without it.
+     * walks the classes. It only collects: every other plugin sees the walk as
+     * it would without it.
      */
     private final EndpointModelPlugin modelPlugin = new EndpointModelPlugin();
     private List<Class<? extends Annotation>> endpointAnnotations = List.of();
@@ -58,14 +55,20 @@ public final class ParserProcessor {
 
     public ParserProcessor(EngineAutoConfiguration conf) {
         this.baseDir = conf.getBaseDir();
-        this.openAPIFile = conf.getOpenAPIFile();
         this.classPath = conf.getClasspath();
         this.endpointAnnotations = conf.getEndpointAnnotations();
         this.endpointExposedAnnotations = conf.getEndpointExposedAnnotations();
         applyConfiguration(conf.getParser());
     }
 
-    private String createOpenAPI(List<Class<?>> endpoints) throws IOException {
+    /**
+     * Runs the parser over the browser callable classes and returns everything
+     * the TypeScript of them is written from.
+     *
+     * @param endpoints
+     *            the browser callable classes
+     */
+    public Generation parse(List<Class<?>> endpoints) throws ParserException {
         var parser = new Parser()
                 .classPath(classPath.stream().map(Path::toString)
                         .collect(Collectors.toSet()))
@@ -77,62 +80,9 @@ public final class ParserProcessor {
 
         logger.debug("Starting JVM Parser");
 
-        var openAPI = parser.execute(endpoints);
+        parser.execute(endpoints);
 
-        return new JsonPrinter().pretty().writeAsString(openAPI);
-    }
-
-    /**
-     * Everything the last run of the parser found, which is what the TypeScript
-     * of the endpoints is written from.
-     */
-    public Generation getGeneration() {
         return modelPlugin.getGeneration();
-    }
-
-    /**
-     * Runs the parser over the browser callable classes and returns everything
-     * the TypeScript of them is written from, without writing anything.
-     *
-     * @param endpoints
-     *            the browser callable classes
-     */
-    public Generation parse(List<Class<?>> endpoints) throws ParserException {
-        try {
-            createOpenAPI(endpoints);
-        } catch (IOException e) {
-            throw new ParserException(
-                    "Unable to walk the browser callable" + " classes", e);
-        }
-
-        return getGeneration();
-    }
-
-    public void process(List<Class<?>> endpoints) throws ParserException {
-        String openAPIString;
-
-        try {
-            Files.createDirectories(openAPIFile.getParent());
-            openAPIString = createOpenAPI(endpoints);
-        } catch (IOException e) {
-            throw new ParserException("Unable to prepare OpenAPI definition",
-                    e);
-        }
-
-        // Only save the file if it has changed
-        Optional.of(openAPIFile).filter(Files::isRegularFile)
-                .map(this::readFromFile).filter(openAPIString::equals)
-                .ifPresentOrElse(s -> {
-                    logger.debug("OpenAPI definition has not changed");
-                }, () -> {
-                    try {
-                        Files.write(openAPIFile, openAPIString.getBytes());
-                        logger.debug("OpenAPI definition file saved");
-                    } catch (IOException e) {
-                        throw new ParserException("Unable to save OpenAPI file",
-                                e);
-                    }
-                });
     }
 
     private void applyConfiguration(ParserConfiguration parserConfiguration) {
@@ -201,15 +151,5 @@ public final class ParserProcessor {
                 .concat(Stream.of(modelPlugin), configuredPlugins).toList();
 
         parser.plugins(loadedPlugins);
-    }
-
-    // Workaround for IOException in lambda
-    private String readFromFile(Path path) {
-        try {
-            return Files.readString(path);
-        } catch (IOException e) {
-            logger.error("Unable to read file", e);
-            return null;
-        }
     }
 }

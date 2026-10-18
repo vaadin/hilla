@@ -31,7 +31,6 @@ import com.vaadin.flow.plugin.maven.FlowModeAbstractMojo;
 import com.vaadin.hilla.engine.BrowserCallableFinderException;
 import com.vaadin.hilla.engine.GeneratorException;
 import com.vaadin.hilla.engine.ParserException;
-import com.vaadin.hilla.engine.ParserProcessor;
 import com.vaadin.hilla.engine.TypeScriptProcessor;
 
 /**
@@ -72,13 +71,7 @@ public final class EngineGenerateMojo extends AbstractMojo
             return;
         }
         try {
-            var conf = configure();
-            var parserProcessor = new ParserProcessor(conf);
-            var typeScriptProcessor = new TypeScriptProcessor(conf);
-
-            var browserCallables = conf.getBrowserCallableFinder().find(conf);
-            parserProcessor.process(browserCallables);
-            typeScriptProcessor.process(parserProcessor.getGeneration());
+            TypeScriptProcessor.generate(configure());
         } catch (GeneratorException | ParserException
                 | BrowserCallableFinderException
                 | DependencyResolutionRequiredException e) {

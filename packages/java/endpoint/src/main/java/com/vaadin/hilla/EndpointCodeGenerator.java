@@ -115,17 +115,33 @@ public class EndpointCodeGenerator {
                         return null;
                     })).filter(Objects::nonNull).distinct().toList();
 
-            ParserProcessor parser = new ParserProcessor(engineConfiguration);
-            parser.process(browserCallables);
-
-            var generation = parser.getGeneration();
-
-            TypeScriptProcessor generator = new TypeScriptProcessor(
-                    engineConfiguration);
-            generator.process(generation);
-            classesUsedInEndpoints = classesUsedIn(generation);
+            generate(engineConfiguration, browserCallables);
             this.endpointController.registerEndpoints();
         });
+    }
+
+    /**
+     * Walks the browser callable classes of the application and writes their
+     * TypeScript, remembering what it is written from, so that the first change
+     * to a class does not have to walk them all again to tell whether it
+     * matters.
+     *
+     * @param engineConfiguration
+     *            the configuration to generate with
+     * @param applicationContext
+     *            the application context to find the browser callable classes
+     *            in
+     */
+    public void generate(EngineAutoConfiguration engineConfiguration,
+            ApplicationContext applicationContext) {
+        generate(engineConfiguration,
+                findBrowserCallables(engineConfiguration, applicationContext));
+    }
+
+    private void generate(EngineAutoConfiguration engineConfiguration,
+            List<Class<?>> browserCallables) {
+        classesUsedInEndpoints = classesUsedIn(TypeScriptProcessor
+                .generate(engineConfiguration, browserCallables));
     }
 
     /**
