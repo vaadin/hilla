@@ -48,12 +48,10 @@ public final class EndpointWriter {
     }
 
     public GeneratedFile write(EndpointModel endpoint) {
-        var path = endpoint.name() + ".ts";
-
         // An endpoint without a callable method still gets a file, so that
         // whatever imports it finds a module rather than nothing
         if (endpoint.methods().isEmpty()) {
-            return new GeneratedFile(path, "export {};\n");
+            return new GeneratedFile(endpoint.name() + ".ts", "export {};\n");
         }
 
         var imports = new ImportRegistry();
@@ -76,7 +74,8 @@ public final class EndpointWriter {
         var exports = GeneratedFile.exportList(
                 endpoint.methods().stream().map(MethodModel::name).toList());
 
-        return new GeneratedFile(path, String.join("\n", lines) + "\n");
+        return GeneratedFile.of(endpoint.name(), imports,
+                String.join("\n\n", methods) + "\n\n" + exports);
     }
 
     private String writeMethod(EndpointModel endpoint, MethodModel method,
