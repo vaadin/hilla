@@ -16,6 +16,7 @@
 package com.vaadin.hilla.parser.plugins;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.abort;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -127,7 +128,9 @@ public class EndpointGenerationTest extends AbstractFullStackTest {
                     .parseGeneration();
         } catch (RuntimeException e) {
             // A case about the walk refusing a class, which the test class of
-            // the case says itself, declares nothing to check against
+            // the case says itself, declares nothing to check against. It is
+            // reported as skipped, so a case which stops being walked shows
+            abort("The walk refuses the classes of " + testCase + ": " + e);
             return;
         }
 

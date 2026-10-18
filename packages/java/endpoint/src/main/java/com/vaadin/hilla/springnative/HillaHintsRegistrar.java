@@ -36,7 +36,6 @@ import com.vaadin.hilla.engine.ParserProcessor;
 import com.vaadin.hilla.generator.model.EndpointModel;
 import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.generator.model.Generation;
-import com.vaadin.hilla.generator.model.UnionModel;
 import com.vaadin.hilla.push.PushEndpoint;
 import com.vaadin.hilla.push.messages.fromclient.AbstractServerMessage;
 import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
@@ -52,9 +51,10 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
         try {
             registerEndpointTypes(hints, classLoader);
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | LinkageError e) {
             // The rest of the hints are worth registering even where the
-            // classes of the endpoints cannot be walked
+            // classes of the endpoints cannot be walked, whether the parser
+            // refuses one or the classpath an image is built from lacks one
             logger.error("Unable to register the types of the endpoints", e);
         }
 
@@ -129,14 +129,13 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
             List<Class<?>> browserCallables) {
         try {
             return new ParserProcessor(configuration).parse(browserCallables);
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | LinkageError e) {
             logger.warn("Unable to walk the browser callable classes together,"
                     + " walking them one by one", e);
         }
 
         var endpoints = new ArrayList<EndpointModel>();
         var entities = new ArrayList<EntityModel>();
-        var unions = new ArrayList<UnionModel>();
 
         for (var browserCallable : browserCallables) {
             try {
@@ -145,13 +144,13 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
 
                 endpoints.addAll(walked.endpoints());
                 entities.addAll(walked.entities());
-                unions.addAll(walked.unions());
-            } catch (RuntimeException e) {
+            } catch (RuntimeException | LinkageError e) {
                 logger.error("Unable to walk {}", browserCallable.getName(), e);
             }
         }
 
-        return new Generation(endpoints, entities, unions);
+        // A union is registered through the entities it unites
+        return new Generation(endpoints, entities, List.of());
     }
 
     /**
