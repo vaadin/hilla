@@ -96,11 +96,11 @@ public class GeneratedTypeScriptTest {
                           return client.call('SampleEndpoint', 'detailed', {}, init);
                         }
 
-                        export async function figure(init?: EndpointRequestInit): Promise<Figure | undefined> {
+                        async function figure(init?: EndpointRequestInit): Promise<Figure | undefined> {
                           return client.call('SampleEndpoint', 'figure', {}, init);
                         }
 
-                        export async function find(id: string | undefined, init?: EndpointRequestInit): Promise<Sample | undefined> {
+                        async function find(id: string | undefined, init?: EndpointRequestInit): Promise<Sample | undefined> {
                           return client.call('SampleEndpoint', 'find', { id }, init);
                         }
 
@@ -144,15 +144,15 @@ public class GeneratedTypeScriptTest {
                           return client.call('SampleEndpoint', 'required', { name }, init);
                         }
 
-                        export async function shaded(init?: EndpointRequestInit): Promise<Shaded | undefined> {
+                        async function shaded(init?: EndpointRequestInit): Promise<Shaded | undefined> {
                           return client.call('SampleEndpoint', 'shaded', {}, init);
                         }
 
-                        export async function wrapped(init?: EndpointRequestInit): Promise<Wrapper<Sample | undefined> | undefined> {
+                        async function wrapped(init?: EndpointRequestInit): Promise<Wrapper<Sample | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'wrapped', {}, init);
                         }
 
-                        export { all, bounded, count, counts, describe, detailed, find, greet, kind, marker, maybe, maybeCounts, maybeNames, mixed, names, ping, required, wrapped };
+                        export { all, bounded, count, counts, describe, detailed, figure, find, greet, kind, marker, maybe, maybeCounts, maybeNames, mixed, names, ping, required, shaded, wrapped };
                         """,
                 file.content());
     }

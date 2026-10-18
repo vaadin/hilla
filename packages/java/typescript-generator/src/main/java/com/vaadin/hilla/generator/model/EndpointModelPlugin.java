@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import io.swagger.v3.oas.models.media.Schema;
@@ -186,20 +187,21 @@ public final class EndpointModelPlugin
         var own = frames.pop();
         var parent = frames.peek();
 
-        if (node instanceof TypedNode type) {
-            collect(parentOf(nodePath), buildType(type, taken(node)));
-        } else if (node instanceof MethodParameterNode parameter) {
-            collect(parentOf(nodePath), parameter, taken(node));
-        } else if (node instanceof MethodNode method) {
-            collectMethod(nodePath, method);
-        } else if (node instanceof PropertyNode property) {
-            collect(parentOf(nodePath), property, taken(node));
-        } else if (node instanceof EntityNode entity) {
-            entities.add(buildEntity(entity,
-                    properties.getOrDefault(node, List.of())));
-        } else if (node instanceof SubTypesPlugin.UnionNode union) {
+        if (own.node() instanceof TypedNode type) {
+            parent.types().add(buildType(type, own.types()));
+        } else if (own.node() instanceof MethodParameterNode parameter) {
+            parent.parameters().add(new ParameterModel(parameter.getTarget(),
+                    only(own.types())));
+        } else if (own.node() instanceof MethodNode method) {
+            collectMethod(method, own);
+        } else if (own.node() instanceof PropertyNode property) {
+            parent.properties().add(
+                    new PropertyModel(property.getTarget(), only(own.types())));
+        } else if (own.node() instanceof EntityNode entity) {
+            entities.add(buildEntity(entity, List.copyOf(own.properties())));
+        } else if (own.node() instanceof SubTypesPlugin.UnionNode union) {
             unions.put(union.getSource().getName(), subTypesOf(union));
-        } else if (node instanceof EndpointNode endpoint) {
+        } else if (own.node() instanceof EndpointNode endpoint) {
             endpoints.add(new EndpointModel(endpoint.getTarget().getName(),
                     endpoint.getSource().getName(),
                     List.copyOf(own.methods().values())));
