@@ -1,0 +1,174 @@
+/*
+ * Copyright 2000-2022 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.hilla.internal;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
+
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+
+import com.vaadin.flow.di.Lookup;
+import com.vaadin.flow.server.VaadinContext;
+import com.vaadin.flow.server.frontend.Options;
+import com.vaadin.hilla.ApplicationContextProvider;
+import com.vaadin.hilla.Endpoint;
+import com.vaadin.hilla.EndpointCodeGenerator;
+import com.vaadin.hilla.EndpointController;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
+import com.vaadin.hilla.internal.fixtures.CustomEndpoint;
+import com.vaadin.hilla.internal.fixtures.EndpointNoValue;
+import com.vaadin.hilla.internal.fixtures.MyEndpoint;
+
+/**
+ * Verifies the tasks writing the TypeScript of the endpoints, which needs no
+ * Node at all: the task which parses the classes writes it, because only that
+ * run has what the writers need, and the task of the endpoints is one which
+ * skips, having nothing left to do.
+ */
+// The same classes as the other task tests, which is what has them share one
+// application context: the provider of it is a static one
+@SpringBootTest(classes = { CustomEndpoint.class, EndpointNoValue.class,
+        MyEndpoint.class, ApplicationContextProvider.class })
+public class TaskGenerateTypeScriptTest extends TaskTest {
+    @Test
+    public void should_WriteTheTypeScriptOfTheEndpointsFromTheClasses()
+            throws Exception {
+        new TaskGenerateTypeScriptImpl(getEngineConfiguration()).execute();
+
+        assertEquals(
+                """
+                        import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
+                        import client from './connect-client.default.js';
+
+                        async function bar(baz: string | undefined, init?: EndpointRequestInit): Promise<string | undefined> {
+                          return client.call('MyEndpoint', 'bar', { baz }, init);
+                        }
+
+                        async function foo(bar: string | undefined, init?: EndpointRequestInit): Promise<void> {
+                          return client.call('MyEndpoint', 'foo', { bar }, init);
+                        }
+
+                        export { bar, foo };
+                        """,
+                read("MyEndpoint.ts"));
+        assertEquals("""
+                import * as CustomEndpointName from './CustomEndpointName.js';
+                import * as MyEndpoint from './MyEndpoint.js';
+                import * as WithoutValueEqual from './WithoutValueEqual.js';
+
+                export { CustomEndpointName, MyEndpoint, WithoutValueEqual };
+                """, read("endpoints.ts"));
+        assertTrue(
+                Files.isRegularFile(
+                        output().resolve("connect-client.default.ts")),
+                "The endpoints call the server through the generated client");
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void should_TellTheGeneratorOfTheApplicationWhatItWrote()
+            throws Exception {
+        var codeGenerator = new EndpointCodeGenerator(
+                Mockito.mock(VaadinContext.class),
+                Mockito.mock(EndpointController.class));
+        ObjectProvider<EndpointCodeGenerator> provider = Mockito
+                .mock(ObjectProvider.class);
+        Mockito.doReturn(codeGenerator).when(provider).getIfAvailable();
+        var applicationContext = Mockito.mock(ApplicationContext.class);
+        Mockito.doReturn(provider).when(applicationContext)
+                .getBeanProvider(EndpointCodeGenerator.class);
+        Mockito.doReturn(Map.of("myEndpoint", new MyEndpoint()))
+                .when(applicationContext)
+                .getBeansWithAnnotation(Endpoint.class);
+
+        try (var contextProvider = Mockito
+                .mockStatic(ApplicationContextProvider.class)) {
+            contextProvider
+                    .when(() -> ApplicationContextProvider
+                            .runOnContext(Mockito.any()))
+                    .thenAnswer(invocation -> {
+                        invocation.<Consumer<ApplicationContext>> getArgument(0)
+                                .accept(applicationContext);
+                        return null;
+                    });
+
+            new TaskGenerateTypeScriptImpl(getEngineConfiguration()).execute();
+        }
+
+        assertTrue(Files.isRegularFile(output().resolve("MyEndpoint.ts")),
+                "The generator of the application writes the TypeScript");
+        assertEquals(Set.of(MyEndpoint.class.getName()),
+                codeGenerator.getClassesUsedInEndpoints().orElse(Set.of()),
+                "The first change is compared against what the build wrote");
+    }
+
+    @Test
+    public void should_WriteTheTypeScriptOfAProductionBuildAsWell()
+            throws Exception {
+        // A production build has no application context to ask, so the
+        // browser callable classes are found by the configuration instead
+        var configuration = new EngineAutoConfiguration.Builder(
+                getEngineConfiguration()).productionMode(true)
+                .browserCallableFinder(conf -> List.of(MyEndpoint.class))
+                .build();
+
+        new TaskGenerateTypeScriptImpl(configuration).execute();
+
+        assertTrue(Files.isRegularFile(output().resolve("MyEndpoint.ts")),
+                "The endpoint the configuration found is written");
+        assertFalse(Files.exists(output().resolve("CustomEndpointName.ts")),
+                "The application context is not what a production build asks");
+        assertFalse(Files.exists(output().resolve("WithoutValueEqual.ts")),
+                "The application context is not what a production build asks");
+    }
+
+    @Test
+    public void should_LeaveTheTaskOfTheEndpointsWithNothingToDo()
+            throws Exception {
+        // The folder the task would write into, so that what is asserted
+        // empty is where its own output would go
+        var options = new Options(Mockito.mock(Lookup.class),
+                getTemporaryDirectory().toFile())
+                .withFrontendGeneratedFolder(output().toFile());
+
+        new EndpointGeneratorTaskFactoryImpl()
+                .createTaskGenerateEndpoint(options).execute();
+
+        assertFalse(Files.exists(output()),
+                "The task which parses the classes is what writes them");
+    }
+
+    private Path output() {
+        return getTemporaryDirectory().resolve(getOutputDirectory());
+    }
+
+    private String read(String path) throws IOException {
+        return Files.readString(output().resolve(path));
+    }
+}

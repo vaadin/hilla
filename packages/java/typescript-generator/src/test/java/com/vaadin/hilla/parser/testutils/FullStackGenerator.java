@@ -16,10 +16,8 @@
 package com.vaadin.hilla.parser.testutils;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -27,16 +25,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import io.swagger.v3.core.util.Json;
-import io.swagger.v3.oas.models.OpenAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 
-import com.vaadin.flow.internal.FrontendUtils;
 import com.vaadin.hilla.EndpointSubscription;
+import com.vaadin.hilla.generator.model.EndpointModel;
+import com.vaadin.hilla.generator.model.EndpointModelPlugin;
+import com.vaadin.hilla.generator.model.EntityModel;
+import com.vaadin.hilla.generator.model.Generation;
+import com.vaadin.hilla.generator.typescript.TypeScriptWriter;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
@@ -80,19 +79,6 @@ public final class FullStackGenerator {
             .of(EndpointExposed.class);
 
     /**
-     * The TypeScript generator plugins, in the order used in production.
-     */
-    private static final List<String> GENERATOR_PLUGINS = List.of(
-            "@vaadin/hilla-generator-plugin-transfertypes",
-            "@vaadin/hilla-generator-plugin-backbone",
-            "@vaadin/hilla-generator-plugin-client",
-            "@vaadin/hilla-generator-plugin-model",
-            "@vaadin/hilla-generator-plugin-barrel",
-            "@vaadin/hilla-generator-plugin-push",
-            "@vaadin/hilla-generator-plugin-signals",
-            "@vaadin/hilla-generator-plugin-subtypes");
-
-    /**
      * Types which the endpoints of a test may refer to and which the parser has
      * to be able to find, in addition to the test classes themselves.
      */
@@ -102,11 +88,12 @@ public final class FullStackGenerator {
     private final ResourceLoader resourceLoader;
     private final Path targetDir;
     private final List<Class<?>> endpointClasses;
+    private final EndpointModelPlugin modelPlugin = new EndpointModelPlugin();
     private final List<Plugin> plugins = defaultParserPlugins();
     private boolean clientFileIncluded;
     private String snapshotsPackage;
 
-    FullStackGenerator(Class<?> testClass, Class<?>... endpointClasses) {
+    public FullStackGenerator(Class<?> testClass, Class<?>... endpointClasses) {
         this.resourceLoader = new ResourceLoader(testClass);
         try {
             this.targetDir = resourceLoader.findTargetDirPath();
@@ -174,14 +161,46 @@ public final class FullStackGenerator {
      * relative to the output folder.
      */
     public Map<String, String> generate() {
-        return generateTypeScript(parse());
+        var files = new LinkedHashMap<String, String>();
+
+        new TypeScriptWriter().write(parseGeneration())
+                .forEach(file -> files.put(file.path(), file.content()));
+
+        return files;
+    }
+
+    /**
+     * Runs the Java part of the pipeline and returns everything one generation
+     * of TypeScript is written from.
+     */
+    public Generation parseGeneration() {
+        parse();
+        return modelPlugin.getGeneration();
+    }
+
+    /**
+     * Runs the Java part of the pipeline and returns the model the TypeScript
+     * is written from, which the parser builds while it walks the classes.
+     */
+    public List<EndpointModel> parseModel() {
+        parse();
+        return modelPlugin.getEndpoints();
+    }
+
+    /**
+     * Runs the Java part of the pipeline and returns the types the endpoints
+     * refer to, which are generated as declarations of their own.
+     */
+    public List<EntityModel> parseEntities() {
+        parse();
+        return modelPlugin.getEntities();
     }
 
     /**
      * Runs only the Java part of the pipeline. Available for the few tests
      * which assert on things that are not visible in the generated TypeScript.
      */
-    public OpenAPI parse() {
+    public void parse() {
         try {
             var classPath = ResourceLoader.getClasspath(SCANNED_TYPES.stream()
                     .map(ResourceLoader::new).collect(Collectors.toList()));
@@ -189,9 +208,14 @@ public final class FullStackGenerator {
                     .classPath(classPath.split(File.pathSeparator))
                     .endpointAnnotations(ENDPOINT_ANNOTATIONS)
                     .endpointExposedAnnotations(ENDPOINT_EXPOSED_ANNOTATIONS);
+            // Collects what the TypeScript is written from while the other
+            // plugins walk the classes, without changing anything they do. It
+            // goes first so that it is the last to exit a node, by which time
+            // the plugins deciding whether a value can be absent have run
+            parser.addPlugin(modelPlugin);
             plugins.forEach(parser::addPlugin);
 
-            return parser.execute(endpointClasses);
+            parser.execute(endpointClasses);
         } catch (URISyntaxException e) {
             throw new IllegalStateException("Unable to build the classpath", e);
         }
@@ -220,101 +244,6 @@ public final class FullStackGenerator {
                 new ModelPlugin()));
 
         return plugins;
-    }
-
-    private Map<String, String> generateTypeScript(OpenAPI openAPI) {
-        Path outputDir = null;
-        Path openAPIFile = null;
-
-        try {
-            var mapper = Json.mapper();
-            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-
-            outputDir = Files.createTempDirectory("hilla-generator-output");
-            openAPIFile = Files.createTempFile("openapi", ".json");
-            Files.writeString(openAPIFile, mapper.writeValueAsString(openAPI));
-
-            var command = new ArrayList<>(
-                    List.of("node", resolveGeneratorCli().toString(),
-                            openAPIFile.toAbsolutePath().toString(), "-o",
-                            outputDir.toAbsolutePath().toString()));
-            GENERATOR_PLUGINS.forEach(plugin -> {
-                command.add("-p");
-                command.add(plugin);
-            });
-
-            LOGGER.debug("Executing the TypeScript generator: {}",
-                    String.join(" ", command));
-            FrontendUtils.executeCommand(command,
-                    pb -> pb.directory(targetDir.toFile()));
-
-            return readGeneratedFiles(outputDir);
-        } catch (IOException | FrontendUtils.CommandExecutionException e) {
-            throw new IllegalStateException(
-                    "Unable to generate TypeScript files", e);
-        } finally {
-            deleteRecursively(openAPIFile);
-            deleteRecursively(outputDir);
-        }
-    }
-
-    private static Map<String, String> readGeneratedFiles(Path outputDir)
-            throws IOException {
-        try (var files = Files.walk(outputDir)) {
-            // A sorted map keeps assertion failures readable
-            return files.filter(Files::isRegularFile)
-                    .filter(path -> path.toString().endsWith(".ts")).sorted()
-                    .collect(Collectors.toMap(
-                            path -> outputDir.relativize(path).toString()
-                                    .replace(File.separatorChar, '/'),
-                            path -> readString(path), (a, b) -> a,
-                            LinkedHashMap::new));
-        }
-    }
-
-    private static String readString(Path path) {
-        try {
-            return Files.readString(path);
-        } catch (IOException e) {
-            throw new IllegalStateException(
-                    "Unable to read the generated file " + path, e);
-        }
-    }
-
-    /**
-     * Resolves the generator CLI the same way Flow resolves an npm package
-     * executable.
-     */
-    private Path resolveGeneratorCli()
-            throws FrontendUtils.CommandExecutionException {
-        var script = """
-                var path = require('path');
-                var jsonPath = require.resolve('@vaadin/hilla-generator-cli/package.json');
-                var json = require(jsonPath);
-                console.log(path.resolve(path.dirname(jsonPath), json.bin['tsgen']));
-                """;
-
-        return Path.of(
-                FrontendUtils.executeCommand(List.of("node", "--eval", script),
-                        pb -> pb.directory(targetDir.toFile())).trim());
-    }
-
-    private static void deleteRecursively(Path path) {
-        if (path == null || !Files.exists(path)) {
-            return;
-        }
-
-        try (var paths = Files.walk(path)) {
-            paths.sorted(java.util.Comparator.reverseOrder()).forEach(entry -> {
-                try {
-                    Files.deleteIfExists(entry);
-                } catch (IOException e) {
-                    LOGGER.warn("Unable to delete {}", entry, e);
-                }
-            });
-        } catch (IOException e) {
-            LOGGER.warn("Unable to clean up {}", path, e);
-        }
     }
 
     /**

@@ -21,7 +21,7 @@ public abstract class AbstractPlugin<C extends PluginConfiguration>
         implements Plugin {
     private C configuration;
 
-    private SharedStorage storage;
+    private Parser.Config parserConfig;
 
     protected AbstractPlugin() {
     }
@@ -56,12 +56,12 @@ public abstract class AbstractPlugin<C extends PluginConfiguration>
         this.configuration = (C) configuration;
     }
 
-    protected SharedStorage getStorage() {
-        return storage;
+    protected Parser.Config getParserConfig() {
+        return parserConfig;
     }
 
     @Override
-    public void setStorage(SharedStorage storage) {
-        this.storage = storage;
+    public void setParserConfig(Parser.Config parserConfig) {
+        this.parserConfig = parserConfig;
     }
 }

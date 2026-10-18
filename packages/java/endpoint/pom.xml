@@ -221,6 +221,12 @@
             <artifactId>hilla-typescript-generator</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- The hints of a native image are registered for the classes a scan
+             of the classpath finds -->
+        <dependency>
+            <groupId>io.github.classgraph</groupId>
+            <artifactId>classgraph</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>hilla-runtime-plugin-transfertypes</artifactId>

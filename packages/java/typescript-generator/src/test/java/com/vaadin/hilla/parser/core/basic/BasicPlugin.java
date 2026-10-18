@@ -19,12 +19,29 @@ import com.vaadin.hilla.parser.core.AbstractCompositePlugin;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 
 final class BasicPlugin extends AbstractCompositePlugin<PluginConfiguration> {
-    public static final String FOOTSTEPS_STORAGE_KEY = "x-basic-plugin-footsteps";
-    public static final String STORAGE_KEY = "x-basic-plugin-result";
-    private int order = 0;
+    private final FinalizePlugin finalizePlugin;
 
     BasicPlugin() {
+        this(new FinalizePlugin());
+    }
+
+    private BasicPlugin(FinalizePlugin finalizePlugin) {
         super(new AddPlugin(), new ReplacePlugin(), new RemovePlugin(),
-                new FinalizePlugin());
+                finalizePlugin);
+        this.finalizePlugin = finalizePlugin;
+    }
+
+    /**
+     * Every step of the walk, one per line, in the order it took them.
+     */
+    String getFootsteps() {
+        return finalizePlugin.getFootsteps();
+    }
+
+    /**
+     * The named members the walk reached, in the order it reached them.
+     */
+    String getMembers() {
+        return finalizePlugin.getMembers();
     }
 }
