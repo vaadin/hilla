@@ -59,10 +59,10 @@ public class HillaHintsRegistrarTest {
     public void should_RegisterTheTypesAnEndpointExposes() {
         var hints = new RuntimeHints();
 
-        new HillaHintsRegistrar().registerEndpointTypes(
-                hints, new EngineAutoConfiguration.Builder()
-                        .withDefaultAnnotations().build(),
-                List.of(HintedEndpoint.class));
+        new HillaHintsRegistrar().registerEndpointTypes(hints,
+                new EngineAutoConfiguration.Builder().withDefaultAnnotations()
+                        .build(),
+                List.of(HintedEndpoint.class, PackagePrivateEndpoint.class));
 
         var registered = registeredTypes(hints);
 
@@ -70,6 +70,9 @@ public class HillaHintsRegistrarTest {
                 "The browser calls the endpoint: " + registered);
         assertTrue(registered.contains(Hinted.class.getName()),
                 "The endpoint sends a value of the type: " + registered);
+        assertTrue(registered.contains(PackagePrivateEndpoint.class.getName()),
+                "The browser calls an endpoint which is not public as well: "
+                        + registered);
     }
 
     @Test
