@@ -8,7 +8,7 @@ const ValidatedModel = m
   .property("address", m.meta(m.constrained(m.optional(StringModel), Email({ message: "that isn't an address" })), { jvmType: "java.lang.String" }))
   .property("code", m.meta(m.constrained(m.optional(StringModel), Pattern({ regexp: "[a-z]+" })), { jvmType: "java.lang.String" }))
   .property("codes", m.meta(m.optional(m.array(m.meta(m.constrained(m.optional(StringModel), Size({ min: 1 })), { jvmType: "java.lang.String" }))), { jvmType: "java.lang.String[]" }))
-  .property("tags", m.meta(m.constrained(m.optional(m.array(m.meta(m.constrained(m.optional(StringModel), NotBlank()), { jvmType: "java.lang.String" }))), Size({ min: 1, max: 10 })), { jvmType: "java.util.List" }))
+  .property("tags", m.meta(m.constrained(m.optional(m.array(m.meta(m.constrained(m.optional(StringModel), NotBlank()), { jvmType: "java.lang.String" }))), Size({ max: 10, min: 1 })), { jvmType: "java.util.List" }))
   .build();
 type ValidatedModel = typeof ValidatedModel;
 export default ValidatedModel;
