@@ -117,6 +117,9 @@ final class ModelCycles {
             found.add(entity.javaClass());
             yield entity.typeArguments().stream();
         }
+        // The model of a type the framework provides is not generated, so it
+        // refers to nothing, whatever it holds
+        case TypeModel.Provided provided -> Stream.<TypeModel> empty();
         case TypeModel.TypeVariable variable -> Stream.<TypeModel> empty();
         };
 
