@@ -1,14 +1,13 @@
-import { StringModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import m, { StringModel } from '@vaadin/hilla-models';
 import type FromInterface from './FromInterface.js';
 import NamedParentModel from './NamedParentModel.js';
 
-class FromInterfaceModel<T extends FromInterface = FromInterface> extends NamedParentModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(FromInterfaceModel);
-
-  get address(): StringModel {
-    return this[_getPropertyModel]('address', (parent, key) =>
-      new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }));
-  }
-}
+const FromInterfaceModel = m
+  .extend(NamedParentModel)
+  .object<FromInterface>('FromInterface')
+  .property('address', m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))
+  .property('@type', m.literal('from-interface'))
+  .build();
+type FromInterfaceModel = typeof FromInterfaceModel;
 
 export default FromInterfaceModel;

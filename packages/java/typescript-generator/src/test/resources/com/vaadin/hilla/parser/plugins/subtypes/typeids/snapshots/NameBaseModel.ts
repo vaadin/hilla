@@ -1,13 +1,10 @@
-import { ObjectModel, StringModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import m, { StringModel } from '@vaadin/hilla-models';
 import type NameBase from './NameBase.js';
 
-class NameBaseModel<T extends NameBase = NameBase> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(NameBaseModel);
-
-  get id(): StringModel {
-    return this[_getPropertyModel]('id', (parent, key) =>
-      new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }));
-  }
-}
+const NameBaseModel = m
+  .object<NameBase>('NameBase')
+  .property('id', m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))
+  .build();
+type NameBaseModel = typeof NameBaseModel;
 
 export default NameBaseModel;

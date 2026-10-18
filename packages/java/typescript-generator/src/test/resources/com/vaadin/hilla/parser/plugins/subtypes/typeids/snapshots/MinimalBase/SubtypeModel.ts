@@ -1,14 +1,12 @@
-import { StringModel, _getPropertyModel, makeObjectEmptyValueCreator } from '@vaadin/hilla-lit-form';
+import m, { StringModel } from '@vaadin/hilla-models';
 import MinimalBaseModel from '../MinimalBaseModel.js';
 import type Subtype from './Subtype.js';
 
-class SubtypeModel<T extends Subtype = Subtype> extends MinimalBaseModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(SubtypeModel);
-
-  get note(): StringModel {
-    return this[_getPropertyModel]('note', (parent, key) =>
-      new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }));
-  }
-}
+const SubtypeModel = m
+  .extend(MinimalBaseModel)
+  .object<Subtype>('Subtype')
+  .property('note', m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))
+  .build();
+type SubtypeModel = typeof SubtypeModel;
 
 export default SubtypeModel;
