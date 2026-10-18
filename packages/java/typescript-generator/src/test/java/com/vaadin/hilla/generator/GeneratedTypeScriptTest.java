@@ -54,7 +54,7 @@ public class GeneratedTypeScriptTest {
                         import type Wrapper from './com/vaadin/hilla/generator/fixtures/SampleEndpoint/Wrapper.js';
                         import client from './connect-client.default.js';
 
-                        export async function all(init?: EndpointRequestInit): Promise<Array<Sample | undefined> | undefined> {
+                        async function all(init?: EndpointRequestInit): Promise<Array<Sample | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'all', {}, init);
                         }
 
@@ -78,23 +78,23 @@ public class GeneratedTypeScriptTest {
                           return client.call('SampleEndpoint', 'greet', { name }, init);
                         }
 
-                        export async function kind(init?: EndpointRequestInit): Promise<Kind | undefined> {
+                        async function kind(init?: EndpointRequestInit): Promise<Kind | undefined> {
                           return client.call('SampleEndpoint', 'kind', {}, init);
                         }
 
-                        export async function maybe(init?: EndpointRequestInit): Promise<string | undefined> {
+                        async function maybe(init?: EndpointRequestInit): Promise<string | undefined> {
                           return client.call('SampleEndpoint', 'maybe', {}, init);
                         }
 
-                        export async function maybeCounts(init?: EndpointRequestInit): Promise<Record<string, number | undefined> | undefined> {
+                        async function maybeCounts(init?: EndpointRequestInit): Promise<Record<string, number | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'maybeCounts', {}, init);
                         }
 
-                        export async function maybeNames(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
+                        async function maybeNames(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'maybeNames', {}, init);
                         }
 
-                        export async function names(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
+                        async function names(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'names', {}, init);
                         }
 
@@ -102,13 +102,15 @@ public class GeneratedTypeScriptTest {
                           return client.call('SampleEndpoint', 'ping', {}, init);
                         }
 
-                        export async function required(name: string, init?: EndpointRequestInit): Promise<string> {
+                        async function required(name: string, init?: EndpointRequestInit): Promise<string> {
                           return client.call('SampleEndpoint', 'required', { name }, init);
                         }
 
-                        export async function wrapped(init?: EndpointRequestInit): Promise<Wrapper<Sample | undefined> | undefined> {
+                        async function wrapped(init?: EndpointRequestInit): Promise<Wrapper<Sample | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'wrapped', {}, init);
                         }
+
+                        export { all, count, counts, describe, find, greet, kind, maybe, maybeCounts, maybeNames, names, ping, required, wrapped };
                         """,
                 file.content());
     }
@@ -122,19 +124,15 @@ public class GeneratedTypeScriptTest {
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
                         import client_1 from './connect-client.default.js';
 
-                        export async function client(init?: EndpointRequestInit): Promise<string | undefined> {
+                        async function client(init?: EndpointRequestInit): Promise<string | undefined> {
                           return client_1.call('ShadowingEndpoint', 'client', {}, init);
                         }
 
-                        export async function echo(
-                          client: string | undefined,
-                          init: string | undefined,
-                          _init?: EndpointRequestInit,
-                        ): Promise<string | undefined> {
+                        async function echo(client: string | undefined, init: string | undefined, _init?: EndpointRequestInit): Promise<string | undefined> {
                           return client_1.call('ShadowingEndpoint', 'echo', { client, init }, _init);
                         }
 
-                        export { echo };
+                        export { client, echo };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpoint).content());
@@ -165,13 +163,15 @@ public class GeneratedTypeScriptTest {
                         import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
                         import client from './connect-client.default.js';
 
-                        export async function shared(init?: EndpointRequestInit): Promise<string | undefined> {
+                        async function shared(init?: EndpointRequestInit): Promise<string | undefined> {
                           return client.call('InheritingEndpoint', 'shared', {}, init);
                         }
 
-                        export async function twice(one: string | undefined, init?: EndpointRequestInit): Promise<string | undefined> {
+                        async function twice(one: string | undefined, init?: EndpointRequestInit): Promise<string | undefined> {
                           return client.call('InheritingEndpoint', 'twice', { one }, init);
                         }
+
+                        export { shared, twice };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
                         .write(endpoint).content());
