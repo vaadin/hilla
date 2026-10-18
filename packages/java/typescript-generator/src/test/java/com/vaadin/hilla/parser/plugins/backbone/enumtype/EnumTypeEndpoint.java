@@ -50,6 +50,10 @@ public class EnumTypeEndpoint {
         return value;
     }
 
+    public LabelledEnum echoLabelled(LabelledEnum value) {
+        return value;
+    }
+
     /**
      * Constants Jackson writes under a name of their own, one of which
      * TypeScript only accepts as a string.
@@ -57,7 +61,24 @@ public class EnumTypeEndpoint {
     public enum RenamedEnum {
         @JsonProperty("very-low")
         VERY_LOW, @JsonProperty("it's high")
-        HIGH, UNCHANGED
+        HIGH, UNCHANGED;
+
+        // A public field of the enum class which is not one of its constants
+        public static final RenamedEnum DEFAULT = UNCHANGED;
+    }
+
+    /**
+     * Constants with a label of their own, which Jackson writes them as unless
+     * the mapper is told otherwise.
+     */
+    public enum LabelledEnum {
+        LOW, HIGH;
+
+        @Override
+        public String toString() {
+            return name().charAt(0) + name().substring(1).toLowerCase()
+                    + " priority";
+        }
     }
 
     /**
