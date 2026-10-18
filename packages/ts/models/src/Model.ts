@@ -293,7 +293,6 @@ export const Model: Model = Object.create(null, {
       return (
         typeof o === 'object' &&
         o != null &&
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         (this === o || Object.prototype.isPrototypeOf.call(this, o) || inheritsLazily(this, o))
       );
     },

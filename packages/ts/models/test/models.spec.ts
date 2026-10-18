@@ -119,8 +119,8 @@ describe('@vaadin/hilla-models', () => {
   });
 
   describe('a deferred base', () => {
-    let LazilyNamedModel: ObjectModel<Named>;
-    let LazyStreetModel: ObjectModel<Street>;
+    let LazilyNamedModel: typeof NamedModel;
+    let LazyStreetModel: typeof StreetModel;
 
     beforeEach(() => {
       // the extending model is built first, so its base is still undefined at
@@ -138,6 +138,8 @@ describe('@vaadin/hilla-models', () => {
     it('should serve the properties of the base', () => {
       expect(LazyStreetModel).to.have.property('name').which.is.instanceof(StringModel);
       expect(LazyStreetModel).to.have.property('building').which.is.instanceof(NumberModel);
+      // an inherited property belongs to the extending model, not to the base
+      expect(LazyStreetModel.name[$owner]).to.be.equal(LazyStreetModel);
     });
 
     it('should include the properties of the base in the default value', () => {
@@ -162,11 +164,40 @@ describe('@vaadin/hilla-models', () => {
       expect(LazyStreetModel).to.not.be.instanceof(AddressModel);
     });
 
+    it('should serve what the base inherits', () => {
+      // the base is built on a model of its own, as a generated model of a
+      // subclass is, which the stand-in has to serve all the same
+      const AvenueModel = m
+        .extend(() => StreetModel)
+        .object<Street>('Avenue')
+        .build();
+
+      expect(AvenueModel).to.have.property('name').which.is.instanceof(StringModel);
+      expect(AvenueModel[$defaultValue]).to.be.deep.equal({ building: NaN, name: '' });
+    });
+
+    it('should follow a deferred base whose own base is deferred', () => {
+      const AvenueModel = m
+        .extend(() => LazyStreetModel)
+        .object<Street>('Avenue')
+        .build();
+
+      expect(AvenueModel).to.be.instanceof(LazyStreetModel);
+      expect(AvenueModel).to.be.instanceof(LazilyNamedModel);
+      expect(AvenueModel).to.have.property('name').which.is.instanceof(StringModel);
+      expect(AvenueModel[$defaultValue]).to.be.deep.equal({ building: NaN, name: '' });
+    });
+
     it('should keep the base out of the prototype chain', () => {
       // the stand-in serves the base's properties, so leaving the base in would
       // offer them twice to anything walking the chain a level at a time
       expect(Object.getPrototypeOf(LazyStreetModel)).to.not.be.equal(LazilyNamedModel);
-      expect(Object.getOwnPropertyNames(Object.getPrototypeOf(LazyStreetModel))).to.be.deep.equal(['name']);
+
+      const names: string[] = [];
+      for (let model: object | null = LazyStreetModel; model; model = Object.getPrototypeOf(model)) {
+        names.push(...Object.getOwnPropertyNames(model));
+      }
+      expect(names.filter((name) => name === 'name')).to.have.length(1);
     });
   });
 

@@ -16,19 +16,52 @@ import {
 } from './Model.js';
 import type { ObjectModel } from './models.js';
 
-const { create, defineProperty, getOwnPropertyDescriptor, getPrototypeOf } = Object;
-const { ownKeys } = Reflect;
+const {
+  create,
+  defineProperty,
+  getOwnPropertyDescriptor,
+  getOwnPropertyNames,
+  getOwnPropertySymbols,
+  getPrototypeOf,
+  keys,
+} = Object;
 
 const $model = Symbol('model');
+
+/**
+ * The models of the chain of the base which declare properties, from the base
+ * on, followed by the first model below them, which declares none and neither
+ * does anything it derives from.
+ */
+function splitChain(base: Model): [levels: object[], root: object | null] {
+  const chain: object[] = [];
+
+  for (let model: object | null = base; model; model = getPrototypeOf(model) as object | null) {
+    chain.push(model);
+  }
+
+  let count = 0;
+
+  chain.forEach((model, index) => {
+    if (keys(model).length > 0) {
+      count = index + 1;
+    }
+  });
+
+  return [chain.slice(0, count), chain[count] ?? null];
+}
 
 /**
  * A stand-in for a base model that is not available yet, to be used as the
  * prototype of the model extending it.
  *
- * The stand-in serves the base's own properties itself and reports the base's
- * prototype as its own, which leaves the base out of the chain entirely. Were
- * it reported instead, anything walking the chain a level at a time would meet
- * the base's properties twice: once here and once on the base.
+ * The stand-in serves as its own every property the base has, inherited ones
+ * included, from the root of the chain on, and reports as its prototype the
+ * model below them, which leaves the models declaring them out of the chain
+ * entirely. Were they reported instead, anything walking the chain a level at
+ * a time would meet their properties twice. Serving the inherited properties
+ * too is what makes them enumerable: `for...in` does not follow the prototype
+ * of a proxy.
  *
  * @param provider - Returns the base model, called no earlier than the first
  * time the extending model is used.
@@ -37,15 +70,26 @@ function lazyBase(provider: () => Model): Model {
   return new Proxy(create(null) as Model, {
     get: (_target, key, receiver) => Reflect.get(provider(), key, receiver),
     getOwnPropertyDescriptor(_target, key) {
-      const descriptor = getOwnPropertyDescriptor(provider(), key);
+      const base = provider();
+      const owner = typeof key === 'symbol' ? base : splitChain(base)[0].find((model) => Object.hasOwn(model, key));
+      const descriptor = owner && getOwnPropertyDescriptor(owner, key);
 
       // the target holds nothing of its own, so a descriptor may only be
       // reported for it as configurable
       return descriptor && { ...descriptor, configurable: true };
     },
-    getPrototypeOf: () => getPrototypeOf(provider()),
+    getPrototypeOf: () => splitChain(provider())[1],
     has: (_target, key) => Reflect.has(provider(), key),
-    ownKeys: () => ownKeys(provider()),
+    ownKeys() {
+      const base = provider();
+      const names = new Set(
+        splitChain(base)[0]
+          .reverse()
+          .flatMap((model) => getOwnPropertyNames(model)),
+      );
+
+      return [...names, ...getOwnPropertySymbols(base)];
+    },
   });
 }
 
