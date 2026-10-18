@@ -634,9 +634,9 @@ public class GeneratedTypeScriptTest {
     }
 
     @Test
-    public void should_WriteTheBarrel() {
-        assertEquals("""
-                import * as SampleEndpoint from './SampleEndpoint.js';
+    public void should_ExportAnEndpointUnderItsOwnName() {
+        var written = new BarrelWriter().write(List.of(
+                new EndpointModel("Record", "com.example.Record", List.of())));
 
         assertEquals("""
                 import * as Record_1 from './Record.js';

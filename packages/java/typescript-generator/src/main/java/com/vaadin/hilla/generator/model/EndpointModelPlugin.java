@@ -92,10 +92,10 @@ public final class EndpointModelPlugin
      */
     private static final String ANNOTATIONS = "x-annotations";
 
-    private final Map<Node<?, ?>, List<TypeModel>> types = new IdentityHashMap<>();
-    private final Map<Node<?, ?>, List<ParameterModel>> parameters = new IdentityHashMap<>();
-    private final Map<Node<?, ?>, Map<String, MethodModel>> methods = new IdentityHashMap<>();
-    private final Map<Node<?, ?>, List<PropertyModel>> properties = new IdentityHashMap<>();
+    /**
+     * What has been built below each node the walk is in, the innermost first.
+     */
+    private final Deque<Frame> frames = new ArrayDeque<>();
     /**
      * The endpoints by the name the client calls them by, which is what tells
      * one from another: two classes of the same name, in packages of their own,
@@ -253,12 +253,12 @@ public final class EndpointModelPlugin
             entities.add(buildEntity(entity, List.copyOf(own.properties())));
         } else if (own.node() instanceof SubTypesPlugin.UnionNode union) {
             unions.put(union.getSource().getName(), subTypesOf(union));
-        } else if (node instanceof EndpointNode endpoint) {
+        } else if (own.node() instanceof EndpointNode endpoint) {
             var name = endpoint.getTarget().getName();
 
-            endpoints.put(name, new EndpointModel(name,
-                    endpoint.getSource().getName(), List.copyOf(
-                            methods.getOrDefault(node, Map.of()).values())));
+            endpoints.put(name,
+                    new EndpointModel(name, endpoint.getSource().getName(),
+                            List.copyOf(own.methods().values())));
         }
     }
 
