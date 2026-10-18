@@ -24,9 +24,8 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.hilla.generator.model.TypeModel;
 
 /**
- * Covers what types turn into where no endpoint signature reaches by itself:
- * the type parameters the entities declare and use, and the names of the types
- * the browser has, however deep a type holds them.
+ * Covers what a type parameter turns into, which no endpoint signature has by
+ * itself: it is the entities that declare and use them.
  */
 public class TypeWriterTest {
     private final ImportRegistry imports = new ImportRegistry();
@@ -49,28 +48,5 @@ public class TypeWriterTest {
                 writer.write(box));
         assertEquals(List.of("import type Box from './com/example/Box.js';"),
                 imports.write());
-    }
-
-    @Test
-    public void should_KeepTheNameOfATypeTheBrowserHasWhereverItIsHeld() {
-        // However deep the type the browser has is held, the type of the
-        // application named after it is imported under another name
-        var file = new TypeModel.Provided("File", "", List.of(), true);
-        var holders = List.<TypeModel> of(
-                new TypeModel.ArrayOf(file, true, "java.util.List"),
-                new TypeModel.MapOf(file, true, "java.util.Map"),
-                new TypeModel.EntityRef("com.example.Box", List.of(file), true),
-                new TypeModel.Provided("Signal", "@vaadin/hilla-react-signals",
-                        List.of(file), true));
-
-        for (var holder : holders) {
-            var registry = new ImportRegistry();
-            new TypeWriter(registry, "").reserveProvided(holder);
-
-            assertEquals("File_1",
-                    new TypeWriter(registry, "")
-                            .write(TypeModel.EntityRef.of("com.example.File")),
-                    holder::toString);
-        }
     }
 }

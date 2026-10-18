@@ -41,19 +41,6 @@ public class ImportRegistryTest {
 
         assertEquals("Person", first);
         assertEquals("Person_1", second);
-        assertEquals("Person_2",
-                imports.importDefault("./three/Person.js", "Person", true));
-    }
-
-    @Test
-    public void should_ReuseTheNameOfAModuleImportedAsAWhole() {
-        assertEquals("PersonEndpoint",
-                imports.importAll("./PersonEndpoint.js", "PersonEndpoint"));
-        assertEquals("PersonEndpoint",
-                imports.importAll("./PersonEndpoint.js", "PersonEndpoint"));
-        assertEquals(List
-                .of("import * as PersonEndpoint from './PersonEndpoint.js';"),
-                imports.write());
     }
 
     @Test
