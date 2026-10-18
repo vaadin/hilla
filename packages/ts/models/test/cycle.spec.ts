@@ -54,11 +54,6 @@ async function load(entry: string): Promise<Readonly<{ default: ModelObject }>> 
   return (await import(/* @vite-ignore */ `./fixtures/cycle/${entry}.js`)) as Readonly<{ default: ModelObject }>;
 }
 
-async function evaluate(entry: string): Promise<void> {
-  vi.resetModules();
-  await load(entry);
-}
-
 /** Loads both models and the model library from one fresh module graph. */
 async function loadBoth(entry: string) {
   vi.resetModules();
@@ -77,14 +72,6 @@ async function loadBoth(entry: string) {
 describe('a reference cycle closed by inheritance', () => {
   it('compiles', () => {
     expect(compile()).to.deep.equal([]);
-  });
-
-  it('evaluates when the subclass module is the entry', async () => {
-    await expect(evaluate('EmployeeModel')).resolves.toBeUndefined();
-  });
-
-  it('evaluates when the superclass module is the entry', async () => {
-    await expect(evaluate('PersonModel')).resolves.toBeUndefined();
   });
 
   it.each(['PersonModel', 'EmployeeModel'])('inherits the base through %s as the entry', async (entry) => {

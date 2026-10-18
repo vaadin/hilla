@@ -112,6 +112,20 @@ describe('@vaadin/hilla-react-crud', () => {
         expect(propertyNames).to.eql(['firstName', 'lastName', 'nickname']);
       });
 
+      it('returns property information in order for a deferred base that inherits properties', () => {
+        const modelInfo = new ModelInfo(
+          m
+            .extend(() => NicknamedModel)
+            .object('Pseudonymous')
+            .build(),
+        );
+
+        const propertyNames = modelInfo.getRootProperties().map((prop) => prop.name);
+
+        // the properties the base inherits come ahead of its own
+        expect(propertyNames).to.eql(['firstName', 'lastName', 'nickname']);
+      });
+
       it('returns property information for nested model', () => {
         const modelInfo = new ModelInfo(PersonModel);
 
