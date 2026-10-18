@@ -191,7 +191,7 @@ public sealed interface TypeModel {
      */
     record Provided(String name, String module, List<TypeModel> typeArguments,
             boolean optional, List<ConstraintModel> constraints,
-            List<String> annotations) implements TypeModel {
+            List<AnnotationModel> annotations) implements TypeModel {
         public Provided {
             Objects.requireNonNull(name);
             Objects.requireNonNull(module);
@@ -203,6 +203,12 @@ public sealed interface TypeModel {
         public Provided(String name, String module,
                 List<TypeModel> typeArguments, boolean optional) {
             this(name, module, typeArguments, optional, List.of(), List.of());
+        }
+
+        @Override
+        public Provided withOptional(boolean optional) {
+            return new Provided(name, module, typeArguments, optional,
+                    constraints, annotations);
         }
     }
 

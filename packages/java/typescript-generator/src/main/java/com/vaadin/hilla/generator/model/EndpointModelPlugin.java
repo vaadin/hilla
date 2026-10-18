@@ -215,19 +215,20 @@ public final class EndpointModelPlugin
         var own = frames.pop();
         var parent = frames.peek();
 
-        if (node instanceof TypedNode type) {
-            collect(parentOf(nodePath), buildType(type, taken(node)));
-        } else if (node instanceof MethodParameterNode parameter) {
-            collect(parentOf(nodePath), parameter, taken(node));
-        } else if (node instanceof MethodNode method) {
-            collectMethod(nodePath, method);
-        } else if (node instanceof PropertyNode property) {
-            collect(parentOf(nodePath), property, taken(node));
-        } else if (node instanceof EntityNode entity
+        if (own.node() instanceof TypedNode type) {
+            parent.types().add(buildType(type, own.types()));
+        } else if (own.node() instanceof MethodParameterNode parameter) {
+            parent.parameters().add(new ParameterModel(parameter.getTarget(),
+                    only(own.types())));
+        } else if (own.node() instanceof MethodNode method) {
+            collectMethod(method, own);
+        } else if (own.node() instanceof PropertyNode property) {
+            parent.properties().add(
+                    new PropertyModel(property.getTarget(), only(own.types())));
+        } else if (own.node() instanceof EntityNode entity
                 && !isProvided(entity.getSource().getName())) {
-            entities.add(buildEntity(entity,
-                    properties.getOrDefault(node, List.of())));
-        } else if (node instanceof SubTypesPlugin.UnionNode union) {
+            entities.add(buildEntity(entity, List.copyOf(own.properties())));
+        } else if (own.node() instanceof SubTypesPlugin.UnionNode union) {
             unions.put(union.getSource().getName(), subTypesOf(union));
         } else if (own.node() instanceof EndpointNode endpoint) {
             endpoints.add(new EndpointModel(endpoint.getTarget().getName(),
@@ -436,7 +437,13 @@ public final class EndpointModelPlugin
                     annotations);
         }
 
-        if (signature.isClassRef() && isEntity(signature)) {
+        var kind = scalarKind(signature);
+
+        // A scalar is checked for first, as the parser does, so that a class
+        // of the application extending one, such as a Date, is written as
+        // what it is serialized as rather than declared on its own
+        if (kind == TypeModel.ScalarKind.UNKNOWN && signature.isClassRef()
+                && isEntity(signature)) {
             return new TypeModel.EntityRef(name(signature), referred, optional,
                     constraints, annotations);
         }
@@ -445,30 +452,13 @@ public final class EndpointModelPlugin
                 constraints, annotations);
     }
 
-    private static TypeModel bound(TypeModel type, boolean optional) {
-        return optional ? asOptional(type) : type;
-    }
-
-    private static TypeModel asOptional(TypeModel type) {
-        return switch (type) {
-        case TypeModel.Scalar scalar ->
-            new TypeModel.Scalar(scalar.kind(), true, scalar.javaType(),
-                    scalar.constraints(), scalar.annotations());
-        case TypeModel.ArrayOf array ->
-            new TypeModel.ArrayOf(array.items(), true, array.javaType(),
-                    array.constraints(), array.annotations());
-        case TypeModel.MapOf map -> new TypeModel.MapOf(map.values(), true,
-                map.javaType(), map.constraints(), map.annotations());
-        case TypeModel.EntityRef entity ->
-            new TypeModel.EntityRef(entity.javaClass(), entity.typeArguments(),
-                    true, entity.constraints(), entity.annotations());
-        case TypeModel.Provided provided -> new TypeModel.Provided(
-                provided.name(), provided.module(), provided.typeArguments(),
-                true, provided.constraints(), provided.annotations());
-        case TypeModel.TypeVariable variable ->
-            new TypeModel.TypeVariable(variable.name(), true,
-                    variable.constraints(), variable.annotations());
-        };
+    /**
+     * Whether the walk is inside an entity, where the parser keeps type
+     * variables and parameters as they are rather than resolving them.
+     */
+    private boolean isInEntity() {
+        return frames.stream()
+                .anyMatch(frame -> frame.node() instanceof EntityNode);
     }
 
     private static TypeModel.ScalarKind scalarKind(SignatureModel signature) {
@@ -518,7 +508,8 @@ public final class EndpointModelPlugin
      */
     private static TypeModel provided(String javaClass,
             List<TypeModel> typeArguments, boolean optional,
-            List<ConstraintModel> constraints, List<String> annotations) {
+            List<ConstraintModel> constraints,
+            List<AnnotationModel> annotations) {
         var provided = PROVIDED_TYPES.get(javaClass);
 
         return new TypeModel.Provided(provided.name(), provided.module(),
