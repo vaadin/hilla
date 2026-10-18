@@ -20,11 +20,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 public class ChunksIT {
 
@@ -32,9 +32,10 @@ public class ChunksIT {
 
     @Before
     public void loadChunks() throws IOException {
-        chunks = new ObjectMapper()
-                .readTree(ChunksIT.class.getResource("/vaadin-i18n/i18n.json"))
-                .path("chunks");
+        try (var json = ChunksIT.class
+                .getResourceAsStream("/vaadin-i18n/i18n.json")) {
+            chunks = new JsonMapper().readTree(json).path("chunks");
+        }
     }
 
     @Test
@@ -66,18 +67,10 @@ public class ChunksIT {
 
     private void checkKeys(String chunk, Mode mode, String... expectedKeys) {
         // Find the entry whose name contains the chunk as a substring
-        String entry = null;
-        for (var it = chunks.fieldNames(); it.hasNext();) {
-            String name = it.next();
-            if (name.contains(chunk)) {
-                entry = name;
-                break;
-            }
-        }
-        if (entry == null) {
-            throw new AssertionError(
-                    "No chunk found containing " + chunk + " in its name");
-        }
+        var entry = chunks.propertyNames().stream()
+                .filter(name -> name.contains(chunk)).findFirst()
+                .orElseThrow(() -> new AssertionError(
+                        "No chunk found containing " + chunk + " in its name"));
         var node = chunks.path(entry).path("keys");
         Assert.assertTrue(node.isArray());
 
@@ -86,8 +79,8 @@ public class ChunksIT {
 
         // Collect keys from the json and remove the expected ones
         var unexpected = new ArrayList<String>();
-        for (var it = node.elements(); it.hasNext();) {
-            String key = it.next().asText();
+        for (var value : node.values()) {
+            var key = value.asString();
             if (!remaining.remove(key)) {
                 unexpected.add(key);
             }

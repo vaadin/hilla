@@ -53,9 +53,6 @@ public class PrepareFrontendMojo
     @Parameter(property = "generatedTsFolder")
     private File generated;
 
-    @Parameter(property = "nodeCommand", defaultValue = "node")
-    private String node;
-
     @Parameter(property = "mainClass")
     private String mainClass;
 
@@ -71,11 +68,6 @@ public class PrepareFrontendMojo
             throw new MojoExecutionException(e);
         }
         super.executeInternal();
-    }
-
-    @Override
-    public String getNode() {
-        return node;
     }
 
     @Override
