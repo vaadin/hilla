@@ -8,10 +8,10 @@ interface Person extends AbstractEntity {
   email?: string;
   phone: string;
   important: boolean;
-  age?: number;
   luckyNumber: number;
   addresses: Record<string, Address>;
   profilePicture?: string;
+  age?: number;
   alias: string;
   badge: string;
   fullName: string;

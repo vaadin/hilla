@@ -14,9 +14,9 @@ open class Person(
     private var dateOfBirth: LocalDate?,
     var important: Boolean,
 ): AbstractEntity<Long?>() {
-    var age: Int? = null
+    var age: Int?
+        get() = dateOfBirth?.let { LocalDate.now().year - it.year }
         set(value) {
-            field = value
             if (value != null) {
                 dateOfBirth = LocalDate.now().minusYears(value.toLong())
             }
