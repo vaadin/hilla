@@ -22,7 +22,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
@@ -68,10 +67,10 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
  */
 public final class EndpointModelPlugin
         extends AbstractPlugin<PluginConfiguration> {
-    private final Map<Node<?, ?>, List<TypeModel>> types = new IdentityHashMap<>();
-    private final Map<Node<?, ?>, List<ParameterModel>> parameters = new IdentityHashMap<>();
-    private final Map<Node<?, ?>, Map<String, MethodModel>> methods = new IdentityHashMap<>();
-    private final Map<Node<?, ?>, List<PropertyModel>> properties = new IdentityHashMap<>();
+    /**
+     * What has been built below each node the walk is in, the innermost first.
+     */
+    private final Deque<Frame> frames = new ArrayDeque<>();
     private final List<EndpointModel> endpoints = new ArrayList<>();
     private final List<EntityModel> entities = new ArrayList<>();
 
@@ -80,10 +79,11 @@ public final class EndpointModelPlugin
      * walk leaves it.
      */
     private record Frame(Node<?, ?> node, List<TypeModel> types,
-            List<ParameterModel> parameters, Map<String, MethodModel> methods) {
+            List<ParameterModel> parameters, Map<String, MethodModel> methods,
+            List<PropertyModel> properties) {
         Frame(Node<?, ?> node) {
             this(node, new ArrayList<>(), new ArrayList<>(),
-                    new LinkedHashMap<>());
+                    new LinkedHashMap<>(), new ArrayList<>());
         }
     }
 
@@ -107,10 +107,7 @@ public final class EndpointModelPlugin
         if (nodePath.getNode() instanceof RootNode) {
             // The plugin can be handed to more than one run of the parser, and
             // each of them describes the whole set of endpoints
-            types.clear();
-            parameters.clear();
-            methods.clear();
-            properties.clear();
+            frames.clear();
             endpoints.clear();
             entities.clear();
         }
@@ -123,18 +120,19 @@ public final class EndpointModelPlugin
         var own = frames.pop();
         var parent = frames.peek();
 
-        if (node instanceof TypedNode type) {
-            collect(parentOf(nodePath), buildType(type, taken(node)));
-        } else if (node instanceof MethodParameterNode parameter) {
-            collect(parentOf(nodePath), parameter, taken(node));
-        } else if (node instanceof MethodNode method) {
-            collectMethod(nodePath, method);
-        } else if (node instanceof PropertyNode property) {
-            collect(parentOf(nodePath), property, taken(node));
-        } else if (node instanceof EntityNode entity) {
-            entities.add(buildEntity(entity,
-                    properties.getOrDefault(node, List.of())));
-        } else if (node instanceof EndpointNode endpoint) {
+        if (own.node() instanceof TypedNode type) {
+            parent.types().add(buildType(type, own.types()));
+        } else if (own.node() instanceof MethodParameterNode parameter) {
+            parent.parameters().add(new ParameterModel(parameter.getTarget(),
+                    only(own.types())));
+        } else if (own.node() instanceof MethodNode method) {
+            collectMethod(method, own);
+        } else if (own.node() instanceof PropertyNode property) {
+            parent.properties().add(
+                    new PropertyModel(property.getTarget(), only(own.types())));
+        } else if (own.node() instanceof EntityNode entity) {
+            entities.add(buildEntity(entity, List.copyOf(own.properties())));
+        } else if (own.node() instanceof EndpointNode endpoint) {
             endpoints.add(new EndpointModel(endpoint.getTarget().getName(),
                     endpoint.getSource().getName(),
                     List.copyOf(own.methods().values())));
@@ -162,12 +160,6 @@ public final class EndpointModelPlugin
         frames.stream().filter(frame -> frame.node() instanceof EndpointNode)
                 .findFirst().ifPresent(endpoint -> endpoint.methods()
                         .put(method.name(), method));
-    }
-
-    private void collect(Node<?, ?> parent, PropertyNode node,
-            List<TypeModel> ownTypes) {
-        properties.computeIfAbsent(parent, key -> new ArrayList<>())
-                .add(new PropertyModel(node.getTarget(), only(ownTypes)));
     }
 
     /**
@@ -224,13 +216,16 @@ public final class EndpointModelPlugin
         var optional = schema != null
                 && Boolean.TRUE.equals(schema.getNullable());
 
-        // A type parameter bound to something else than an object stands for
-        // that bound, which the walk visits below it, since the declaration
-        // does not keep such a parameter
-        if (signature.isTypeVariable() || signature.isTypeParameter()) {
+        // A type variable or parameter of an entity is declared by it, so it
+        // is written as its name, unless it is bound to something else than
+        // an object: it then stands for that bound, which the walk visits
+        // below it, since the declaration does not keep such a parameter
+        if ((signature.isTypeVariable() || signature.isTypeParameter())
+                && isInEntity()) {
             return referred.isEmpty()
                     ? new TypeModel.TypeVariable(name(signature), optional)
-                    : bound(only(referred), optional);
+                    : optional ? only(referred).withOptional(true)
+                            : only(referred);
         }
 
         // A type argument, such as the String of a List<String>, stands for
@@ -269,22 +264,13 @@ public final class EndpointModelPlugin
         return new TypeModel.Scalar(kind, optional, name(signature));
     }
 
-    private static TypeModel bound(TypeModel type, boolean optional) {
-        return optional ? asOptional(type) : type;
-    }
-
-    private static TypeModel asOptional(TypeModel type) {
-        return switch (type) {
-        case TypeModel.Scalar scalar ->
-            new TypeModel.Scalar(scalar.kind(), true, scalar.javaType());
-        case TypeModel.ArrayOf array ->
-            new TypeModel.ArrayOf(array.items(), true);
-        case TypeModel.MapOf map -> new TypeModel.MapOf(map.values(), true);
-        case TypeModel.EntityRef entity -> new TypeModel.EntityRef(
-                entity.javaClass(), entity.typeArguments(), true);
-        case TypeModel.TypeVariable variable ->
-            new TypeModel.TypeVariable(variable.name(), true);
-        };
+    /**
+     * Whether the walk is inside an entity, where the parser keeps type
+     * variables and parameters as they are rather than resolving them.
+     */
+    private boolean isInEntity() {
+        return frames.stream()
+                .anyMatch(frame -> frame.node() instanceof EntityNode);
     }
 
     private static TypeModel.ScalarKind scalarKind(SignatureModel signature) {

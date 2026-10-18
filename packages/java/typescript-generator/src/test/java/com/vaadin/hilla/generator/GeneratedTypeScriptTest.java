@@ -67,11 +67,11 @@ public class GeneratedTypeScriptTest {
                           return client.call('SampleEndpoint', 'all', {}, init);
                         }
 
-                        export async function bounded(init?: EndpointRequestInit): Promise<Bounded | undefined> {
+                        async function bounded(init?: EndpointRequestInit): Promise<Bounded | undefined> {
                           return client.call('SampleEndpoint', 'bounded', {}, init);
                         }
 
-                        export async function count(init?: EndpointRequestInit): Promise<number> {
+                        async function count(init?: EndpointRequestInit): Promise<number> {
                           return client.call('SampleEndpoint', 'count', {}, init);
                         }
 
@@ -83,11 +83,11 @@ public class GeneratedTypeScriptTest {
                           return client.call('SampleEndpoint', 'describe', { firstName, lastName, age }, init);
                         }
 
-                        export async function detailed(init?: EndpointRequestInit): Promise<Detailed | undefined> {
+                        async function detailed(init?: EndpointRequestInit): Promise<Detailed | undefined> {
                           return client.call('SampleEndpoint', 'detailed', {}, init);
                         }
 
-                        export async function find(id: string | undefined, init?: EndpointRequestInit): Promise<Sample | undefined> {
+                        async function find(id: string | undefined, init?: EndpointRequestInit): Promise<Sample | undefined> {
                           return client.call('SampleEndpoint', 'find', { id }, init);
                         }
 
@@ -99,11 +99,11 @@ public class GeneratedTypeScriptTest {
                           return client.call('SampleEndpoint', 'kind', {}, init);
                         }
 
-                        export async function marker(init?: EndpointRequestInit): Promise<Marker | undefined> {
+                        async function marker(init?: EndpointRequestInit): Promise<Marker | undefined> {
                           return client.call('SampleEndpoint', 'marker', {}, init);
                         }
 
-                        export async function maybe(init?: EndpointRequestInit): Promise<string | undefined> {
+                        async function maybe(init?: EndpointRequestInit): Promise<string | undefined> {
                           return client.call('SampleEndpoint', 'maybe', {}, init);
                         }
 
@@ -131,7 +131,7 @@ public class GeneratedTypeScriptTest {
                           return client.call('SampleEndpoint', 'wrapped', {}, init);
                         }
 
-                        export { all, count, counts, describe, find, greet, kind, maybe, maybeCounts, maybeNames, names, ping, required, wrapped };
+                        export { all, bounded, count, counts, describe, detailed, find, greet, kind, marker, maybe, maybeCounts, maybeNames, names, ping, required, wrapped };
                         """,
                 file.content());
     }
