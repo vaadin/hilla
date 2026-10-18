@@ -100,7 +100,7 @@ public final class FormModelWriter {
 
         var calls = new ArrayList<String>();
         bean.superTypes().stream().findFirst().ifPresent(superType -> calls
-                .add(".extend(" + models.name(superType) + ")"));
+                .add(".extend(" + models.base(superType) + ")"));
         calls.add(".object<" + entity + ">("
                 + Names.string(ModulePaths.entityName(bean.javaClass())) + ")");
         bean.properties()

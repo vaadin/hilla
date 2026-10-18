@@ -66,8 +66,9 @@ final class ModelCycles {
     }
 
     /**
-     * Whether a property of the model of {@code owner} holding the model of
-     * {@code target} has to read it lazily.
+     * Whether the model of {@code owner} has to read the model of
+     * {@code target} lazily, be it the model of a property or the model it is
+     * built on.
      */
     boolean isDeferred(String owner, String target) {
         return owner != null

@@ -144,6 +144,21 @@ final class ModelWriter {
     }
 
     /**
+     * The model a model of an object is built on, which is the model of the
+     * type it inherits properties from. A base which refers back to the model
+     * being written, at any depth, is handed over as a function returning it,
+     * since the model library reads the base as the model is built, and the
+     * module of the base may not be evaluated yet when both import each other.
+     */
+    String base(TypeModel.EntityRef superType) {
+        var model = name(superType);
+
+        return cycles.isDeferred(owner, superType.javaClass())
+                ? "() => " + model
+                : model;
+    }
+
+    /**
      * The namespace of the model library, which holds the builders and the
      * converters.
      */
