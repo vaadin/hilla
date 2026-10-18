@@ -70,7 +70,8 @@ async function loadBoth(entry: string) {
 }
 
 describe('a reference cycle closed by inheritance', () => {
-  it('compiles', () => {
+  // a full TypeScript program is slow to build, more so under coverage
+  it('compiles', { timeout: 30_000 }, () => {
     expect(compile()).to.deep.equal([]);
   });
 
