@@ -82,11 +82,10 @@ function lazyBase(provider: () => Model): Model {
     has: (_target, key) => Reflect.has(provider(), key),
     ownKeys() {
       const base = provider();
-      const names = new Set(
-        splitChain(base)[0]
-          .reverse()
-          .flatMap((model) => getOwnPropertyNames(model)),
-      );
+      const [levels] = splitChain(base);
+      // the root of the chain goes first, as it would to anything walking it
+      levels.reverse();
+      const names = new Set(levels.flatMap((model) => getOwnPropertyNames(model)));
 
       return [...names, ...getOwnPropertySymbols(base)];
     },
