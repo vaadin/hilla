@@ -595,9 +595,11 @@ public class GeneratedTypeScriptTest {
                         import type File_1 from './com/vaadin/hilla/generator/fixtures/ShadowingProvidedEndpoint/File.js';
                         import client from './connect-client.default.js';
 
-                        export async function describe(file: File | undefined, init?: EndpointRequestInit): Promise<File_1 | undefined> {
+                        async function describe(file: File | undefined, init?: EndpointRequestInit): Promise<File_1 | undefined> {
                           return client.call('ShadowingProvidedEndpoint', 'describe', { file }, init);
                         }
+
+                        export { describe };
                         """,
                 new EndpointWriter(ClientWriter.MODULE_SPECIFIER).write(
                         endpointsOf(ShadowingProvidedEndpoint.class).get(0))
@@ -615,9 +617,11 @@ public class GeneratedTypeScriptTest {
         var written = new BarrelWriter().write(List.of(
                 new EndpointModel("Record", "com.example.Record", List.of())));
 
-                export { SampleEndpoint };
-                """,
-                new BarrelWriter().write(generation.endpoints()).content());
+        assertEquals("""
+                import * as Record_1 from './Record.js';
+
+                export { Record_1 as Record };
+                """, written.content());
     }
 
     @Test
@@ -1065,7 +1069,7 @@ public class GeneratedTypeScriptTest {
     }
 
     private static GeneratedFile writeModel(EntityModel entity) {
-        return new FormModelWriter(entities).write(entity);
+        return new FormModelWriter(generation.entities()).write(entity);
     }
 
     /**

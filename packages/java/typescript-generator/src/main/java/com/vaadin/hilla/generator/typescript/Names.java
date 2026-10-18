@@ -58,6 +58,20 @@ final class Names {
     }
 
     /**
+     * The given name, or the first one free of it with underscores in front,
+     * which is how a generated name gives way to one that is taken.
+     */
+    static String free(String name, Predicate<String> taken) {
+        var free = name;
+
+        while (taken.test(free)) {
+            free = "_" + free;
+        }
+
+        return free;
+    }
+
+    /**
      * The name of a property as it is written in a type or an object, written
      * as a string when it is not a name TypeScript accepts as it is.
      */

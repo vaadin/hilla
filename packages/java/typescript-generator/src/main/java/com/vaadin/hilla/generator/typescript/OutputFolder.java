@@ -81,9 +81,9 @@ public final class OutputFolder {
             return;
         }
 
-        Files.createDirectories(folder);
-        Files.writeString(folder.resolve(FILE_LIST), files.stream()
-                .map(file -> file.path() + "\n").collect(Collectors.joining()));
+        FileIOUtils.writeIfChanged(folder.resolve(FILE_LIST).toFile(),
+                files.stream().map(file -> file.path() + "\n")
+                        .collect(Collectors.joining()));
 
         var written = new LinkedHashSet<String>();
 
