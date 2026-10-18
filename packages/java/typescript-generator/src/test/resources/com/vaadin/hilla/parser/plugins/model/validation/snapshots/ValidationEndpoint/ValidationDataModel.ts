@@ -6,7 +6,7 @@ const ValidationDataModel = m
   .property("assertTrue", m.meta(m.optional(StringModel), { jvmType: "java.lang.String" }))
   .property("decimalMax", m.meta(m.constrained(NumberModel, DecimalMax({ inclusive: false, value: "0.01" })), { jvmType: "double" }))
   .property("decimalMin", m.meta(m.constrained(NumberModel, DecimalMin("0.01")), { jvmType: "double" }))
-  .property("digits", m.meta(m.constrained(m.optional(StringModel), Digits({ integer: 5, fraction: 2 })), { jvmType: "java.lang.String" }))
+  .property("digits", m.meta(m.constrained(m.optional(StringModel), Digits({ fraction: 2, integer: 5 })), { jvmType: "java.lang.String" }))
   .property("email", m.meta(m.constrained(m.optional(StringModel), Email({ message: "foo" })), { jvmType: "java.lang.String" }))
   .property("future", m.meta(m.constrained(m.optional(StringModel), Future()), { jvmType: "java.time.LocalDate" }))
   .property("isNull", m.meta(m.constrained(m.optional(StringModel), Null()), { jvmType: "java.lang.String" }))

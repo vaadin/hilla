@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -79,11 +80,14 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
 
     private static Map<String, Object> extractAttributes(
             AnnotationInfoModel annotation) {
+        // Ordered by name: the parameters of an annotation come in the order
+        // reflection lists its methods in, which is no order at all
         var attributes = annotation.getParameters().stream()
                 .filter(Predicate.not(AnnotationParameterModel::isDefault))
                 .collect(Collectors.toMap(AnnotationParameterModel::getName,
                         parameter -> convertAttributeValue(
-                                parameter.getValue())));
+                                parameter.getValue()),
+                        (first, second) -> first, TreeMap::new));
 
         return !attributes.isEmpty() ? attributes : null;
     }
