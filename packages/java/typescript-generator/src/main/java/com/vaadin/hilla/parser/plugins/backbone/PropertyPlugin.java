@@ -214,9 +214,12 @@ public final class PropertyPlugin
                             serializationConfig, annotatedClass))
                     .map(names -> Set.copyOf(List.of(names)))
                     .orElseGet(Set::of);
+            // The order may name a property by its Java name as well as by
+            // the name it is serialized under, which Jackson accepts both of
             Predicate<BeanPropertyDefinition> ordered = property -> property
                     .hasField() || property.hasConstructorParameter()
-                    || named.contains(property.getName());
+                    || named.contains(property.getName())
+                    || named.contains(property.getInternalName());
 
             return Stream.concat(properties.stream().filter(ordered),
                     properties.stream().filter(ordered.negate())
