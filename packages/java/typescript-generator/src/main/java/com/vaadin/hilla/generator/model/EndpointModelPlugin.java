@@ -144,6 +144,19 @@ public final class EndpointModelPlugin
     }
 
     /**
+     * What has been built below one node, which the node is built from once the
+     * walk leaves it.
+     */
+    private record Frame(Node<?, ?> node, List<TypeModel> types,
+            List<ParameterModel> parameters, Map<String, MethodModel> methods,
+            List<PropertyModel> properties) {
+        Frame(Node<?, ?> node) {
+            this(node, new ArrayList<>(), new ArrayList<>(),
+                    new LinkedHashMap<>(), new ArrayList<>());
+        }
+    }
+
+    /**
      * The endpoints built by the last run of the parser.
      */
     public List<EndpointModel> getEndpoints() {
