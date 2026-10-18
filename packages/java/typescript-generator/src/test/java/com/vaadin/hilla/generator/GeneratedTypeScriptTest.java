@@ -118,11 +118,11 @@ public class GeneratedTypeScriptTest {
                           return client.call('SampleEndpoint', 'maybeNames', {}, init);
                         }
 
-                        export async function mixed(init?: EndpointRequestInit): Promise<Mixed | undefined> {
+                        async function mixed(init?: EndpointRequestInit): Promise<Mixed | undefined> {
                           return client.call('SampleEndpoint', 'mixed', {}, init);
                         }
 
-                        export async function names(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
+                        async function names(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'names', {}, init);
                         }
 
@@ -138,7 +138,7 @@ public class GeneratedTypeScriptTest {
                           return client.call('SampleEndpoint', 'wrapped', {}, init);
                         }
 
-                        export { all, bounded, count, counts, describe, detailed, find, greet, kind, marker, maybe, maybeCounts, maybeNames, names, ping, required, wrapped };
+                        export { all, bounded, count, counts, describe, detailed, find, greet, kind, marker, maybe, maybeCounts, maybeNames, mixed, names, ping, required, wrapped };
                         """,
                 file.content());
     }
