@@ -50,6 +50,11 @@ public sealed interface TypeModel {
     List<AnnotationModel> annotations();
 
     /**
+     * The same type, said to be absent or not as given.
+     */
+    TypeModel withOptional(boolean optional);
+
+    /**
      * The types which TypeScript expresses without a declaration of their own.
      */
     enum ScalarKind {
@@ -82,7 +87,8 @@ public sealed interface TypeModel {
 
         @Override
         public Scalar withOptional(boolean optional) {
-            return new Scalar(kind, optional, javaType);
+            return new Scalar(kind, optional, javaType, constraints,
+                    annotations);
         }
     }
 
@@ -108,7 +114,8 @@ public sealed interface TypeModel {
 
         @Override
         public ArrayOf withOptional(boolean optional) {
-            return new ArrayOf(items, optional);
+            return new ArrayOf(items, optional, javaType, constraints,
+                    annotations);
         }
     }
 
@@ -133,7 +140,8 @@ public sealed interface TypeModel {
 
         @Override
         public MapOf withOptional(boolean optional) {
-            return new MapOf(values, optional);
+            return new MapOf(values, optional, javaType, constraints,
+                    annotations);
         }
     }
 
@@ -165,7 +173,8 @@ public sealed interface TypeModel {
 
         @Override
         public EntityRef withOptional(boolean optional) {
-            return new EntityRef(javaClass, typeArguments, optional);
+            return new EntityRef(javaClass, typeArguments, optional,
+                    constraints, annotations);
         }
     }
 
@@ -192,7 +201,7 @@ public sealed interface TypeModel {
 
         @Override
         public TypeVariable withOptional(boolean optional) {
-            return new TypeVariable(name, optional);
+            return new TypeVariable(name, optional, constraints, annotations);
         }
     }
 }
