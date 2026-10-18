@@ -61,8 +61,10 @@ public class EnumTypeEndpoint {
     }
 
     /**
-     * Constants Jackson writes as numbers, which keep their names in the
-     * generated enum, since that holds strings.
+     * Constants Jackson writes as numbers. The generated enum holds strings, so
+     * they keep their names, which is a known limitation: the server sends 0
+     * and 1, not these names. What is pinned here is only that such an enum
+     * does not break the generation.
      */
     @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     public enum NumberedEnum {
