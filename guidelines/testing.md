@@ -41,9 +41,13 @@ Maven Failsafe against the application, which the build starts and stops.
 - Don't depend on JVM or machine defaults (locale, time zone, charset).
   Set them explicitly, or choose a value that differs from the default, so
   the test cannot pass without exercising the code.
-- For a change to the generated TypeScript, a generator snapshot case is
-  the test. Prefer adding a case over a hand-written assertion on the
-  output.
+- The generated TypeScript is verified only through snapshots. Never
+  assert on it with `assertEquals`, `contains` or a hand-written expected
+  string: add a snapshot case, or, when the case needs a configured
+  plugin or other setup, a test class extending `AbstractFullStackTest`
+  that calls `assertTypescriptMatchesSnapshot`. When converting an existing
+  test, replace its hand-written assertions with snapshots rather than
+  keeping both.
 - Only add an IT when the behavior needs a browser and a running server.
   Logic of a TypeScript package belongs in its Vitest tests; the endpoint
   runtime can usually be tested with unit tests of `EndpointController` and
