@@ -15,15 +15,24 @@
  */
 package com.vaadin.hilla.parser.testutils;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.vaadin.hilla.generator.model.EntityModel;
+import com.vaadin.hilla.generator.model.Generation;
+import com.vaadin.hilla.generator.model.PropertyModel;
 
 /**
  * Base class for tests which verify that a set of browser callable Java classes
@@ -74,7 +83,7 @@ import org.slf4j.LoggerFactory;
  * diff: it is the specification of what the generator produces.
  */
 public abstract class AbstractFullStackTest {
-    static final String SNAPSHOTS_DIR = "snapshots";
+    protected static final String SNAPSHOTS_DIR = "snapshots";
 
     /**
      * The generated client, which is the same for every endpoint and is
@@ -110,7 +119,11 @@ public abstract class AbstractFullStackTest {
      */
     protected void assertTypescriptMatchesSnapshot(
             FullStackGenerator generator) {
-        var generated = new LinkedHashMap<>(generator.generate());
+        var generation = generator.parseGeneration();
+        assertNoInheritedPropertyCanBeAbsent(generation);
+
+        var generated = new LinkedHashMap<>(
+                FullStackGenerator.write(generation));
 
         if (!generator.isClientFileIncluded()) {
             generated.remove(CLIENT_FILE);
@@ -129,6 +142,46 @@ public abstract class AbstractFullStackTest {
             throw new AssertionError(
                     getSnapshotsDir(generator) + ": " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * TypeScript does not accept a declaration which says that a property of a
+     * type it extends can be absent: a value of it would not be a value of the
+     * type it extends. Whether a value can be absent is decided in more than
+     * one place, so the declarations of a hierarchy are checked against each
+     * other rather than one by one.
+     */
+    private static void assertNoInheritedPropertyCanBeAbsent(
+            Generation generation) {
+        var beans = generation.entities().stream()
+                .filter(EntityModel.Bean.class::isInstance)
+                .map(EntityModel.Bean.class::cast)
+                .collect(Collectors.toMap(EntityModel::javaClass, bean -> bean,
+                        (first, second) -> first));
+
+        var absent = beans.values().stream().flatMap(bean -> bean.properties()
+                .stream().filter(property -> property.type().optional())
+                .filter(property -> inherited(beans, bean, property.name())
+                        .anyMatch(inherited -> !inherited.type().optional()))
+                .map(property -> bean.javaClass() + "." + property.name()))
+                .sorted().toList();
+
+        assertTrue(absent.isEmpty(),
+                () -> "The types they are declared in say that these values are"
+                        + " always there: " + absent);
+    }
+
+    /**
+     * The declarations of the same property in the types the given one extends.
+     */
+    private static Stream<PropertyModel> inherited(
+            Map<String, EntityModel.Bean> beans, EntityModel.Bean bean,
+            String name) {
+        return bean.superTypes().stream()
+                .map(superType -> beans.get(superType.javaClass()))
+                .filter(Objects::nonNull)
+                .flatMap(superType -> superType.properties().stream())
+                .filter(property -> property.name().equals(name));
     }
 
     /**
