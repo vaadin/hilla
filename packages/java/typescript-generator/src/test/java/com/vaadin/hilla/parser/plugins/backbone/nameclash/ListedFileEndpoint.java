@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.hilla.parser.plugins.backbone.clashingnames;
+package com.vaadin.hilla.parser.plugins.backbone.nameclash;
 
 import java.util.List;
 

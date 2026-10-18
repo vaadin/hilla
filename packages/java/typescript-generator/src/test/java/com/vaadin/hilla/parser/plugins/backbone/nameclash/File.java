@@ -13,12 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.hilla.parser.plugins.backbone.clashingnames;
+package com.vaadin.hilla.parser.plugins.backbone.nameclash;
 
-public class Box<T> {
-    private T value;
+/**
+ * Named after the type a multipart file is sent as, which the generated files
+ * write as they are.
+ */
+public class File {
+    private java.lang.String name;
 
-    public T getValue() {
-        return value;
+    public java.lang.String getName() {
+        return name;
     }
 }

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.hilla.parser.plugins.backbone.clashingnames;
+package com.vaadin.hilla.parser.plugins.backbone.nameclash;
 
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
@@ -21,5 +21,17 @@ import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 public class StringEndpoint {
     public String get() {
         return null;
+    }
+
+    /**
+     * Named like the model of the model library its own model holds for its
+     * value, which that model then imports under another name.
+     */
+    public static class String {
+        private java.lang.String value;
+
+        public java.lang.String getValue() {
+            return value;
+        }
     }
 }

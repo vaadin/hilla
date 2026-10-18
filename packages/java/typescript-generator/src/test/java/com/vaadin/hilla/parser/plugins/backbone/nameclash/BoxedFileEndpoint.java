@@ -13,25 +13,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.hilla.parser.plugins.backbone.clashingnames;
+package com.vaadin.hilla.parser.plugins.backbone.nameclash;
+
+import org.springframework.web.multipart.MultipartFile;
 
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 /**
- * Refers to three types of the same name, the second and third of which are
- * imported under names of their own.
+ * Takes a file the browser has as the type argument of a generic type of the
+ * application, which keeps the name of its type from the type of the
+ * application named after it.
  */
 @Endpoint
-public class PersonEndpoint {
-    public com.vaadin.hilla.parser.plugins.backbone.clashingnames.one.Person first() {
-        return null;
-    }
-
-    public com.vaadin.hilla.parser.plugins.backbone.clashingnames.two.Person second() {
-        return null;
-    }
-
-    public com.vaadin.hilla.parser.plugins.backbone.clashingnames.three.Person third() {
+public class BoxedFileEndpoint {
+    public File upload(Box<MultipartFile> file) {
         return null;
     }
 }

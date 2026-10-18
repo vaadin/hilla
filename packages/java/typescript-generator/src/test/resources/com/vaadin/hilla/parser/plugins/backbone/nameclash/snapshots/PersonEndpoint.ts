@@ -1,7 +1,7 @@
 import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
-import type Person from './com/vaadin/hilla/parser/plugins/backbone/clashingnames/one/Person.js';
-import type Person_2 from './com/vaadin/hilla/parser/plugins/backbone/clashingnames/three/Person.js';
-import type Person_1 from './com/vaadin/hilla/parser/plugins/backbone/clashingnames/two/Person.js';
+import type Person from './com/vaadin/hilla/parser/plugins/backbone/nameclash/one/Person.js';
+import type Person_2 from './com/vaadin/hilla/parser/plugins/backbone/nameclash/three/Person.js';
+import type Person_1 from './com/vaadin/hilla/parser/plugins/backbone/nameclash/two/Person.js';
 import client from './connect-client.default.js';
 
 async function first(init?: EndpointRequestInit): Promise<Person | undefined> {

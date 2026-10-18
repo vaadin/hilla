@@ -13,16 +13,25 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.hilla.parser.plugins.backbone.clashingnames;
+package com.vaadin.hilla.parser.plugins.backbone.nameclash;
+
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 /**
- * Named after the type a multipart file is sent as, which the generated files
- * write as they are.
+ * Refers to three types of the same name, the second and third of which are
+ * imported under names of their own.
  */
-public class File {
-    private java.lang.String name;
+@Endpoint
+public class PersonEndpoint {
+    public com.vaadin.hilla.parser.plugins.backbone.nameclash.one.Person first() {
+        return null;
+    }
 
-    public java.lang.String getName() {
-        return name;
+    public com.vaadin.hilla.parser.plugins.backbone.nameclash.two.Person second() {
+        return null;
+    }
+
+    public com.vaadin.hilla.parser.plugins.backbone.nameclash.three.Person third() {
+        return null;
     }
 }

@@ -13,21 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.hilla.parser.plugins.backbone.clashingnames;
+package com.vaadin.hilla.parser.plugins.backbone.nameclash;
 
-import java.util.Map;
+public class Box<T> {
+    private T value;
 
-import org.springframework.web.multipart.MultipartFile;
-
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
-
-/**
- * Takes the files the browser has in a map, which keeps the name of their type
- * from the type of the application named after it.
- */
-@Endpoint
-public class MappedFileEndpoint {
-    public File upload(Map<java.lang.String, MultipartFile> files) {
-        return null;
+    public T getValue() {
+        return value;
     }
 }

@@ -13,16 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.hilla.parser.plugins.backbone.clashingnames;
+package com.vaadin.hilla.parser.plugins.backbone.nameclash.two;
 
-/**
- * Named like the model of the model library its own model holds for its value,
- * which that model then imports under another name.
- */
-public class String {
-    private java.lang.String value;
+public class Person {
+    private java.lang.String name;
 
-    public java.lang.String getValue() {
-        return value;
+    public java.lang.String getName() {
+        return name;
     }
 }
