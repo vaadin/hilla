@@ -264,8 +264,7 @@ public final class EndpointModelPlugin
         var pushed = pushedValue(returnType);
 
         var method = new MethodModel(node.getSource().getName(),
-                parameters.getOrDefault(node, List.of()),
-                pushed.orElse(returnType),
+                List.copyOf(own.parameters()), pushed.orElse(returnType),
                 pushed.map(values -> MethodModel.Kind.SUBSCRIBED)
                         .orElseGet(() -> kindOf(returnType)));
 
@@ -297,24 +296,6 @@ public final class EndpointModelPlugin
                 ? SIGNAL_KINDS.getOrDefault(provided.name(),
                         MethodModel.Kind.CALLED)
                 : MethodModel.Kind.CALLED;
-    }
-
-    private void collect(Node<?, ?> parent, TypeModel type) {
-        types.computeIfAbsent(parent, key -> new ArrayList<>()).add(type);
-    }
-
-    private void collect(Node<?, ?> parent, MethodParameterNode node,
-            List<TypeModel> ownTypes) {
-        var type = only(ownTypes);
-
-        parameters.computeIfAbsent(parent, key -> new ArrayList<>())
-                .add(new ParameterModel(node.getTarget(), type));
-    }
-
-    private void collect(Node<?, ?> parent, PropertyNode node,
-            List<TypeModel> ownTypes) {
-        properties.computeIfAbsent(parent, key -> new ArrayList<>())
-                .add(new PropertyModel(node.getTarget(), only(ownTypes)));
     }
 
     /**

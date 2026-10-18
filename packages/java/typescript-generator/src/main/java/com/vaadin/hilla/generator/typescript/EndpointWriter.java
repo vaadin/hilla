@@ -56,11 +56,12 @@ public final class EndpointWriter {
      * the value of the two in step afterwards.
      */
     private static final String SIGNAL = """
-            export function {{method}}({{parameters}}): {{returnType}} {
+            function {{method}}({{parameters}}): {{returnType}} {
               return new {{signal}}({{defaultValue}}{
                 client: {{client}},
                 endpoint: '{{endpoint}}',
-                method: '{{method}}',{{params}}
+                method: '{{method}}',
+                {{params}}
               });
             }""";
 
@@ -118,24 +119,6 @@ public final class EndpointWriter {
         var init = ownName(method, INIT_PARAMETER);
         var declared = declaredParameters(method, init, imports, types);
 
-        var written = fill(endpoint, method, String.join(", ", declared), types,
-                models, client, init, imports);
-
-        // Written again with the parameters on a line each when the first line
-        // came out too wide to read
-        if (firstLineOf(written).length() <= Layout.MAX_WIDTH) {
-            return written;
-        }
-
-        return fill(endpoint, method,
-                declared.stream()
-                        .collect(Collectors.joining(",\n  ", "\n  ", ",\n")),
-                types, models, client, init, imports);
-    }
-
-    private String fill(EndpointModel endpoint, MethodModel method,
-            String parameters, TypeWriter types, ModelWriter models,
-            String client, String init, ImportRegistry imports) {
         var template = Template.of(templateOf(method)) //
                 .with("method", method.name()) //
                 .with("parameters", String.join(", ", declared)) //
@@ -195,9 +178,7 @@ public final class EndpointWriter {
         var given = ownName(method, OPTIONS_PARAMETER) + "?.defaultValue";
 
         return (value.optional() ? given
-                : given + " ?? " + models.className(value)
-                        + ".createEmptyValue()")
-                + ", ";
+                : given + " ?? " + models.defaultValue(value)) + ", ";
     }
 
     /**
@@ -216,7 +197,7 @@ public final class EndpointWriter {
      */
     private static String sharedParameters(MethodModel method) {
         return method.parameters().isEmpty() ? ""
-                : "\n    params: " + packParameters(method.parameters()) + ",";
+                : "params: " + packParameters(method.parameters()) + ",";
     }
 
     /**

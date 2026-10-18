@@ -88,45 +88,7 @@ final class ModelWriter {
         case TypeModel.EntityRef entity -> reference(entity);
         // A value the framework provides is not bound as properties: it is
         // whatever the module exporting it makes of it
-        case TypeModel.Provided provided -> objectModel();
-        case TypeModel.TypeVariable variable -> objectModel();
-        };
-    }
-
-    /**
-     * The class the model of a value is, without what it holds: it is the class
-     * itself which knows the empty value to start from.
-     */
-    String className(TypeModel type) {
-        return switch (type) {
-        case TypeModel.Scalar scalar -> scalarModel(scalar.kind());
-        case TypeModel.ArrayOf array -> arrayModel();
-        case TypeModel.MapOf map -> objectModel();
-        case TypeModel.EntityRef entity -> name(entity);
-        case TypeModel.Provided provided -> objectModel();
-        case TypeModel.TypeVariable variable -> objectModel();
-        };
-    }
-
-    /**
-     * How a model of a value is built, which a form model hands to the binding
-     * of the property holding it.
-     */
-    String instance(TypeModel type) {
-        return switch (type) {
-        case TypeModel.Scalar scalar -> instance(scalarModel(scalar.kind()),
-                scalar.optional(), options(scalar, scalar.javaType()));
-        // The model of the items goes on a line of its own, since a model
-        // holding a model holding a model is unreadable as one line
-        case TypeModel.ArrayOf array -> instance(arrayModel(), array.optional(),
-                "\n  (parent, key) => " + instance(array.items()),
-                "\n  " + options(array, array.javaType()));
-        case TypeModel.MapOf map -> instance(objectModel(), map.optional(),
-                options(map, map.javaType()));
-        case TypeModel.EntityRef entity ->
-            instance(name(entity), entity.optional(), options(entity, null));
-        case TypeModel.Provided provided -> instance(objectModel(),
-                provided.optional(), options(provided, null));
+        case TypeModel.Provided provided -> named("ObjectModel");
         // A type variable holds whatever the declaration is used with, which
         // is nothing the model can be told about
         case TypeModel.TypeVariable variable -> named("Model");
@@ -151,6 +113,23 @@ final class ModelWriter {
         var meta = meta(type);
 
         return meta.isEmpty() ? model : call("meta", model, meta);
+    }
+
+    /**
+     * The empty value of a type, which the model of the type holds: what a
+     * signal sharing a value of it starts from.
+     */
+    String defaultValue(TypeModel type) {
+        var model = switch (type) {
+        case TypeModel.Scalar scalar -> scalarModel(scalar.kind());
+        case TypeModel.ArrayOf array -> named("ArrayModel");
+        case TypeModel.MapOf map -> named("RecordModel");
+        case TypeModel.EntityRef entity -> name(entity);
+        case TypeModel.Provided provided -> named("ObjectModel");
+        case TypeModel.TypeVariable variable -> named("ObjectModel");
+        };
+
+        return model + "[" + named("$defaultValue") + "]";
     }
 
     /**
