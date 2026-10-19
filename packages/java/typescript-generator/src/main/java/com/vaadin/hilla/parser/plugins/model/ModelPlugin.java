@@ -48,7 +48,7 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
     private static final String VALIDATION_CONSTRAINTS_PACKAGE_NAME = "jakarta.validation.constraints";
 
-    // Include-list of annotations that should be added to the schema
+    // Include-list of annotations that should be added to the form model
     private static final Set<String> INCLUDED_ANNOTATIONS = Set.of(
             "jakarta.persistence.Id", "jakarta.persistence.Version",
             "jakarta.persistence.OneToOne", "jakarta.persistence.ManyToOne",
@@ -87,9 +87,9 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
     }
 
     /**
-     * Converts an annotation parameter value into something the OpenAPI
-     * document can hold. The parser hands back its own models for enum
-     * constants and class references. An array arrives as a list of such
+     * Converts an annotation parameter value into something the form model
+     * writer can write as TypeScript. The parser hands back its own models for
+     * enum constants and class references. An array arrives as a list of such
      * values.
      */
     private static Object convertAttributeValue(Object value) {
@@ -99,13 +99,13 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
         case ClassInfoModel classInfo -> new JvmTypeRef(classInfo.getName());
         case Collection<?> collection -> collection.stream()
                 .map(ModelPlugin::convertAttributeValue).toList();
-        // Every other model carries a whole type graph behind it, which the
-        // serializer would write into the document. The only kind left is a
+        // Every other model carries a whole type graph behind it, which has
+        // no TypeScript value to be written as. The only kind left is a
         // nested annotation, which nothing reaching this plugin has: the
         // include-list holds none, and a repeated constraint is unwrapped
         // before it gets here. Adding one means adding its conversion too.
         case Model model -> throw new IllegalStateException(
-                "No OpenAPI representation for the annotation attribute value "
+                "No TypeScript representation for the annotation attribute value "
                         + model);
         default -> value;
         };
