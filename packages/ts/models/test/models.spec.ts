@@ -11,7 +11,10 @@ import m, {
   $name,
   $optional,
   $owner,
+  $attributeNames,
   $constraints,
+  $literal,
+  $valueModel,
   ArrayModel,
   BooleanModel,
   type EnumModel,
@@ -19,6 +22,7 @@ import m, {
   NumberModel,
   ObjectModel,
   PrimitiveModel,
+  RecordModel,
   StringModel,
   type Target,
   Null,
@@ -27,6 +31,8 @@ import m, {
   NotEmpty,
   Min,
   Max,
+  DecimalMin,
+  Pattern,
   Size,
   type Value,
   type Constraint,
@@ -112,6 +118,89 @@ describe('@vaadin/hilla-models', () => {
     expect(StreetModel).to.have.property('building').which.is.instanceof(NumberModel);
   });
 
+  describe('a deferred base', () => {
+    let LazilyNamedModel: typeof NamedModel;
+    let LazyStreetModel: typeof StreetModel;
+
+    beforeEach(() => {
+      // the extending model is built first, so its base is still undefined at
+      // that point — which is what a module evaluated before the one holding
+      // its base amounts to
+      LazyStreetModel = m
+        .extend(() => LazilyNamedModel)
+        .object<Street>('Street')
+        .property('building', NumberModel)
+        .build();
+
+      LazilyNamedModel = m.object<Named>('Named').property('name', StringModel).build();
+    });
+
+    it('should serve the properties of the base', () => {
+      expect(LazyStreetModel).to.have.property('name').which.is.instanceof(StringModel);
+      expect(LazyStreetModel).to.have.property('building').which.is.instanceof(NumberModel);
+      // an inherited property belongs to the extending model, not to the base
+      expect(LazyStreetModel.name[$owner]).to.be.equal(LazyStreetModel);
+    });
+
+    it('should include the properties of the base in the default value', () => {
+      expect(LazyStreetModel[$defaultValue]).to.be.deep.equal({ building: NaN, name: '' });
+    });
+
+    it('should be an instance of the base and of what the base derives from', () => {
+      expect(LazyStreetModel).to.be.instanceof(LazilyNamedModel);
+      expect(LazyStreetModel).to.be.instanceof(ObjectModel);
+      expect(LazyStreetModel).to.be.instanceof(Model);
+    });
+
+    it('should stay an instance of the base through a further extension', () => {
+      const AvenueModel = m.extend(LazyStreetModel).object<Street>('Avenue').build();
+
+      expect(AvenueModel).to.be.instanceof(LazyStreetModel);
+      expect(AvenueModel).to.be.instanceof(LazilyNamedModel);
+      expect(AvenueModel).to.have.property('name').which.is.instanceof(StringModel);
+    });
+
+    it('should not report an unrelated model as the base', () => {
+      expect(LazyStreetModel).to.not.be.instanceof(AddressModel);
+    });
+
+    it('should serve what the base inherits', () => {
+      // the base is built on a model of its own, as a generated model of a
+      // subclass is, which the stand-in has to serve all the same
+      const AvenueModel = m
+        .extend(() => StreetModel)
+        .object<Street>('Avenue')
+        .build();
+
+      expect(AvenueModel).to.have.property('name').which.is.instanceof(StringModel);
+      expect(AvenueModel[$defaultValue]).to.be.deep.equal({ building: NaN, name: '' });
+    });
+
+    it('should follow a deferred base whose own base is deferred', () => {
+      const AvenueModel = m
+        .extend(() => LazyStreetModel)
+        .object<Street>('Avenue')
+        .build();
+
+      expect(AvenueModel).to.be.instanceof(LazyStreetModel);
+      expect(AvenueModel).to.be.instanceof(LazilyNamedModel);
+      expect(AvenueModel).to.have.property('name').which.is.instanceof(StringModel);
+      expect(AvenueModel[$defaultValue]).to.be.deep.equal({ building: NaN, name: '' });
+    });
+
+    it('should keep the base out of the prototype chain', () => {
+      // the stand-in serves the base's properties, so leaving the base in would
+      // offer them twice to anything walking the chain a level at a time
+      expect(Object.getPrototypeOf(LazyStreetModel)).to.not.be.equal(LazilyNamedModel);
+
+      const names: string[] = [];
+      for (let model: object | null = LazyStreetModel; model; model = Object.getPrototypeOf(model)) {
+        names.push(...Object.getOwnPropertyNames(model));
+      }
+      expect(names.filter((name) => name === 'name')).to.have.length(1);
+    });
+  });
+
   it('should allow model composition', () => {
     expect(PersonModel).to.have.property('address').which.is.instanceof(AddressModel);
     expect(AddressModel).to.have.property('street').which.is.instanceof(StreetModel);
@@ -168,6 +257,22 @@ describe('@vaadin/hilla-models', () => {
     expect(EmployeeModel).to.have.property($defaultValue).which.is.like({ colleagues: undefined });
   });
 
+  it('should allow self-reference with record of optional', () => {
+    interface Employee {
+      reports: Record<string, Employee | undefined>;
+    }
+
+    const EmployeeModel = m
+      .object<Employee>('Employee')
+      .property('reports', m.record(m.optional(m.self)))
+      .build();
+
+    expect(EmployeeModel).to.have.property('reports').which.is.instanceof(RecordModel);
+    expect(EmployeeModel.reports[$valueModel]).to.be.instanceof(EmployeeModel);
+    expect(EmployeeModel.reports[$valueModel]).to.have.property($optional).which.equals(true);
+    expect(EmployeeModel).to.have.property($defaultValue).which.is.like({ reports: {} });
+  });
+
   it('should allow self-reference with array of optional', () => {
     interface Employee {
       colleagues: Array<Employee | undefined>;
@@ -196,6 +301,17 @@ describe('@vaadin/hilla-models', () => {
     expect(RoleModel).to.have.property($name, 'Role');
     expect(RoleModel).to.have.property($enum, Role);
     expect(RoleModel).to.have.property($defaultValue).which.is.equal(Role.Guest);
+  });
+
+  it('should keep createEmptyValue as a deprecated alias of the default value', () => {
+    const value: Person = PersonModel.createEmptyValue();
+
+    expect(value).to.deep.equal(PersonModel[$defaultValue]);
+    expect(value).not.to.equal(PersonModel.createEmptyValue());
+    expect(RoleModel.createEmptyValue()).to.equal(Role.Guest);
+
+    const { createEmptyValue } = PersonModel;
+    expect(createEmptyValue()).to.deep.equal(value);
   });
 
   it('correctly sets the model owner', () => {
@@ -405,6 +521,151 @@ describe('@vaadin/hilla-models', () => {
         expect(ObjectModel[$defaultValue]).to.be.like({});
       });
     });
+
+    describe('RecordModel', () => {
+      it('should have a default value', () => {
+        expect(RecordModel[$defaultValue]).to.be.like({});
+      });
+    });
+  });
+
+  describe('m.record', () => {
+    it('should keep the value model', () => {
+      const model = m.record(NumberModel);
+
+      expect(model[$valueModel]).to.be.equal(NumberModel);
+      expect(model).to.be.instanceof(RecordModel);
+      expect(model[$defaultValue]).to.be.like({});
+      expect(model[$name]).to.be.equal('Record<string, number>');
+    });
+
+    it('should accept a record of records', () => {
+      const model = m.record(m.record(StringModel));
+
+      expect(model[$valueModel][$valueModel]).to.be.equal(StringModel);
+    });
+  });
+
+  describe('m.literal', () => {
+    it('should pin the value and derive from the matching primitive', () => {
+      const model = m.literal('add');
+
+      expect(model[$literal]).to.be.equal('add');
+      expect(model[$defaultValue]).to.be.equal('add');
+      expect(model).to.be.instanceof(StringModel);
+      expect(model[$name]).to.be.equal('"add"');
+    });
+
+    it('should support number and boolean values', () => {
+      expect(m.literal(42)).to.be.instanceof(NumberModel);
+      expect(m.literal(42)[$defaultValue]).to.be.equal(42);
+      expect(m.literal(true)).to.be.instanceof(BooleanModel);
+      expect(m.literal(true)[$defaultValue]).to.be.equal(true);
+    });
+
+    it('should default a union of literals to the first member', () => {
+      const model = m.union(m.literal('a'), m.literal('b'));
+
+      expect(model[$defaultValue]).to.be.equal('a');
+      expect(model[$members]).to.have.lengthOf(2);
+    });
+  });
+
+  describe('m.isLiteral', () => {
+    it('should detect a literal model and a union of them', () => {
+      expect(m.isLiteral(m.literal('add'))).to.be.true;
+      expect(m.isLiteral(m.union(m.literal('a'), m.literal('b')))).to.be.true;
+    });
+
+    it('should reject models that are not pinned to fixed values', () => {
+      expect(m.isLiteral(StringModel)).to.be.false;
+      expect(m.isLiteral(m.union(StringModel, NumberModel))).to.be.false;
+      expect(m.isLiteral(m.union(m.literal('a'), StringModel))).to.be.false;
+    });
+  });
+
+  describe('m.lazy', () => {
+    // Mutually referencing models cannot have their types inferred, so each one
+    // that takes part in a cycle needs an explicit annotation. `m.lazy` only
+    // defers the *value*, which is what keeps the eager builder from reading an
+    // uninitialised binding.
+    interface Author {
+      name: string;
+      book?: Book;
+    }
+    interface Book {
+      title: string;
+      author?: Author;
+    }
+
+    const AuthorModel: ObjectModel<Author> = m
+      .object<Author>('Author')
+      .property('name', StringModel)
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      .property('book', m.optional(m.lazy(() => BookModel)))
+      .build();
+
+    const BookModel: ObjectModel<Book> = m
+      .object<Book>('Book')
+      .property('title', StringModel)
+      .property('author', m.optional(m.lazy(() => AuthorModel)))
+      .build();
+
+    it('should resolve the other model of a cycle on access', () => {
+      const { book } = AuthorModel as typeof AuthorModel & { book: Model };
+
+      expect(book).to.be.instanceof(BookModel);
+      expect(book[$optional]).to.be.true;
+      expect(book[$name]).to.be.equal('Book');
+    });
+
+    it('should produce a default value for both ends of the cycle', () => {
+      expect(AuthorModel[$defaultValue]).to.be.like({ name: '', book: undefined });
+      expect(BookModel[$defaultValue]).to.be.like({ title: '', author: undefined });
+    });
+
+    it('should compose with array', () => {
+      // `array` wraps the provider rather than a model, so the item model only
+      // materialises once the property is read.
+      const ShelfModel = m
+        .object<{ label: string; books: Book[] }>('Shelf')
+        .property('label', StringModel)
+        .property('books', m.array(m.lazy(() => BookModel)))
+        .build();
+
+      expect(ShelfModel.books[$itemModel]).to.be.equal(BookModel);
+      expect(ShelfModel[$defaultValue]).to.be.like({ label: '', books: [] });
+    });
+
+    it('should let a required array break a cycle', () => {
+      interface Rack {
+        label: string;
+        books: RackedBook[];
+      }
+      interface RackedBook {
+        title: string;
+        rack: Rack;
+      }
+
+      // the array default is `[]` without reading the item model, so the
+      // recursion stops even though neither property is optional
+      const RackModel: ObjectModel<Rack> = m
+        .object<Rack>('Rack')
+        .property('label', StringModel)
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        .property('books', m.array(m.lazy(() => RackedBookModel)))
+        .build();
+      const RackedBookModel: ObjectModel<RackedBook> = m
+        .object<RackedBook>('RackedBook')
+        .property('title', StringModel)
+        .property(
+          'rack',
+          m.lazy(() => RackModel),
+        )
+        .build();
+
+      expect(RackedBookModel[$defaultValue]).to.be.like({ title: '', rack: { label: '', books: [] } });
+    });
   });
 
   describe('Validation constraints support', () => {
@@ -495,6 +756,45 @@ describe('@vaadin/hilla-models', () => {
       expect(m.isConstraint(personModelWithNonEmptyComments.comments[$constraints][0], Size)).to.be.false;
       expect(personModelWithNonEmptyComments.comments[$constraints][0].attributes).to.be.like({});
       expect(personModelWithNonEmptyComments.comments[$constraints][0].name).to.be.equal('NotEmpty');
+    });
+
+    it('should list the declared attributes, including those without a default', () => {
+      expect(Pattern[$attributeNames]).to.have.members(['message', 'regexp']);
+      expect(Size[$attributeNames]).to.have.members(['message', 'min', 'max']);
+    });
+
+    it('should leave out attributes that were not given', () => {
+      // Consumers spread the attributes over their own defaults, so a `message`
+      // that is present but empty would silently replace the default wording.
+      expect(NotBlank()).to.have.property('attributes').which.does.not.have.property('message');
+      expect(Size({ min: 4 }))
+        .to.have.property('attributes')
+        .which.does.not.have.property('message');
+      expect(NotBlank({ message: 'required' }).attributes).to.be.like({ message: 'required' });
+
+      // and the type has to say so: an assignment the other way around would
+      // pass even if `message` were required, as `string` fits `string | undefined`
+      const _attributes: Constraint<number, 'Min', Readonly<{ value: number; message?: string }>>['attributes'] = {
+        value: 5,
+      };
+    });
+
+    it('should keep the declared default of an omitted attribute', () => {
+      expect(Size({ max: 140 }).attributes).to.be.like({ min: 0, max: 140 });
+    });
+
+    it('should accept a decimal bound as a string', () => {
+      // `@DecimalMin` carries its bound as a string in Java, and that is what
+      // the generator emits.
+      expect(DecimalMin('0.01').attributes).to.be.like({ value: '0.01', inclusive: true });
+      expect(DecimalMin({ value: '0.01', inclusive: false }).attributes).to.be.like({
+        value: '0.01',
+        inclusive: false,
+      });
+
+      // the call result carries its attribute types rather than a bare `{}`
+      const _bound: number | string = DecimalMin('0.01').attributes.value;
+      const _inclusive: boolean | undefined = DecimalMin('0.01').attributes.inclusive;
     });
 
     it('should support custom constraints', () => {

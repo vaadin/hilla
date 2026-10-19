@@ -1,5 +1,7 @@
-import type InheritedEnum_1 from "../InheritedEnum.js";
-interface Red extends InheritedEnum_1 {
-    note?: string;
+import type InheritedEnum from '../InheritedEnum.js';
+
+interface Red extends InheritedEnum {
+  note?: string;
 }
+
 export default Red;

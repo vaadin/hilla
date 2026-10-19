@@ -61,7 +61,6 @@ public class EndpointGenerationTest extends AbstractFullStackTest {
     private static final String ROOT_PACKAGE = EndpointGenerationTest.class
             .getPackageName();
     private static final String ENDPOINT_ANNOTATION = "com.vaadin.hilla.parser.testutils.annotations.Endpoint";
-    private static final String SNAPSHOTS_DIR = "snapshots";
 
     /**
      * The longest path Windows accepts from a program which has not opted into
@@ -107,15 +106,23 @@ public class EndpointGenerationTest extends AbstractFullStackTest {
     /**
      * Guards against a snapshots folder which is no longer the expected output
      * of anything, which is what is left behind when the endpoints of a case
-     * are removed or moved.
+     * are removed or moved. A package inside another case which has endpoints
+     * and a test class of its own owns its snapshots too.
      */
     @Test
     public void should_NotHaveStaleSnapshots() {
         try (var scan = scan()) {
-            var testCases = findTestCases(endpoints(scan));
+            var endpoints = endpoints(scan);
+            var testCases = findTestCases(endpoints);
+            var withTestClass = packagesWithTestClass(scan);
 
             var stale = findSnapshotPackages().stream()
-                    .filter(pkg -> !testCases.contains(pkg)).sorted().toList();
+                    .filter(pkg -> !testCases.contains(pkg))
+                    .filter(pkg -> !withTestClass.contains(pkg)
+                            || endpoints.stream()
+                                    .noneMatch(endpoint -> pkg.equals(
+                                            packageOf(endpoint.getName()))))
+                    .sorted().toList();
 
             assertTrue(stale.isEmpty(),
                     () -> "There is no browser callable class left to generate"

@@ -1,3 +1,5 @@
-import type Bitter_1 from "./EnumDiscriminated/Bitter.js";
-type EnumDiscriminatedUnion = Bitter_1;
+import type Bitter from './EnumDiscriminated/Bitter.js';
+
+type EnumDiscriminatedUnion = Bitter;
+
 export default EnumDiscriminatedUnion;

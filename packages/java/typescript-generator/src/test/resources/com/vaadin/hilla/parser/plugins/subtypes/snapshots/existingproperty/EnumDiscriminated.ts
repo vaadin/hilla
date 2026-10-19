@@ -1,4 +1,5 @@
 interface EnumDiscriminated {
-    label?: string;
+  label?: string;
 }
+
 export default EnumDiscriminated;

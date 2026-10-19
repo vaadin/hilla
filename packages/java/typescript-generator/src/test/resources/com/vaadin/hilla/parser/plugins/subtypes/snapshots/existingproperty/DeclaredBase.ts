@@ -1,4 +1,5 @@
 interface DeclaredBase {
-    label?: string;
+  label?: string;
 }
+
 export default DeclaredBase;

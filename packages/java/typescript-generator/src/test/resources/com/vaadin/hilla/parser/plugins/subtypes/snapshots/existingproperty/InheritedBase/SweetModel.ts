@@ -1,10 +1,13 @@
-import { _getPropertyModel as _getPropertyModel_1, makeObjectEmptyValueCreator as makeObjectEmptyValueCreator_1, StringModel as StringModel_1 } from "@vaadin/hilla-lit-form";
-import InheritedBaseModel_1 from "../InheritedBaseModel.js";
-import type Sweet_1 from "./Sweet.js";
-class SweetModel<T extends Sweet_1 = Sweet_1> extends InheritedBaseModel_1<T> {
-    static override createEmptyValue = makeObjectEmptyValueCreator_1(SweetModel);
-    get note(): StringModel_1 {
-        return this[_getPropertyModel_1]("note", (parent, key) => new StringModel_1(parent, key, true, { meta: { javaType: "java.lang.String" } }));
-    }
-}
+import m, { StringModel } from '@vaadin/hilla-models';
+import InheritedBaseModel from '../InheritedBaseModel.js';
+import type Sweet from './Sweet.js';
+
+const SweetModel = m
+  .extend(InheritedBaseModel)
+  .object<Sweet>('Sweet')
+  .property('note', m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))
+  .property('flavour', m.literal('sweet'))
+  .build();
+type SweetModel = typeof SweetModel;
+
 export default SweetModel;

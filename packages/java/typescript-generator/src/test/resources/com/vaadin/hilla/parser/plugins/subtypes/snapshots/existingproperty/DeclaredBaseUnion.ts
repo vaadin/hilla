@@ -1,3 +1,5 @@
-import type First_1 from "./DeclaredBase/First.js";
-type DeclaredBaseUnion = First_1;
+import type First from './DeclaredBase/First.js';
+
+type DeclaredBaseUnion = First;
+
 export default DeclaredBaseUnion;

@@ -320,7 +320,7 @@ function _max(attrs: SizeAttributes) {
   return attrs.max ?? Number.MAX_SAFE_INTEGER;
 }
 
-export class Size extends AbstractValidator<string> {
+export class Size extends AbstractValidator<string | readonly unknown[]> {
   min: number;
   max: number;
 
@@ -333,12 +333,15 @@ export class Size extends AbstractValidator<string> {
     }
   }
 
-  override validate(value: string | null | undefined): boolean {
+  override validate(value: string | readonly unknown[] | null | undefined): boolean {
     // JSR380 considers empty values valid, unless a positive `min` makes the
     // value required (see `impliesRequired` above). `Size` also applies to
     // arrays, which `isLength()` rejects, so length is checked here.
-    if (value == null || (value as { length?: number }).length === 0) {
+    if (value == null || value.length === 0) {
       return this.min <= 0;
+    }
+    if (typeof value !== 'string') {
+      return value.length >= this.min && value.length <= this.max;
     }
     // eslint-disable-next-line sort-keys
     return isLength(value, { min: this.min, max: this.max });

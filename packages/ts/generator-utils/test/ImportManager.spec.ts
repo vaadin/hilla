@@ -50,4 +50,118 @@ import * as FooEndpoint from "Frontend/generated/FooEndpoint";`;
       ]);
     });
   });
+
+  describe('merging', () => {
+    let manager: ImportManager;
+
+    function print(): string {
+      return ts.createPrinter().printFile(createSourceFile(manager.toCode(), 'foo.ts'));
+    }
+
+    beforeEach(() => {
+      manager = new ImportManager(new Intl.Collator());
+    });
+
+    it.each([
+      ['a value', false, 'import m, { StringModel } from "foo";'],
+      ['a type-only', true, 'import m, { type StringModel } from "foo";'],
+    ])('should merge %s named import into the default import of the same module', (_, isType, expected) => {
+      manager.default.add('foo', 'm');
+      manager.named.add('foo', 'StringModel', isType);
+
+      expect(print()).to.equal(`${expected}\n`);
+    });
+
+    it('should keep the aliases of type-only specifiers when merging', () => {
+      manager.named.add('bar', 'StringModel');
+      manager.default.add('foo', 'm');
+      manager.named.add('foo', 'StringModel', true);
+
+      expect(print()).to.contain('import m, { type StringModel as StringModel_1 } from "foo";');
+    });
+
+    it('should extract a merged default and named import from a code', () => {
+      const code = 'import m, { StringModel } from "foo";\n';
+
+      manager.fromCode(ts.createSourceFile('foo.ts', code, ts.ScriptTarget.ESNext, true, ts.ScriptKind.TS));
+
+      expect(manager.default.getIdentifier('foo')?.text).to.equal('m');
+      expect(manager.named.getIdentifier('foo', 'StringModel')?.text).to.equal('StringModel');
+      expect(print()).to.equal(code);
+    });
+
+    it('should keep named imports apart from a type-only default import', () => {
+      manager.default.add('foo', 'm', true);
+      manager.named.add('foo', 'StringModel');
+
+      expect(print()).to.equal('import type m from "foo";\nimport { StringModel } from "foo";\n');
+    });
+
+    it('should not merge imports of different modules', () => {
+      manager.default.add('foo', 'm');
+      manager.named.add('bar', 'StringModel');
+
+      expect(print()).to.equal('import { StringModel } from "bar";\nimport m from "foo";\n');
+    });
+  });
+
+  describe('names', () => {
+    let manager: ImportManager;
+
+    beforeEach(() => {
+      manager = new ImportManager(new Intl.Collator());
+    });
+
+    it('should suffix only the colliding specifiers', () => {
+      expect(manager.named.add('foo', 'Model').text).to.equal('Model');
+      expect(manager.named.add('bar', 'Model').text).to.equal('Model_1');
+      expect(manager.default.add('baz', 'Model').text).to.equal('Model_2');
+    });
+
+    it('should reuse the identifier of an already imported specifier', () => {
+      const id = manager.named.add('foo', 'Model');
+
+      expect(manager.named.add('foo', 'Model')).to.equal(id);
+    });
+
+    it('should keep names claimed elsewhere out of reach', () => {
+      manager.names.claim('Model');
+
+      expect(manager.named.add('foo', 'Model').text).to.equal('Model_1');
+    });
+
+    it('should alias a specifier only when it was suffixed', () => {
+      manager.named.add('foo', 'Model');
+      manager.named.add('bar', 'Model');
+
+      const printer = ts.createPrinter();
+      const code = printer.printFile(createSourceFile(manager.toCode(), 'foo.ts'));
+
+      expect(code).to.contain('import { Model } from "foo";');
+      expect(code).to.contain('import { Model as Model_1 } from "bar";');
+    });
+
+    it('should keep the exported name of an aliased specifier through a round trip', () => {
+      const code = `import { Model as Model_1 } from "foo";`;
+
+      manager.fromCode(ts.createSourceFile('foo.ts', code, ts.ScriptTarget.ESNext, true, ts.ScriptKind.TS));
+
+      const printer = ts.createPrinter();
+
+      expect(printer.printFile(createSourceFile(manager.toCode(), 'foo.ts'))).to.contain(
+        'import { Model as Model_1 } from "foo";',
+      );
+      expect(manager.named.getIdentifier('foo', 'Model')?.text).to.equal('Model_1');
+    });
+
+    it('should not hand out a name that the parsed code already uses', () => {
+      const code = `import { Model } from "foo";
+const Sample = 1;`;
+
+      manager.fromCode(ts.createSourceFile('foo.ts', code, ts.ScriptTarget.ESNext, true, ts.ScriptKind.TS));
+
+      expect(manager.named.add('bar', 'Model').text).to.equal('Model_1');
+      expect(manager.named.add('bar', 'Sample').text).to.equal('Sample_1');
+    });
+  });
 });

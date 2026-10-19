@@ -1,7 +1,9 @@
-import type EnumDiscriminated_1 from "../EnumDiscriminated.js";
-import type Taste_1 from "./Taste.js";
-interface Bitter extends EnumDiscriminated_1 {
-    note?: string;
-    taste?: Taste_1;
+import type EnumDiscriminated from '../EnumDiscriminated.js';
+import type Taste from './Taste.js';
+
+interface Bitter extends EnumDiscriminated {
+  note?: string;
+  taste?: Taste;
 }
+
 export default Bitter;

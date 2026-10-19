@@ -1,5 +1,7 @@
-import type Colour_1 from "./InheritedEnum/Colour.js";
+import type Colour from './InheritedEnum/Colour.js';
+
 interface InheritedEnum {
-    colour?: Colour_1;
+  colour?: Colour;
 }
+
 export default InheritedEnum;

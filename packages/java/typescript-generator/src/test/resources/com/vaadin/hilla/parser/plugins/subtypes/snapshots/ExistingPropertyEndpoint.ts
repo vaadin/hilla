@@ -1,11 +1,24 @@
-import { EndpointRequestInit as EndpointRequestInit_1 } from "@vaadin/hilla-frontend";
-import type DeclaredBase_1 from "./com/vaadin/hilla/parser/plugins/subtypes/existingproperty/DeclaredBase.js";
-import type EnumDiscriminated_1 from "./com/vaadin/hilla/parser/plugins/subtypes/existingproperty/EnumDiscriminated.js";
-import type InheritedBase_1 from "./com/vaadin/hilla/parser/plugins/subtypes/existingproperty/InheritedBase.js";
-import type InheritedEnum_1 from "./com/vaadin/hilla/parser/plugins/subtypes/existingproperty/InheritedEnum.js";
-import client_1 from "./connect-client.default.js";
-async function send_1(init?: EndpointRequestInit_1): Promise<DeclaredBase_1 | undefined> { return client_1.call("ExistingPropertyEndpoint", "send", {}, init); }
-async function sendEnumDiscriminated_1(init?: EndpointRequestInit_1): Promise<EnumDiscriminated_1 | undefined> { return client_1.call("ExistingPropertyEndpoint", "sendEnumDiscriminated", {}, init); }
-async function sendInherited_1(init?: EndpointRequestInit_1): Promise<InheritedBase_1 | undefined> { return client_1.call("ExistingPropertyEndpoint", "sendInherited", {}, init); }
-async function sendInheritedEnum_1(init?: EndpointRequestInit_1): Promise<InheritedEnum_1 | undefined> { return client_1.call("ExistingPropertyEndpoint", "sendInheritedEnum", {}, init); }
-export { send_1 as send, sendEnumDiscriminated_1 as sendEnumDiscriminated, sendInherited_1 as sendInherited, sendInheritedEnum_1 as sendInheritedEnum };
+import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
+import type DeclaredBase from './com/vaadin/hilla/parser/plugins/subtypes/existingproperty/DeclaredBase.js';
+import type EnumDiscriminated from './com/vaadin/hilla/parser/plugins/subtypes/existingproperty/EnumDiscriminated.js';
+import type InheritedBase from './com/vaadin/hilla/parser/plugins/subtypes/existingproperty/InheritedBase.js';
+import type InheritedEnum from './com/vaadin/hilla/parser/plugins/subtypes/existingproperty/InheritedEnum.js';
+import client from './connect-client.default.js';
+
+async function send(init?: EndpointRequestInit): Promise<DeclaredBase | undefined> {
+  return client.call('ExistingPropertyEndpoint', 'send', {}, init);
+}
+
+async function sendEnumDiscriminated(init?: EndpointRequestInit): Promise<EnumDiscriminated | undefined> {
+  return client.call('ExistingPropertyEndpoint', 'sendEnumDiscriminated', {}, init);
+}
+
+async function sendInherited(init?: EndpointRequestInit): Promise<InheritedBase | undefined> {
+  return client.call('ExistingPropertyEndpoint', 'sendInherited', {}, init);
+}
+
+async function sendInheritedEnum(init?: EndpointRequestInit): Promise<InheritedEnum | undefined> {
+  return client.call('ExistingPropertyEndpoint', 'sendInheritedEnum', {}, init);
+}
+
+export { send, sendEnumDiscriminated, sendInherited, sendInheritedEnum };

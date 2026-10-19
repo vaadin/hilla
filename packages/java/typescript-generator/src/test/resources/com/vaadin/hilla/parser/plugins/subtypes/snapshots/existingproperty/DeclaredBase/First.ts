@@ -1,6 +1,8 @@
-import type DeclaredBase_1 from "../DeclaredBase.js";
-interface First extends DeclaredBase_1 {
-    kind: "first";
-    note?: string;
+import type DeclaredBase from '../DeclaredBase.js';
+
+interface First extends DeclaredBase {
+  note?: string;
+  kind: 'first';
 }
+
 export default First;

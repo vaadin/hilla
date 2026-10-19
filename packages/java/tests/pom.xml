@@ -12,13 +12,10 @@
 
     <artifactId>tests</artifactId>
     <name>Hilla Tests</name>
-    <modules>
-        <module>fix-lumo</module>
-    </modules>
     <packaging>pom</packaging>
 
     <properties>
-        <vaadin.components.version>25.3-SNAPSHOT</vaadin.components.version>
+        <vaadin.components.version>25.4-SNAPSHOT</vaadin.components.version>
         <jetty.version>11.0.20</jetty.version>
         <jetty.scantrigger></jetty.scantrigger>
 
@@ -32,9 +29,6 @@
         <vaadin.devmode.vite.options>--host</vaadin.devmode.vite.options>
         <!-- make sure we do not leave webpack-dev-server running after IT -->
         <vaadin.reuseDevServer>false</vaadin.reuseDevServer>
-
-        <!-- enable React 19 feature flag by default -->
-        <vaadin.experimental.react19>true</vaadin.experimental.react19>
 
         <!-- Used in the tests, should be overridden for each module to support
     concurrent running of test modules. -->
@@ -282,9 +276,6 @@
                                     <vaadin.devmode.vite.options>
                                         ${vaadin.devmode.vite.options}
                                     </vaadin.devmode.vite.options>
-                                    <vaadin.experimental.react19>
-                                        ${vaadin.experimental.react19}
-                                    </vaadin.experimental.react19>
                                 </properties>
                             </configuration>
                         </execution>
@@ -330,9 +321,15 @@
             </modules>
         </profile>
 
-        <!-- the spring module constains submodules to run with different profiles -->
+        <!-- The it-modules-* profiles below split the ITs of the it-modules
+             profile into the groups that the ITs job of the Validation
+             workflow runs in parallel, one group per matrix leg. Every IT
+             module belongs to exactly one group, and the groups are balanced
+             by measured run time rather than by topic, so a module may sit in
+             a group it has no thematic relation to. The spring module carries
+             the same profiles to select its own submodules. -->
         <profile>
-            <id>it-modules-group-1</id>
+            <id>it-modules-endpoints</id>
             <modules>
                 <module>csrf</module>
                 <module>csrf-context</module>
@@ -341,24 +338,14 @@
         </profile>
 
         <profile>
-            <id>it-modules-group-2</id>
+            <id>it-modules-security</id>
             <modules>
                 <module>spring</module>
             </modules>
         </profile>
 
         <profile>
-            <id>it-modules-some</id>
-            <modules>
-                <module>spring</module>
-            </modules>
-        </profile>
-
-        <profile>
-            <id>react-18</id>
-            <properties>
-                <vaadin.experimental.react19>false</vaadin.experimental.react19>
-            </properties>
+            <id>it-modules-react</id>
             <modules>
                 <module>spring</module>
             </modules>

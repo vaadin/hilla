@@ -45,7 +45,7 @@ repositories {
 dependencies {
     implementation 'com.vaadin:vaadin-spring'
     implementation 'com.vaadin:hilla'
-    implementation "com.vaadin:fix-lumo:$effectiveHillaVersion"
+    implementation "com.vaadin:vaadin-lumo-theme:$effectiveVaadinComponentsVersion"
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.parttio:line-awesome:1.1.0'
     implementation 'com.vaadin:vaadin-dev-server'

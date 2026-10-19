@@ -1,7 +1,5 @@
-import { _enum as _enum_1, EnumModel as EnumModel_1, makeEnumEmptyValueCreator as makeEnumEmptyValueCreator_1 } from "@vaadin/hilla-lit-form";
-import NullHandling_1 from "./NullHandling.js";
-class NullHandlingModel extends EnumModel_1<typeof NullHandling_1> {
-    static override createEmptyValue = makeEnumEmptyValueCreator_1(NullHandlingModel);
-    readonly [_enum_1] = NullHandling_1;
-}
+import m from "@vaadin/hilla-models";
+import NullHandling from "./NullHandling.js";
+const NullHandlingModel = m.enum(NullHandling, "NullHandling");
+type NullHandlingModel = typeof NullHandlingModel;
 export default NullHandlingModel;
