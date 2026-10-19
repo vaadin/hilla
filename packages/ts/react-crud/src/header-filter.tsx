@@ -214,9 +214,11 @@ export function EnumHeaderFilter(): ReactElement {
       value: '',
       label: '',
     },
-    ...Object.entries(model[_enum]).map(([name, value]) => ({
-      label: convertToTitleCase(name),
-      value: String(value),
+    // A filter is resolved on the server by the name of the constant, not by
+    // the value the constant is sent as
+    ...Object.keys(model[_enum]).map((value) => ({
+      label: convertToTitleCase(value),
+      value,
     })),
   ];
   return (

@@ -41,6 +41,24 @@ export enum Gender {
   NON_BINARY = 'NON_BINARY',
 }
 export const GenderModel = m.enum(Gender, 'Gender');
+
+// Sent as values which differ from the names of the constants
+export enum Priority {
+  VERY_LOW = 'very-low',
+  HIGH = 'high',
+}
+export const PriorityModel = m.enum(Priority, 'Priority');
+
+export interface Task extends HasIdVersion {
+  priority: Priority;
+}
+export const TaskModel = m
+  .object<Task>('Task')
+  .property('id', idNumberModel)
+  .property('version', versionNumberModel)
+  .property('priority', PriorityModel)
+  .build();
+export type TaskModel = typeof TaskModel;
 export type GenderModel = typeof GenderModel;
 
 export interface Named {
