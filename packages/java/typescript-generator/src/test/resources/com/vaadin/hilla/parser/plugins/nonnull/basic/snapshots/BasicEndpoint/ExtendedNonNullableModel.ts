@@ -1,5 +1,5 @@
-import type NonNullableModel_1 from "./NonNullableModel.js";
-interface ExtendedNonNullableModel extends NonNullableModel_1 {
+import type NonNullableModel from "./NonNullableModel.js";
+interface ExtendedNonNullableModel extends NonNullableModel {
     mixedAnnotations: Array<string>;
     nonTypeAnnotation: string;
 }

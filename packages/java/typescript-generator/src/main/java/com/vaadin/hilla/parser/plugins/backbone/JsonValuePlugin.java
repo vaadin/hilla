@@ -38,14 +38,6 @@ public class JsonValuePlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
     private final Map<Class<?>, Optional<Class<?>>> jsonValues = new HashMap<>();
 
-    @Override
-    public void enter(NodePath<?> nodePath) {
-    }
-
-    @Override
-    public void exit(NodePath<?> nodePath) {
-    }
-
     @NonNull
     @Override
     public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {

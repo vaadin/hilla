@@ -2,6 +2,7 @@
 import {
   $defaultValue,
   $key,
+  $lazyParent,
   $meta,
   $name,
   $optional,
@@ -15,9 +16,81 @@ import {
 } from './Model.js';
 import type { ObjectModel } from './models.js';
 
-const { create, defineProperty } = Object;
+const {
+  create,
+  defineProperty,
+  getOwnPropertyDescriptor,
+  getOwnPropertyNames,
+  getOwnPropertySymbols,
+  getPrototypeOf,
+  keys,
+} = Object;
 
 const $model = Symbol('model');
+
+/**
+ * The models of the chain of the base which declare properties, from the base
+ * on, followed by the first model below them, which declares none and neither
+ * does anything it derives from.
+ */
+function splitChain(base: Model): [levels: object[], root: object | null] {
+  const chain: object[] = [];
+
+  for (let model: object | null = base; model; model = getPrototypeOf(model) as object | null) {
+    chain.push(model);
+  }
+
+  let count = 0;
+
+  chain.forEach((model, index) => {
+    if (keys(model).length > 0) {
+      count = index + 1;
+    }
+  });
+
+  return [chain.slice(0, count), chain[count] ?? null];
+}
+
+/**
+ * A stand-in for a base model that is not available yet, to be used as the
+ * prototype of the model extending it.
+ *
+ * The stand-in serves as its own every property the base has, inherited ones
+ * included, from the root of the chain on, and reports as its prototype the
+ * model below them, which leaves the models declaring them out of the chain
+ * entirely. Were they reported instead, anything walking the chain a level at
+ * a time would meet their properties twice. Serving the inherited properties
+ * too is what makes them enumerable: `for...in` does not follow the prototype
+ * of a proxy.
+ *
+ * @param provider - Returns the base model, called no earlier than the first
+ * time the extending model is used.
+ */
+function lazyBase(provider: () => Model): Model {
+  return new Proxy(create(null) as Model, {
+    get: (_target, key, receiver) => Reflect.get(provider(), key, receiver),
+    getOwnPropertyDescriptor(_target, key) {
+      const base = provider();
+      const owner = typeof key === 'symbol' ? base : splitChain(base)[0].find((model) => Object.hasOwn(model, key));
+      const descriptor = owner && getOwnPropertyDescriptor(owner, key);
+
+      // the target holds nothing of its own, so a descriptor may only be
+      // reported for it as configurable
+      return descriptor && { ...descriptor, configurable: true };
+    },
+    getPrototypeOf: () => splitChain(provider())[1],
+    has: (_target, key) => Reflect.has(provider(), key),
+    ownKeys() {
+      const base = provider();
+      const [levels] = splitChain(base);
+      // the root of the chain goes first, as it would to anything walking it
+      levels.reverse();
+      const names = new Set(levels.flatMap((model) => getOwnPropertyNames(model)));
+
+      return [...names, ...getOwnPropertySymbols(base)];
+    },
+  });
+}
 
 /**
  * The flags for the model constructor that allow to determine specific characteristics of the model.
@@ -42,12 +115,20 @@ export class CoreModelBuilder<V, EX extends AnyObject = AnyObject, F extends Fla
   protected readonly [$model]: Model<V, EX>;
 
   /**
-   * @param base - The base model to extend.
+   * @param base - The base model to extend, or a function returning it. Pass a
+   * function when the base is not initialized yet, as happens when two models
+   * in separate modules refer to each other: the model is then built against a
+   * stand-in and the base is read on first use.
    * @param defaultValueProvider - The function that provides the default value
    * for the model.
    */
-  constructor(base: Model, defaultValueProvider?: (model: Model<V, EX>) => V) {
-    this[$model] = create(base);
+  constructor(base: Model | (() => Model), defaultValueProvider?: (model: Model<V, EX>) => V) {
+    if (typeof base === 'function') {
+      this[$model] = create(lazyBase(base));
+      defineProperty(this[$model], $lazyParent, { value: base });
+    } else {
+      this[$model] = create(base);
+    }
 
     if (defaultValueProvider) {
       this.defaultValueProvider(defaultValueProvider);
@@ -166,7 +247,7 @@ export class ObjectModelBuilder<
   },
   F
 > {
-  constructor(base: Model) {
+  constructor(base: Model | (() => Model)) {
     super(base, (m) => {
       const result: Record<string, unknown> = {};
 
@@ -226,8 +307,10 @@ export class ObjectModelBuilder<
    * value type of the model to make it closer to the final value type.
    *
    * @param key - The key of the property.
-   * @param model - The model of the property value. You can also provide a
-   * function that produces the model based on the current model.
+   * @param model - The model of the property value, or a model converter such
+   * as {@link m.optional}, {@link m.array} or {@link m.lazy}. Use
+   * {@link m.lazy} to defer reading a model that is not initialized yet, and
+   * {@link m.self} for a model that refers to itself.
    *
    * @returns The current builder instance updated with the new property type.
    */

@@ -33,7 +33,7 @@ import com.vaadin.hilla.parser.models.TypeVariableModel;
 /**
  * Reading the bounds of a type parameter.
  */
-final class TypeParameters {
+public final class TypeParameters {
     private TypeParameters() {
     }
 
@@ -54,7 +54,7 @@ final class TypeParameters {
      *            the type parameter to read the bounds of
      * @return the bounds which constrain the type parameter
      */
-    static List<SignatureModel> getEffectiveBounds(
+    public static List<SignatureModel> getEffectiveBounds(
             TypeParameterModel typeParameter) {
         return typeParameter.getBounds().stream().filter(Objects::nonNull)
                 .filter(Predicate.not(SpecializedModel::isNativeObject))
@@ -71,7 +71,7 @@ final class TypeParameters {
      *            the type parameter to check
      * @return {@code true} if the type parameter has no effective bound
      */
-    static boolean isUnbounded(TypeParameterModel typeParameter) {
+    public static boolean isUnbounded(TypeParameterModel typeParameter) {
         return getEffectiveBounds(typeParameter).isEmpty();
     }
 

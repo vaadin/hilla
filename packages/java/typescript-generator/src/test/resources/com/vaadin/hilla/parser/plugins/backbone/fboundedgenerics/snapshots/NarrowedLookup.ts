@@ -1,6 +1,8 @@
-import type EnumLookupValue_1 from "./EnumLookupValue.js";
-import type NodeType_1 from "./NodeType.js";
+import type EnumLookupValue from './EnumLookupValue.js';
+import type NodeType from './NodeType.js';
+
 interface NarrowedLookup {
-    value?: EnumLookupValue_1<NodeType_1 | undefined>;
+  value?: EnumLookupValue<NodeType | undefined>;
 }
+
 export default NarrowedLookup;
