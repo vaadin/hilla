@@ -114,12 +114,19 @@ public class TypeParameterModelTests {
     @DisplayName("It should compare mutually bounded type parameters")
     @Test
     public void should_CompareMutuallyBoundedTypeParameters() {
-        var left = MutuallyBoundedSample.class.getTypeParameters()[0];
-        var right = MutuallyBoundedSample.class.getTypeParameters()[1];
+        var origin = MutuallyBoundedSample.class.getTypeParameters()[0];
+        var otherOrigin = OtherMutuallyBoundedSample.class
+                .getTypeParameters()[0];
 
-        assertEquals(TypeParameterModel.of(left), TypeParameterModel.of(left));
-        assertNotEquals(TypeParameterModel.of(left),
-                TypeParameterModel.of(right));
+        assertEquals(TypeParameterModel.of(origin),
+                TypeParameterModel.of(origin));
+
+        // Both are named L and both are bounded by an R, so only the bound of
+        // R, reached on the way round the cycle, tells them apart.
+        assertNotEquals(TypeParameterModel.of(origin),
+                TypeParameterModel.of(otherOrigin));
+        assertNotEquals(TypeParameterModel.of(otherOrigin),
+                TypeParameterModel.of(origin));
     }
 
     @DisplayName("It should have the same hashCode for source and reflection models")
@@ -248,6 +255,13 @@ public class TypeParameterModelTests {
      * compares the other one on the way back to it.
      */
     static final class MutuallyBoundedSample<L extends Comparable<R>, R extends Comparable<L>> {
+    }
+
+    /**
+     * Another sample starting the same way as {@link MutuallyBoundedSample},
+     * but whose {@code R} is not bounded by {@code L}.
+     */
+    static final class OtherMutuallyBoundedSample<L extends Comparable<R>, R extends Number> {
     }
 
     static final class Sample<@Sample.Foo RegularTypeParameter, @Sample.Foo BoundedTypeParameter extends Sample.Bound> {
