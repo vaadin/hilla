@@ -54,7 +54,7 @@ public final class TypeParameters {
      *            the type parameter to read the bounds of
      * @return the bounds which constrain the type parameter
      */
-    public static List<SignatureModel> getEffectiveBounds(
+    static List<SignatureModel> getEffectiveBounds(
             TypeParameterModel typeParameter) {
         return typeParameter.getBounds().stream().filter(Objects::nonNull)
                 .filter(Predicate.not(SpecializedModel::isNativeObject))

@@ -26,4 +26,8 @@ public class FBoundedGenericsEndpoint {
     public MutuallyBoundedPair<String, String> getPair() {
         return null;
     }
+
+    public WildcardBounded<String> getWildcardBounded() {
+        return null;
+    }
 }
