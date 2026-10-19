@@ -15,8 +15,11 @@
  */
 package com.vaadin.hilla.nullmarked;
 
+import org.jspecify.annotations.Nullable;
+
 public class NullMarkedEntity {
     private String value;
+    private @Nullable String nullableValue;
 
     public String getValue() {
         return value;
@@ -24,5 +27,13 @@ public class NullMarkedEntity {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public @Nullable String getNullableValue() {
+        return nullableValue;
+    }
+
+    public void setNullableValue(@Nullable String nullableValue) {
+        this.nullableValue = nullableValue;
     }
 }

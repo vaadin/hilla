@@ -88,6 +88,7 @@ import com.vaadin.hilla.endpoints.IterableEndpoint;
 import com.vaadin.hilla.endpoints.PersonEndpoint;
 import com.vaadin.hilla.exception.EndpointException;
 import com.vaadin.hilla.exception.EndpointValidationException;
+import com.vaadin.hilla.nullmarked.NullMarkedEndpoint;
 import com.vaadin.hilla.packages.application.ApplicationComponent;
 import com.vaadin.hilla.packages.application.ApplicationEndpoint;
 import com.vaadin.hilla.packages.library.LibraryEndpoint;
@@ -1248,6 +1249,27 @@ public class EndpointControllerTest {
                 message.contains(NullCheckerTestClass.class.getSimpleName()));
         assertTrue(message.contains(testNullMethodName));
         assertTrue(message.contains(errorMessage));
+    }
+
+    @Test
+    public void should_RequireNonNullReturnValue_When_PackageIsNullMarked()
+            throws IOException {
+        EndpointController controller = createVaadinController(
+                new NullMarkedEndpoint(), null, null, null,
+                new ExplicitNullableTypeChecker(), null);
+        String endpointName = NullMarkedEndpoint.class.getSimpleName();
+
+        ResponseEntity<String> response = controller.serveEndpoint(endpointName,
+                "nonNullMethod", createRequestParameters("{}"), requestMock);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
+                response.getStatusCode());
+        assertTrue(new ObjectMapper()
+                .readValue(response.getBody(), ObjectNode.class).get("message")
+                .asText().contains("Unexpected return value"));
+
+        response = controller.serveEndpoint(endpointName, "nullableMethod",
+                createRequestParameters("{}"), requestMock);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
     @Test

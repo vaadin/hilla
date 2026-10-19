@@ -470,6 +470,12 @@ public class ExplicitNullableTypeCheckerTest {
     @Test
     public void should_ReturnError_When_GivenNestedNullAndRequiredByNullMarkedPackage() {
         NullMarkedEntity nullMarkedEntity = new NullMarkedEntity();
+        nullMarkedEntity.setValue("value");
+        nullMarkedEntity.setNullableValue(null);
+        Assert.assertNull("Nullable property should allow null value",
+                explicitNullableTypeChecker.checkValueForType(nullMarkedEntity,
+                        NullMarkedEntity.class));
+
         nullMarkedEntity.setValue(null);
         Assert.assertNotNull(explicitNullableTypeChecker
                 .checkValueForType(nullMarkedEntity, NullMarkedEntity.class));
