@@ -1271,13 +1271,8 @@ public class EndpointControllerTest {
         EndpointController controller = createVaadinController(
                 new NullMarkedEndpoint(), null, null, null,
                 new ExplicitNullableTypeChecker(), null);
-        assertUnexpectedNullReturnValue(controller,
+        assertNullOnlyFromNullableMethod(controller,
                 NullMarkedEndpoint.class.getSimpleName());
-
-        ResponseEntity<String> response = controller.serveEndpoint(
-                NullMarkedEndpoint.class.getSimpleName(), "nullableMethod",
-                createRequestParameters("{}"), requestMock);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
     @Test
@@ -1286,11 +1281,11 @@ public class EndpointControllerTest {
         EndpointController controller = createVaadinController(
                 new NonNullApiEndpoint(), null, null, null,
                 new ExplicitNullableTypeChecker(), null);
-        assertUnexpectedNullReturnValue(controller,
+        assertNullOnlyFromNullableMethod(controller,
                 NonNullApiEndpoint.class.getSimpleName());
     }
 
-    private void assertUnexpectedNullReturnValue(EndpointController controller,
+    private void assertNullOnlyFromNullableMethod(EndpointController controller,
             String endpointName) throws IOException {
         ResponseEntity<String> response = controller.serveEndpoint(endpointName,
                 "nonNullMethod", createRequestParameters("{}"), requestMock);
@@ -1299,6 +1294,10 @@ public class EndpointControllerTest {
         assertTrue(new ObjectMapper()
                 .readValue(response.getBody(), ObjectNode.class).get("message")
                 .asText().contains("Unexpected return value"));
+
+        response = controller.serveEndpoint(endpointName, "nullableMethod",
+                createRequestParameters("{}"), requestMock);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
     @Test
