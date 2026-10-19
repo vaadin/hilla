@@ -18,11 +18,15 @@ package com.vaadin.hilla.engine.commandrunner;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -34,6 +38,7 @@ public class GradleRunnerTest {
 
     @Test
     void shouldRunIfBuildGradleIsAvailable() throws IOException {
+        assumeTrue(isGradleOnPath(), "Gradle is not available on the PATH");
         Files.createFile(tmpDir.resolve("build.gradle"));
         var opt = GradleRunner.forProject(tmpDir.toFile(), "-v");
         assertTrue(opt.isPresent());
@@ -44,6 +49,7 @@ public class GradleRunnerTest {
 
     @Test
     void shouldRunIfBuildGradleKtsIsAvailable() throws IOException {
+        assumeTrue(isGradleOnPath(), "Gradle is not available on the PATH");
         Files.createFile(tmpDir.resolve("build.gradle.kts"));
         var opt = GradleRunner.forProject(tmpDir.toFile(), "-v");
         assertTrue(opt.isPresent());
@@ -82,5 +88,13 @@ public class GradleRunnerTest {
                 System.clearProperty(MavenRunner.EXECUTABLE_PROPERTY);
             }
         }
+    }
+
+    private static boolean isGradleOnPath() {
+        var executable = CommandRunner.IS_WINDOWS ? "gradle.bat" : "gradle";
+        return Optional.ofNullable(System.getenv("PATH")).stream()
+                .flatMap(path -> Stream.of(path.split(File.pathSeparator)))
+                .map(dir -> new File(dir, executable))
+                .anyMatch(File::canExecute);
     }
 }
