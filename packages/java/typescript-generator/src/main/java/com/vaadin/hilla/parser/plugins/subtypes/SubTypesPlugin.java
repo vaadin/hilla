@@ -15,8 +15,6 @@
  */
 package com.vaadin.hilla.parser.plugins.subtypes;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -31,6 +29,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.jspecify.annotations.NonNull;
+import tools.jackson.databind.introspect.BeanPropertyDefinition;
+import tools.jackson.databind.json.JsonMapper;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.core.AbstractPlugin;
@@ -191,6 +191,12 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                 Object.class);
 
         /**
+         * Reads the properties of a type the way the entities are written, with
+         * the getters and setters Jackson sees by default.
+         */
+        private static final JsonMapper MAPPER = JsonMapper.builder().build();
+
+        /**
          * The type id strategies whose values are known here: both take the id
          * from the annotations and fall back to the name of the class itself.
          * The ids of the class based strategies are built from the name of the
@@ -224,7 +230,9 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                     ? typeInfo.use().getDefaultPropertyName()
                     : typeInfo.property();
 
-            return Optional.ofNullable(property).filter(this::acceptsTypeIds);
+            return Optional.ofNullable(property)
+                    .filter(name -> include != JsonTypeInfo.As.EXISTING_PROPERTY
+                            || acceptsTypeIds(name));
         }
 
         /**
@@ -238,7 +246,9 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
          * common case, cannot be described as the ids without contradicting the
          * type it is declared with. Nothing is generated for it then, which
          * leaves the property as what it is declared as: describing it as the
-         * ids instead produced TypeScript which did not compile.
+         * ids instead produced TypeScript which did not compile. With
+         * {@code As.PROPERTY} Jackson writes the type id itself, so this
+         * question is not asked there.
          */
         private boolean acceptsTypeIds(String property) {
             return declaredType(property).map(TYPE_ID_TYPES::contains)
@@ -248,38 +258,30 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
         /**
          * The type the hierarchy declares the property with, if it declares it
          * at all, looking at the type which declares the subtypes as well as at
-         * the subtypes themselves. A discriminator which no type declares is
-         * added by the parser, and is a string by construction.
+         * the subtypes themselves. The property is looked up by the name
+         * Jackson serializes it under, as the annotation names it, so a renamed
+         * member is found by its new name and not by its Java one.
          */
         private Optional<Class<?>> declaredType(String property) {
             return Stream
                     .concat(Stream.of(declaringClass),
                             Arrays.stream(subTypes.value())
                                     .map(JsonSubTypes.Type::value))
-                    .flatMap(SubTypesPlugin::hierarchyOf).distinct()
-                    .<Class<?>> flatMap(
-                            cls -> Stream.concat(
-                                    Arrays.stream(cls.getDeclaredFields())
-                                            .filter(field -> field.getName()
-                                                    .equals(property))
-                                            .map(Field::getType),
-                                    Arrays.stream(cls.getDeclaredMethods())
-                                            .filter(method -> isGetterOf(method,
-                                                    property))
-                                            .map(Method::getReturnType)))
+                    .distinct().flatMap(SubTypesInfo::propertiesOf)
+                    .filter(definition -> definition.getName().equals(property))
+                    .<Class<?>> map(BeanPropertyDefinition::getRawPrimaryType)
                     .findFirst();
         }
 
-        private static boolean isGetterOf(Method method, String property) {
-            if (method.getParameterCount() > 0) {
-                return false;
-            }
-
-            var capitalized = Character.toUpperCase(property.charAt(0))
-                    + property.substring(1);
-
-            return method.getName().equals("get" + capitalized)
-                    || method.getName().equals("is" + capitalized);
+        private static Stream<BeanPropertyDefinition> propertiesOf(
+                Class<?> cls) {
+            var config = MAPPER.serializationConfig();
+            var javaType = config.constructType(cls);
+            var introspector = config.classIntrospectorInstance();
+            return introspector
+                    .introspectForSerialization(javaType,
+                            introspector.introspectClassAnnotations(javaType))
+                    .findProperties().stream();
         }
 
         /**

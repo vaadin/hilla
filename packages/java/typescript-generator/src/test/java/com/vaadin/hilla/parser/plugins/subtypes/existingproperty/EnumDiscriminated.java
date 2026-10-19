@@ -15,14 +15,15 @@
  */
 package com.vaadin.hilla.parser.plugins.subtypes.existingproperty;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
  * A hierarchy whose declared discriminator is an enum, which is a common way of
- * writing {@code As.EXISTING_PROPERTY}. The type ids are strings, so the
- * generated TypeScript describes the property as the ids it accepts rather than
- * as the enum.
+ * writing {@code As.EXISTING_PROPERTY}. The type ids are strings, which an enum
+ * cannot be described as, so no discriminator is generated and the property
+ * stays the enum it is declared as.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "taste")
 @JsonSubTypes(@JsonSubTypes.Type(value = EnumDiscriminated.Bitter.class, name = "BITTER"))
@@ -36,9 +37,11 @@ public class EnumDiscriminated {
     public static class Bitter extends EnumDiscriminated {
         /**
          * Read from a getter rather than from a field of its own, which is how
-         * Jackson usually reads a property.
+         * Jackson usually reads a property, and serialized under a name other
+         * than its Java one: the discriminator is the name Jackson writes.
          */
-        public Taste getTaste() {
+        @JsonProperty("taste")
+        public Taste getFlavour() {
             return Taste.BITTER;
         }
 

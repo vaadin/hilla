@@ -31,9 +31,10 @@ public class DeclaredBase {
         /**
          * The subtype declares the discriminator itself, which is what
          * {@code As.EXISTING_PROPERTY} means: it is an ordinary property of the
-         * type as well as the type id.
+         * type as well as the type id. Declared as {@code Object}, which a type
+         * id fits into as well as a {@code String} does.
          */
-        public String kind;
+        public Object kind;
 
         public String note;
     }
