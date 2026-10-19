@@ -17,6 +17,8 @@ package com.vaadin.hilla.nullmarked;
 
 import org.jspecify.annotations.Nullable;
 
+import com.vaadin.hilla.nullmarked.unmarked.UnmarkedEntity;
+
 public class NullMarkedEndpoint {
     public String nonNullMethod() {
         return null;
@@ -24,5 +26,9 @@ public class NullMarkedEndpoint {
 
     public @Nullable String nullableMethod() {
         return null;
+    }
+
+    public UnmarkedEntity unmarkedEntity() {
+        return new UnmarkedEntity();
     }
 }
