@@ -28,6 +28,12 @@ public class NullableEndpoint {
         return nullableFieldModel;
     }
 
+    // @NullMarked is only supported on packages
+    @org.jspecify.annotations.NullMarked
+    public String nullMarkedMethod() {
+        return null;
+    }
+
     public static class NullableFieldModel {
         @Id
         public String id;
