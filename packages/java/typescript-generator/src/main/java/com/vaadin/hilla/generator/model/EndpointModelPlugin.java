@@ -40,6 +40,7 @@ import com.vaadin.hilla.parser.models.FieldInfoModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.models.SpecializedModel;
 import com.vaadin.hilla.parser.models.TypeParameterModel;
+import com.vaadin.hilla.parser.models.jackson.JacksonPropertyModel;
 import com.vaadin.hilla.parser.plugins.backbone.EntityFacts;
 import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointNode;
@@ -233,8 +234,7 @@ public final class EndpointModelPlugin
         } else if (own.node() instanceof MethodNode method) {
             collectMethod(method, own);
         } else if (own.node() instanceof PropertyNode property) {
-            parent.properties().add(
-                    new PropertyModel(property.getTarget(), only(own.types())));
+            parent.properties().add(buildProperty(property, own.types()));
         } else if (own.node() instanceof EntityNode entity
                 && !isProvided(entity.getSource().getName())) {
             entities.add(buildEntity(entity, List.copyOf(own.properties())));
@@ -298,6 +298,35 @@ public final class EndpointModelPlugin
                 ? SIGNAL_KINDS.getOrDefault(provided.name(),
                         MethodModel.Kind.CALLED)
                 : MethodModel.Kind.CALLED;
+    }
+
+    private static PropertyModel buildProperty(PropertyNode node,
+            List<TypeModel> ownTypes) {
+        var type = only(ownTypes);
+
+        // Whether the value of a property can be absent is not settled until
+        // the property itself is left: the nullability a Kotlin declaration
+        // keeps on the member it is written as is decided there. A property
+        // holding an optional is one which can be absent whatever such a
+        // declaration says, since an empty optional is what the server leaves
+        // out. A value of a type variable is left as absent as the type it
+        // stands for says, since a declaration extending this one gives that
+        // type and is free to say that the value is always there
+        var absent = isOptional(node.getSource())
+                || node.getValueType().isOptional();
+
+        return new PropertyModel(node.getTarget(),
+                type instanceof TypeModel.TypeVariable && !absent ? type
+                        : type.withOptional(absent));
+    }
+
+    /**
+     * Whether the value a property holds is an optional, which the type of the
+     * member it is written as says.
+     */
+    private static boolean isOptional(JacksonPropertyModel property) {
+        return property.getAssociatedTypes().stream().findFirst()
+                .filter(SignatureModel::isOptional).isPresent();
     }
 
     /**
@@ -473,11 +502,19 @@ public final class EndpointModelPlugin
     private static TypeModel.Provided providedType(Class<?> javaClass) {
         var fromModule = javaClass.getAnnotation(FromModule.class);
 
-        return fromModule == null
-                ? new TypeModel.Provided(javaClass.getSimpleName(), "",
-                        List.of(), false)
-                : new TypeModel.Provided(fromModule.namedSpecifier(),
-                        fromModule.module(), List.of(), false);
+        if (fromModule == null) {
+            return new TypeModel.Provided(javaClass.getSimpleName(), "",
+                    List.of(), false);
+        }
+
+        if (fromModule.namedSpecifier().isBlank()) {
+            throw new IllegalStateException(javaClass.getName()
+                    + " says which module it comes from without saying the"
+                    + " name it is exported under");
+        }
+
+        return new TypeModel.Provided(fromModule.namedSpecifier(),
+                fromModule.module(), List.of(), false);
     }
 
     /**

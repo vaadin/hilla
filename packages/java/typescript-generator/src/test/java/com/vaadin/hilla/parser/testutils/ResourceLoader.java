@@ -16,9 +16,7 @@
 package com.vaadin.hilla.parser.testutils;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -50,12 +48,6 @@ public final class ResourceLoader {
         return builder.toString();
     }
 
-    public File find(String resourceName) throws URISyntaxException {
-        return Paths.get(
-                Objects.requireNonNull(cls.getResource(resourceName)).toURI())
-                .toFile();
-    }
-
     public Path findTargetDirPath() throws URISyntaxException {
         return findTargetPath().getParent();
     }
@@ -65,10 +57,5 @@ public final class ResourceLoader {
                 .requireNonNull(
                         cls.getProtectionDomain().getCodeSource().getLocation())
                 .toURI());
-    }
-
-    public String readToString(String resourceName)
-            throws URISyntaxException, IOException {
-        return new String(Files.readAllBytes(find(resourceName).toPath()));
     }
 }

@@ -36,8 +36,8 @@ import com.vaadin.hilla.parser.testutils.FullStackGenerator;
  */
 public class TypeIdentityTest {
     private final EndpointModel endpoint = new FullStackGenerator(
-            TypeIdentityTest.class, TypeIdentityEndpoint.class).parseModel()
-            .get(0);
+            TypeIdentityTest.class, TypeIdentityEndpoint.class)
+            .parseGeneration().endpoints().get(0);
     private final List<MethodModel> methods = endpoint.methods();
 
     @Test
