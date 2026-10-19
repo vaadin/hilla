@@ -18,6 +18,7 @@ package com.vaadin.hilla.parser.plugins.nonnull.nullable;
 import jakarta.persistence.Id;
 import jakarta.persistence.Version;
 
+import com.vaadin.hilla.parser.plugins.nonnull.nullable.nullMarked.NullMarkedEndpoint.NullMarkedModel;
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
@@ -26,6 +27,10 @@ public class NullableEndpoint {
     public NullableFieldModel nullableFieldModel(
             NullableFieldModel nullableFieldModel) {
         return nullableFieldModel;
+    }
+
+    public NullMarkedModel nullMarkedModel(NullMarkedModel nullMarkedModel) {
+        return nullMarkedModel;
     }
 
     // @NullMarked is only supported on packages

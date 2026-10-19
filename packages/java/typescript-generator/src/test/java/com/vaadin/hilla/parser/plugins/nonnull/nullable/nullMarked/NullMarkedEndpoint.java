@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 
+import com.vaadin.hilla.parser.plugins.nonnull.nullable.nullMarked.unmarked.UnmarkedModel;
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
@@ -35,6 +36,10 @@ public class NullMarkedEndpoint {
     public List<@Nullable String> nullableTypeArgumentMethod(
             List<@Nullable String> param) {
         return param;
+    }
+
+    public UnmarkedModel unmarkedModel(UnmarkedModel unmarkedModel) {
+        return unmarkedModel;
     }
 
     public static class NullMarkedModel {
