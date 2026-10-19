@@ -15,8 +15,15 @@
  */
 package com.vaadin.hilla.nonnullapi;
 
+import org.springframework.lang.Nullable;
+
 public class NonNullApiEndpoint {
     public String nonNullMethod() {
+        return null;
+    }
+
+    @Nullable
+    public String nullableMethod() {
         return null;
     }
 }
