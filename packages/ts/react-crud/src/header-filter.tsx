@@ -216,9 +216,9 @@ export function EnumHeaderFilter(): ReactElement {
     },
     // A filter is resolved on the server by the name of the constant, not by
     // the value the constant is sent as
-    ...Object.keys(model[_enum]).map((value) => ({
-      label: convertToTitleCase(value),
-      value,
+    ...Object.keys(model[_enum]).map((name) => ({
+      label: convertToTitleCase(name),
+      value: name,
     })),
   ];
   return (

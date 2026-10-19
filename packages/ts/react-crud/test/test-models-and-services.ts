@@ -41,6 +41,7 @@ export enum Gender {
   NON_BINARY = 'NON_BINARY',
 }
 export const GenderModel = m.enum(Gender, 'Gender');
+export type GenderModel = typeof GenderModel;
 
 // Sent as values which differ from the names of the constants
 export enum Priority {
@@ -59,7 +60,6 @@ export const TaskModel = m
   .property('priority', PriorityModel)
   .build();
 export type TaskModel = typeof TaskModel;
-export type GenderModel = typeof GenderModel;
 
 export interface Named {
   firstName: string;

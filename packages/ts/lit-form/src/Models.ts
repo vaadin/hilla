@@ -184,7 +184,9 @@ export abstract class EnumModel<E extends typeof Enum = typeof Enum>
   abstract readonly [$enum]: E;
 
   [_fromString](value: string): E[keyof E] | undefined {
-    return value in this[$enum] ? (value as E[keyof E]) : undefined;
+    // A constant arrives as the value the server sends for it, which is not
+    // always its name
+    return Object.values(this[$enum]).includes(value) ? (value as E[keyof E]) : undefined;
   }
 }
 
