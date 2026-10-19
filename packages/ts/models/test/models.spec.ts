@@ -118,6 +118,89 @@ describe('@vaadin/hilla-models', () => {
     expect(StreetModel).to.have.property('building').which.is.instanceof(NumberModel);
   });
 
+  describe('a deferred base', () => {
+    let LazilyNamedModel: typeof NamedModel;
+    let LazyStreetModel: typeof StreetModel;
+
+    beforeEach(() => {
+      // the extending model is built first, so its base is still undefined at
+      // that point — which is what a module evaluated before the one holding
+      // its base amounts to
+      LazyStreetModel = m
+        .extend(() => LazilyNamedModel)
+        .object<Street>('Street')
+        .property('building', NumberModel)
+        .build();
+
+      LazilyNamedModel = m.object<Named>('Named').property('name', StringModel).build();
+    });
+
+    it('should serve the properties of the base', () => {
+      expect(LazyStreetModel).to.have.property('name').which.is.instanceof(StringModel);
+      expect(LazyStreetModel).to.have.property('building').which.is.instanceof(NumberModel);
+      // an inherited property belongs to the extending model, not to the base
+      expect(LazyStreetModel.name[$owner]).to.be.equal(LazyStreetModel);
+    });
+
+    it('should include the properties of the base in the default value', () => {
+      expect(LazyStreetModel[$defaultValue]).to.be.deep.equal({ building: NaN, name: '' });
+    });
+
+    it('should be an instance of the base and of what the base derives from', () => {
+      expect(LazyStreetModel).to.be.instanceof(LazilyNamedModel);
+      expect(LazyStreetModel).to.be.instanceof(ObjectModel);
+      expect(LazyStreetModel).to.be.instanceof(Model);
+    });
+
+    it('should stay an instance of the base through a further extension', () => {
+      const AvenueModel = m.extend(LazyStreetModel).object<Street>('Avenue').build();
+
+      expect(AvenueModel).to.be.instanceof(LazyStreetModel);
+      expect(AvenueModel).to.be.instanceof(LazilyNamedModel);
+      expect(AvenueModel).to.have.property('name').which.is.instanceof(StringModel);
+    });
+
+    it('should not report an unrelated model as the base', () => {
+      expect(LazyStreetModel).to.not.be.instanceof(AddressModel);
+    });
+
+    it('should serve what the base inherits', () => {
+      // the base is built on a model of its own, as a generated model of a
+      // subclass is, which the stand-in has to serve all the same
+      const AvenueModel = m
+        .extend(() => StreetModel)
+        .object<Street>('Avenue')
+        .build();
+
+      expect(AvenueModel).to.have.property('name').which.is.instanceof(StringModel);
+      expect(AvenueModel[$defaultValue]).to.be.deep.equal({ building: NaN, name: '' });
+    });
+
+    it('should follow a deferred base whose own base is deferred', () => {
+      const AvenueModel = m
+        .extend(() => LazyStreetModel)
+        .object<Street>('Avenue')
+        .build();
+
+      expect(AvenueModel).to.be.instanceof(LazyStreetModel);
+      expect(AvenueModel).to.be.instanceof(LazilyNamedModel);
+      expect(AvenueModel).to.have.property('name').which.is.instanceof(StringModel);
+      expect(AvenueModel[$defaultValue]).to.be.deep.equal({ building: NaN, name: '' });
+    });
+
+    it('should keep the base out of the prototype chain', () => {
+      // the stand-in serves the base's properties, so leaving the base in would
+      // offer them twice to anything walking the chain a level at a time
+      expect(Object.getPrototypeOf(LazyStreetModel)).to.not.be.equal(LazilyNamedModel);
+
+      const names: string[] = [];
+      for (let model: object | null = LazyStreetModel; model; model = Object.getPrototypeOf(model)) {
+        names.push(...Object.getOwnPropertyNames(model));
+      }
+      expect(names.filter((name) => name === 'name')).to.have.length(1);
+    });
+  });
+
   it('should allow model composition', () => {
     expect(PersonModel).to.have.property('address').which.is.instanceof(AddressModel);
     expect(AddressModel).to.have.property('street').which.is.instanceof(StreetModel);
