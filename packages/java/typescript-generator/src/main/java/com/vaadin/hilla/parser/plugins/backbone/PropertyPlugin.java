@@ -58,7 +58,10 @@ public final class PropertyPlugin
                             JsonAutoDetect.Visibility.PUBLIC_ONLY))
             .disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY).build();
 
-    private ObjectMapper mapper = MAPPER;
+    // Writes the enum constants. Without a factory of the application's own,
+    // it is the mapper the endpoints serialize with by default, so a generated
+    // enum holds what the server sends without two mappers having to agree.
+    private ObjectMapper mapper = new JacksonObjectMapperFactory.Json().build();
     private SerializationConfig serializationConfig = MAPPER
             .serializationConfig();
 
