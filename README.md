@@ -98,6 +98,9 @@ npm test
 mvn verify -Pproduction
 ```
 
+What `npm run build` does, and why it touches the `package.json` files, is in
+[scripts/README.md](scripts/README.md).
+
 You need the following versions of SDKs and tools:
 
 - **Node.js**: `>= 22 LTS`,
