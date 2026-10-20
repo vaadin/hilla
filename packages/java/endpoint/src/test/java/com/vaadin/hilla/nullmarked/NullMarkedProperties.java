@@ -34,7 +34,10 @@ public class NullMarkedProperties {
     private String id = "";
     @Version
     private Long version = 0L;
+    @Id
+    private String nonnullId = "";
     private String ignoredOnGetter = "";
+    private String ignoredOnSetter = "";
     private String nullableGetter = "";
     private String nullableSetter = "";
     private String nullableGetterNonnullSetter = "";
@@ -56,6 +59,23 @@ public class NullMarkedProperties {
 
     public void setVersion(Long version) {
         this.version = version;
+    }
+
+    public @NonNull String getNonnullId() {
+        return nonnullId;
+    }
+
+    public void setNonnullId(String nonnullId) {
+        this.nonnullId = nonnullId;
+    }
+
+    public String getIgnoredOnSetter() {
+        return ignoredOnSetter;
+    }
+
+    @JsonIgnore
+    public void setIgnoredOnSetter(String ignoredOnSetter) {
+        this.ignoredOnSetter = ignoredOnSetter;
     }
 
     @JsonIgnore

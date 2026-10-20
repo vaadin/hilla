@@ -542,6 +542,12 @@ public class ExplicitNullableTypeCheckerTest {
         Assert.assertNull(
                 "Property ignored on the getter should not be checked",
                 checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.setIgnoredOnSetter(null);
+        Assert.assertNull(
+                "Property ignored on the setter should not be checked",
+                checkNullMarkedProperties(properties));
     }
 
     @Test
@@ -549,6 +555,11 @@ public class ExplicitNullableTypeCheckerTest {
         NullMarkedProperties properties = new NullMarkedProperties();
         properties.setNullableGetterNonnullSetter(null);
         Assert.assertNotNull("Nonnull should take precedence over nullable",
+                checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.setNonnullId(null);
+        Assert.assertNotNull("Nonnull should take precedence over Id",
                 checkNullMarkedProperties(properties));
 
         properties = new NullMarkedProperties();
@@ -592,6 +603,9 @@ public class ExplicitNullableTypeCheckerTest {
                 explicitNullableTypeChecker.checkValueForAnnotatedElement(
                         new String[] { "foo", null },
                         getClass().getMethod("nullableItemArray"), true));
+        Assert.assertNull("Nullable array should allow null value",
+                explicitNullableTypeChecker.checkValueForAnnotatedElement(null,
+                        getClass().getMethod("nullableArray"), true));
 
         Assert.assertNotNull(explicitNullableTypeChecker
                 .checkValueForAnnotatedElement(Arrays.asList("foo", null),
@@ -683,6 +697,13 @@ public class ExplicitNullableTypeCheckerTest {
      */
     public Map<String, @org.jspecify.annotations.Nullable Date> nullableValueMap() {
         return Map.of();
+    }
+
+    /**
+     * Method for testing
+     */
+    public String @org.jspecify.annotations.Nullable [] nullableArray() {
+        return new String[0];
     }
 
     /**
