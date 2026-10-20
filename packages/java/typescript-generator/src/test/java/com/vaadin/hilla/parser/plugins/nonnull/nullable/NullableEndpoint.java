@@ -18,7 +18,7 @@ package com.vaadin.hilla.parser.plugins.nonnull.nullable;
 import jakarta.persistence.Id;
 import jakarta.persistence.Version;
 
-import com.vaadin.hilla.parser.plugins.nonnull.nullable.nullMarked.NullMarkedEndpoint.NullMarkedModel;
+import com.vaadin.hilla.parser.plugins.nonnull.nullable.nullmarked.NullMarkedEndpoint.NullMarkedModel;
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
