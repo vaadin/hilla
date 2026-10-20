@@ -54,6 +54,21 @@ public class ExplicitNullableTypeChecker {
             return true;
         }
 
+        return isRequired(getNullabilityAnnotations(element),
+                requiredByContext);
+    }
+
+    /**
+     * Gets the annotations of the reflected element that may define its
+     * nullability: its own annotations and the type-use annotations of its
+     * type, or of its return type for a method.
+     *
+     * @param element
+     *            a field, a method or a parameter
+     * @return the annotations of the element
+     */
+    static Stream<Annotation> getNullabilityAnnotations(
+            AnnotatedElement element) {
         Stream<Annotation> annotations = Stream.of(element.getAnnotations());
 
         if (element instanceof Field) {
@@ -68,13 +83,15 @@ public class ExplicitNullableTypeChecker {
                             .getAnnotations()));
         }
 
-        return isRequired(annotations, requiredByContext);
+        return annotations;
     }
 
     /**
      * Checks if a node with the given annotations, collected from all the
      * places that declare it, should be required (not nullable) in the
-     * generated Typescript code.
+     * generated Typescript code. As in the generator, a nonnull annotation
+     * takes precedence over a nullable one, which takes precedence over the
+     * context.
      *
      * @param annotations
      *            the annotations of the node
@@ -84,11 +101,14 @@ public class ExplicitNullableTypeChecker {
      */
     static boolean isRequired(Stream<Annotation> annotations,
             boolean requiredByContext) {
-        if (requiredByContext) {
-            return !hasAnnotation(annotations, NULLABLE_ANNOTATION_NAME);
+        List<Annotation> annotationList = annotations.toList();
+        if (hasAnnotation(annotationList.stream(), NONNULL_ANNOTATION_NAME)) {
+            return true;
         }
-
-        return hasAnnotation(annotations, NONNULL_ANNOTATION_NAME);
+        if (hasAnnotation(annotationList.stream(), NULLABLE_ANNOTATION_NAME)) {
+            return false;
+        }
+        return requiredByContext;
     }
 
     /**

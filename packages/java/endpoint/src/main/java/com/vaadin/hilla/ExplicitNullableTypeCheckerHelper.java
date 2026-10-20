@@ -20,7 +20,6 @@ import static com.vaadin.hilla.ExplicitNullableTypeChecker.isRequired;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedArrayType;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
@@ -38,6 +37,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -380,27 +380,15 @@ class ExplicitNullableTypeCheckerHelper {
             return true;
         }
 
-        Method readMethod = propertyDescriptor.getReadMethod();
-        Stream<Annotation> annotations = Stream
-                .of(field.getAnnotations(),
-                        field.getAnnotatedType().getAnnotations(),
-                        readMethod.getAnnotations(),
-                        readMethod.getAnnotatedReturnType().getAnnotations())
-                .flatMap(Stream::of);
-
         Method writeMethod = propertyDescriptor.getWriteMethod();
-        if (writeMethod != null) {
-            Parameter parameter = writeMethod.getParameters()[0];
-            annotations = Stream
-                    .concat(annotations, Stream
-                            .of(writeMethod.getAnnotations(),
-                                    parameter.getAnnotations(),
-                                    parameter.getAnnotatedType()
-                                            .getAnnotations())
-                            .flatMap(Stream::of));
-        }
-
-        return isRequired(annotations, requiredByContext);
+        Parameter writeParameter = writeMethod != null
+                ? writeMethod.getParameters()[0]
+                : null;
+        return isRequired(Stream
+                .of(field, propertyDescriptor.getReadMethod(), writeParameter)
+                .filter(Objects::nonNull).flatMap(
+                        ExplicitNullableTypeChecker::getNullabilityAnnotations),
+                requiredByContext);
     }
 
     /**

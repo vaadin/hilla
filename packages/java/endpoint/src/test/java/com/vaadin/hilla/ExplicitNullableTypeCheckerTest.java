@@ -44,6 +44,7 @@ import org.springframework.lang.Nullable;
 import com.vaadin.hilla.endpoints.Id;
 import com.vaadin.hilla.nonnullapi.NonNullableEntity;
 import com.vaadin.hilla.nullmarked.NullMarkedEntity;
+import com.vaadin.hilla.nullmarked.NullMarkedProperties;
 
 public class ExplicitNullableTypeCheckerTest {
     private ExplicitNullableTypeChecker explicitNullableTypeChecker;
@@ -489,10 +490,7 @@ public class ExplicitNullableTypeCheckerTest {
                         NullMarkedEntity.class));
 
         nullMarkedEntity.getNullableItems().add(null);
-        nullMarkedEntity.getNullableGetterItems().add(null);
-        Assert.assertNull(
-                "Nullable properties and list items should allow null value, "
-                        + "also when annotated on the getter or setter",
+        Assert.assertNull("Nullable list item should allow null value",
                 explicitNullableTypeChecker.checkValueForType(nullMarkedEntity,
                         NullMarkedEntity.class));
 
@@ -504,6 +502,50 @@ public class ExplicitNullableTypeCheckerTest {
         nullMarkedEntity.setValue(null);
         Assert.assertNotNull(explicitNullableTypeChecker
                 .checkValueForType(nullMarkedEntity, NullMarkedEntity.class));
+    }
+
+    @Test
+    public void should_FollowGetterAndSetterAnnotations_When_RequiredByNullMarkedPackage() {
+        NullMarkedProperties properties = new NullMarkedProperties();
+        properties.setNullableGetter(null);
+        Assert.assertNull("Nullable getter should allow null value",
+                checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.setNullableSetter(null);
+        Assert.assertNull("Nullable setter parameter should allow null value",
+                checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.getNullableGetterItems().add(null);
+        Assert.assertNull("Nullable getter list item should allow null value",
+                checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.getNullableSetterItems().add(null);
+        Assert.assertNull(
+                "Nullable setter parameter list item should allow null value",
+                checkNullMarkedProperties(properties));
+    }
+
+    @Test
+    public void should_ReturnError_When_GetterOrSetterAnnotationsDoNotAllowNull() {
+        NullMarkedProperties properties = new NullMarkedProperties();
+        properties.setNullableGetterNonnullSetter(null);
+        Assert.assertNotNull("Nonnull should take precedence over nullable",
+                checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.getNullableFieldOfOtherTypeItems().add(null);
+        Assert.assertNotNull(
+                "Nullable list item of a field with another type than the "
+                        + "getter should be ignored",
+                checkNullMarkedProperties(properties));
+    }
+
+    private String checkNullMarkedProperties(NullMarkedProperties properties) {
+        return explicitNullableTypeChecker.checkValueForType(properties,
+                NullMarkedProperties.class);
     }
 
     @Test
@@ -686,7 +728,7 @@ public class ExplicitNullableTypeCheckerTest {
             return items;
         }
 
-        public List<@NonNull String> getNonNullItems() {
+        public List<String> getNonNullItems() {
             return nonNullItems;
         }
     }
