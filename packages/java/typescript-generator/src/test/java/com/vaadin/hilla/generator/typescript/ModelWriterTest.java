@@ -140,6 +140,31 @@ public class ModelWriterTest {
                 "import CModel from './CModel.js';"), imports.write());
     }
 
+    @Test
+    public void should_ReadABaseWhichRefersBackLazily() {
+        // B extends A, which holds a B, and C extends A as well, which
+        // nothing refers back to. The model library reads a base as the model
+        // is built, so the base of B is handed over as a function returning
+        // it, while the one of C stays as it is
+        var a = bean("com.example.A", TypeModel.EntityRef.of("com.example.B"));
+        var b = new EntityModel.Bean("com.example.B", List.of(),
+                List.of(TypeModel.EntityRef.of("com.example.A")), List.of(),
+                Optional.empty());
+        var c = new EntityModel.Bean("com.example.C", List.of(),
+                List.of(TypeModel.EntityRef.of("com.example.A")), List.of(),
+                Optional.empty());
+        var cycles = ModelCycles.of(List.of(a, b, c));
+
+        assertEquals("() => AModel",
+                new ModelWriter(new ImportRegistry(), "com/example",
+                        "com.example.B", cycles)
+                        .base(TypeModel.EntityRef.of("com.example.A")));
+        assertEquals("AModel",
+                new ModelWriter(new ImportRegistry(), "com/example",
+                        "com.example.C", cycles)
+                        .base(TypeModel.EntityRef.of("com.example.A")));
+    }
+
     private static EntityModel bean(String javaClass, TypeModel... types) {
         var properties = new ArrayList<PropertyModel>();
 
