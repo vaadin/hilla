@@ -18,8 +18,8 @@
     "@vaadin/vaadin-lumo-styles": "25.3.3",
     "@vaadin/vaadin-themable-mixin": "25.3.3",
     "lit": "3.3.3",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "react-router": "8.4.0"
   },
   "devDependencies": {
@@ -74,8 +74,8 @@
       "@vaadin/vaadin-lumo-styles": "25.3.3",
       "@vaadin/vaadin-themable-mixin": "25.3.3",
       "lit": "3.3.3",
-      "react": "19.3.0",
-      "react-dom": "19.3.0",
+      "react": "19.3.1",
+      "react-dom": "19.3.1",
       "react-router": "8.4.0"
     },
     "devDependencies": {
@@ -113,7 +113,7 @@
       "vite": "8.3.4",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "d256a8e73a74c510f2089ec9b56ba70c2b6a349fe28bd3bfd7f8ca8ffd819efc"
+    "hash": "03d13dbda56f1c6e359afd4f98c3fd25130b5c7b5fa6d8f3e9a56ca819339a4d"
   },
   "overrides": {
     "@vaadin/a11y-base": "25.3.0-beta1",
