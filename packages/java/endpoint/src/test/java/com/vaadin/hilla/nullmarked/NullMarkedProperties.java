@@ -15,9 +15,13 @@
  */
 package com.vaadin.hilla.nullmarked;
 
+import jakarta.persistence.Id;
+import jakarta.persistence.Version;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -26,12 +30,42 @@ import org.jspecify.annotations.Nullable;
  * field.
  */
 public class NullMarkedProperties {
+    @Id
+    private String id = "";
+    @Version
+    private Long version = 0L;
+    private String ignoredOnGetter = "";
     private String nullableGetter = "";
     private String nullableSetter = "";
     private String nullableGetterNonnullSetter = "";
     private List<String> nullableGetterItems = new ArrayList<>();
     private List<String> nullableSetterItems = new ArrayList<>();
     private ArrayList<@Nullable String> nullableFieldOfOtherTypeItems = new ArrayList<>();
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    @JsonIgnore
+    public String getIgnoredOnGetter() {
+        return ignoredOnGetter;
+    }
+
+    public void setIgnoredOnGetter(String ignoredOnGetter) {
+        this.ignoredOnGetter = ignoredOnGetter;
+    }
 
     public @Nullable String getNullableGetter() {
         return nullableGetter;

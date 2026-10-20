@@ -362,12 +362,25 @@ class ExplicitNullableTypeCheckerHelper {
                     && !Modifier.isTransient(field.getModifiers())
                     && isPropertyRequired(field, propertyDescriptor,
                             requiredByContext)
-                    && !field.isAnnotationPresent(JsonIgnore.class));
+                    && !isPropertyIgnored(field, propertyDescriptor));
         } catch (NoSuchFieldException e) {
             getLogger().error("Unexpected missing declared field in Java Bean",
                     e);
             return false;
         }
+    }
+
+    /**
+     * Checks if a property is left out of the JSON, which is the case when its
+     * field, getter or setter is annotated with {@code @JsonIgnore}.
+     */
+    private boolean isPropertyIgnored(Field field,
+            PropertyDescriptor propertyDescriptor) {
+        return Stream
+                .of(field, propertyDescriptor.getReadMethod(),
+                        propertyDescriptor.getWriteMethod())
+                .filter(Objects::nonNull).anyMatch(element -> element
+                        .isAnnotationPresent(JsonIgnore.class));
     }
 
     /**

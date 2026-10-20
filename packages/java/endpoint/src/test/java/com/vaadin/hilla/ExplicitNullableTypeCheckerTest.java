@@ -526,6 +526,22 @@ public class ExplicitNullableTypeCheckerTest {
         Assert.assertNull(
                 "Nullable setter parameter list item should allow null value",
                 checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.setId(null);
+        Assert.assertNull("Id should allow null value",
+                checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.setVersion(null);
+        Assert.assertNull("Version should allow null value",
+                checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.setIgnoredOnGetter(null);
+        Assert.assertNull(
+                "Property ignored on the getter should not be checked",
+                checkNullMarkedProperties(properties));
     }
 
     @Test
