@@ -46,5 +46,17 @@ public class NullMarkedEndpoint {
         public String required;
 
         public @Nullable String nullable;
+
+        private String nullableGetter;
+
+        private List<String> nullableGetterItems;
+
+        public @Nullable String getNullableGetter() {
+            return nullableGetter;
+        }
+
+        public List<@Nullable String> getNullableGetterItems() {
+            return nullableGetterItems;
+        }
     }
 }

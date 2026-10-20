@@ -72,21 +72,17 @@ public class ExplicitNullableTypeChecker {
     }
 
     /**
-     * Checks if a value of the given annotated type, such as a type argument or
-     * an array component type, should be required (not nullable) in the
-     * generated Typescript code based on its type-use annotations.
+     * Checks if a node with the given annotations, collected from all the
+     * places that declare it, should be required (not nullable) in the
+     * generated Typescript code.
      *
-     * @param type
-     *            an annotated type to be required
+     * @param annotations
+     *            the annotations of the node
      * @param requiredByContext
      *            {@code true} if the context defines that the node is required
      * @return a result of check
      */
-    static boolean isRequired(AnnotatedType type, boolean requiredByContext) {
-        return isRequired(Stream.of(type.getAnnotations()), requiredByContext);
-    }
-
-    private static boolean isRequired(Stream<Annotation> annotations,
+    static boolean isRequired(Stream<Annotation> annotations,
             boolean requiredByContext) {
         if (requiredByContext) {
             return !hasAnnotation(annotations, NULLABLE_ANNOTATION_NAME);

@@ -489,7 +489,10 @@ public class ExplicitNullableTypeCheckerTest {
                         NullMarkedEntity.class));
 
         nullMarkedEntity.getNullableItems().add(null);
-        Assert.assertNull("Nullable list item should allow null value",
+        nullMarkedEntity.getNullableGetterItems().add(null);
+        Assert.assertNull(
+                "Nullable properties and list items should allow null value, "
+                        + "also when annotated on the getter or setter",
                 explicitNullableTypeChecker.checkValueForType(nullMarkedEntity,
                         NullMarkedEntity.class));
 
@@ -514,15 +517,6 @@ public class ExplicitNullableTypeCheckerTest {
         bean.getNonNullItems().add(null);
         Assert.assertNotNull(explicitNullableTypeChecker.checkValueForType(bean,
                 UnmarkedListBean.class));
-    }
-
-    @Test
-    public void should_RequireNestedValues_When_BeanGetterTypeDiffersFromField() {
-        MismatchedTypeBean bean = new MismatchedTypeBean();
-        bean.getItems().add(null);
-
-        Assert.assertNotNull(explicitNullableTypeChecker.checkValueForType(bean,
-                MismatchedTypeBean.class));
     }
 
     @Test
@@ -694,14 +688,6 @@ public class ExplicitNullableTypeCheckerTest {
 
         public List<@NonNull String> getNonNullItems() {
             return nonNullItems;
-        }
-    }
-
-    static private class MismatchedTypeBean {
-        private @NonNull ArrayList<@org.jspecify.annotations.Nullable String> items = new ArrayList<>();
-
-        public List<String> getItems() {
-            return items;
         }
     }
 
