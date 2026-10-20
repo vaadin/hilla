@@ -83,11 +83,6 @@ public class ExplicitNullableTypeChecker {
      * @return a result of check
      */
     static boolean isRequired(AnnotatedType type, boolean requiredByContext) {
-        if (type.getType() instanceof Class<?>
-                && ((Class<?>) type.getType()).isPrimitive()) {
-            return true;
-        }
-
         return isRequired(Stream.of(type.getAnnotations()), requiredByContext);
     }
 

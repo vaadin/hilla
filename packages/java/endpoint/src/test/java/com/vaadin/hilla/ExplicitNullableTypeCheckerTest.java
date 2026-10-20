@@ -22,6 +22,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -235,8 +236,10 @@ public class ExplicitNullableTypeCheckerTest {
         // The first interaction is the obvious
         verify(checker).checkValueForType(list, stringListType);
 
-        verify(checker).checkValueForType("foo", String.class, null, true);
-        verify(checker).checkValueForType("bar", String.class, null, true);
+        verify(checker).checkValueForType(eq("foo"), eq(String.class), any(),
+                anyBoolean());
+        verify(checker).checkValueForType(eq("bar"), eq(String.class), any(),
+                anyBoolean());
     }
 
     private static class MyList extends ArrayList<String> {
@@ -253,8 +256,10 @@ public class ExplicitNullableTypeCheckerTest {
         checker.checkValueForType(list, MyList.class);
         verify(checker).checkValueForType(list, MyList.class);
 
-        verify(checker).checkValueForType("foo", String.class, null, true);
-        verify(checker).checkValueForType("bar", String.class, null, true);
+        verify(checker).checkValueForType(eq("foo"), eq(String.class), any(),
+                anyBoolean());
+        verify(checker).checkValueForType(eq("bar"), eq(String.class), any(),
+                anyBoolean());
     }
 
     @Test
@@ -286,8 +291,10 @@ public class ExplicitNullableTypeCheckerTest {
         // The first interaction is the obvious
         verify(checker).checkValueForType(map, stringToDateMapType);
 
-        verify(checker).checkValueForType(dateOne, Date.class, null, true);
-        verify(checker).checkValueForType(dateTwo, Date.class, null, true);
+        verify(checker).checkValueForType(eq(dateOne), eq(Date.class), any(),
+                anyBoolean());
+        verify(checker).checkValueForType(eq(dateTwo), eq(Date.class), any(),
+                anyBoolean());
     }
 
     @Test
@@ -319,8 +326,10 @@ public class ExplicitNullableTypeCheckerTest {
         // The first interaction is the obvious
         verify(checker).checkValueForType(array, stringArrayType);
 
-        verify(checker).checkValueForType("foo", String.class, null, true);
-        verify(checker).checkValueForType("bar", String.class, null, true);
+        verify(checker).checkValueForType(eq("foo"), eq(String.class), any(),
+                anyBoolean());
+        verify(checker).checkValueForType(eq("bar"), eq(String.class), any(),
+                anyBoolean());
     }
 
     @Test
@@ -401,18 +410,16 @@ public class ExplicitNullableTypeCheckerTest {
     }
 
     @Test
-    public void should_InvokeCheckValueForType_When_AnnotatedNonnull()
+    public void should_ReturnError_When_AnnotatedNonnullAndGivenNull()
             throws NoSuchMethodException {
-        explicitNullableTypeChecker = spy(explicitNullableTypeChecker);
-        String notNullValue = "someValue";
-        String error = explicitNullableTypeChecker
-                .checkValueForAnnotatedElement(notNullValue,
-                        getClass().getMethod("stringNonnull"), false);
+        Method method = getClass().getMethod("stringNonnull");
 
-        Assert.assertNull("Should allow values with @NonNull", error);
-
-        verify(explicitNullableTypeChecker)
-                .checkValueForAnnotatedType(eq(notNullValue), any(), eq(false));
+        Assert.assertNull("Should allow values with @NonNull",
+                explicitNullableTypeChecker.checkValueForAnnotatedElement(
+                        "someValue", method, false));
+        Assert.assertNotNull("Should reject null with @NonNull",
+                explicitNullableTypeChecker.checkValueForAnnotatedElement(null,
+                        method, false));
     }
 
     @Test
@@ -497,6 +504,28 @@ public class ExplicitNullableTypeCheckerTest {
     }
 
     @Test
+    public void should_FollowNestedTypeAnnotations_When_BeanNotRequiredByContext() {
+        UnmarkedListBean bean = new UnmarkedListBean();
+        bean.getItems().add(null);
+        Assert.assertNull("List item without @NonNull should allow null value",
+                explicitNullableTypeChecker.checkValueForType(bean,
+                        UnmarkedListBean.class));
+
+        bean.getNonNullItems().add(null);
+        Assert.assertNotNull(explicitNullableTypeChecker.checkValueForType(bean,
+                UnmarkedListBean.class));
+    }
+
+    @Test
+    public void should_RequireNestedValues_When_BeanGetterTypeDiffersFromField() {
+        MismatchedTypeBean bean = new MismatchedTypeBean();
+        bean.getItems().add(null);
+
+        Assert.assertNotNull(explicitNullableTypeChecker.checkValueForType(bean,
+                MismatchedTypeBean.class));
+    }
+
+    @Test
     public void should_FollowNestedTypeAnnotations_When_RequiredByContext()
             throws NoSuchMethodException {
         Assert.assertNull("Nullable list item should allow null value",
@@ -517,6 +546,15 @@ public class ExplicitNullableTypeCheckerTest {
                         getClass().getMethod("parametrizedListMethod",
                                 String[].class),
                         true));
+
+        List<List<String>> nestedList = List.of(Arrays.asList("foo", null));
+        Assert.assertNull("Nullable nested list item should allow null value",
+                explicitNullableTypeChecker.checkValueForAnnotatedElement(
+                        nestedList, getClass().getMethod("nullableNestedList"),
+                        true));
+        Assert.assertNotNull(
+                explicitNullableTypeChecker.checkValueForAnnotatedElement(
+                        nestedList, getClass().getMethod("nestedList"), true));
     }
 
     @Test
@@ -605,6 +643,20 @@ public class ExplicitNullableTypeCheckerTest {
     /**
      * Method for testing
      */
+    public List<List<@org.jspecify.annotations.Nullable String>> nullableNestedList() {
+        return List.of();
+    }
+
+    /**
+     * Method for testing
+     */
+    public List<List<String>> nestedList() {
+        return List.of();
+    }
+
+    /**
+     * Method for testing
+     */
     public @com.vaadin.hilla.Nonnull List<String> hillaNonnullList() {
         return List.of();
     }
@@ -630,6 +682,27 @@ public class ExplicitNullableTypeCheckerTest {
     @jakarta.annotation.Nonnull
     public String stringNonnull() {
         return "";
+    }
+
+    static private class UnmarkedListBean {
+        private @NonNull List<String> items = new ArrayList<>();
+        private @NonNull List<@NonNull String> nonNullItems = new ArrayList<>();
+
+        public List<String> getItems() {
+            return items;
+        }
+
+        public List<@NonNull String> getNonNullItems() {
+            return nonNullItems;
+        }
+    }
+
+    static private class MismatchedTypeBean {
+        private @NonNull ArrayList<@org.jspecify.annotations.Nullable String> items = new ArrayList<>();
+
+        public List<String> getItems() {
+            return items;
+        }
     }
 
     static private class Bean {
