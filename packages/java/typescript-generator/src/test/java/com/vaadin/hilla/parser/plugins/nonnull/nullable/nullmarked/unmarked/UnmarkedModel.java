@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.hilla.parser.plugins.nonnull.nullable.nullMarked.unmarked;
+package com.vaadin.hilla.parser.plugins.nonnull.nullable.nullmarked.unmarked;
 
 // @NullMarked on a package does not apply to its subpackages
 public class UnmarkedModel {

@@ -1,6 +1,6 @@
 import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
 import type NullableFieldModel from './com/vaadin/hilla/parser/plugins/nonnull/nullable/NullableEndpoint/NullableFieldModel.js';
-import type NullMarkedModel from './com/vaadin/hilla/parser/plugins/nonnull/nullable/nullMarked/NullMarkedEndpoint/NullMarkedModel.js';
+import type NullMarkedModel from './com/vaadin/hilla/parser/plugins/nonnull/nullable/nullmarked/NullMarkedEndpoint/NullMarkedModel.js';
 import client from './connect-client.default.js';
 
 async function nullMarkedMethod(init?: EndpointRequestInit): Promise<string | undefined> {

@@ -13,13 +13,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.hilla.parser.plugins.nonnull.nullable.nullMarked;
+package com.vaadin.hilla.parser.plugins.nonnull.nullable.nullmarked;
 
 import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 
-import com.vaadin.hilla.parser.plugins.nonnull.nullable.nullMarked.unmarked.UnmarkedModel;
+import com.vaadin.hilla.parser.plugins.nonnull.nullable.nullmarked.unmarked.UnmarkedModel;
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
