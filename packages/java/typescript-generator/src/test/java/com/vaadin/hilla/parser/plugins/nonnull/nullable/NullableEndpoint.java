@@ -18,6 +18,8 @@ package com.vaadin.hilla.parser.plugins.nonnull.nullable;
 import jakarta.persistence.Id;
 import jakarta.persistence.Version;
 
+import org.jspecify.annotations.NullMarked;
+
 import com.vaadin.hilla.parser.plugins.nonnull.nullable.nullmarked.NullMarkedEndpoint.NullMarkedModel;
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
@@ -34,7 +36,7 @@ public class NullableEndpoint {
     }
 
     // @NullMarked is only supported on packages
-    @org.jspecify.annotations.NullMarked
+    @NullMarked
     public String nullMarkedMethod() {
         return null;
     }
