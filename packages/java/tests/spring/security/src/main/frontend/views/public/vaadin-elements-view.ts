@@ -42,7 +42,7 @@ export class VaadinElementsView extends View {
 
   firstUpdated(arg: any) {
     super.firstUpdated(arg);
-    this.binder.read(ElementsModel.createEmptyValue());
+    this.binder.clear();
   }
 
   render() {

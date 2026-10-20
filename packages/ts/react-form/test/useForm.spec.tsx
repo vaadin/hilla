@@ -257,7 +257,7 @@ describe('@vaadin/hilla-react-form', () => {
       await user.clear(getByTestId('user.name'));
       await user.click(getByTestId('user.password'));
 
-      expect(getByTestId('validation.user.name')).to.contain.text('invalid');
+      expect(getByTestId('validation.user.name')).to.contain.text('must not be empty');
 
       // fix
       await user.type(getByTestId('user.name'), 'jane');

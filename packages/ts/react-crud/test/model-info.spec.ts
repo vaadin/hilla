@@ -1,5 +1,4 @@
-import { _getPropertyModel, BooleanModel, NumberModel, ObjectModel, StringModel } from '@vaadin/hilla-lit-form';
-import m, { StringModel as ModelsStringModel } from '@vaadin/hilla-models';
+import m, { BooleanModel, type Model, NumberModel, StringModel } from '@vaadin/hilla-models';
 import { describe, expect, it } from 'vitest';
 import { getDefaultProperties, ModelInfo } from '../src/model-info.js';
 import { NicknamedModel, PersonModel } from './test-models-and-services.js';
@@ -10,14 +9,11 @@ describe('@vaadin/hilla-react-crud', () => {
       property: any;
     }
 
-    function getPropertyType(modelType: any, javaType?: string) {
-      class TestModel extends ObjectModel<TestItem> {
-        get property(): any {
-          const options = javaType ? { meta: { javaType } } : undefined;
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-          return this[_getPropertyModel]('property', (parent, key) => new modelType(parent, key, false, options));
-        }
-      }
+    function getPropertyType(modelType: Model, jvmType?: string) {
+      const TestModel = m
+        .object<TestItem>('TestItem')
+        .property('property', jvmType ? m.meta(modelType, { jvmType }) : modelType)
+        .build();
 
       const property = new ModelInfo(TestModel).getProperty('property');
       expect(property).to.exist;
@@ -167,7 +163,7 @@ describe('@vaadin/hilla-react-crud', () => {
         const EventModel = m
           .object<Event>('Event')
           .property('@type', m.literal('add'))
-          .property('name', ModelsStringModel)
+          .property('name', StringModel)
           .build();
 
         const names = getDefaultProperties(new ModelInfo(EventModel)).map((prop) => prop.name);
