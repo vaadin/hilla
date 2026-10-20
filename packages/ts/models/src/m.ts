@@ -98,11 +98,22 @@ export function attach<M extends Model>(this: void, model: M, targetProvider: ()
 /**
  * Creates a new model that extends the given base model.
  *
- * @param base - The base model to extend.
+ * Unlike a property, which {@link ObjectModelBuilder.property} resolves on first
+ * access, a base is needed to build the model at all. Pass a function to defer
+ * reading it: two models in separate modules that refer to each other form an
+ * import cycle, and the module evaluated second would otherwise read an
+ * uninitialized binding. The base is then read no earlier than the first use of
+ * the extending model, by which point both modules have been evaluated.
+ *
+ * A deferred base is kept out of the prototype chain, so
+ * `Object.getPrototypeOf` reports the stand-in rather than the base. Use
+ * `instanceof`, which accounts for it.
+ *
+ * @param base - The base model to extend, or a function returning it.
  */
 export function extend<M extends Model<AnyObject>>(
   this: void,
-  base: M,
+  base: M | (() => M),
 ): ObjectModelBuilder<Value<M>, Value<M>, Extensions<M>> {
   return new ObjectModelBuilder(base);
 }
