@@ -19,12 +19,20 @@ async function nullableMethod(param: string | undefined, init?: EndpointRequestI
   return client.call('NullMarkedEndpoint', 'nullableMethod', { param }, init);
 }
 
+async function nullableNestedList(init?: EndpointRequestInit): Promise<Array<Array<string | undefined>>> {
+  return client.call('NullMarkedEndpoint', 'nullableNestedList', {}, init);
+}
+
 async function nullableTypeArgumentMethod(param: Array<string | undefined>, init?: EndpointRequestInit): Promise<Array<string | undefined>> {
   return client.call('NullMarkedEndpoint', 'nullableTypeArgumentMethod', { param }, init);
+}
+
+async function nullableValueMap(init?: EndpointRequestInit): Promise<Record<string, string | undefined>> {
+  return client.call('NullMarkedEndpoint', 'nullableValueMap', {}, init);
 }
 
 async function unmarkedModel(unmarkedModel: UnmarkedModel, init?: EndpointRequestInit): Promise<UnmarkedModel> {
   return client.call('NullMarkedEndpoint', 'unmarkedModel', { unmarkedModel }, init);
 }
 
-export { nullMarkedModel, nullableArray, nullableItemArray, nullableMethod, nullableTypeArgumentMethod, unmarkedModel };
+export { nullMarkedModel, nullableArray, nullableItemArray, nullableMethod, nullableNestedList, nullableTypeArgumentMethod, nullableValueMap, unmarkedModel };
