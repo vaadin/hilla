@@ -576,6 +576,14 @@ public class ExplicitNullableTypeCheckerTest {
     }
 
     @Test
+    public void should_ReturnError_When_NonnullGetterAndBeanNotRequiredByContext() {
+        NonnullGetterBean bean = new NonnullGetterBean();
+
+        Assert.assertNotNull(explicitNullableTypeChecker.checkValueForType(bean,
+                NonnullGetterBean.class));
+    }
+
+    @Test
     public void should_FollowNestedTypeAnnotations_When_BeanNotRequiredByContext() {
         UnmarkedListBean bean = new UnmarkedListBean();
         bean.getItems().add(null);
@@ -755,6 +763,14 @@ public class ExplicitNullableTypeCheckerTest {
     @jakarta.annotation.Nonnull
     public String stringNonnull() {
         return "";
+    }
+
+    static private class NonnullGetterBean {
+        private String name;
+
+        public @NonNull String getName() {
+            return name;
+        }
     }
 
     static private class UnmarkedListBean {

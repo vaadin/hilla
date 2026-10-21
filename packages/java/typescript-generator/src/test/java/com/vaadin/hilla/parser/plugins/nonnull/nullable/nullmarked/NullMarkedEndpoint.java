@@ -59,12 +59,33 @@ public class NullMarkedEndpoint {
 
         private List<String> nullableGetterItems;
 
+        private String nullableSetter;
+
+        private List<String> nullableSetterItems;
+
         public @Nullable String getNullableGetter() {
             return nullableGetter;
         }
 
         public List<@Nullable String> getNullableGetterItems() {
             return nullableGetterItems;
+        }
+
+        public String getNullableSetter() {
+            return nullableSetter;
+        }
+
+        public void setNullableSetter(@Nullable String nullableSetter) {
+            this.nullableSetter = nullableSetter;
+        }
+
+        public List<String> getNullableSetterItems() {
+            return nullableSetterItems;
+        }
+
+        public void setNullableSetterItems(
+                List<@Nullable String> nullableSetterItems) {
+            this.nullableSetterItems = nullableSetterItems;
         }
     }
 }
