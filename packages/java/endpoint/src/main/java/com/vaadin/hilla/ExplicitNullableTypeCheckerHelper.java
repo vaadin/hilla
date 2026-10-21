@@ -21,6 +21,7 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.AnnotatedArrayType;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
@@ -44,6 +45,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -371,16 +373,36 @@ class ExplicitNullableTypeCheckerHelper {
     }
 
     /**
-     * Checks if a property is left out of the JSON, which is the case when its
-     * field, getter or setter is annotated with {@code @JsonIgnore}.
+     * Checks if a property is left out of the JSON, following the Jackson
+     * rules: when its field, getter or setter is annotated with
+     * {@code @JsonIgnore}, the whole property is left out, unless another of
+     * them is annotated with {@code @JsonProperty}. In that case only the
+     * ignored ones are left out, so the property is still serialized if its
+     * getter, or its field annotated with {@code @JsonProperty}, remains.
      */
     private boolean isPropertyIgnored(Field field,
             PropertyDescriptor propertyDescriptor) {
-        return Stream
-                .of(field, propertyDescriptor.getReadMethod(),
+        Method readMethod = propertyDescriptor.getReadMethod();
+        List<AnnotatedElement> accessors = Stream
+                .<AnnotatedElement> of(field, readMethod,
                         propertyDescriptor.getWriteMethod())
-                .filter(Objects::nonNull).anyMatch(element -> element
-                        .isAnnotationPresent(JsonIgnore.class));
+                .filter(Objects::nonNull).toList();
+        if (accessors.stream().noneMatch(this::isJsonIgnored)) {
+            return false;
+        }
+        if (accessors.stream().noneMatch(
+                accessor -> accessor.isAnnotationPresent(JsonProperty.class))) {
+            return true;
+        }
+        boolean serializedByGetter = !isJsonIgnored(readMethod);
+        boolean serializedByField = !isJsonIgnored(field)
+                && field.isAnnotationPresent(JsonProperty.class);
+        return !serializedByGetter && !serializedByField;
+    }
+
+    private boolean isJsonIgnored(AnnotatedElement accessor) {
+        JsonIgnore jsonIgnore = accessor.getAnnotation(JsonIgnore.class);
+        return jsonIgnore != null && jsonIgnore.value();
     }
 
     /**

@@ -563,6 +563,13 @@ public class ExplicitNullableTypeCheckerTest {
                 checkNullMarkedProperties(properties));
 
         properties = new NullMarkedProperties();
+        properties.setIgnoredOnSetterIncludedOnGetter(null);
+        Assert.assertNotNull(
+                "Property ignored on the setter but included on the getter "
+                        + "should be checked",
+                checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
         properties.getNullableFieldOfOtherTypeItems().add(null);
         Assert.assertNotNull(
                 "Nullable list item of a field with another type than the "

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -38,6 +39,7 @@ public class NullMarkedProperties {
     private String nonnullId = "";
     private String ignoredOnGetter = "";
     private String ignoredOnSetter = "";
+    private String ignoredOnSetterIncludedOnGetter = "";
     private String nullableGetter = "";
     private String nullableSetter = "";
     private String nullableGetterNonnullSetter = "";
@@ -76,6 +78,17 @@ public class NullMarkedProperties {
     @JsonIgnore
     public void setIgnoredOnSetter(String ignoredOnSetter) {
         this.ignoredOnSetter = ignoredOnSetter;
+    }
+
+    @JsonProperty
+    public String getIgnoredOnSetterIncludedOnGetter() {
+        return ignoredOnSetterIncludedOnGetter;
+    }
+
+    @JsonIgnore
+    public void setIgnoredOnSetterIncludedOnGetter(
+            String ignoredOnSetterIncludedOnGetter) {
+        this.ignoredOnSetterIncludedOnGetter = ignoredOnSetterIncludedOnGetter;
     }
 
     @JsonIgnore
