@@ -48,8 +48,10 @@ methods are exposed through the endpoints that extend it.
 - `EndpointRegistry` discovers the browser callable beans at startup and
   registers their public methods. `EndpointNameChecker` rejects an endpoint
   name that is a reserved word in ECMAScript or TypeScript. A method or
-  parameter with such a name is accepted: the generator declares it under
-  another name in the generated TypeScript (`Names` in the writers).
+  parameter with such a name is accepted. The writers declare it under a free
+  name (`Names.free`), and export a method under its Java name again
+  (`export { __delete as delete }`), so the application still calls
+  `delete`; only a parameter's name changes in the generated TypeScript.
 - `EndpointController` receives the call as a `POST` to
   `{prefix}/{endpoint}/{method}` (the prefix is `vaadin.endpoint.prefix`,
   `/connect` by default), as JSON or as multipart when files are sent.

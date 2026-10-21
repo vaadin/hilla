@@ -40,10 +40,11 @@ behavior.
   generated output shows up in the snapshots; review that diff as carefully as
   the code that caused it, and call out changes to existing output in the PR.
 - **Java names meet TypeScript's reserved words.** An endpoint name that is
-  one is rejected at registration (`EndpointNameChecker`); a method or
-  parameter name that is one is declared under another name by the writers
-  (`Names.free`). A new kind of name that reaches the generated TypeScript
-  needs one of these two answers, decided on purpose.
+  one is rejected at registration (`EndpointNameChecker`). A method or
+  parameter name that is one is declared under a free name by the writers
+  (`Names.free`); a method is exported under its Java name again, so what
+  the application calls does not change. A new kind of name that reaches
+  the generated TypeScript needs one of these answers, decided on purpose.
 
 ## Java API
 
