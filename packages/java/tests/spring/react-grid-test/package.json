@@ -54,7 +54,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.9.3",
-    "vite": "7.3.6",
+    "vite": "7.3.7",
     "vite-plugin-checker": "0.14.5"
   },
   "vaadin": {
@@ -110,10 +110,10 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.9.3",
-      "vite": "7.3.6",
+      "vite": "7.3.7",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "a490bec3448e22deb1bdd67ce9715d4aefbb7d84dcd541d5dd55a7a5c6bba630",
+    "hash": "e028517425e79508c69a40b7269b9e14e1aca5c42831fc011c946a391d1362a3",
     "overrides": {
       "@polymer/polymer": "$@polymer/polymer",
       "@vaadin/a11y-base": "24.9.20",
