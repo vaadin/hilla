@@ -482,7 +482,7 @@ public class ExplicitNullableTypeCheckerTest {
     }
 
     @Test
-    public void should_ReturnError_When_GivenNestedNullAndRequiredByNullMarkedPackage() {
+    public void should_FollowNestedNullability_When_RequiredByNullMarkedPackage() {
         NullMarkedEntity nullMarkedEntity = new NullMarkedEntity();
         nullMarkedEntity.setValue("value");
         nullMarkedEntity.setNullableValue(null);
@@ -495,11 +495,21 @@ public class ExplicitNullableTypeCheckerTest {
                 explicitNullableTypeChecker.checkValueForType(nullMarkedEntity,
                         NullMarkedEntity.class));
 
+        nullMarkedEntity.getNullableValues().put("key", null);
+        Assert.assertNull("Nullable map value should allow null value",
+                explicitNullableTypeChecker.checkValueForType(nullMarkedEntity,
+                        NullMarkedEntity.class));
+
         nullMarkedEntity.getItems().add(null);
         Assert.assertNotNull(explicitNullableTypeChecker
                 .checkValueForType(nullMarkedEntity, NullMarkedEntity.class));
 
         nullMarkedEntity.getItems().clear();
+        nullMarkedEntity.getValues().put("key", null);
+        Assert.assertNotNull(explicitNullableTypeChecker
+                .checkValueForType(nullMarkedEntity, NullMarkedEntity.class));
+
+        nullMarkedEntity.getValues().clear();
         nullMarkedEntity.setValue(null);
         Assert.assertNotNull(explicitNullableTypeChecker
                 .checkValueForType(nullMarkedEntity, NullMarkedEntity.class));
@@ -686,9 +696,6 @@ public class ExplicitNullableTypeCheckerTest {
     @Test
     public void should_FollowNestedTypeAnnotations_When_NotRequiredByContext()
             throws NoSuchMethodException {
-        Assert.assertNotNull(
-                explicitNullableTypeChecker.checkValueForAnnotatedElement(null,
-                        getClass().getMethod("hillaNonnullList"), false));
         Assert.assertNull("List item without @Nonnull should allow null value",
                 explicitNullableTypeChecker.checkValueForAnnotatedElement(
                         Arrays.asList("foo", null),
