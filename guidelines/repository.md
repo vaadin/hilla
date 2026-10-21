@@ -9,6 +9,11 @@
   Gradle plugin, and in the `tests/gradle/kotlin-gradle-test` application and
   its integration tests.
 - **Spring Boot 4** — endpoints are Spring beans served by Spring MVC.
+- **Vaadin Flow** — Hilla applications don't use Flow's server-side UI, but
+  Flow provides much of what they run on: the build plugins and the Vite
+  frontend build, the application shell, PWA and offline support, the i18n
+  plumbing, the Spring integration (`vaadin-spring`) and the connection
+  state. See [Architecture](architecture.md#what-vaadin-flow-provides).
 - **Jackson 3** (`tools.jackson.*`) for endpoint serialization and for reading
   what a class serializes as.
 - **ClassGraph** for walking the browser callable classes at build time.

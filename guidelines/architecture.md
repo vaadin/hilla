@@ -3,6 +3,40 @@
 How the core pieces of Hilla fit together, and what to keep in mind when
 touching them.
 
+## What Vaadin Flow provides
+
+Hilla applications don't use Flow's server-side UI, but many of the parts they
+run on are provided by, or shared with, Flow and live in the Flow repository. A
+change in one of these areas often needs a change in Flow, or is a Flow change
+altogether.
+
+- **Build plugins.** The Hilla Maven and Gradle plugins are entry points on top
+  of Flow's: most Maven goals extend Flow's mojos, and the Gradle plugin
+  applies Flow's plugin. The generation runs as a Flow build task
+  (`engine-runtime`).
+- **Frontend build.** The Vite build of a Hilla application is Flow's frontend
+  build.
+- **Application shell.** The `index.html` response, the application shell and
+  static resource serving are Flow's; static resources are also served by
+  Spring MVC. Hilla hooks into the `index.html` response with listeners such
+  as `CsrfIndexHtmlRequestListener` and `RouteUnifyingIndexHtmlRequestListener`.
+- **Offline support.** It relies on `@PWA`, the service worker in Flow's
+  frontend build and the precache entries Flow provides.
+- **Internationalization.** A frontend plugin in Flow collects the translation
+  keys, and a Flow request handler serves the translation bundles;
+  `@vaadin/hilla-react-i18n` is the runtime that loads them and changes the
+  language.
+- **Spring integration.** The `vaadin-spring` add-on is the Spring Boot entry
+  point that brings in Hilla's endpoint controller, and integrates Spring
+  Security for authorization, including stateless JWT authentication.
+- **Routing.** The file router integrates with Flow: it supports server-side
+  layouts, and provides the client-side view entries for the menu
+  (`createMenuItems`) and the access check helpers (`ServerAndClientViewsProvider`,
+  `RouteUtil`).
+- **Connection state.** The online/offline connection state
+  (`window.Vaadin.connectionState`, which `ConnectClient` reports loading to)
+  and the connection indicator component come from Flow.
+
 ## Calling an endpoint
 
 A browser callable class is a Spring bean annotated with `@BrowserCallable`
