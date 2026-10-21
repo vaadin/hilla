@@ -15,6 +15,9 @@
  */
 package com.vaadin.hilla.nullmarked;
 
+import jakarta.persistence.Id;
+import jakarta.persistence.Version;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,12 +29,42 @@ import org.jspecify.annotations.Nullable;
  * field.
  */
 public class NullMarkedProperties {
+    @Id
+    private String id = "";
+    @Version
+    private Long version = 0L;
+    @Id
+    private String nonnullId = "";
     private String nullableGetter = "";
     private String nullableSetter = "";
     private String nullableGetterNonnullSetter = "";
     private List<String> nullableGetterItems = new ArrayList<>();
     private List<String> nullableSetterItems = new ArrayList<>();
     private ArrayList<@Nullable String> nullableFieldOfOtherTypeItems = new ArrayList<>();
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    public @NonNull String getNonnullId() {
+        return nonnullId;
+    }
+
+    public void setNonnullId(String nonnullId) {
+        this.nonnullId = nonnullId;
+    }
 
     public @Nullable String getNullableGetter() {
         return nullableGetter;
