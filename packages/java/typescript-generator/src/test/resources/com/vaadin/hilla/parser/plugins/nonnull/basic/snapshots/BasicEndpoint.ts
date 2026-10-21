@@ -7,10 +7,11 @@ async function complexType(map: Record<string, Array<ExtendedNonNullableModel>>,
 async function mixedAnnotations(parameter: string, init?: EndpointRequestInit): Promise<Array<string>> { return client.call("BasicEndpoint", "mixedAnnotations", { parameter }, init); }
 async function nonNullableFieldModel(nonNullableFieldModel: NonNullableFieldModel, init?: EndpointRequestInit): Promise<NonNullableFieldModel> { return client.call("BasicEndpoint", "nonNullableFieldModel", { nonNullableFieldModel }, init); }
 async function nonTypeAnnotation(nonTypeParameter: string, init?: EndpointRequestInit): Promise<string> { return client.call("BasicEndpoint", "nonTypeAnnotation", { nonTypeParameter }, init); }
+async function nonnullTypeWithTypeArgument(list: Array<string | undefined>, init?: EndpointRequestInit): Promise<Array<string | undefined>> { return client.call("BasicEndpoint", "nonnullTypeWithTypeArgument", { list }, init); }
 async function nullableType(nullableParameter: string | undefined, init?: EndpointRequestInit): Promise<string | undefined> { return client.call("BasicEndpoint", "nullableType", { nullableParameter }, init); }
 async function optional(opt: string | undefined, init?: EndpointRequestInit): Promise<string | undefined> { return client.call("BasicEndpoint", "optional", { opt }, init); }
 async function simpleType(str: string, init?: EndpointRequestInit): Promise<string> { return client.call("BasicEndpoint", "simpleType", { str }, init); }
 async function typeArgumentWildcard(list: Array<string> | undefined, init?: EndpointRequestInit): Promise<Array<string> | undefined> { return client.call("BasicEndpoint", "typeArgumentWildcard", { list }, init); }
 async function typeParameter(list: Array<string> | undefined, init?: EndpointRequestInit): Promise<Array<string> | undefined> { return client.call("BasicEndpoint", "typeParameter", { list }, init); }
 async function typeWithTypeArgument(list: Array<NonNullableModel> | undefined, init?: EndpointRequestInit): Promise<Array<NonNullableModel> | undefined> { return client.call("BasicEndpoint", "typeWithTypeArgument", { list }, init); }
-export { complexType, mixedAnnotations, nonNullableFieldModel, nonTypeAnnotation, nullableType, optional, simpleType, typeArgumentWildcard, typeParameter, typeWithTypeArgument };
+export { complexType, mixedAnnotations, nonNullableFieldModel, nonTypeAnnotation, nonnullTypeWithTypeArgument, nullableType, optional, simpleType, typeArgumentWildcard, typeParameter, typeWithTypeArgument };
