@@ -578,9 +578,15 @@ public class ExplicitNullableTypeCheckerTest {
     @Test
     public void should_ReturnError_When_NonnullGetterAndBeanNotRequiredByContext() {
         NonnullGetterBean bean = new NonnullGetterBean();
-
-        Assert.assertNotNull(explicitNullableTypeChecker.checkValueForType(bean,
+        bean.setName("foo");
+        Assert.assertNull(explicitNullableTypeChecker.checkValueForType(bean,
                 NonnullGetterBean.class));
+
+        bean.setName(null);
+        String error = explicitNullableTypeChecker.checkValueForType(bean,
+                NonnullGetterBean.class);
+        Assert.assertNotNull(error);
+        Assert.assertTrue(error.contains("property 'name'"));
     }
 
     @Test
@@ -770,6 +776,10 @@ public class ExplicitNullableTypeCheckerTest {
 
         public @NonNull String getName() {
             return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
         }
     }
 
