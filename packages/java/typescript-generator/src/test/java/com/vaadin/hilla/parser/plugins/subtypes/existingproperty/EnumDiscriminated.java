@@ -20,13 +20,15 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
- * A hierarchy whose declared discriminator is an enum, which is a common way of
- * writing {@code As.EXISTING_PROPERTY}. The type ids are strings, which an enum
- * cannot be described as, so no discriminator is generated and the property
- * stays the enum it is declared as.
+ * A hierarchy whose discriminator is an enum declared by the subtypes alone.
+ * Nothing above them declares it, so pinning it to their type ids contradicts
+ * no declaration: each subtype gets its own id, and the union can be told apart
+ * by it.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "taste")
-@JsonSubTypes(@JsonSubTypes.Type(value = EnumDiscriminated.Bitter.class, name = "BITTER"))
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = EnumDiscriminated.Bitter.class, name = "BITTER"),
+        @JsonSubTypes.Type(value = EnumDiscriminated.Salty.class, name = "SALTY") })
 public class EnumDiscriminated {
     public String label;
 
@@ -46,5 +48,10 @@ public class EnumDiscriminated {
         }
 
         public String note;
+    }
+
+    public static class Salty extends EnumDiscriminated {
+        public Taste taste;
+        public int level;
     }
 }

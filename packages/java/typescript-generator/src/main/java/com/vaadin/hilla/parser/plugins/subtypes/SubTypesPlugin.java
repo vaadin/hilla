@@ -41,6 +41,7 @@ import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
+import com.vaadin.hilla.parser.models.jackson.JacksonPropertyModel;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.EntityFacts;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
@@ -76,7 +77,7 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
             var cls = (Class<?>) entityNode.getSource().get();
 
             var info = findSubTypesInfo(cls);
-            var property = info.flatMap(i -> i.discriminatorProperty(
+            var property = info.flatMap(i -> i.discriminatorProperty(cls,
                     entityNode.getTarget().getSerializationConfig()));
             var values = info.map(i -> i.discriminatorValues(cls))
                     .orElseGet(List::of);
@@ -205,11 +206,13 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
         /**
          * Returns the name of the property that holds the type discriminator,
          * or an empty optional if the type information is not serialized as a
-         * property of the object itself, or if its values are not known here.
-         * The properties the types declare are read with the given Jackson
-         * configuration, the one the entities are written with.
+         * property of the object itself, if its values are not known here, or
+         * if the given class cannot pin it to its type ids. The properties the
+         * types declare are read with the given Jackson configuration, the one
+         * the entities are written with.
          */
-        Optional<String> discriminatorProperty(SerializationConfig config) {
+        Optional<String> discriminatorProperty(Class<?> cls,
+                SerializationConfig config) {
             var include = typeInfo.include();
 
             if (include != JsonTypeInfo.As.PROPERTY
@@ -229,45 +232,64 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
 
             return Optional.ofNullable(property)
                     .filter(name -> include != JsonTypeInfo.As.EXISTING_PROPERTY
-                            || acceptsTypeIds(name, config));
+                            || acceptsTypeIds(cls, name, config));
         }
 
         /**
-         * Whether the property can be described as the type ids the hierarchy
-         * uses, which are strings.
+         * Whether the given class can pin the property to the type ids it
+         * accepts, which are strings.
          *
          * <p>
          * With {@code As.EXISTING_PROPERTY} the discriminator is a property the
          * types declare themselves, and Jackson serializes the type id as its
-         * value, so a declared property of any other type, an enum being the
-         * common case, cannot be described as the ids without contradicting the
-         * type it is declared with. Nothing is generated for it then, which
-         * leaves the property as what it is declared as: describing it as the
-         * ids instead produced TypeScript which did not compile. With
-         * {@code As.PROPERTY} Jackson writes the type id itself, so this
-         * question is not asked there.
+         * value. Pinning it contradicts a type above the class that keeps
+         * declaring the property as something a string id does not fit into, an
+         * enum being the common case: the subtype would narrow an inherited
+         * {@code colour?: Colour} to {@code 'RED'}, which TypeScript rejects.
+         * Nothing is generated for the class then, which leaves the property as
+         * what it is declared as. A type above that is a subtype itself gets a
+         * discriminator of its own in place of its declaration, and a class
+         * declaring the property itself has it replaced by the ids, so neither
+         * contradicts anything. With {@code As.PROPERTY} Jackson writes the
+         * type id itself, so this question is not asked there.
          */
-        private boolean acceptsTypeIds(String property,
+        private boolean acceptsTypeIds(Class<?> cls, String property,
                 SerializationConfig config) {
-            return declaredType(property, config).map(TYPE_ID_TYPES::contains)
-                    .orElse(true);
+            return superclassesOf(cls)
+                    .filter(superclass -> !isSubType(superclass))
+                    .flatMap(superclass -> declaredType(superclass, property,
+                            config).stream())
+                    .allMatch(TYPE_ID_TYPES::contains);
         }
 
         /**
-         * The type the hierarchy declares the property with, if it declares it
-         * at all, looking at the type which declares the subtypes as well as at
-         * the subtypes themselves. The property is looked up by the name
-         * Jackson serializes it under, as the annotation names it, so a renamed
-         * member is found by its new name and not by its Java one.
+         * The superclasses of a class the generated TypeScript extends, which
+         * are the ones outside the JDK.
          */
-        private Optional<Class<?>> declaredType(String property,
-                SerializationConfig config) {
-            return Stream
-                    .concat(Stream.of(declaringClass),
-                            Arrays.stream(subTypes.value())
-                                    .map(JsonSubTypes.Type::value))
-                    .distinct().flatMap(cls -> propertiesOf(cls, config))
+        private static Stream<Class<?>> superclassesOf(Class<?> cls) {
+            return Stream.<Class<?>> iterate(cls.getSuperclass(),
+                    superclass -> superclass != null
+                            && !ClassInfoModel.isJDKClass(superclass),
+                    Class::getSuperclass);
+        }
+
+        private boolean isSubType(Class<?> cls) {
+            return Arrays.stream(subTypes.value())
+                    .anyMatch(type -> cls.equals(type.value()));
+        }
+
+        /**
+         * The type the given class declares the property with itself, if it
+         * does. The property is looked up by the name Jackson serializes it
+         * under, as the annotation names it, so a renamed member is found by
+         * its new name and not by its Java one.
+         */
+        private static Optional<Class<?>> declaredType(Class<?> cls,
+                String property, SerializationConfig config) {
+            return propertiesOf(cls, config)
                     .filter(definition -> definition.getName().equals(property))
+                    .filter(definition -> JacksonPropertyModel.of(definition)
+                            .getOwner().is(cls))
                     .<Class<?>> map(BeanPropertyDefinition::getRawPrimaryType)
                     .findFirst();
         }
