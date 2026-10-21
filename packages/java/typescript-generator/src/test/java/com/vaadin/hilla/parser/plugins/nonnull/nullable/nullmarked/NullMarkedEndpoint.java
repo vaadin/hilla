@@ -74,6 +74,9 @@ public class NullMarkedEndpoint {
         @JsonProperty
         private String ignoredOnGetterIncludedOnField;
 
+        // Write-only: Jackson never writes it into a response, but it is
+        // still generated as required, see
+        // https://github.com/vaadin/hilla/issues/6641
         private String ignoredOnGetterIncludedOnSetter;
 
         private String notIgnoredOnGetter;
