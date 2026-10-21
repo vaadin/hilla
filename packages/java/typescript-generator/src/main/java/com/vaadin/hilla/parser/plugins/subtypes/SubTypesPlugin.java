@@ -29,8 +29,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.jspecify.annotations.NonNull;
+import tools.jackson.databind.SerializationConfig;
 import tools.jackson.databind.introspect.BeanPropertyDefinition;
-import tools.jackson.databind.json.JsonMapper;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.core.AbstractPlugin;
@@ -76,7 +76,8 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
             var cls = (Class<?>) entityNode.getSource().get();
 
             var info = findSubTypesInfo(cls);
-            var property = info.flatMap(SubTypesInfo::discriminatorProperty);
+            var property = info.flatMap(i -> i.discriminatorProperty(
+                    entityNode.getTarget().getSerializationConfig()));
             var values = info.map(i -> i.discriminatorValues(cls))
                     .orElseGet(List::of);
 
@@ -191,12 +192,6 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                 Object.class);
 
         /**
-         * Reads the properties of a type the way the entities are written, with
-         * the getters and setters Jackson sees by default.
-         */
-        private static final JsonMapper MAPPER = JsonMapper.builder().build();
-
-        /**
          * The type id strategies whose values are known here: both take the id
          * from the annotations and fall back to the name of the class itself.
          * The ids of the class based strategies are built from the name of the
@@ -211,8 +206,10 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
          * Returns the name of the property that holds the type discriminator,
          * or an empty optional if the type information is not serialized as a
          * property of the object itself, or if its values are not known here.
+         * The properties the types declare are read with the given Jackson
+         * configuration, the one the entities are written with.
          */
-        Optional<String> discriminatorProperty() {
+        Optional<String> discriminatorProperty(SerializationConfig config) {
             var include = typeInfo.include();
 
             if (include != JsonTypeInfo.As.PROPERTY
@@ -232,7 +229,7 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
 
             return Optional.ofNullable(property)
                     .filter(name -> include != JsonTypeInfo.As.EXISTING_PROPERTY
-                            || acceptsTypeIds(name));
+                            || acceptsTypeIds(name, config));
         }
 
         /**
@@ -250,8 +247,9 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
          * {@code As.PROPERTY} Jackson writes the type id itself, so this
          * question is not asked there.
          */
-        private boolean acceptsTypeIds(String property) {
-            return declaredType(property).map(TYPE_ID_TYPES::contains)
+        private boolean acceptsTypeIds(String property,
+                SerializationConfig config) {
+            return declaredType(property, config).map(TYPE_ID_TYPES::contains)
                     .orElse(true);
         }
 
@@ -262,20 +260,20 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
          * Jackson serializes it under, as the annotation names it, so a renamed
          * member is found by its new name and not by its Java one.
          */
-        private Optional<Class<?>> declaredType(String property) {
+        private Optional<Class<?>> declaredType(String property,
+                SerializationConfig config) {
             return Stream
                     .concat(Stream.of(declaringClass),
                             Arrays.stream(subTypes.value())
                                     .map(JsonSubTypes.Type::value))
-                    .distinct().flatMap(SubTypesInfo::propertiesOf)
+                    .distinct().flatMap(cls -> propertiesOf(cls, config))
                     .filter(definition -> definition.getName().equals(property))
                     .<Class<?>> map(BeanPropertyDefinition::getRawPrimaryType)
                     .findFirst();
         }
 
-        private static Stream<BeanPropertyDefinition> propertiesOf(
-                Class<?> cls) {
-            var config = MAPPER.serializationConfig();
+        private static Stream<BeanPropertyDefinition> propertiesOf(Class<?> cls,
+                SerializationConfig config) {
             var javaType = config.constructType(cls);
             var introspector = config.classIntrospectorInstance();
             return introspector
