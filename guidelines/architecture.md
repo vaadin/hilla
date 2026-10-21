@@ -51,14 +51,6 @@ describes the model, the writers and the tests in detail.
 Whether a value can be `null` decides whether its generated TypeScript type is
 `T` or `T | undefined`, so nullability is part of the contract.
 
-A Java `null` is `undefined` in TypeScript and at run time in the browser, not
-`null`. The client maps between them when it handles the JSON (`Connect.ts`):
-`null` in a response becomes `undefined`, and `undefined` in a request is sent
-as `null`. `undefined` is what JavaScript uses for a variable or property that
-was never set, so the mapping matches its meaning and lets client code simply
-leave out a nullable value. Generated types and client code therefore use
-`undefined` and `?`, never `null`.
-
 - At build time, the `nonnull` plugin decides it from the annotations listed in
   `NonnullPluginConfig` (JSpecify, Jakarta, Spring and Hilla's own) and from
   Kotlin's type system for Kotlin classes. An annotation that is not on that
@@ -68,6 +60,15 @@ leave out a nullable value. Generated types and client code therefore use
   returns is not `null` where the generated type says it can not be.
 - `com.vaadin.hilla.Nonnull` is deprecated for removal; new code uses the
   JSpecify annotations.
+
+A Java `null` is `undefined` in TypeScript, not `null`. For endpoint calls the
+client maps between them when it handles the JSON (`Connect.ts`): `null` in a
+response becomes `undefined`, and `undefined` in a request is sent as `null`.
+`undefined` is what JavaScript uses for a variable or property that was never
+set, so the mapping matches its meaning and lets client code simply leave out a
+nullable value. Generated types and client code therefore use `undefined` and
+`?`, never `null`. Values pushed over a subscription (`FluxConnection`) are not
+mapped yet and can still arrive as `null`.
 
 ## Jackson
 
