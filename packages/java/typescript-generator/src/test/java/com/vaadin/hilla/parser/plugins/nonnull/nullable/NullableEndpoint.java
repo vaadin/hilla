@@ -35,9 +35,10 @@ public class NullableEndpoint {
         return nullMarkedModel;
     }
 
-    // Checks that @NullMarked on a method is ignored, as it is only supported
-    // on packages: the return type must stay optional, because the endpoint
-    // runtime does not check methods annotated with it
+    // @NullMarked on a method is currently ignored, so the return type stays
+    // optional: only package-level @NullMarked is supported so far, and the
+    // endpoint runtime would not check this method. Supporting it on methods
+    // and classes is https://github.com/vaadin/hilla/issues/6631
     @NullMarked
     public String nullMarkedMethod() {
         return null;
