@@ -38,6 +38,14 @@ public class NullMarkedEndpoint {
         return param;
     }
 
+    public @Nullable String[] nullableItemArray() {
+        return new String[0];
+    }
+
+    public String @Nullable [] nullableArray() {
+        return new String[0];
+    }
+
     public UnmarkedModel unmarkedModel(UnmarkedModel unmarkedModel) {
         return unmarkedModel;
     }
