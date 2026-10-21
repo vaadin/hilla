@@ -42,6 +42,7 @@ import org.junit.Test;
 import org.springframework.lang.Nullable;
 
 import com.vaadin.hilla.endpoints.Id;
+import com.vaadin.hilla.nonnullapi.NonNullApiProperties;
 import com.vaadin.hilla.nonnullapi.NonNullableEntity;
 import com.vaadin.hilla.nullmarked.NullMarkedEntity;
 import com.vaadin.hilla.nullmarked.NullMarkedProperties;
@@ -595,6 +596,34 @@ public class ExplicitNullableTypeCheckerTest {
                 "Nullable list item of a field with another type than the "
                         + "getter should be ignored",
                 checkNullMarkedProperties(properties));
+    }
+
+    @Test
+    public void should_FollowGetterAndSetterAnnotations_When_RequiredByNonNullApiPackage() {
+        NonNullApiProperties properties = new NonNullApiProperties();
+        properties.setNullableGetter(null);
+        Assert.assertNull("Nullable getter should allow null value",
+                checkNonNullApiProperties(properties));
+
+        properties = new NonNullApiProperties();
+        properties.setNullableSetter(null);
+        Assert.assertNull("Nullable setter parameter should allow null value",
+                checkNonNullApiProperties(properties));
+
+        properties = new NonNullApiProperties();
+        properties.setId(null);
+        Assert.assertNull("Id should allow null value",
+                checkNonNullApiProperties(properties));
+
+        properties = new NonNullApiProperties();
+        properties.setValue(null);
+        Assert.assertNotNull("Plain property should not allow null value",
+                checkNonNullApiProperties(properties));
+    }
+
+    private String checkNonNullApiProperties(NonNullApiProperties properties) {
+        return explicitNullableTypeChecker.checkValueForType(properties,
+                NonNullApiProperties.class);
     }
 
     private String checkNullMarkedProperties(NullMarkedProperties properties) {
