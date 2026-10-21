@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.googlecode.gentyref.GenericTypeReflector;
+import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -602,8 +603,9 @@ public class EndpointInvoker {
 
     private boolean isNonNullApi(Package pkg) {
         return Stream.of(pkg.getAnnotations())
-                .anyMatch(ann -> ann.annotationType().getSimpleName()
-                        .equals(NonNullApi.class.getSimpleName()));
+                .map(ann -> ann.annotationType().getSimpleName())
+                .anyMatch(name -> name.equals(NonNullApi.class.getSimpleName())
+                        || name.equals(NullMarked.class.getSimpleName()));
     }
 
     private String listMethodParameterTypes(Type[] javaParameters) {
