@@ -5,8 +5,9 @@
 - **Java 21+** (source level), **Maven** multi-module build; the Gradle plugin
   is built with Gradle.
 - **Kotlin** in the parser's Kotlin support (the Kotlin nullability plugin
-  and the Kotlin nodes of the `backbone` plugin, plus their tests) and in the
-  Gradle plugin.
+  and the Kotlin nodes of the `backbone` plugin, plus their tests), in the
+  Gradle plugin, and in the `tests/gradle/kotlin-gradle-test` application and
+  its integration tests.
 - **Spring Boot 4** — endpoints are Spring beans served by Spring MVC.
 - **Jackson 3** (`tools.jackson.*`) for endpoint serialization and for reading
   what a class serializes as.
