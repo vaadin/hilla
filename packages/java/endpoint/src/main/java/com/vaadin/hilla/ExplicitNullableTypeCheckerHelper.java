@@ -27,14 +27,17 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -357,7 +360,8 @@ class ExplicitNullableTypeCheckerHelper {
             Field field = readMethod.getDeclaringClass().getDeclaredField(name);
             return (!Modifier.isStatic(field.getModifiers())
                     && !Modifier.isTransient(field.getModifiers())
-                    && isRequired(field, requiredByContext)
+                    && isPropertyRequired(field, propertyDescriptor,
+                            requiredByContext)
                     && !field.isAnnotationPresent(JsonIgnore.class));
         } catch (NoSuchFieldException e) {
             getLogger().error("Unexpected missing declared field in Java Bean",
@@ -367,24 +371,55 @@ class ExplicitNullableTypeCheckerHelper {
     }
 
     /**
-     * Gets the annotated types which declare the nested values of a property:
-     * the field type when it is the same type as the getter return type.
-     * Otherwise, the annotated types are unknown.
+     * Checks if a property is required, based on the annotations of its field,
+     * getter and setter, the same way as in the generated TypeScript.
      */
-    private @Nullable List<AnnotatedType> getAnnotatedPropertyTypes(
+    private boolean isPropertyRequired(Field field,
+            PropertyDescriptor propertyDescriptor, boolean requiredByContext) {
+        if (field.getType().isPrimitive()) {
+            return true;
+        }
+
+        Method writeMethod = propertyDescriptor.getWriteMethod();
+        Parameter writeParameter = writeMethod != null
+                ? writeMethod.getParameters()[0]
+                : null;
+        return isRequired(Stream
+                .of(field, propertyDescriptor.getReadMethod(), writeParameter)
+                .filter(Objects::nonNull).flatMap(
+                        ExplicitNullableTypeChecker::getNullabilityAnnotations),
+                requiredByContext);
+    }
+
+    /**
+     * Gets the annotated types which declare the nested values of a property:
+     * the getter return type, and the field and setter parameter types when
+     * they are the same type as the getter return type.
+     */
+    private List<AnnotatedType> getAnnotatedPropertyTypes(
             PropertyDescriptor propertyDescriptor) {
         Method readMethod = propertyDescriptor.getReadMethod();
+        Type propertyType = readMethod.getGenericReturnType();
+        List<AnnotatedType> annotatedTypes = new ArrayList<>();
+        annotatedTypes.add(readMethod.getAnnotatedReturnType());
+
         try {
             Field field = readMethod.getDeclaringClass()
                     .getDeclaredField(propertyDescriptor.getName());
-            if (field.getGenericType()
-                    .equals(readMethod.getGenericReturnType())) {
-                return List.of(field.getAnnotatedType());
+            if (field.getGenericType().equals(propertyType)) {
+                annotatedTypes.add(field.getAnnotatedType());
             }
         } catch (NoSuchFieldException e) {
             // a property without a field has no field annotations
         }
-        return null;
+
+        Method writeMethod = propertyDescriptor.getWriteMethod();
+        if (writeMethod != null && writeMethod.getGenericParameterTypes()[0]
+                .equals(propertyType)) {
+            annotatedTypes.add(writeMethod.getAnnotatedParameterTypes()[0]);
+        }
+
+        return annotatedTypes;
     }
 
 }
