@@ -15,13 +15,22 @@
  */
 package com.vaadin.hilla.parser.plugins.subtypes.existingproperty;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "colour")
 @JsonSubTypes(@JsonSubTypes.Type(value = InheritedEnum.Red.class, name = "RED"))
 public class InheritedEnum {
-    public Colour colour;
+    /**
+     * Read from a getter rather than from a field, which is how Jackson usually
+     * reads a property, and serialized under a name other than its Java one:
+     * the discriminator is found by the name Jackson writes.
+     */
+    @JsonProperty("colour")
+    public Colour getShade() {
+        return null;
+    }
 
     public enum Colour {
         RED, BLUE

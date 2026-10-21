@@ -15,7 +15,6 @@
  */
 package com.vaadin.hilla.parser.plugins.subtypes.existingproperty;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -37,17 +36,8 @@ public class EnumDiscriminated {
     }
 
     public static class Bitter extends EnumDiscriminated {
-        /**
-         * Read from a getter rather than from a field of its own, which is how
-         * Jackson usually reads a property, and serialized under a name other
-         * than its Java one: the discriminator is the name Jackson writes.
-         */
-        @JsonProperty("taste")
-        public Taste getFlavour() {
-            return Taste.BITTER;
-        }
-
         public String note;
+        public Taste taste;
     }
 
     public static class Salty extends EnumDiscriminated {
