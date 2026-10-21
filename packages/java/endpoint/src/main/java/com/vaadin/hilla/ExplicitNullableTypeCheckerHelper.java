@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNullApi;
@@ -198,8 +199,9 @@ class ExplicitNullableTypeCheckerHelper {
         markAsVisited(value, expectedType);
         Class<?> clazz = (Class<?>) expectedType;
         // the context is the package where the object is defined
-        boolean requiredByContext = clazz.getPackage() != null
-                && clazz.getPackage().isAnnotationPresent(NonNullApi.class);
+        boolean requiredByContext = clazz.getPackage() != null && (clazz
+                .getPackage().isAnnotationPresent(NonNullApi.class)
+                || clazz.getPackage().isAnnotationPresent(NullMarked.class));
         try {
             for (PropertyDescriptor propertyDescriptor : Introspector
                     .getBeanInfo(clazz).getPropertyDescriptors()) {

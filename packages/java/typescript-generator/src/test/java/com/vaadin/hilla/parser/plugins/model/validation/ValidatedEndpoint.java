@@ -19,6 +19,7 @@ import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -52,7 +53,15 @@ public class ValidatedEndpoint {
         private String code;
 
         @Size(min = 1)
-        private String[] codes;
+        private java.lang.@NotBlank String[] codes;
+
+        @NotEmpty
+        private String[][] rows;
+
+        private String[] labels;
+
+        @NotBlank
+        private String[] notes;
 
         @Size(min = 1, max = 10)
         private List<@NotBlank String> tags;
@@ -79,6 +88,18 @@ public class ValidatedEndpoint {
 
         public String[] getCodes() {
             return codes;
+        }
+
+        public String[][] getRows() {
+            return rows;
+        }
+
+        public @Size(min = 1) String[] getLabels() {
+            return labels;
+        }
+
+        public String[] getNotes() {
+            return notes;
         }
 
         public List<String> getTags() {

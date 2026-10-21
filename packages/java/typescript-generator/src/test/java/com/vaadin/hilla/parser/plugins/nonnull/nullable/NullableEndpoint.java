@@ -18,6 +18,9 @@ package com.vaadin.hilla.parser.plugins.nonnull.nullable;
 import jakarta.persistence.Id;
 import jakarta.persistence.Version;
 
+import org.jspecify.annotations.NullMarked;
+
+import com.vaadin.hilla.parser.plugins.nonnull.nullable.nullmarked.NullMarkedEndpoint.NullMarkedModel;
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
@@ -26,6 +29,19 @@ public class NullableEndpoint {
     public NullableFieldModel nullableFieldModel(
             NullableFieldModel nullableFieldModel) {
         return nullableFieldModel;
+    }
+
+    public NullMarkedModel nullMarkedModel(NullMarkedModel nullMarkedModel) {
+        return nullMarkedModel;
+    }
+
+    // @NullMarked on a method is currently ignored, so the return type stays
+    // optional: only package-level @NullMarked is supported so far, and the
+    // endpoint runtime would not check this method. Supporting it on methods
+    // and classes is https://github.com/vaadin/hilla/issues/6631
+    @NullMarked
+    public String nullMarkedMethod() {
+        return null;
     }
 
     public static class NullableFieldModel {

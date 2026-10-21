@@ -40,7 +40,11 @@ public final class EntityPlugin
         }
 
         var ref = (ClassRefSignatureModel) typedNode.getType();
-        if (ref.isJDKClass() || ref.isDate() || ref.isIterable()) {
+        // A class extending a value the browser has, such as a Date or a
+        // BigDecimal, is sent as that value and so has no declaration of its
+        // own
+        if (ref.isJDKClass() || ref.isDate() || ref.isIterable()
+                || ref.isBigDecimal() || ref.isBigInteger()) {
             return nodeDependencies;
         }
 
