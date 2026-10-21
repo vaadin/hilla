@@ -108,8 +108,8 @@ check what it generates.
 
 ### Nullability discipline
 
-- Annotate with JSpecify (`org.jspecify.annotations.Nullable` / `NonNull`).
-  Only mark `@Nullable` what genuinely may be null. In endpoint signatures
+- Use JSpecify: apply `@NullMarked` at the package level and mark with
+  `@Nullable` only what genuinely may be null. In endpoint signatures
   and the types they send, the annotation decides the generated TypeScript
   type — see [Architecture](architecture.md#nullability).
 - **Collections: return empty, never `null`.** A method returning a `List`,
