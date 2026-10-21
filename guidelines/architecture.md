@@ -29,10 +29,12 @@ altogether.
 - **Spring integration.** The `vaadin-spring` add-on is the Spring Boot entry
   point that brings in Hilla's endpoint controller, and integrates Spring
   Security for authorization, including stateless JWT authentication.
-- **Routing.** The file router integrates with Flow: it supports server-side
-  layouts, and provides the client-side view entries for the menu
-  (`createMenuItems`) and the access check helpers (`ServerAndClientViewsProvider`,
-  `RouteUtil`).
+- **Routing.** Client-side views are combined with Flow's server-side routes
+  and layouts: Flow's router serves server-side layouts around client views,
+  and defines the `FileRouterRequestUtil` SPI that Hilla's `RouteUtil`
+  implements for the access check of client views. The Hilla side of this —
+  the `route` package and `@vaadin/hilla-file-router` — is described under
+  [Routing](#routing) below.
 - **Connection state.** The online/offline connection state
   (`window.Vaadin.connectionState`, which `ConnectClient` reports loading to)
   and the connection indicator component come from Flow.
