@@ -22,7 +22,6 @@ import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -38,11 +37,11 @@ import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.FieldInfoModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
-import com.vaadin.hilla.parser.models.SpecializedModel;
 import com.vaadin.hilla.parser.models.TypeParameterModel;
 import com.vaadin.hilla.parser.models.jackson.JacksonPropertyModel;
 import com.vaadin.hilla.parser.plugins.backbone.EntityFacts;
 import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
+import com.vaadin.hilla.parser.plugins.backbone.TypeParameters;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
@@ -373,13 +372,12 @@ public final class EndpointModelPlugin
     /**
      * The type parameters of a declaration, which are the ones the generated
      * TypeScript can express: a parameter bound to something else than an
-     * object stands for that bound instead.
+     * object stands for that bound instead, unless the bound only leads back to
+     * the parameter itself, as in {@code <E extends Enum<E>>}.
      */
     private static List<String> typeParameters(ClassInfoModel cls) {
         return cls.getTypeParameters().stream()
-                .filter(parameter -> parameter.getBounds().stream()
-                        .filter(Objects::nonNull)
-                        .allMatch(SpecializedModel::isNativeObject))
+                .filter(TypeParameters::isUnbounded)
                 .map(TypeParameterModel::getName).toList();
     }
 
@@ -408,8 +406,9 @@ public final class EndpointModelPlugin
 
         // A type variable or parameter of an entity is declared by it, so it
         // is written as its name, unless it is bound to something else than
-        // an object: it then stands for that bound, which the walk visits
-        // below it, since the declaration does not keep such a parameter
+        // an object and not only to itself, as in <E extends Enum<E>>: it then
+        // stands for that bound, which the walk visits below it, since the
+        // declaration does not keep such a parameter
         if ((signature.isTypeVariable() || signature.isTypeParameter())
                 && isInEntity()) {
             return referred.isEmpty()
