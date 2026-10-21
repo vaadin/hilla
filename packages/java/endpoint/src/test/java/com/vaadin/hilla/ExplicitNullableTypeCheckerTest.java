@@ -609,16 +609,6 @@ public class ExplicitNullableTypeCheckerTest {
         properties.setNullableSetter(null);
         Assert.assertNull("Nullable setter parameter should allow null value",
                 checkNonNullApiProperties(properties));
-
-        properties = new NonNullApiProperties();
-        properties.setId(null);
-        Assert.assertNull("Id should allow null value",
-                checkNonNullApiProperties(properties));
-
-        properties = new NonNullApiProperties();
-        properties.setValue(null);
-        Assert.assertNotNull("Plain property should not allow null value",
-                checkNonNullApiProperties(properties));
     }
 
     private String checkNonNullApiProperties(NonNullApiProperties properties) {

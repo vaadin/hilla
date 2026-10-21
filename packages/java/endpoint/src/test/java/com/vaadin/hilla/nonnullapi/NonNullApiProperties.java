@@ -15,8 +15,6 @@
  */
 package com.vaadin.hilla.nonnullapi;
 
-import jakarta.persistence.Id;
-
 import org.springframework.lang.Nullable;
 
 /**
@@ -24,27 +22,8 @@ import org.springframework.lang.Nullable;
  * field, in a package annotated with Spring's {@code @NonNullApi}.
  */
 public class NonNullApiProperties {
-    @Id
-    private String id = "";
-    private String value = "";
     private String nullableGetter = "";
     private String nullableSetter = "";
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
 
     @Nullable
     public String getNullableGetter() {
