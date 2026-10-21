@@ -547,8 +547,31 @@ public class ExplicitNullableTypeCheckerTest {
         properties.setVersion(null);
         Assert.assertNull("Version should allow null value",
                 checkNullMarkedProperties(properties));
+    }
+
+    @Test
+    public void should_ReturnError_When_GetterOrSetterAnnotationsDoNotAllowNull() {
+        NullMarkedProperties properties = new NullMarkedProperties();
+        properties.setNullableGetterNonnullSetter(null);
+        Assert.assertNotNull("Nonnull should take precedence over nullable",
+                checkNullMarkedProperties(properties));
 
         properties = new NullMarkedProperties();
+        properties.setNonnullId(null);
+        Assert.assertNotNull("Nonnull should take precedence over Id",
+                checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.getNullableFieldOfOtherTypeItems().add(null);
+        Assert.assertNotNull(
+                "Nullable list item of a field with another type than the "
+                        + "getter should be ignored",
+                checkNullMarkedProperties(properties));
+    }
+
+    @Test
+    public void should_SkipProperty_When_JsonIgnored() {
+        NullMarkedProperties properties = new NullMarkedProperties();
         properties.setIgnoredOnGetter(null);
         Assert.assertNull(
                 "Property ignored on the getter should not be checked",
@@ -569,18 +592,8 @@ public class ExplicitNullableTypeCheckerTest {
     }
 
     @Test
-    public void should_ReturnError_When_GetterOrSetterAnnotationsDoNotAllowNull() {
+    public void should_CheckProperty_When_JsonPropertyOverridesJsonIgnore() {
         NullMarkedProperties properties = new NullMarkedProperties();
-        properties.setNullableGetterNonnullSetter(null);
-        Assert.assertNotNull("Nonnull should take precedence over nullable",
-                checkNullMarkedProperties(properties));
-
-        properties = new NullMarkedProperties();
-        properties.setNonnullId(null);
-        Assert.assertNotNull("Nonnull should take precedence over Id",
-                checkNullMarkedProperties(properties));
-
-        properties = new NullMarkedProperties();
         properties.setIgnoredOnSetterIncludedOnGetter(null);
         Assert.assertNotNull(
                 "Property ignored on the setter but included on the getter "
@@ -598,13 +611,6 @@ public class ExplicitNullableTypeCheckerTest {
         properties.setNotIgnoredOnGetter(null);
         Assert.assertNotNull(
                 "Property with JsonIgnore(false) should be checked",
-                checkNullMarkedProperties(properties));
-
-        properties = new NullMarkedProperties();
-        properties.getNullableFieldOfOtherTypeItems().add(null);
-        Assert.assertNotNull(
-                "Nullable list item of a field with another type than the "
-                        + "getter should be ignored",
                 checkNullMarkedProperties(properties));
     }
 
