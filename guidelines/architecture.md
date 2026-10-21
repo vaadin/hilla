@@ -46,9 +46,10 @@ A browser callable class is a Spring bean annotated with `@BrowserCallable`
 methods are exposed through the endpoints that extend it.
 
 - `EndpointRegistry` discovers the browser callable beans at startup and
-  registers their public methods. `EndpointNameChecker` rejects names that
-  are reserved words in ECMAScript and TypeScript, since every endpoint and
-  method name becomes a TypeScript identifier.
+  registers their public methods. `EndpointNameChecker` rejects an endpoint
+  name that is a reserved word in ECMAScript or TypeScript. A method or
+  parameter with such a name is accepted: the generator declares it under
+  another name in the generated TypeScript (`Names` in the writers).
 - `EndpointController` receives the call as a `POST` to
   `{prefix}/{endpoint}/{method}` (the prefix is `vaadin.endpoint.prefix`,
   `/connect` by default), as JSON or as multipart when files are sent.

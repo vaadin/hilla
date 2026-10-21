@@ -39,8 +39,11 @@ behavior.
 - **Read the snapshot diff as the specification.** Every change to the
   generated output shows up in the snapshots; review that diff as carefully as
   the code that caused it, and call out changes to existing output in the PR.
-- **Every name becomes a TypeScript identifier.** Endpoint, method, parameter
-  and type names have to be valid there too; see `EndpointNameChecker`.
+- **Java names meet TypeScript's reserved words.** An endpoint name that is
+  one is rejected at registration (`EndpointNameChecker`); a method or
+  parameter name that is one is declared under another name by the writers
+  (`Names.free`). A new kind of name that reaches the generated TypeScript
+  needs one of these two answers, decided on purpose.
 
 ## Java API
 
@@ -102,9 +105,11 @@ public sealed interface Foo permits FooA, FooB, FooC {}
 ```
 
 Exhaustive `switch` expressions over the sealed set are guaranteed complete at
-compile time; design for that, don't add `default:` arms. A sealed hierarchy
-sent through an endpoint is also a polymorphic type for the `subtypes` plugin —
-check what it generates.
+compile time; design for that, don't add `default:` arms. Sealing a
+hierarchy does not make it polymorphic in the generated TypeScript: the
+`subtypes` plugin only reacts to Jackson's `@JsonTypeInfo` and
+`@JsonSubTypes`. A sealed hierarchy sent through an endpoint without them is
+generated as the supertype alone, with none of its subtypes.
 
 ### Nullability discipline
 
