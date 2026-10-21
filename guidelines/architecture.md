@@ -91,9 +91,9 @@ Whether a value can be `null` decides whether its generated TypeScript type is
   `NonnullPluginConfig` (JSpecify, Jakarta, Spring and Hilla's own) and from
   Kotlin's type system for Kotlin classes. A package annotated with JSpecify's
   `@NullMarked` (or Spring's `@NonNullApi`) makes its types non-null by
-  default, in the generated TypeScript and in the run-time check below. An annotation that is not on that
-  list has no effect on the generated types — check it before assuming one
-  does.
+  default, in the generated TypeScript and in the run-time check below. An
+  annotation that is not on that list has no effect on the generated types —
+  check it before assuming one does.
 - At run time, `ExplicitNullableTypeChecker` checks that a value an endpoint
   returns is not `null` where the generated type says it can not be.
 - `com.vaadin.hilla.Nonnull` is deprecated for removal; new code uses the
