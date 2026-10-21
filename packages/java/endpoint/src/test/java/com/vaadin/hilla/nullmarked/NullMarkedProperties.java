@@ -40,6 +40,10 @@ public class NullMarkedProperties {
     private String ignoredOnGetter = "";
     private String ignoredOnSetter = "";
     private String ignoredOnSetterIncludedOnGetter = "";
+    @JsonProperty
+    private String ignoredOnGetterIncludedOnField = "";
+    private String ignoredOnGetterIncludedOnSetter = "";
+    private String notIgnoredOnGetter = "";
     private String nullableGetter = "";
     private String nullableSetter = "";
     private String nullableGetterNonnullSetter = "";
@@ -89,6 +93,36 @@ public class NullMarkedProperties {
     public void setIgnoredOnSetterIncludedOnGetter(
             String ignoredOnSetterIncludedOnGetter) {
         this.ignoredOnSetterIncludedOnGetter = ignoredOnSetterIncludedOnGetter;
+    }
+
+    @JsonIgnore
+    public String getIgnoredOnGetterIncludedOnField() {
+        return ignoredOnGetterIncludedOnField;
+    }
+
+    public void setIgnoredOnGetterIncludedOnField(
+            String ignoredOnGetterIncludedOnField) {
+        this.ignoredOnGetterIncludedOnField = ignoredOnGetterIncludedOnField;
+    }
+
+    @JsonIgnore
+    public String getIgnoredOnGetterIncludedOnSetter() {
+        return ignoredOnGetterIncludedOnSetter;
+    }
+
+    @JsonProperty
+    public void setIgnoredOnGetterIncludedOnSetter(
+            String ignoredOnGetterIncludedOnSetter) {
+        this.ignoredOnGetterIncludedOnSetter = ignoredOnGetterIncludedOnSetter;
+    }
+
+    @JsonIgnore(false)
+    public String getNotIgnoredOnGetter() {
+        return notIgnoredOnGetter;
+    }
+
+    public void setNotIgnoredOnGetter(String notIgnoredOnGetter) {
+        this.notIgnoredOnGetter = notIgnoredOnGetter;
     }
 
     @JsonIgnore

@@ -548,6 +548,13 @@ public class ExplicitNullableTypeCheckerTest {
         Assert.assertNull(
                 "Property ignored on the setter should not be checked",
                 checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.setIgnoredOnGetterIncludedOnSetter(null);
+        Assert.assertNull(
+                "Property ignored on the getter and only included on the "
+                        + "setter should not be checked",
+                checkNullMarkedProperties(properties));
     }
 
     @Test
@@ -567,6 +574,19 @@ public class ExplicitNullableTypeCheckerTest {
         Assert.assertNotNull(
                 "Property ignored on the setter but included on the getter "
                         + "should be checked",
+                checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.setIgnoredOnGetterIncludedOnField(null);
+        Assert.assertNotNull(
+                "Property ignored on the getter but included on the field "
+                        + "should be checked",
+                checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.setNotIgnoredOnGetter(null);
+        Assert.assertNotNull(
+                "Property with JsonIgnore(false) should be checked",
                 checkNullMarkedProperties(properties));
 
         properties = new NullMarkedProperties();

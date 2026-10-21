@@ -373,12 +373,13 @@ class ExplicitNullableTypeCheckerHelper {
     }
 
     /**
-     * Checks if a property is left out of the JSON, following the Jackson
-     * rules: when its field, getter or setter is annotated with
+     * Checks if a property is left out of the JSON because of
+     * {@code @JsonIgnore}: when its field, getter or setter is annotated with
      * {@code @JsonIgnore}, the whole property is left out, unless another of
      * them is annotated with {@code @JsonProperty}. In that case only the
      * ignored ones are left out, so the property is still serialized if its
-     * getter, or its field annotated with {@code @JsonProperty}, remains.
+     * getter, or its field annotated with {@code @JsonProperty}, remains. Other
+     * Jackson annotations that include a property are not considered.
      */
     private boolean isPropertyIgnored(Field field,
             PropertyDescriptor propertyDescriptor) {
