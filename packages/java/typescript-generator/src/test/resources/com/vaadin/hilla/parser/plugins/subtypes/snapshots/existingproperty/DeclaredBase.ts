@@ -1,4 +1,5 @@
 interface DeclaredBase {
+  kind: unknown;
   label?: string;
 }
 

@@ -32,10 +32,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * declared.
  *
  * <p>
- * It is the hierarchy with two subtypes, which the others next to it have no
- * use for: this is where a declared discriminator is pinned as narrowing an
- * inherited property, and as a different type id per subtype rather than the
- * same one for all of them.
+ * It is the hierarchy with two sibling subtypes: this is where a declared
+ * discriminator is pinned as narrowing an inherited property, and as a
+ * different type id per subtype rather than the same one for all of them.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "flavour")
 @JsonSubTypes({

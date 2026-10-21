@@ -1,6 +1,6 @@
 import type Bitter from './EnumDiscriminated/Bitter.js';
-import type Salty from './EnumDiscriminated/Salty.js';
+import type VeryBitter from './EnumDiscriminated/VeryBitter.js';
 
-type EnumDiscriminatedUnion = Bitter | Salty;
+type EnumDiscriminatedUnion = (Bitter & { taste: 'BITTER' }) | VeryBitter;
 
 export default EnumDiscriminatedUnion;

@@ -25,17 +25,18 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "kind")
 @JsonSubTypes(@JsonSubTypes.Type(value = DeclaredBase.First.class, name = "first"))
 public class DeclaredBase {
+    /**
+     * The base declares the discriminator itself, which is what
+     * {@code As.EXISTING_PROPERTY} means: it is an ordinary property of the
+     * type as well as the type id. Declared as {@code Object}, which a type id
+     * fits into as well as a {@code String} does, so the subtype still narrows
+     * it to its id.
+     */
+    public Object kind;
+
     public String label;
 
     public static class First extends DeclaredBase {
-        /**
-         * The subtype declares the discriminator itself, which is what
-         * {@code As.EXISTING_PROPERTY} means: it is an ordinary property of the
-         * type as well as the type id. Declared as {@code Object}, which a type
-         * id fits into as well as a {@code String} does.
-         */
-        public Object kind;
-
         public String note;
     }
 }

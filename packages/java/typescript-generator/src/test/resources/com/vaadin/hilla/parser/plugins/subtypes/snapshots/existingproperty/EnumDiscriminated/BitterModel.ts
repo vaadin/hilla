@@ -6,7 +6,7 @@ const BitterModel = m
   .extend(EnumDiscriminatedModel)
   .object<Bitter>('Bitter')
   .property('note', m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))
-  .property('taste', m.literal('BITTER'))
+  .property('taste', m.union(m.literal('BITTER'), m.literal('VERY_BITTER')))
   .build();
 type BitterModel = typeof BitterModel;
 

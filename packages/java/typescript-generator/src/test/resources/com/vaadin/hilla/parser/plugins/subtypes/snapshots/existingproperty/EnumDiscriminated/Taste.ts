@@ -1,6 +1,6 @@
 enum Taste {
   BITTER = 'BITTER',
-  SALTY = 'SALTY',
+  VERY_BITTER = 'VERY_BITTER',
 }
 
 export default Taste;
