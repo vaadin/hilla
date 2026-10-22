@@ -2,7 +2,7 @@
 
 [API documentation ↗](https://hilla.dev/docs/data-binding/reference)
 
-[![Latest Stable Version](https://img.shields.io/npm/v/@hilla/form.svg)](https://www.npmjs.com/package/@vaadin/hilla-lit-form)
+[![Latest Stable Version](https://img.shields.io/npm/v/@vaadin/hilla-lit-form.svg)](https://www.npmjs.com/package/@vaadin/hilla-lit-form)
 
 A set of utilities for building forms with TypeScript and [Lit](https://lit.dev/), including data binding, validation, code generation, backend integration, Lit directives, and more.
 
