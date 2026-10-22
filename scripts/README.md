@@ -66,13 +66,13 @@ add the new file to `componentSources` in `prepare/config.ts`.
 
 ## Deliberate exceptions
 
-- **`typescript`.** Flow pins `typescript` to TypeScript 7, which is the native
-  compiler only. Hilla's build, tooling, and some parts (typescript-eslint, Nx,
-  file router) need the JavaScript API, so the root aliases `typescript` to
+- **`typescript`.** TypeScript 7 is the native compiler only. Hilla's build,
+  tooling, and some parts (typescript-eslint, Nx, file router) need the
+  JavaScript API, so the root aliases `typescript` to
   `@typescript/typescript6`, and installs TypeScript 7 as `@typescript/native`,
-  which owns `tsc`. Both alignment steps skip `typescript` (`NOT_ALIGNED` in
-  the updater, `NOT_PROPAGATED` in prepare). Keep `@typescript/native` in step
-  with Flow by hand.
+  which owns `tsc`. Flow declares the same today, but both alignment steps
+  skip `typescript` (`NOT_ALIGNED` in the updater, `NOT_PROPAGATED` in
+  prepare), so the alias survives if Flow changes it.
 - **`.npmrc`.** Alignment changes the versions in `package.json` files whose
   `node_modules` and `package-lock.json` already exist, and the build installs
   over them:
@@ -96,7 +96,7 @@ being built. Otherwise each application would do its own deep install when
 Flow runs `npm install` in it, slowly and with versions of its own.
 `build:prepare` deletes the `node_modules` of the test applications so that
 none keeps a stale nested install. `endpoints-maven-engine` is left out of
-the workspaces and does not install at all (`runNpmInstall=false`).
+the workspaces: it installs on its own, from its own `package.json`.
 
 Flow still edits the `package.json` of a test application when it runs, so
 those files change in CI. [`updateLockFiles.cjs`](updateLockFiles.cjs)
@@ -110,7 +110,7 @@ Each package's `build` script runs one of two builders:
 - [`fast-build.ts`](fast-build.ts), with oxc-transform, file by file, for most
   packages;
 - [`build.ts`](build.ts), a full emit with the TypeScript 6 compiler, for
-  `react-crud`.
+  `lit-form`, `models`, `react-crud` and `react-signals`.
 
 Both replace `__REGISTER__` with the code that registers the package and its
 version in `window.Vaadin.registrations` ([`utils/injectRegister.ts`](utils/injectRegister.ts)),
