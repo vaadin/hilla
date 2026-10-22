@@ -45,23 +45,21 @@ tree, the connection, and the server side.
 
 ## Generated code
 
-The Java parser maps the Flow signal types to the stand-in types in
+The parser maps the Flow signal types to the stand-in types in
 `runtime-plugin-transfertypes` (`TransferTypesPlugin`), which say which class
-of `@vaadin/hilla-react-signals` to use (`@FromModule`). The OpenAPI response of
-such a method references that stand-in.
+of `@vaadin/hilla-react-signals` to use (`@FromModule`). The generator reads a
+method returning one of them as a signal of its own kind
+(`EndpointModelPlugin`, `MethodModel.Kind`), and `EndpointWriter` writes it
+differently from a call:
 
-`@vaadin/hilla-generator-plugin-signals` finds those methods and rewrites
-their functions in the generated endpoint file (`SignalProcessor`):
-
-- The function is no longer `async`, loses its `init` parameter, and returns
+- The function is not `async`, has no `init` parameter, and returns
   `new ValueSignal(...)` (or the `NumberSignal`, `ListSignal`, `MapSignal`
   class) with the client, the endpoint and method names, and the method's
   parameters as `params`.
 - A `ValueSignal` gets an `options?: SignalMethodOptions<T>` parameter for its
   default value. Without one, the default is `undefined` for a nullable type,
-  and the empty value of the type's model otherwise (`PersonModel`,
-  `StringModel`, `ArrayModel`). A `NumberSignal` defaults to `0`. Lists and
-  maps have no default.
+  and the empty value of the type's model otherwise. A `NumberSignal` defaults
+  to `0`. Lists and maps have no default.
 
 Calling the generated function creates a new client signal. It costs nothing
 until it is watched, but two calls give two signals with two connections, so
@@ -227,7 +225,8 @@ tree's lock. When the tree has processed a command:
   `simulateReceivedChange` plays the server's part.
 - Server: `InternalSignalTest` and the other tests in
   `packages/java/endpoint/src/test/java/com/vaadin/hilla/signals`.
-- Generator: `packages/ts/generator-plugin-signals/test`.
+- Generator: the `transfertypes/signals` case of `EndpointGenerationTest`
+  in `packages/java/typescript-generator`.
 - Integration tests with several browsers on one signal:
   `packages/java/tests/spring/react-signals`.
 - When the tree logic changes, compare it with `MutableTreeRevision` in Flow.
