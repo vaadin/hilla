@@ -162,8 +162,8 @@ because its id is known before the server answers.
 
 - `subscribe(providerEndpoint, providerMethod, clientSignalId, params)`, a
   `Flux` of commands, carried by the push connection of
-  `@vaadin/hilla-frontend` (see
-  [`../frontend/ARCHITECTURE.md`](../frontend/ARCHITECTURE.md#subscribing)).
+  `@vaadin/hilla-frontend` (`FluxConnection`, see
+  [`../frontend/src/FluxConnection.ts`](../frontend/src/FluxConnection.ts)).
 - `update(clientSignalId, command)`, a regular call, sent with `mute: true` so
   it doesn't show in Flow's loading indicator.
 
