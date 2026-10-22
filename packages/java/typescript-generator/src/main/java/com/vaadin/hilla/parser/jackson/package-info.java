@@ -20,8 +20,9 @@
  * without notice or deprecation. Do not use it in application code or
  * libraries.
  * <p>
- * The exception is
- * {@link com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory}, which
- * applications implement to customize endpoint serialization.
+ * The exceptions are
+ * {@link com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory} and
+ * {@link com.vaadin.hilla.parser.jackson.ByteArrayModule}, which applications
+ * use to customize endpoint serialization.
  */
 package com.vaadin.hilla.parser.jackson;

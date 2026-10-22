@@ -13,11 +13,13 @@ This module consolidates the Java-to-TypeScript code generation functionality fo
 > notice or deprecation. Do not depend on it from application code or
 > third-party libraries.
 >
-> The one exception is
+> The exceptions are
 > `com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory`, which an
 > application implements and registers as a bean with the
 > `endpointMapperFactory` qualifier to customize how endpoint values are
-> serialized. It remains public API.
+> serialized, and `com.vaadin.hilla.parser.jackson.ByteArrayModule`, which a
+> factory building its mapper from scratch registers to keep `byte[]` sent as
+> an array of numbers. They remain public API.
 
 ## What's Inside
 
