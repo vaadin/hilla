@@ -44,15 +44,29 @@ entries. There are two kinds:
 
 - `Spring`, when Spring Security's token is in the `XSRF-TOKEN` cookie or the
   `_csrf` meta tags of the page; the header name comes from `_csrf_header`.
-- `Vaadin` otherwise: the `csrfToken` cookie, sent as `X-CSRF-Token`. The
-  server's `CsrfChecker` compares the two (a double-submit cookie), and answers
-  `401` when they differ.
+  Flow writes the meta tags into `index.html` (its `SpringCsrfTokenUtil`), and
+  the cookie is set by Spring's `CookieCsrfTokenRepository`, which stateless
+  authentication uses.
+- `Vaadin` otherwise: the `csrfToken` cookie, sent as `X-CSRF-Token`.
+  `CsrfIndexHtmlRequestListener` sets the cookie on the `index.html` response
+  when Spring provides no token. The server's `CsrfChecker` compares the two
+  (a double-submit cookie), and answers `401` when they differ.
 
 In a page, `BrowserCsrfInfoSource` reads the info from the document. In a
 worker there is no document, so `SharedCsrfInfoSource` asks the pages for it
 over a `BroadcastChannel`; a page answers, and also broadcasts the info
 whenever it resets. `reset()` re-reads the info, and is what login and logout
 call when the token changes.
+
+This is what lets a service worker call endpoints (#3506). The client modules
+avoid DOM globals so that they can be bundled into the service worker (#3438),
+and Flow's service worker build defines `globalThis.document` as `undefined`,
+so the worker always picks `SharedCsrfInfoSource`. The two channels are
+`@vaadin/hilla-frontend/SharedCsrfUtils.update` and `.requestUpdate`. Each
+info carries a `timestamp`, and a receiver ignores info older than what it
+has, so a late answer from a stale tab doesn't overwrite a newer token. A
+page closes its channels on `pagehide` and asks for an update on `pageshow`,
+for when it comes back from the back/forward cache.
 
 ### Request body
 
@@ -192,7 +206,11 @@ it before anything else is sent:
 - `login` posts the form with a `source: typescript` header, so the server's
   success handler answers with `Result`, `Saved-url`, `Default-url` and the new
   Spring CSRF header and token in response headers. The client writes the
-  token into the `_csrf` meta tags and calls `csrfInfoSource.reset()`.
+  token into the `_csrf` meta tags and calls `csrfInfoSource.reset()`. The
+  server side of this contract is Flow's
+  `VaadinSavedRequestAwareAuthenticationSuccessHandler`; a login is successful
+  only with `Result: success`. After it, the client goes to `Saved-url`, then
+  `Default-url`, then the base URL.
 - `logout` uses a `fetch` when `navigate` or `onSuccess` is given, and reads
   the new token from the returned page; otherwise it submits a form and lets
   the browser navigate. When the logout fails, it retries with the token from
@@ -204,3 +222,11 @@ it before anything else is sent:
 Both helpers reload the page by default afterwards. An application that
 navigates without a reload keeps the open push connection, with the CSRF
 headers it was opened with.
+
+With stateless authentication (Flow's `VaadinStatelessSecurityConfigurer`),
+the user is kept in a JWT split over two cookies, and the server re-issues it
+on every response. The client never reads the token: who is logged in comes
+from an endpoint, through `@vaadin/hilla-react-auth`
+([`../react-auth/ARCHITECTURE.md`](../react-auth/ARCHITECTURE.md)). The only
+place the client touches it is `logout`, which removes the JS-readable
+`jwt.headerAndPayload` cookie even when the server could not be reached.

@@ -16,6 +16,7 @@ The more involved parts have their own architecture notes next to the code:
 | File router                     | [`file-router/ARCHITECTURE.md`](../packages/ts/file-router/ARCHITECTURE.md)                     |
 | CRUD components and services    | [`react-crud/ARCHITECTURE.md`](../packages/ts/react-crud/ARCHITECTURE.md)                       |
 | Internationalization runtime    | [`react-i18n/ARCHITECTURE.md`](../packages/ts/react-i18n/ARCHITECTURE.md)                       |
+| Authentication state in React   | [`react-auth/ARCHITECTURE.md`](../packages/ts/react-auth/ARCHITECTURE.md)                       |
 
 ## What Vaadin Flow provides
 

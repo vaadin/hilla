@@ -72,7 +72,10 @@ optional parameter, and any other `@` name.
 `TaskGenerateReactFiles` writes with the paths of the `@Layout` classes (and
 rewrites on hotswap). Each route under one of those paths gets `flowLayout:
 true`, so that the runtime renders it inside the server-side layout. Without
-the file, the routes are left as they are.
+the file, the routes are left as they are. A `flowLayout` set in the view's
+config wins over this flag, in the route module, in `file-routes.json` and in
+the runtime: `flowLayout: false` opts a view out of a server-side layout that
+covers its path (#4430).
 
 ### Reading the metadata
 
@@ -194,6 +197,34 @@ tree.
 
 The client checks access for the user experience only; the server enforces it
 (see below).
+
+### Fallback to Flow and Flow layouts
+
+The fallback component is Flow's `Flow` component from the generated
+`Flow.tsx`. Hilla only uses it as a React component: it never reads Flow's
+`serverSideRoutes`, and how `Flow` renders a server view is Flow's business
+(Flow's `flow-client/ARCHITECTURE.md`). What Hilla decides is where `Flow` goes
+in the tree.
+
+`withFallback` records `withLayout` first, then the fallback, so the layout
+split happens before fallbacks are added:
+
+1. `mergeLayout` sorts the routes by `flowLayout`. A route with the flag set to
+   `true` goes under the server layout with its children, except the children
+   that set it to `false`; a route with `false` stays a client route, and so do
+   routes without the flag whose ancestors don't have it. A parent whose
+   children are split ends up in both groups, each copy with its own children.
+   The server routes are wrapped in one pathless route that renders the layout
+   component and carries the `IGNORE_FALLBACK` flag.
+2. `createFallbackTransformer` adds the fallback to every branch that has
+   children, except the ones flagged `IGNORE_FALLBACK`, which are the server
+   layout routes; a path under a Flow layout that no client view matches
+   reaches the top-level fallback instead. A branch with a wildcard child gets only the index
+   fallback, a branch with an index or optional child only the wildcard
+   fallback, and any other branch both. Leaf routes are left alone.
+3. The fallback routes are also merged in at the top level, so the
+   application falls back to Flow even with no client routes at all, or with
+   only a client layout and nothing inside it (#2989, #3280, #3883).
 
 ### View config and menu
 
