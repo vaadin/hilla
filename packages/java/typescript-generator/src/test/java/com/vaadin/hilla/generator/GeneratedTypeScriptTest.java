@@ -144,8 +144,11 @@ public class GeneratedTypeScriptTest {
         var generator = new FullStackGenerator(GeneratedTypeScriptTest.class,
                 SampleEndpoint.class);
         generator.parseGeneration();
+        var generation = generator.parseGeneration();
 
-        assertEquals(1, generator.parseGeneration().endpoints().size());
+        assertEquals(1, generation.endpoints().size());
+        assertEquals(generationOf(SampleEndpoint.class), generation,
+                "What the first run found is not found again by the second");
     }
 
     private static Generation generationOf(Class<?>... endpoints) {
