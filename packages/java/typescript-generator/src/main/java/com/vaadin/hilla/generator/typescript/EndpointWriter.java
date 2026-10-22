@@ -216,7 +216,9 @@ public final class EndpointWriter {
      */
     private static String defaultValue(MethodModel method,
             Map<String, String> parameterNames, ModelWriter models) {
-        if (method.kind() == MethodModel.Kind.LIST_SIGNAL) {
+        // A list or a map starts out empty, so there is nothing to give
+        if (method.kind() == MethodModel.Kind.LIST_SIGNAL
+                || method.kind() == MethodModel.Kind.MAP_SIGNAL) {
             return "";
         }
 

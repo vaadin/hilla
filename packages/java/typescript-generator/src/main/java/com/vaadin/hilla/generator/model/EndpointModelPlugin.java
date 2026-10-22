@@ -105,7 +105,8 @@ public final class EndpointModelPlugin
                     com.vaadin.hilla.runtime.transfertypes.Signal.class,
                     com.vaadin.hilla.runtime.transfertypes.NumberSignal.class,
                     com.vaadin.hilla.runtime.transfertypes.ValueSignal.class,
-                    com.vaadin.hilla.runtime.transfertypes.ListSignal.class)
+                    com.vaadin.hilla.runtime.transfertypes.ListSignal.class,
+                    com.vaadin.hilla.runtime.transfertypes.MapSignal.class)
             .collect(java.util.stream.Collectors.toMap(Class::getName,
                     EndpointModelPlugin::providedType));
 
@@ -116,7 +117,8 @@ public final class EndpointModelPlugin
     private static final Map<String, MethodModel.Kind> SIGNAL_KINDS = Map.of(
             "NumberSignal", MethodModel.Kind.NUMBER_SIGNAL, "ValueSignal",
             MethodModel.Kind.VALUE_SIGNAL, "ListSignal",
-            MethodModel.Kind.LIST_SIGNAL);
+            MethodModel.Kind.LIST_SIGNAL, "MapSignal",
+            MethodModel.Kind.MAP_SIGNAL);
 
     /**
      * The Java types an endpoint sends a series of values through, which the
