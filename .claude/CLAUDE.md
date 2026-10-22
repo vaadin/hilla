@@ -12,6 +12,12 @@ Hilla is a web framework that integrates a Spring Boot Java backend with a react
 - Support for both React and Lit frontends
 - Plugin-based code generation architecture
 
+## Guidelines
+
+Design and implementation guidelines live in `guidelines/`. Read the chapters
+mapped in `guidelines/overview.md` selectively for the topics your work
+touches.
+
 ## Build Commands
 
 How the build keeps the npm versions in step with Flow and the platform, and
