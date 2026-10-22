@@ -55,8 +55,8 @@
       "@vaadin/common-frontend": "0.0.24",
       "@vaadin/component-base": "25.4.0-alpha4",
       "@vaadin/field-base": "25.4.0-alpha4",
-      "@vaadin/hilla-frontend": "25.4.0-alpha3",
-      "@vaadin/hilla-lit-form": "25.4.0-alpha3",
+      "@vaadin/hilla-frontend": "25.4.0-alpha4",
+      "@vaadin/hilla-lit-form": "25.4.0-alpha4",
       "@vaadin/icon": "25.4.0-alpha4",
       "@vaadin/icons": "25.4.0-alpha4",
       "@vaadin/input-container": "25.4.0-alpha4",
@@ -67,7 +67,8 @@
       "@vaadin/vaadin-lumo-styles": "25.4.0-alpha4",
       "@vaadin/vaadin-themable-mixin": "25.4.0-alpha4",
       "lit": "3.3.3",
-      "mobx": "6.3.3"
+      "mobx": "6.3.3",
+      "@vaadin/hilla-models": "25.4.0-alpha4"
     },
     "devDependencies": {
       "@babel/core": "7.29.7",
@@ -78,7 +79,7 @@
       "@rolldown/plugin-babel": "0.2.4",
       "@types/node": "26.6.5",
       "@typescript/native": "npm:typescript@7.0.2",
-      "@vaadin/hilla-generator-utils": "25.4.0-alpha3",
+      "@vaadin/hilla-generator-utils": "25.4.0-alpha4",
       "@vitejs/plugin-react": "6.1.2",
       "magic-string": "1.4.3",
       "rollup-plugin-brotli": "3.1.0",
