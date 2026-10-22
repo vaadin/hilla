@@ -2,6 +2,16 @@
 
 This module consolidates the Java-to-TypeScript code generation functionality for Hilla. It walks the Java classes annotated with `@BrowserCallable` and writes the type-safe TypeScript the browser calls them through.
 
+> [!IMPORTANT]
+> The Java API of this module is **not public API**. It exists solely to be
+> run by the Hilla development mode server and the production build (the Maven
+> plugin, the Gradle plugin and the Flow build tasks, through
+> `TypeScriptProcessor.generate`). Every class, method and package in it,
+> including `com.vaadin.hilla.parser.*` and `com.vaadin.hilla.generator.*`,
+> may change or be removed in any release, minor and maintenance ones
+> included, without notice or deprecation. Do not depend on it from
+> application code or third-party libraries.
+
 ## What's Inside
 
 The module is made of these parts:
@@ -171,4 +181,4 @@ This module was created by consolidating 9 separate `parser-jvm-*` modules to:
 - Improve maintainability
 - Speed up builds
 
-All package names remain unchanged (`com.vaadin.hilla.parser.*`), so existing code using these classes should continue to work with only a dependency update.
+All package names remain unchanged (`com.vaadin.hilla.parser.*`). As noted above, these classes are not public API, so code outside Hilla should not use them.
