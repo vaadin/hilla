@@ -18,9 +18,11 @@ package com.vaadin.hilla.generator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import com.vaadin.hilla.generator.model.EntityModel;
@@ -33,10 +35,10 @@ import com.vaadin.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint;
 import com.vaadin.hilla.parser.testutils.FullStackGenerator;
 
 /**
- * A generated enum holds what the server writes, and a form sends one of those
- * values back, so the mapper the endpoints use has to read each value as the
- * constant it was written from. The snapshots pin the values, not that they
- * read back.
+ * A generated enum holds what the mapper the endpoints use writes, and a form
+ * sends one of those values back, so that mapper has to read each value as the
+ * constant it was written from. Both are asked of the mapper itself, the
+ * default one and an application's own, rather than of fixed snapshots.
  */
 public class EnumValuesTest {
     @Test
@@ -70,15 +72,28 @@ public class EnumValuesTest {
         assertFalse(enums.isEmpty());
 
         for (var enumeration : enums) {
-            var cls = load(enumeration.javaClass());
+            var constants = load(enumeration.javaClass()).getEnumConstants();
 
             for (var constant : enumeration.constants()) {
+                var written = Arrays.stream(constants)
+                        .filter(c -> ((Enum<?>) c).name()
+                                .equals(constant.name()))
+                        .findFirst()
+                        .<JsonNode> map(mapper::valueToTree).orElseThrow();
+                var label = enumeration.javaClass() + "." + constant.name();
+
+                // What the server sends, where it sends a string: a constant
+                // written as a number keeps its name, a known limitation
+                if (written.isString()) {
+                    assertEquals(written.stringValue(), constant.value(),
+                            label);
+                }
+
                 assertEquals(constant.name(),
                         ((Enum<?>) mapper.readValue(
                                 mapper.writeValueAsString(constant.value()),
-                                cls)).name(),
-                        enumeration.javaClass() + " value "
-                                + constant.value());
+                                load(enumeration.javaClass()))).name(),
+                        label);
             }
         }
     }
