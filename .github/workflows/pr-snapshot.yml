@@ -190,10 +190,10 @@ jobs:
         # The backup poms are only in the way here, the checkout is thrown away
         # at the end of the job.
         run: |
-          mvn -q -B -ntp org.codehaus.mojo:versions-maven-plugin:2.22.0:set \
+          mvn -q -B -ntp org.codehaus.mojo:versions-maven-plugin:2.23.0:set \
             -DnewVersion="$VERSION" -DprocessAllModules=true -DgenerateBackupPoms=false
           if [ -n "$FLOW_VERSION" ]; then
-            mvn -q -N -B -ntp org.codehaus.mojo:versions-maven-plugin:2.22.0:set-property \
+            mvn -q -N -B -ntp org.codehaus.mojo:versions-maven-plugin:2.23.0:set-property \
               -Dproperty=flow.version -DnewVersion="$FLOW_VERSION" -DgenerateBackupPoms=false
           fi
       - name: Build TypeScript
