@@ -326,7 +326,7 @@ jobs:
 
           Built without running tests. Look at the checks on this pull request before relying on it.
 
-          Every new commit on this branch republishes it while the \`snapshot build\` label is there. Add \`-U\` to pick the newest build up.
+          Every new commit on this branch republishes it while the \`snapshot build\` label is there. Add \`-U\` to pick the newest Maven build up; the TypeScript packages need the step at the end of the instructions below on every rebuild.
 
           <details><summary>How to use it</summary>
           EOF
@@ -360,7 +360,7 @@ jobs:
 
           Replace the application's own \`vaadin-bom\` import with these rather than adding them next to it: with two \`vaadin-bom\` imports, the first one decides the platform version. Keep the order: Maven takes the first version it finds for an artifact, so \`vaadin-bom\` has to come last. \`$PLATFORM_VERSION\` is the unreleased platform snapshot of the same minor version as this one, so this also moves the application off its released platform version.
 
-          The jar pins the TypeScript packages to the pkg.pr.new previews of the same commit, e.g. \`https://pkg.pr.new/${{ github.repository }}/@vaadin/hilla-frontend@$_HEAD_SHA\`. Flow writes them to \`package.json\` of a new application. An existing application keeps the \`@vaadin/hilla-*\` versions it already has there: remove those entries to get the previews.
+          The jar pins the TypeScript packages to the pkg.pr.new previews of the same commit, e.g. \`https://pkg.pr.new/${{ github.repository }}/@vaadin/hilla-frontend@$_HEAD_SHA\`. Flow writes them to \`package.json\` only where it has no version of its own there yet: an application that already has \`@vaadin/hilla-*\` versions, including the previews of an earlier build of this pull request, keeps them. To move to the previews of this build, remove the \`@vaadin/hilla-*\` entries from both \`dependencies\` and the \`vaadin\` section of \`package.json\` before building the application. Removing them from \`dependencies\` alone leaves them out altogether.
           </details>
           EOF
           # One comment per pull request, edited in place, so a series of pushes

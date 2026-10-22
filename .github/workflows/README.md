@@ -45,9 +45,16 @@ snapshots it was paired with, and the matching `vaadin-bom` import
 (`25.4-SNAPSHOT` for the branch above) last, in the order Maven needs for the
 snapshots to win. It edits the same comment on every rebuild.
 
-Flow writes the preview URLs to `package.json` of a new application. An
-existing application keeps the `@vaadin/hilla-*` versions it already has there,
-so those entries have to be removed to get the previews.
+Flow writes the preview URLs to `package.json` only where it has no version
+of its own there yet. An application that already has `@vaadin/hilla-*`
+versions keeps them, and that includes the previews of an earlier build of the
+same pull request: Flow does not replace a URL it wrote before, because it
+cannot compare it as a version. So on every rebuild, not just the first one,
+the `@vaadin/hilla-*` entries have to be removed from both `dependencies` and
+the `vaadin` section of `package.json` for the application to pick up the new
+previews. Removing them from `dependencies` alone leaves the packages out
+altogether, as Flow then finds its own record in the `vaadin` section and adds
+nothing. `-U` only refreshes the Maven half.
 
 Dropping the prefix means the version is only as unique as the part of the
 branch name after the last slash: `fix/npe` and `issues/npe` both publish
