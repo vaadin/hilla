@@ -12,12 +12,12 @@
     "@vaadin/common-frontend": "0.0.24",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
-    "@vaadin/icon": "25.3.3",
-    "@vaadin/icons": "25.3.3",
+    "@vaadin/icon": "25.3.4",
+    "@vaadin/icons": "25.3.4",
     "@vaadin/router": "2.0.1",
-    "@vaadin/tooltip": "25.3.3",
-    "@vaadin/vaadin-lumo-styles": "25.3.3",
-    "@vaadin/vaadin-themable-mixin": "25.3.3",
+    "@vaadin/tooltip": "25.3.4",
+    "@vaadin/vaadin-lumo-styles": "25.3.4",
+    "@vaadin/vaadin-themable-mixin": "25.3.4",
     "lit": "3.3.3",
     "mobx": "6.3.3"
   },
@@ -60,12 +60,12 @@
       "@vaadin/common-frontend": "0.0.24",
       "@vaadin/hilla-frontend": "25.3.3",
       "@vaadin/hilla-lit-form": "25.3.3",
-      "@vaadin/icon": "25.3.3",
-      "@vaadin/icons": "25.3.3",
+      "@vaadin/icon": "25.3.4",
+      "@vaadin/icons": "25.3.4",
       "@vaadin/router": "2.0.1",
-      "@vaadin/tooltip": "25.3.3",
-      "@vaadin/vaadin-lumo-styles": "25.3.3",
-      "@vaadin/vaadin-themable-mixin": "25.3.3",
+      "@vaadin/tooltip": "25.3.4",
+      "@vaadin/vaadin-lumo-styles": "25.3.4",
+      "@vaadin/vaadin-themable-mixin": "25.3.4",
       "lit": "3.3.3",
       "mobx": "6.3.3"
     },
@@ -102,7 +102,7 @@
       "vite": "8.3.4",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "1c542e6908a84d2417cb47ecdbbbb6cc659b8af08479e3786fe7bd72cf378520"
+    "hash": "10dcd206a8b416950410b8193960409a48560742892dcbfe225cf2d6d0d93b57"
   },
   "overrides": {
     "@adobe/lit-mobx": "$@adobe/lit-mobx",
