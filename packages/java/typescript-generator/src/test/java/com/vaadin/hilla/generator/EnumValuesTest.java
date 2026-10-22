@@ -78,8 +78,8 @@ public class EnumValuesTest {
                 var written = Arrays.stream(constants)
                         .filter(c -> ((Enum<?>) c).name()
                                 .equals(constant.name()))
-                        .findFirst()
-                        .<JsonNode> map(mapper::valueToTree).orElseThrow();
+                        .findFirst().<JsonNode> map(mapper::valueToTree)
+                        .orElseThrow();
                 var label = enumeration.javaClass() + "." + constant.name();
 
                 // What the server sends, where it sends a string: a constant
