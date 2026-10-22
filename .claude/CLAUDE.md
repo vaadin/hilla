@@ -91,6 +91,9 @@ mvn test -Dtest=ClassName#methodName
 
 ## Architecture
 
+Deeper notes on each subsystem live in `ARCHITECTURE.md` files next to the
+code, listed at the top of `guidelines/architecture.md`.
+
 ### Monorepo Structure
 
 This is an Nx-based monorepo with:
@@ -113,7 +116,7 @@ This is an Nx-based monorepo with:
 - Integrates with Maven/Gradle plugins
 
 #### Parser and generator (`packages/java/typescript-generator`)
-- **parser core**: Walks the browser callable classes with ClassGraph
+- **parser core**: Walks the browser callable classes with reflection
 - **plugins**: Say what the walk finds:
   - `backbone`: The endpoints, their methods and the types they send
   - `model`: What the validation and persistence annotations say about a value
