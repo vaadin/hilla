@@ -95,6 +95,7 @@
     "lint-staged": "15.4.3",
     "lit": "3.3.3",
     "magic-string": "1.4.3",
+    "meow": "13.2.0",
     "micromatch": "4.0.8",
     "nx": "20.4.5",
     "oxc-transform": "0.50.0",
