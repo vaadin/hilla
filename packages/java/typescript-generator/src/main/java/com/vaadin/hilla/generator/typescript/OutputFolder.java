@@ -43,6 +43,10 @@ import com.vaadin.flow.internal.FileIOUtils;
  * A file whose content has not changed is left untouched rather than written
  * again, so that watching the folder, as the development server does, only sees
  * what actually differs.
+ * <p>
+ * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
+ * itself, and may change or be removed in any release without notice or
+ * deprecation. Do not use it in application code or libraries.
  */
 public final class OutputFolder {
     /**

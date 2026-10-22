@@ -19,6 +19,11 @@ import com.vaadin.hilla.parser.models.MethodInfoModel
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode
 import kotlin.reflect.KFunction
 
+/**
+ * **Internal API.** Not part of the public Hilla API: used only by Hilla
+ * itself, and may change or be removed in any release without notice or
+ * deprecation. Do not use it in application code or libraries.
+ */
 class KMethodNode(
     source: MethodInfoModel,
     val kFunction: KFunction<*>

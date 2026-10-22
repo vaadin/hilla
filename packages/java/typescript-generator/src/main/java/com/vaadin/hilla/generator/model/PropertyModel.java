@@ -20,6 +20,10 @@ import java.util.Objects;
 /**
  * A property of an entity, under the name it is serialized as, which is not
  * necessarily the name of the Java field or of the method reading it.
+ * <p>
+ * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
+ * itself, and may change or be removed in any release without notice or
+ * deprecation. Do not use it in application code or libraries.
  */
 public record PropertyModel(String name, TypeModel type) {
     public PropertyModel {

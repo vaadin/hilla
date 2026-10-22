@@ -24,6 +24,11 @@ import java.util.Set;
 import io.github.classgraph.TypeParameter;
 import org.jspecify.annotations.NonNull;
 
+/**
+ * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
+ * itself, and may change or be removed in any release without notice or
+ * deprecation. Do not use it in application code or libraries.
+ */
 public abstract class TypeParameterModel extends AnnotatedAbstractModel
         implements SignatureModel, NamedModel {
     /**

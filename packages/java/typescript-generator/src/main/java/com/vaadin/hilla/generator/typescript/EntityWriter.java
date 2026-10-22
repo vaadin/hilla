@@ -23,6 +23,10 @@ import com.vaadin.hilla.generator.model.PropertyModel;
 
 /**
  * Writes the file declaring one of the types the endpoints refer to.
+ * <p>
+ * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
+ * itself, and may change or be removed in any release without notice or
+ * deprecation. Do not use it in application code or libraries.
  */
 public final class EntityWriter {
     private static final String BEAN = """

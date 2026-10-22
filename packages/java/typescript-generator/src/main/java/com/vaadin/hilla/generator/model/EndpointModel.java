@@ -22,6 +22,11 @@ import java.util.Objects;
  * A browser callable class as the TypeScript generator needs it: the name the
  * client calls it by, and the methods it exposes.
  *
+ * <p>
+ * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
+ * itself, and may change or be removed in any release without notice or
+ * deprecation. Do not use it in application code or libraries.
+ *
  * @param name
  *            the name used both for the generated file and in the calls to the
  *            server, which is not necessarily the simple name of the Java class

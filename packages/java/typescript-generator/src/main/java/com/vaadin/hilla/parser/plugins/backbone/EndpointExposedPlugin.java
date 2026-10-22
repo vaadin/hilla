@@ -37,6 +37,11 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointSignatureNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 
+/**
+ * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
+ * itself, and may change or be removed in any release without notice or
+ * deprecation. Do not use it in application code or libraries.
+ */
 public final class EndpointExposedPlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
     @NonNull

@@ -23,6 +23,11 @@ import com.vaadin.hilla.parser.models.AnnotatedAbstractModel;
 import com.vaadin.hilla.parser.models.AnnotatedModel;
 import com.vaadin.hilla.parser.models.Model;
 
+/**
+ * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
+ * itself, and may change or be removed in any release without notice or
+ * deprecation. Do not use it in application code or libraries.
+ */
 public abstract class JacksonModel<F extends Model, G extends Model, S extends Model>
         extends AnnotatedAbstractModel implements Model, AnnotatedModel {
     protected final BeanPropertyDefinition origin;

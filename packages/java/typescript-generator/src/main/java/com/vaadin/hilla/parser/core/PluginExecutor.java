@@ -30,6 +30,11 @@ import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
+ * itself, and may change or be removed in any release without notice or
+ * deprecation. Do not use it in application code or libraries.
+ */
 public final class PluginExecutor {
     private static final Logger logger = LoggerFactory
             .getLogger(PluginExecutor.class);

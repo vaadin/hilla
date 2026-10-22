@@ -22,6 +22,10 @@ import com.vaadin.hilla.generator.model.UnionModel;
 /**
  * Writes the file saying which of its subtypes a value of a polymorphic type
  * can be, which is what lets TypeScript tell them apart by the discriminator.
+ * <p>
+ * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
+ * itself, and may change or be removed in any release without notice or
+ * deprecation. Do not use it in application code or libraries.
  */
 public final class UnionWriter {
     /**
