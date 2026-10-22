@@ -212,8 +212,12 @@ jobs:
         # that exact form, or npm installs a second copy of a package. The
         # comment of pkg.pr.new itself is turned off: the one of this workflow
         # below lists the packages next to the Maven coordinates.
+        #
+        # The CLI is a root devDependency, run from the node_modules the setup
+        # action installed from the lockfile with --ignore-scripts, rather than
+        # through npx, which would download whatever it resolves and run that.
         run: |
-          npx --yes pkg-pr-new@0.0.91 publish './packages/ts/*' --no-compact --comment=off
+          node_modules/.bin/pkg-pr-new publish './packages/ts/*' --no-compact --comment=off
       - name: Pin the npm packages in the jar
         # The `hilla` jar lists the TypeScript packages Flow adds to an
         # application, at the version of the packages in this repository,
