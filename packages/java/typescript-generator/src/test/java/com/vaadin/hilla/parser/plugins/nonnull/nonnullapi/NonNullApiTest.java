@@ -15,28 +15,18 @@
  */
 package com.vaadin.hilla.parser.plugins.nonnull.nonnullapi;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import com.vaadin.hilla.parser.core.Parser;
-import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.nonnull.AnnotationMatcher;
 import com.vaadin.hilla.parser.plugins.nonnull.NonnullPlugin;
 import com.vaadin.hilla.parser.plugins.nonnull.NonnullPluginConfig;
-import com.vaadin.hilla.parser.plugins.nonnull.test.helpers.TestHelper;
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
-import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
+import com.vaadin.hilla.parser.testutils.AbstractFullStackTest;
 
-public class NonNullApiTest {
-    private final TestHelper helper = new TestHelper(getClass());
-
+public class NonNullApiTest extends AbstractFullStackTest {
     @Test
-    public void should_ApplyNonNullApiAnnotation()
-            throws IOException, URISyntaxException {
+    public void should_ApplyNonNullApiAnnotation() {
         var plugin = new NonnullPlugin();
         plugin.setConfiguration(new NonnullPluginConfig(Set.of(
                 new AnnotationMatcher(NonNullApi.class.getName(), false, 10),
@@ -48,13 +38,7 @@ public class NonNullApiTest {
                         20)),
                 null));
 
-        var openAPI = new Parser()
-                .classPath(Set.of(helper.getTargetDir().toString()))
-                .endpointAnnotations(List.of(Endpoint.class))
-                .endpointExposedAnnotations(List.of(EndpointExposed.class))
-                .addPlugin(new BackbonePlugin()).addPlugin(plugin)
-                .execute(List.of(NonNullApiEndpoint.class));
-
-        helper.executeParserWithConfig(openAPI);
+        assertTypescriptMatchesSnapshot(
+                generator(NonNullApiEndpoint.class).withPlugin(plugin));
     }
 }

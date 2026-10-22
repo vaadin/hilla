@@ -1,0 +1,233 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.hilla.parser.testutils;
+
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
+import reactor.core.publisher.Flux;
+
+import com.vaadin.hilla.EndpointSubscription;
+import com.vaadin.hilla.generator.model.EndpointModelPlugin;
+import com.vaadin.hilla.generator.model.Generation;
+import com.vaadin.hilla.generator.typescript.TypeScriptWriter;
+import com.vaadin.hilla.parser.core.Parser;
+import com.vaadin.hilla.parser.core.Plugin;
+import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
+import com.vaadin.hilla.parser.plugins.model.ModelPlugin;
+import com.vaadin.hilla.parser.plugins.nonnull.NonnullPlugin;
+import com.vaadin.hilla.parser.plugins.subtypes.SubTypesPlugin;
+import com.vaadin.hilla.parser.plugins.transfertypes.MultipartFileCheckerPlugin;
+import com.vaadin.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
+
+/**
+ * Runs the complete endpoint code generation pipeline for a set of browser
+ * callable classes and returns the generated TypeScript files.
+ *
+ * <p>
+ * The generator is configured exactly like a real application: the same parser
+ * plugins in the same order, and the same TypeScript generator plugins. Tests
+ * only need to say which classes to generate from, so that they describe the
+ * externally visible contract: given these Java classes, these TypeScript files
+ * with this content are produced in these locations.
+ */
+public final class FullStackGenerator {
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(FullStackGenerator.class);
+
+    /**
+     * The name of the Kotlin nullability plugin, which is only loaded when both
+     * the plugin and {@code kotlin-reflect} are available, following the same
+     * rule as {@code ParserConfiguration}.
+     */
+    private static final String KOTLIN_NULLABILITY_PLUGIN = "com.vaadin.hilla.parser.plugins.nonnull.kotlin.KotlinNullabilityPlugin";
+
+    /**
+     * The annotations by which the test endpoints are recognized.
+     */
+    private static final List<Class<? extends Annotation>> ENDPOINT_ANNOTATIONS = List
+            .of(Endpoint.class);
+
+    private static final List<Class<? extends Annotation>> ENDPOINT_EXPOSED_ANNOTATIONS = List
+            .of(EndpointExposed.class);
+
+    /**
+     * Types which the endpoints of a test may refer to and which the parser has
+     * to be able to find, in addition to the test classes themselves.
+     */
+    private static final List<Class<?>> SCANNED_TYPES = List.of(Flux.class,
+            EndpointSubscription.class, Pageable.class);
+
+    private final Path targetDir;
+    private final List<Class<?>> endpointClasses;
+    private final EndpointModelPlugin modelPlugin = new EndpointModelPlugin();
+    private final List<Plugin> plugins = defaultParserPlugins();
+    private boolean clientFileIncluded;
+    private String snapshotsPackage;
+
+    public FullStackGenerator(Class<?> testClass, Class<?>... endpointClasses) {
+        try {
+            this.targetDir = new ResourceLoader(testClass).findTargetDirPath();
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException("Unable to find the target folder",
+                    e);
+        }
+        this.endpointClasses = List.of(endpointClasses);
+        this.snapshotsPackage = testClass.getPackageName();
+    }
+
+    /**
+     * Uses the given configured plugin instead of the default instance of the
+     * same plugin class. The chain itself is not affected: every test runs
+     * through all the plugins, in the production order, so that only the
+     * configuration of a plugin can differ from a real application.
+     *
+     * @param plugin
+     *            a configured instance of one of the plugins of the chain
+     */
+    public FullStackGenerator withPlugin(Plugin plugin) {
+        var index = plugins.stream().map(Object::getClass).toList()
+                .indexOf(plugin.getClass());
+
+        if (index < 0) {
+            throw new IllegalArgumentException(plugin.getClass().getSimpleName()
+                    + " is not part of the plugin chain, so it cannot"
+                    + " be configured for a test");
+        }
+
+        plugins.set(index, plugin);
+
+        return this;
+    }
+
+    /**
+     * Reads the expected files from the snapshots folder of the given package
+     * instead of the one of the test class. Needed by tests which cover more
+     * than one package.
+     */
+    public FullStackGenerator withSnapshotsIn(String packageName) {
+        this.snapshotsPackage = packageName;
+        return this;
+    }
+
+    String getSnapshotsPackage() {
+        return snapshotsPackage;
+    }
+
+    /**
+     * Includes the generated client file in the comparison. It is the same for
+     * every endpoint, so it is left out unless a test is about it.
+     */
+    public FullStackGenerator withClientFile() {
+        this.clientFileIncluded = true;
+        return this;
+    }
+
+    boolean isClientFileIncluded() {
+        return clientFileIncluded;
+    }
+
+    /**
+     * Writes the TypeScript of a generation and returns the files, keyed by
+     * their path relative to the output folder.
+     */
+    public static Map<String, String> write(Generation generation) {
+        var files = new LinkedHashMap<String, String>();
+
+        new TypeScriptWriter().write(generation)
+                .forEach(file -> files.put(file.path(), file.content()));
+
+        return files;
+    }
+
+    /**
+     * Runs the Java part of the pipeline and returns everything one generation
+     * of TypeScript is written from.
+     */
+    public Generation parseGeneration() {
+        parse();
+        return modelPlugin.getGeneration();
+    }
+
+    /**
+     * Runs only the Java part of the pipeline. Available for the few tests
+     * which assert on things that are not visible in the generated TypeScript.
+     */
+    public void parse() {
+        try {
+            var classPath = ResourceLoader.getClasspath(SCANNED_TYPES.stream()
+                    .map(ResourceLoader::new).collect(Collectors.toList()));
+            var parser = new Parser()
+                    .classPath(classPath.split(File.pathSeparator))
+                    .endpointAnnotations(ENDPOINT_ANNOTATIONS)
+                    .endpointExposedAnnotations(ENDPOINT_EXPOSED_ANNOTATIONS);
+            // Collects what the TypeScript is written from while the other
+            // plugins walk the classes, without changing anything they do. It
+            // goes first so that it is the last to exit a node, by which time
+            // the plugins deciding whether a value can be absent have run
+            parser.addPlugin(modelPlugin);
+            plugins.forEach(parser::addPlugin);
+
+            parser.execute(endpointClasses);
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException("Unable to build the classpath", e);
+        }
+    }
+
+    private static List<Plugin> defaultParserPlugins() {
+        // Same plugins in the same order as ParserConfiguration uses for a
+        // real application.
+        var plugins = new ArrayList<Plugin>(List.of(new BackbonePlugin(),
+                new MultipartFileCheckerPlugin(), new TransferTypesPlugin()));
+
+        try {
+            var pluginClass = Class.forName(KOTLIN_NULLABILITY_PLUGIN);
+
+            // Check that a class from kotlin-reflect is available:
+            Class.forName("kotlin.reflect.KClass");
+
+            plugins.add((Plugin) pluginClass.getDeclaredConstructor()
+                    .newInstance());
+        } catch (Throwable e) {
+            LOGGER.debug("Kotlin nullability plugin is not going to be loaded",
+                    e);
+        }
+
+        plugins.addAll(List.of(new NonnullPlugin(), new SubTypesPlugin(),
+                new ModelPlugin()));
+
+        return plugins;
+    }
+
+    /**
+     * Returns the module folder, which is the parent of the build folder.
+     */
+    Path getModuleDir() {
+        return targetDir.getParent();
+    }
+}

@@ -21,11 +21,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.swagger.v3.oas.models.media.Schema;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
@@ -36,10 +36,10 @@ import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.models.AnnotatedModel;
 import com.vaadin.hilla.parser.models.AnnotationInfoModel;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
-import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.PackageInfoModel;
 import com.vaadin.hilla.parser.models.SpecializedModel;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
+import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.AnnotatedNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
@@ -47,6 +47,13 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 
 public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
+    /**
+     * Annotations which can be placed on other elements too, but are only
+     * supported on packages, as the endpoint runtime only checks them there.
+     */
+    private static final Set<String> PACKAGE_ONLY_ANNOTATIONS = Set
+            .of("org.jspecify.annotations.NullMarked");
+
     private Map<String, AnnotationMatcher> annotationsMap = mapByName(
             NonnullPluginConfig.Processor.defaults);
 
@@ -61,73 +68,38 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
     }
 
     @Override
-    public void enter(NodePath<?> nodePath) {
-    }
-
-    @Override
     public void exit(NodePath<?> nodePath) {
         var node = nodePath.getNode();
 
-        if (node.getTarget() instanceof Schema) {
-            var schema = (Schema<?>) node.getTarget();
+        if (node.getTarget() instanceof TypeFacts type) {
             var nodeSource = node.getSource();
 
             if ((nodeSource instanceof SpecializedModel)
                     && ((SpecializedModel) nodeSource).isOptional()) {
                 // Optional is always nullable, regardless of annotations
-                schema.setNullable(true);
+                type.setOptional(true);
             } else {
-                // Apply annotations from package (NonNullApi)
-                var annotations = getPackageAnnotationsStream(nodePath);
+                Stream<AnnotationInfoModel> annotations = Stream.empty();
 
                 // Apply from current node, if it is annotated
                 if (node instanceof AnnotatedNode) {
-                    annotations = Stream.concat(annotations,
-                            ((AnnotatedNode) node).getAnnotations().stream());
+                    annotations = ((AnnotatedNode) node).getAnnotations()
+                            .stream();
                 }
 
                 annotations = considerAscendantAnnotations(annotations,
                         nodePath);
 
-                computeNullabilityFromAnnotations(annotations).ifPresent(
-                        nullable -> schema.setNullable(nullable ? true : null));
+                // Apply annotations from package (NonNullApi, NullMarked)
+                annotations = Stream.concat(
+                        getPackageAnnotationsStream(nodePath),
+                        annotations
+                                .filter(annotation -> !PACKAGE_ONLY_ANNOTATIONS
+                                        .contains(annotation.getName())));
 
-                // For type arguments, it is necessary to apply the same
-                // processing
-                if (nodeSource instanceof ClassRefSignatureModel) {
-                    var args = ((ClassRefSignatureModel) nodeSource)
-                            .getTypeArguments();
+                computeNullabilityFromAnnotations(annotations)
+                        .ifPresent(type::setOptional);
 
-                    if (!args.isEmpty()) {
-                        Optional.ofNullable(schema.getExtensions())
-                                .map(ext -> ext.get("x-type-arguments"))
-                                .map(ext -> (Schema<?>) ext)
-                                .map(Schema::getAllOf).ifPresent(schemas -> {
-                                    if (schemas.size() != args.size()) {
-                                        throw new IllegalStateException(
-                                                "Number of parameters mismatch for "
-                                                        + nodePath);
-                                    }
-
-                                    var nullables = args.stream()
-                                            .map(param -> Stream.concat(
-                                                    getPackageAnnotationsStream(
-                                                            nodePath),
-                                                    param.getAnnotations()
-                                                            .stream()))
-                                            .map(this::computeNullabilityFromAnnotations)
-                                            .toList();
-
-                                    for (var i = 0; i < nullables.size(); i++) {
-                                        var sch = schemas.get(i);
-                                        nullables.get(i).ifPresent(
-                                                nullable -> sch.setNullable(
-                                                        nullable ? true
-                                                                : null));
-                                    }
-                                });
-                    }
-                }
             }
         }
     }

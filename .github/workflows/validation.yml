@@ -6,27 +6,51 @@ defaults:
 
 on:
   push:
-    branches: [main, '25.1', '25.0', '24.9', '2.5', '1.5']
+    branches: [main, '25.2', '25.1', '24.10', '24.9', '2.5', '1.5']
     paths-ignore:
       - 'hilla-logo.svg'
       - 'README.md'
       - '.github/ISSUE_TEMPLATE/*'
       - 'packages/**/README.md'
       - 'scripts/generator/templates/**/*.md'
+  # No `branches` filter here: it matches the pull request's base branch, so
+  # listing only the long-lived branches skipped every stacked pull request -
+  # one based on the branch below it in the stack instead of on main. Those
+  # branches are not in the `push` list either, so their code got no
+  # validation at all until the stack was retargeted. Release branches are
+  # unaffected: a pull request runs the workflow file from its own merge
+  # commit, so a pull request against e.g. 24.9 uses that branch version of
+  # this file.
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: [main]
     paths-ignore:
       - 'hilla-logo.svg'
       - 'README.md'
       - '.github/ISSUE_TEMPLATE/*'
       - 'packages/**/README.md'
       - 'scripts/generator/templates/**/*.md'
+  # Called by validation-label.yml for the two labels that ask for a job the
+  # other events leave out - `run-windows-tests` and `run-native-build` - so
+  # that adding one starts that job on a pull request that is already open,
+  # without a commit to push. The `labeled` event is there rather than here
+  # because it fires for every label: a run of this workflow started by any
+  # other label skipped all of its jobs, which listed skipped copies of the
+  # real checks on the pull request. A called workflow sees the event of its
+  # caller, so a run started by a label runs only what the label asks for:
+  # what that is, the init job below works out once and the jobs after it
+  # read from its outputs.
+  workflow_call:
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: ${{ github.head_ref || github.ref_name }}
+  # A run a label started gets a group of its own, one per label, so that it
+  # neither cancels the runs of the pull request itself nor is cancelled by
+  # them.
+  group: >-
+    ${{ github.event.action == 'labeled'
+    && format('{0}-{1}', github.head_ref, github.event.label.name)
+    || github.head_ref || github.ref_name }}
   cancel-in-progress: true
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -41,6 +65,20 @@ jobs:
     timeout-minutes: 10
     env:
       NX_SKIP_NX_CACHE: true
+    # What a run started by a label asks for, read once here and by the jobs
+    # below as `needs.init.outputs`, rather than repeated in every condition.
+    # A run any other event started asks for everything. The conditions read
+    # these as "not false", so that a job runs rather than skips if it ever
+    # sees no answer at all - re-running the failed jobs of a run does not
+    # run this one again.
+    outputs:
+      everything: ${{ github.event.action != 'labeled' }}
+      windows_tests: >-
+        ${{ github.event.action != 'labeled'
+        || github.event.label.name == 'run-windows-tests' }}
+      native_build: >-
+        ${{ github.event.action != 'labeled'
+        || github.event.label.name == 'run-native-build' }}
 
     steps:
       - name: Check secrets
@@ -85,6 +123,7 @@ jobs:
   check-style:
     needs: init
     name: Check style
+    if: ${{ needs.init.outputs.everything != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -108,10 +147,13 @@ jobs:
         run: mvn -B spotless:check
       - name: Lint TypeScript
         run: npm run check
+      - name: Test Prepare Scripts
+        run: npm run test:prepare
 
   test-java:
     needs: init
     name: Test Java
+    if: ${{ needs.init.outputs.everything != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -135,10 +177,14 @@ jobs:
         run: mvn -B -am -P\!it-modules verify -pl '!:hilla-gradle-plugin'
       - name: Collect Coverage
         run: |
-          COVFILES=$(find packages/java -wholename 'target/site/jacoco/jacoco.xml' | tr '\n' ',' | sed '$s/,$//')
+          COVFILES=$(find packages/java -wholename '*/target/site/jacoco/jacoco.xml' | tr '\n' ',' | sed '$s/,$//')
+          if [ -z "$COVFILES" ]; then
+            echo "::error::No JaCoCo report found under packages/java, so there is nothing to upload."
+            exit 1
+          fi
           echo "COVFILES=$COVFILES" >> $GITHUB_ENV
       - name: Send Coverage to Codecov
-        if: ${{ env.COVFILES != '' && !github.event.pull_request.head.repo.fork }}
+        if: ${{ !github.event.pull_request.head.repo.fork }}
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -150,6 +196,7 @@ jobs:
   test-typescript:
     needs: init
     name: Test TypeScript
+    if: ${{ needs.init.outputs.everything != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -194,7 +241,9 @@ jobs:
   test-it:
     needs:
       - init
-    if: ${{ !github.event.pull_request.head.repo.fork }}
+    if: >-
+      ${{ !github.event.pull_request.head.repo.fork
+      && needs.init.outputs.everything != 'false' }}
     name: ITs
     timeout-minutes: 25
     strategy:
@@ -202,11 +251,11 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            it-modules: group-1
+            it-modules: endpoints
           - os: ubuntu-latest
-            it-modules: group-2
+            it-modules: security
           - os: ubuntu-latest
-            it-modules: some
+            it-modules: react
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -237,7 +286,6 @@ jobs:
             mvn -B -am -ntp -fae \
               -Dfailsafe.forkCount=4 \
               -Dcom.vaadin.testbench.Parameters.testsInParallel=5 \
-              -Dfailsafe.rerunFailingTestsCount=2 \
               -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \
               -Dmaven.wagon.http.retryHandler.count=3 \
               -P\!it-modules \
@@ -256,15 +304,36 @@ jobs:
   test-gradle:
     needs:
       - init
-    if: ${{ !github.event.pull_request.head.repo.fork }}
+    if: >-
+      ${{ !github.event.pull_request.head.repo.fork
+      && needs.init.outputs.windows_tests != 'false' }}
     name: Gradle tests
     timeout-minutes: 25
     strategy:
       fail-fast: false
+      # The Windows legs take ~10 and ~6 minutes while every other validation
+      # job is done in 4, so they alone decide how long a PR waits. They guard
+      # path-separator and file-locking behaviour, which rarely changes, so run
+      # them on pushes to main and the release branches (i.e. on every merge)
+      # and on workflow_dispatch, but not on pull requests. To get them on a
+      # PR, add the `run-windows-tests` label: that starts a run of the
+      # Windows legs alone, since the Ubuntu ones have already run with the
+      # rest of the validation. Re-running an existing run does not pick the
+      # label up, because it replays the original event payload.
       matrix:
-        include:
-          - os: ubuntu-latest
-          - os: windows-latest
+        os: >-
+          ${{ fromJSON(github.event.action == 'labeled'
+          && '["windows-latest"]'
+          || (github.event_name == 'pull_request'
+          && !contains(github.event.pull_request.labels.*.name, 'run-windows-tests')
+          && '["ubuntu-latest"]')
+          || '["ubuntu-latest", "windows-latest"]') }}
+        # The plugin leg (the gradle-plugin functional tests) and the IT leg
+        # (kotlin-gradle-test) are independent once the plugin is in the local
+        # Maven repository, and running them one after the other made this the
+        # longest validation job. Both legs publish the plugin first, which
+        # costs half a minute each, and the tests then run in parallel.
+        task: [plugin, its]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -285,6 +354,20 @@ jobs:
           tar cf - .m2 | (cd ~ && tar xf -)
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
+      # The functional tests run the build under test with the Gradle version
+      # pinned in TestUtils.kt, which TestKit downloads into the Gradle user
+      # home. setup-gradle only caches wrapper zips, and TestKit deletes the
+      # zip once it has unpacked it, so without this the distribution is
+      # downloaded again on every run. Keep the version in sync with
+      # TestProject.gradleVersion in TestUtils.kt.
+      - name: Cache the Gradle distribution used by TestKit
+        if: ${{ matrix.task == 'plugin' }}
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.GRADLE_USER_HOME || '~/.gradle' }}/wrapper/dists/gradle-8.14-bin
+          key: ${{ runner.os }}-testkit-gradle-dist-${{ hashFiles('packages/java/gradle-plugin/src/functionalTest/kotlin/com/vaadin/hilla/gradle/plugin/TestUtils.kt') }}
+          restore-keys: |
+            ${{ runner.os }}-testkit-gradle-dist-
       - name: Set TB License
         run: |
           TB_LICENSE=${{secrets.TB_LICENSE}}
@@ -293,35 +376,128 @@ jobs:
       - name: publish plugin to Maven Local
         run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin build publishToMavenLocal -x functionalTest
       - name: Test gradle-plugin's functional tests
+        if: ${{ matrix.task == 'plugin' }}
         run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin functionalTest
       - name: Gradle ITs
+        if: ${{ matrix.task == 'its' }}
         run: ./packages/java/tests/gradle/kotlin-gradle-test/gradlew --info --stacktrace -p packages/java/tests/gradle/kotlin-gradle-test clean integrationTest
       - uses: actions/upload-artifact@v6
         if: ${{ failure() || success() }}
         with:
-          name: saved-outputs-gradle-${{ matrix.os }}
+          name: saved-outputs-gradle-${{ matrix.os }}-${{ matrix.task }}
           path: |
             packages/java/tests/**/target/*-reports/*
             packages/java/tests/**/error-screenshots/*.png
             packages/java/gradle-plugin/build/test-results/*
             packages/java/gradle-plugin/build/reports/*
 
+  test-native:
+    needs:
+      - init
+    name: Native build
+    # Building the test application into a GraalVM native image takes minutes
+    # and needs a GraalVM JDK, so this runs like the Windows Gradle legs: on
+    # pushes to main and the release branches, on workflow_dispatch, and on a
+    # pull request that asks for it with the `run-native-build` label, which
+    # starts a run of its own when it is added. The label is separate from
+    # `run-windows-tests`, so that a pull request can ask for the native
+    # build without the Windows legs and the other way around - hence the
+    # second condition, which keeps adding the other label from building the
+    # image again.
+    if: >-
+      ${{ !github.event.pull_request.head.repo.fork
+      && (github.event_name != 'pull_request'
+      || contains(github.event.pull_request.labels.*.name, 'run-native-build'))
+      && needs.init.outputs.native_build != 'false' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout Project Code
+        uses: actions/checkout@v5
+        with:
+          ref: ${{env._HEAD_SHA}}
+          fetch-depth: 0
+      - name: Setup
+        uses: ./.github/actions/setup
+      # Replaces the JDK of the setup action with one that has native-image.
+      # The image is built with the current GraalVM rather than with the 21 the
+      # other jobs compile against: the native-image of GraalVM for JDK 21 ends
+      # the build with "Classes that should be initialized at run time got
+      # initialized during image building" for the logging classes, which the
+      # AOT output of Spring Boot 4 expects a newer one to handle. The classes
+      # themselves are still compiled for 21, as everywhere else.
+      - name: Setup GraalVM
+        uses: graalvm/setup-graalvm@0426e2e191540e8514dff98dc52a5f5146a2a276 # v1.6.6
+        with:
+          distribution: graalvm
+          java-version: '25'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v7
+        with:
+          name: saved-workspace
+      - name: Restore Workspace
+        run: |
+          set -x
+          tar xf workspace.tar
+          tar cf - .m2 | (cd ~ && tar xf -)
+      # The license is read from the environment rather than expanded into the
+      # script, so that it does not end up in the command the runner logs.
+      - name: Set TB License
+        env:
+          TB_LICENSE: ${{ secrets.TB_LICENSE }}
+        run: |
+          mkdir -p ~/.vaadin/
+          echo '{"username":"'"$(echo "$TB_LICENSE" | cut -d / -f1)"'","proKey":"'"$(echo "$TB_LICENSE" | cut -d / -f2)"'"}' > ~/.vaadin/proKey
+      # The `native` profile puts the module in the reactor, compiles the
+      # application to a native binary and starts that binary for the ITs.
+      # `production` is what builds the frontend bundle the binary serves.
+      - name: Build the native image and verify
+        run: |
+          mvn -B -ntp \
+            -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \
+            -Dmaven.wagon.http.retryHandler.count=3 \
+            -pl packages/java/tests/spring/native \
+            -Pnative \
+            -Pproduction \
+            verify
+      - uses: actions/upload-artifact@v6
+        if: ${{ failure() || success() }}
+        with:
+          name: saved-outputs-native
+          path: |
+            packages/java/tests/spring/native/target/*-reports/*
+            packages/java/tests/spring/native/target/*.txt
+            packages/java/tests/spring/native/error-screenshots/*.png
+
   test-all:
+    # A static name, as this is the required check of a pull request. A run a
+    # label started is called from validation-label.yml, so its summary is
+    # listed as `Requested by label / Tests Summary` and does not replace the
+    # one of the run that validated the commit.
     name: Tests Summary
     runs-on: ubuntu-latest
     if: ${{ always() }}
     needs:
+      - init
       - check-style
       - test-java
       - test-typescript
       - test-it
       - test-gradle
+      - test-native
     steps:
       - name: Merge Artifacts
         uses: actions/upload-artifact/merge@v6
         with:
           name: saved-outputs
           pattern: saved-outputs-*
+      # A skipped job is not a failure: which jobs run depends on the event,
+      # on the labels of the pull request and on whether it comes from a
+      # fork. A job that failed takes the rest of the run with it, and so
+      # does `init`, whose failure leaves everything after it skipped.
       - name: Fail if test jobs did not succeed
-        if: ${{ needs.check-style.result != 'success' || needs.test-java.result != 'success' || needs.test-typescript.result != 'success' || (needs.test-it.result != 'success' && needs.test-it.result != 'skipped') || (needs.test-gradle.result != 'success' && needs.test-gradle.result != 'skipped') }}
+        if: >-
+          ${{ contains(needs.*.result, 'failure')
+          || contains(needs.*.result, 'cancelled') }}
         run: exit 1

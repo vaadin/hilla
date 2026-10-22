@@ -34,11 +34,9 @@ import com.vaadin.hilla.parser.core.Node;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
-import com.vaadin.hilla.parser.core.RootNode;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
-import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 import com.vaadin.hilla.runtime.transfertypes.EndpointSubscription;
 import com.vaadin.hilla.runtime.transfertypes.File;
@@ -48,7 +46,6 @@ import com.vaadin.hilla.runtime.transfertypes.MapSignal;
 import com.vaadin.hilla.runtime.transfertypes.NumberSignal;
 import com.vaadin.hilla.runtime.transfertypes.Signal;
 import com.vaadin.hilla.runtime.transfertypes.ValueSignal;
-import com.vaadin.hilla.transfertypes.annotations.FromModule;
 
 public final class TransferTypesPlugin
         extends AbstractPlugin<PluginConfiguration> {
@@ -78,51 +75,6 @@ public final class TransferTypesPlugin
                 ListSignal.class);
         classMap.put("com.vaadin.flow.signals.shared.SharedMapSignal",
                 MapSignal.class);
-    }
-
-    @Override
-    public void enter(NodePath<?> nodePath) {
-    }
-
-    @Override
-    public void exit(NodePath<?> nodePath) {
-        if (nodePath.getNode() instanceof EntityNode entityNode && nodePath
-                .getParentPath().getNode() instanceof RootNode rootNode) {
-            var cls = entityNode.getSource();
-            if (classMap.containsValue((Class<?>) cls.get())) {
-                var schema = entityNode.getTarget();
-
-                cls.getAnnotations().stream()
-                        .filter((model) -> model.getName()
-                                .equals(FromModule.class.getName()))
-                        .findFirst().ifPresent((annotationModel) -> {
-                            var annotation = (FromModule) annotationModel.get();
-                            var namedSpecifier = annotation.namedSpecifier();
-                            var defaultSpecifier = annotation
-                                    .defaultSpecifier();
-
-                            if (namedSpecifier.isBlank()
-                                    && defaultSpecifier.isBlank()) {
-                                throw new IllegalArgumentException(String
-                                        .format("@FromModule annotation for class %s must have at least one named specifier or a default specifier",
-                                                cls.getName()));
-                            }
-
-                            var fromModule = new HashMap<String, Object>();
-                            fromModule.put("module", annotation.module());
-
-                            if (!namedSpecifier.isBlank()) {
-                                fromModule.put("named", namedSpecifier);
-                            }
-
-                            if (!defaultSpecifier.isBlank()) {
-                                fromModule.put("default", defaultSpecifier);
-                            }
-
-                            schema.addExtension("x-from-module", fromModule);
-                        });
-            }
-        }
     }
 
     @Override

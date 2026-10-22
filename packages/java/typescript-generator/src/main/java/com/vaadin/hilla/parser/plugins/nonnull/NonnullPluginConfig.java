@@ -62,6 +62,8 @@ public class NonnullPluginConfig
                 // Package-level annotations have low score
                 new AnnotationMatcher("org.springframework.lang.NonNullApi",
                         false, 10),
+                new AnnotationMatcher("org.jspecify.annotations.NullMarked",
+                        false, 10),
                 // Id and Version annotation usually mark nullable fields for
                 // CRUD operations.
                 // Low score allows other annotations to override them.

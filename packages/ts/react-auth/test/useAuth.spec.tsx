@@ -1,6 +1,7 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { render, renderHook, waitFor } from '@testing-library/react';
 import { UnauthorizedResponseError } from '@vaadin/hilla-frontend';
-import { describe, expect, it } from 'vitest';
+import { StrictMode } from 'react';
+import { describe, expect, it, vi } from 'vitest';
 import { configureAuth } from '../src/index.js';
 
 describe('@vaadin/react-auth', () => {
@@ -11,6 +12,39 @@ describe('@vaadin/react-auth', () => {
       const { result } = renderHook(() => useAuth(), { wrapper: AuthProvider });
 
       await waitFor(() => expect(result.current.state.user).to.equal(user));
+    });
+
+    it('should fetch the authenticated user once per mount in Strict Mode', async () => {
+      const user = { customRoles: ['admin'] };
+      const getAuthenticatedUser = vi.fn(async () => {
+        await Promise.resolve();
+        return user;
+      });
+      const { AuthProvider, useAuth } = configureAuth(getAuthenticatedUser);
+      const AuthState = () => <span>{useAuth().state.user ? 'authenticated' : 'unauthenticated'}</span>;
+
+      const { container, unmount } = render(
+        <StrictMode>
+          <AuthProvider>
+            <AuthState />
+          </AuthProvider>
+        </StrictMode>,
+      );
+
+      expect(getAuthenticatedUser).toHaveBeenCalledOnce();
+      await waitFor(() => expect(container.textContent).to.equal('authenticated'));
+
+      unmount();
+      const { container: remountedContainer } = render(
+        <StrictMode>
+          <AuthProvider>
+            <AuthState />
+          </AuthProvider>
+        </StrictMode>,
+      );
+
+      expect(getAuthenticatedUser).toHaveBeenCalledTimes(2);
+      await waitFor(() => expect(remountedContainer.textContent).to.equal('authenticated'));
     });
 
     it('should handle 401 from UserInfo endpoint', async () => {

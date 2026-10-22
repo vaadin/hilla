@@ -6,13 +6,13 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>hilla-project</artifactId>
-    <version>25.3-SNAPSHOT</version>
+    <version>25.4-SNAPSHOT</version>
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
   <artifactId>hilla-typescript-generator</artifactId>
   <name>Hilla TypeScript Generator</name>
-  <description>Generates TypeScript from Java endpoints via OpenAPI</description>
+  <description>Generates TypeScript from Java endpoints</description>
   <url>https://vaadin.com/hilla</url>
   <packaging>jar</packaging>
 
@@ -34,43 +34,6 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
     </dependency>
-    <!-- Swagger for OpenAPI model compatibility (Jackson 2) -->
-    <dependency>
-      <groupId>io.swagger.core.v3</groupId>
-      <artifactId>swagger-core-jakarta</artifactId>
-      <version>${swagger.core.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.fasterxml.jackson.datatype</groupId>
-          <artifactId>jackson-datatype-jsr310</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.yaml</groupId>
-          <artifactId>snakeyaml</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>io.swagger.core.v3</groupId>
-      <artifactId>swagger-models-jakarta</artifactId>
-      <version>${swagger.models.version}</version>
-    </dependency>
-    <!-- Jackson 2 needed for Swagger compatibility -->
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>${jackson2.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.dataformat</groupId>
-      <artifactId>jackson-dataformat-yaml</artifactId>
-      <version>${jackson2.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.datatype</groupId>
-      <artifactId>jackson-datatype-jsr310</artifactId>
-      <version>${jackson2.version}</version>
-    </dependency>
     <!-- Jackson 3 for internal serialization -->
     <dependency>
       <groupId>tools.jackson.core</groupId>
@@ -79,11 +42,6 @@
     <dependency>
       <groupId>tools.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-    </dependency>
-    <!-- Keep Jackson 3 for YAML processing in other parts -->
-    <dependency>
-      <groupId>tools.jackson.dataformat</groupId>
-      <artifactId>jackson-dataformat-yaml</artifactId>
     </dependency>
     <!-- Vaadin Flow dependency from parser-jvm-utils -->
     <dependency>
@@ -142,13 +100,6 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <!-- Jackson 2 datatype modules needed for Swagger Json util in tests - provided by compile scope dependency above -->
-    <dependency>
-      <groupId>org.skyscreamer</groupId>
-      <artifactId>jsonassert</artifactId>
-      <version>1.5.3</version>
       <scope>test</scope>
     </dependency>
     <!-- Test dependencies from plugins -->

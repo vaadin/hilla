@@ -1,7 +1,3 @@
-import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
-import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
-import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
-import ast from '@vaadin/hilla-generator-utils/tsc-template.js';
 import {
   type CallExpression,
   createPrinter,
@@ -10,7 +6,11 @@ import {
   NewLineKind,
   type ObjectLiteralExpression,
   type PropertyAccessExpression,
-} from 'typescript';
+} from '@typescript/typescript6';
+import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
+import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
+import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
+import ast from '@vaadin/hilla-generator-utils/tsc-template.js';
 import type { ServerViewConfig } from '../shared/internal.js';
 import { transformTree } from '../shared/transformTree.js';
 import type { RouteMeta } from './collectRoutesFromFS.js';

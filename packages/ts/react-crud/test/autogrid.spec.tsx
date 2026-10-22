@@ -31,12 +31,12 @@ import {
   Gender,
   getItem,
   type HasTestInfo,
+  NamedModel,
   type Person,
   personData,
   personListService,
   PersonModel,
   personService,
-  PersonWithoutIdPropertyModel,
   PersonWithSimpleIdPropertyModel,
 } from './test-models-and-services.js';
 import { nextFrame } from './test-utils.js';
@@ -1898,10 +1898,7 @@ describe('@vaadin/hilla-react-crud', () => {
         expect(grid.instance.itemIdPath).to.equal('email');
 
         // Model without discernible ID property
-        grid = await GridController.init(
-          render(<AutoGrid service={personService()} model={PersonWithoutIdPropertyModel} />),
-          user,
-        );
+        grid = await GridController.init(render(<AutoGrid service={personService()} model={NamedModel} />), user);
         expect(grid.instance.itemIdPath).to.be.undefined;
       });
     });

@@ -1,18 +1,29 @@
-import ts, { type Identifier, type ImportDeclaration, type Statement } from 'typescript';
-import createFullyUniqueIdentifier from '../createFullyUniqueIdentifier.js';
+import ts, { type Identifier, type ImportDeclaration, type Statement } from '@typescript/typescript6';
 import type CodeConvertable from './CodeConvertable.js';
+import NameRegistry from './NameRegistry.js';
 import StatementRecordManager, { createComparator, type StatementRecord } from './StatementRecordManager.js';
 import { createDependencyRecord, type DependencyRecord } from './utils.js';
 
 export class NamedImportManager extends StatementRecordManager<ImportDeclaration> {
   readonly #map = new Map<string, Map<string, DependencyRecord>>();
+  readonly #names: NameRegistry;
+
+  constructor(collator: Intl.Collator, names: NameRegistry) {
+    super(collator);
+    this.#names = names;
+  }
 
   get size(): number {
     return this.#map.size;
   }
 
   add(path: string, specifier: string, isType?: boolean, uniqueId?: Identifier): Identifier {
-    const record = createDependencyRecord(uniqueId ?? createFullyUniqueIdentifier(specifier), isType);
+    if (uniqueId) {
+      this.#names.claim(uniqueId.text);
+    }
+
+    const id = uniqueId ?? this.getIdentifier(path, specifier) ?? this.#names.reserveIdentifier(specifier);
+    const record = createDependencyRecord(id, isType);
 
     if (this.#map.has(path)) {
       this.#map.get(path)!.set(specifier, record);
@@ -83,7 +94,7 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
                 const { id, isType } = specifiers.get(name)!;
                 return ts.factory.createImportSpecifier(
                   isTypeOnly ? false : isType,
-                  ts.factory.createIdentifier(name),
+                  id.text === name ? undefined : ts.factory.createIdentifier(name),
                   id,
                 );
               }),
@@ -106,13 +117,23 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
 
 export class NamespaceImportManager extends StatementRecordManager<ImportDeclaration> {
   readonly #map = new Map<string, Identifier>();
+  readonly #names: NameRegistry;
+
+  constructor(collator: Intl.Collator, names: NameRegistry) {
+    super(collator);
+    this.#names = names;
+  }
 
   get size(): number {
     return this.#map.size;
   }
 
   add(path: string, name: string, uniqueId?: Identifier): Identifier {
-    const id = uniqueId ?? createFullyUniqueIdentifier(name);
+    if (uniqueId) {
+      this.#names.claim(uniqueId.text);
+    }
+
+    const id = uniqueId ?? this.#map.get(path) ?? this.#names.reserveIdentifier(name);
     this.#map.set(path, id);
     return id;
   }
@@ -159,13 +180,23 @@ export class NamespaceImportManager extends StatementRecordManager<ImportDeclara
 
 export class DefaultImportManager extends StatementRecordManager<ImportDeclaration> {
   readonly #map = new Map<string, DependencyRecord>();
+  readonly #names: NameRegistry;
+
+  constructor(collator: Intl.Collator, names: NameRegistry) {
+    super(collator);
+    this.#names = names;
+  }
 
   get size(): number {
     return this.#map.size;
   }
 
   add(path: string, name: string, isType?: boolean, uniqueId?: Identifier): Identifier {
-    const id = uniqueId ?? createFullyUniqueIdentifier(name);
+    if (uniqueId) {
+      this.#names.claim(uniqueId.text);
+    }
+
+    const id = uniqueId ?? this.getIdentifier(path) ?? this.#names.reserveIdentifier(name);
     this.#map.set(path, createDependencyRecord(id, isType));
     return id;
   }
@@ -216,17 +247,55 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
   }
 }
 
+/**
+ * Combines a default and a named import of the same module into one
+ * declaration, i.e. `import m, { StringModel } from "..."`.
+ *
+ * A type-only default import cannot take named bindings along, so those stay
+ * apart. A named group that is entirely type-only can still be merged, by
+ * marking its specifiers individually instead of the declaration.
+ */
+function mergeDefaultAndNamed(
+  defaultDeclaration: ImportDeclaration,
+  namedDeclaration: ImportDeclaration,
+): ImportDeclaration | undefined {
+  const defaultClause = defaultDeclaration.importClause;
+  const namedClause = namedDeclaration.importClause;
+
+  if (!defaultClause?.name || defaultClause.isTypeOnly || !namedClause?.namedBindings) {
+    return undefined;
+  }
+
+  const bindings = namedClause.namedBindings;
+
+  if (!ts.isNamedImports(bindings)) {
+    return undefined;
+  }
+
+  const elements = namedClause.isTypeOnly
+    ? bindings.elements.map((element) => ts.factory.createImportSpecifier(true, element.propertyName, element.name))
+    : bindings.elements;
+
+  return ts.factory.createImportDeclaration(
+    defaultDeclaration.modifiers,
+    ts.factory.createImportClause(false, defaultClause.name, ts.factory.createNamedImports(elements)),
+    defaultDeclaration.moduleSpecifier,
+  );
+}
+
 export default class ImportManager implements CodeConvertable<readonly Statement[]> {
   readonly collator: Intl.Collator;
   readonly default: DefaultImportManager;
   readonly named: NamedImportManager;
+  readonly names: NameRegistry;
   readonly namespace: NamespaceImportManager;
 
-  constructor(collator: Intl.Collator) {
-    this.default = new DefaultImportManager(collator);
-    this.named = new NamedImportManager(collator);
-    this.namespace = new NamespaceImportManager(collator);
+  constructor(collator: Intl.Collator, names: NameRegistry = new NameRegistry()) {
+    this.default = new DefaultImportManager(collator, names);
+    this.named = new NamedImportManager(collator, names);
+    this.namespace = new NamespaceImportManager(collator, names);
     this.collator = collator;
+    this.names = names;
   }
 
   get size(): number {
@@ -234,11 +303,21 @@ export default class ImportManager implements CodeConvertable<readonly Statement
   }
 
   toCode(): readonly Statement[] {
-    const records = [
-      ...this.default.statementRecords(),
-      ...this.named.statementRecords(),
-      ...this.namespace.statementRecords(),
-    ];
+    const named = new Map(this.named.statementRecords());
+    const records: Array<StatementRecord<ImportDeclaration>> = [];
+
+    for (const [path, declaration] of this.default.statementRecords()) {
+      const namedDeclaration = named.get(path);
+      const merged = namedDeclaration && mergeDefaultAndNamed(declaration, namedDeclaration);
+
+      if (merged) {
+        named.delete(path);
+      }
+
+      records.push([path, merged ?? declaration]);
+    }
+
+    records.push(...named, ...this.namespace.statementRecords());
     records.sort(createComparator(this.collator));
 
     return records.map(([, statement]) => statement);
@@ -248,6 +327,17 @@ export default class ImportManager implements CodeConvertable<readonly Statement
     this.default.clear();
     this.named.clear();
     this.namespace.clear();
+
+    // Anything already spelled out in the source is off limits for names the
+    // registry hands out later.
+    const claim = (node: ts.Node): void => {
+      if (ts.isIdentifier(node)) {
+        this.names.claim(node.text);
+      }
+
+      ts.forEachChild(node, claim);
+    };
+    claim(source);
 
     const imports = source.statements.filter((statement): statement is ImportDeclaration =>
       ts.isImportDeclaration(statement),
@@ -262,16 +352,22 @@ export default class ImportManager implements CodeConvertable<readonly Statement
       const { name, namedBindings } = importClause;
       const path = (moduleSpecifier as ts.StringLiteral).text;
 
+      // a default import may come along with named bindings in a single
+      // declaration, i.e. `import m, { StringModel } from "..."`
+      if (name) {
+        this.default.add(path, name.text, importClause.isTypeOnly, name);
+      }
+
       if (namedBindings) {
         if (ts.isNamespaceImport(namedBindings)) {
           this.namespace.add(path, namedBindings.name.text, namedBindings.name);
         } else {
-          for (const { isTypeOnly, name: specifier } of namedBindings.elements) {
-            this.named.add(path, specifier.text, isTypeOnly, specifier);
+          for (const { isTypeOnly, name: local, propertyName } of namedBindings.elements) {
+            // `propertyName` holds the exported name whenever the import is
+            // aliased; the local binding alone would not survive the round trip.
+            this.named.add(path, (propertyName ?? local).text, isTypeOnly, local);
           }
         }
-      } else if (name) {
-        this.default.add(path, name.text, importClause.isTypeOnly, name);
       }
     }
   }

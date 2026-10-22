@@ -1,4 +1,5 @@
 import type { AbstractModel, DetachedModelConstructor } from '@vaadin/hilla-lit-form';
+import type { Model } from '@vaadin/hilla-models';
 import { Grid, type GridElement, type GridProps } from '@vaadin/react-components/Grid.js';
 import { GridColumn } from '@vaadin/react-components/GridColumn.js';
 import { GridColumnGroup } from '@vaadin/react-components/GridColumnGroup.js';
@@ -59,7 +60,7 @@ interface AutoGridOwnProps<TItem> {
    * have a type that is supported. Use the `visibleColumns` option to customize
    * which columns to show and in which order.
    */
-  model: DetachedModelConstructor<AbstractModel<TItem>>;
+  model: DetachedModelConstructor<AbstractModel<TItem>> | Model<TItem>;
   /**
    * The property to use to detect an item's ID. The item ID is used to keep
    * the selection state when reloading the grid.

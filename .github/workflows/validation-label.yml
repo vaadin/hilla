@@ -1,0 +1,32 @@
+name: Validation on label
+
+# Starts the jobs of validation.yml that a pull request leaves out when one of
+# the labels that ask for them - `run-windows-tests` or `run-native-build` - is
+# added to a pull request that is already open. This is a workflow of its own
+# because GitHub cannot filter the `labeled` event by label name: every other
+# label (e.g. the `target/*` ones) starts a run too, and that run now shows up
+# as the single skipped job below instead of a skipped copy of every
+# validation check.
+
+on:
+  pull_request:
+    types: [labeled]
+    paths-ignore:
+      - 'hilla-logo.svg'
+      - 'README.md'
+      - '.github/ISSUE_TEMPLATE/*'
+      - 'packages/**/README.md'
+      - 'scripts/generator/templates/**/*.md'
+permissions:
+  contents: read
+# No concurrency group here: the called workflow has one that gives a run a
+# label started a group of its own, and the same group on both levels would
+# make the called run wait for its caller forever.
+jobs:
+  validation:
+    name: Requested by label
+    if: >-
+      ${{ github.event.label.name == 'run-windows-tests'
+      || github.event.label.name == 'run-native-build' }}
+    uses: ./.github/workflows/validation.yml
+    secrets: inherit

@@ -15,14 +15,16 @@
  */
 package com.vaadin.hilla.parser.plugins.model;
 
-import java.lang.reflect.AnnotatedArrayType;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import io.swagger.v3.oas.models.media.Schema;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
@@ -32,23 +34,21 @@ import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.models.AnnotatedModel;
 import com.vaadin.hilla.parser.models.AnnotationInfoModel;
+import com.vaadin.hilla.parser.models.AnnotationParameterEnumValueModel;
 import com.vaadin.hilla.parser.models.AnnotationParameterModel;
-import com.vaadin.hilla.parser.models.ArraySignatureModel;
-import com.vaadin.hilla.parser.models.BaseSignatureModel;
-import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
+import com.vaadin.hilla.parser.models.ClassInfoModel;
+import com.vaadin.hilla.parser.models.Model;
 import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
+import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.AnnotatedNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 
 public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
-    private static final String VALIDATION_CONSTRAINTS_KEY = "x-validation-constraints";
-    private static final String ANNOTATIONS_KEY = "x-annotations";
-    private static final String JAVA_TYPE_KEY = "x-java-type";
     private static final String VALIDATION_CONSTRAINTS_PACKAGE_NAME = "jakarta.validation.constraints";
 
-    // Include-list of annotations that should be added to the schema
+    // Include-list of annotations that should be added to the form model
     private static final Set<String> INCLUDED_ANNOTATIONS = Set.of(
             "jakarta.persistence.Id", "jakarta.persistence.Version",
             "jakarta.persistence.OneToOne", "jakarta.persistence.ManyToOne",
@@ -62,23 +62,85 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
             AnnotationInfoModel annotation) {
         var simpleName = extractSimpleName(annotation.getName());
 
-        var attributes = annotation.getParameters().stream()
-                .filter(Predicate.not(AnnotationParameterModel::isDefault))
-                .collect(Collectors.toMap(AnnotationParameterModel::getName,
-                        AnnotationParameterModel::getValue));
-
         return new ValidationConstraint(simpleName,
-                !attributes.isEmpty() ? attributes : null);
+                extractAttributes(annotation));
     }
 
     private static Annotation convertAnnotation(
             AnnotationInfoModel annotation) {
-        return new Annotation(annotation.getName(), null);
+        return new Annotation(annotation.getName(),
+                extractAttributes(annotation));
+    }
+
+    private static Map<String, Object> extractAttributes(
+            AnnotationInfoModel annotation) {
+        // Ordered by name: the parameters of an annotation come in the order
+        // reflection lists its methods in, which is no order at all
+        var attributes = annotation.getParameters().stream()
+                .filter(Predicate.not(AnnotationParameterModel::isDefault))
+                .collect(Collectors.toMap(AnnotationParameterModel::getName,
+                        parameter -> convertAttributeValue(
+                                parameter.getValue()),
+                        (first, second) -> first, TreeMap::new));
+
+        return !attributes.isEmpty() ? attributes : null;
+    }
+
+    /**
+     * Converts an annotation parameter value into something the form model
+     * writer can write as TypeScript. The parser hands back its own models for
+     * enum constants and class references. An array arrives as a list of such
+     * values.
+     */
+    private static Object convertAttributeValue(Object value) {
+        return switch (value) {
+        case AnnotationParameterEnumValueModel enumValue ->
+            enumValue.getValueName();
+        case ClassInfoModel classInfo -> new JvmTypeRef(classInfo.getName());
+        case Collection<?> collection -> collection.stream()
+                .map(ModelPlugin::convertAttributeValue).toList();
+        // Every other model carries a whole type graph behind it, which has
+        // no TypeScript value to be written as. The only kind left is a
+        // nested annotation, which nothing reaching this plugin has: the
+        // include-list holds none, and a repeated constraint is unwrapped
+        // before it gets here. Adding one means adding its conversion too.
+        case Model model -> throw new IllegalStateException(
+                "No TypeScript representation for the annotation attribute value "
+                        + model);
+        default -> value;
+        };
     }
 
     private static String extractSimpleName(String fullyQualifiedName) {
         return fullyQualifiedName
                 .substring(fullyQualifiedName.lastIndexOf(".") + 1);
+    }
+
+    /**
+     * Replaces the container the compiler synthesizes for a repeated
+     * constraint, such as {@code @Pattern.List} for two {@code @Pattern}s, with
+     * the constraints it holds. The container has no validator of its own, so
+     * emitting it would ask the form binder for a name it does not export.
+     * <p>
+     * A container is recognized by its shape rather than by its name: a single
+     * {@code value} parameter holding the repeated annotations.
+     */
+    private static Stream<AnnotationInfoModel> unwrapRepeatableContainer(
+            AnnotationInfoModel annotation) {
+        var parameters = annotation.getParameters();
+
+        if (parameters.size() == 1) {
+            var parameter = parameters.iterator().next();
+
+            if ("value".equals(parameter.getName())
+                    && parameter.getValue() instanceof Collection<?> values
+                    && !values.isEmpty() && values.stream()
+                            .allMatch(AnnotationInfoModel.class::isInstance)) {
+                return values.stream().map(AnnotationInfoModel.class::cast);
+            }
+        }
+
+        return Stream.of(annotation);
     }
 
     private static boolean isValidationConstraintAnnotation(
@@ -103,21 +165,15 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
             return;
         }
 
-        var schema = typedNode.getTarget();
-        addConstraintsToSchema(typedNode, schema);
-        addJavaTypeToSchema(typedNode, schema);
+        var type = typedNode.getTarget();
+        noteConstraints(constrainingAnnotations(nodePath, typedNode), type);
 
-        // Add annotations from parent property model to schema
+        // The annotations of the property the value belongs to are told to the
+        // form model of it as well
         if (nodePath.getParentPath() != null && nodePath.getParentPath()
                 .getNode() instanceof PropertyNode propertyNode) {
-            var propertyModel = propertyNode.getSource();
-            addAnnotationsToSchema(propertyModel, schema);
+            noteAnnotations(propertyNode.getSource(), type);
         }
-    }
-
-    @Override
-    public void exit(NodePath<?> nodePath) {
-
     }
 
     @Override
@@ -131,73 +187,75 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
         return nodeDependencies;
     }
 
-    private void addConstraintsToSchema(AnnotatedNode annotatedNode,
-            Schema<?> schema) {
-        var constraints = annotatedNode.getAnnotations().stream()
+    /**
+     * The annotations a value is constrained by. Java reads an annotation
+     * written in front of an array property as one of what the array holds as
+     * well, but Bean Validation checks the array itself with it, so the array
+     * gets the annotations of the property instead of the values in it.
+     */
+    private static List<AnnotationInfoModel> constrainingAnnotations(
+            NodePath<?> nodePath, AnnotatedNode annotatedNode) {
+        var annotations = annotatedNode.getAnnotations();
+        var arrayProperty = findArrayProperty(nodePath);
+        if (arrayProperty.isEmpty()) {
+            return annotations;
+        }
+
+        var declared = arrayProperty.get().getSource().getAnnotations();
+        if (nodePath.getParentPath().getNode() == arrayProperty.get()) {
+            return Stream.concat(annotations.stream(), declared.stream())
+                    .distinct().collect(Collectors.toList());
+        }
+
+        return annotations.stream().filter(Predicate.not(declared::contains))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * The property whose value is the array the node is, or is in.
+     */
+    private static Optional<PropertyNode> findArrayProperty(
+            NodePath<?> nodePath) {
+        var path = nodePath;
+        while (path.getParentPath() != null
+                && path.getParentPath().getNode() instanceof TypedNode parent
+                && parent.getType().isArray()) {
+            path = path.getParentPath();
+        }
+
+        if (path.getNode() instanceof TypedNode typedNode
+                && typedNode.getType().isArray() && path.getParentPath() != null
+                && path.getParentPath()
+                        .getNode() instanceof PropertyNode propertyNode) {
+            return Optional.of(propertyNode);
+        }
+
+        return Optional.empty();
+    }
+
+    private void noteConstraints(List<AnnotationInfoModel> annotations,
+            TypeFacts type) {
+        var constraints = annotations.stream()
                 .filter(ModelPlugin::isValidationConstraintAnnotation)
+                .flatMap(ModelPlugin::unwrapRepeatableContainer)
                 .map(ModelPlugin::convertValidationConstraintAnnotation)
                 .collect(Collectors.toList());
 
         if (!constraints.isEmpty()) {
-            schema.addExtension(VALIDATION_CONSTRAINTS_KEY, constraints);
+            type.note(TypeFacts.CONSTRAINTS, constraints);
         }
     }
 
-    private void addAnnotationsToSchema(AnnotatedModel annotatedModel,
-            Schema<?> schema) {
+    private void noteAnnotations(AnnotatedModel annotatedModel,
+            TypeFacts type) {
         var annotations = annotatedModel.getAnnotations().stream()
                 .filter(ModelPlugin::isIncludedAnnotation)
                 .map(ModelPlugin::convertAnnotation)
                 .collect(Collectors.toList());
 
         if (!annotations.isEmpty()) {
-            schema.addExtension(ANNOTATIONS_KEY, annotations);
+            type.note(TypeFacts.ANNOTATIONS, annotations);
         }
     }
 
-    private void addJavaTypeToSchema(TypedNode typedNode, Schema<?> schema) {
-        var signature = (SignatureModel) typedNode.getType();
-        String typeName = null;
-
-        if (signature instanceof BaseSignatureModel baseSignatureModel) {
-            typeName = baseSignatureModel.getType().getName();
-        } else if (signature instanceof ClassRefSignatureModel classRefSignatureModel) {
-            typeName = classRefSignatureModel.getName();
-        } else if (signature instanceof ArraySignatureModel arraySignatureModel) {
-            AnnotatedArrayType o = (AnnotatedArrayType) arraySignatureModel
-                    .get();
-            typeName = o.toString();
-        }
-
-        if (includeJavaType(typeName)) {
-            schema.addExtension(JAVA_TYPE_KEY, typeName);
-        }
-    }
-
-    private boolean includeJavaType(String typeName) {
-        if (typeName == null) {
-            return false;
-        }
-
-        // Handle array types just the same
-        if (typeName.endsWith("[]")) {
-            typeName = typeName.substring(0, typeName.length() - 2);
-        }
-
-        // Include all primitive types
-        if (typeName.equals("boolean") || typeName.equals("byte")
-                || typeName.equals("char") || typeName.equals("double")
-                || typeName.equals("float") || typeName.equals("int")
-                || typeName.equals("long") || typeName.equals("short")) {
-            return true;
-        }
-
-        // Include all types from java package
-        if (typeName.startsWith("java.")) {
-            return true;
-        }
-
-        // Otherwise don't include
-        return false;
-    }
 }

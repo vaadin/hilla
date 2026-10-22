@@ -1,0 +1,11 @@
+import * as BoxedFileEndpoint from "./BoxedFileEndpoint.js";
+import * as ClientMethodEndpoint from "./ClientMethodEndpoint.js";
+import * as ListedFileEndpoint from "./ListedFileEndpoint.js";
+import * as MappedFileEndpoint from "./MappedFileEndpoint.js";
+import * as NameClashEndpoint from "./NameClashEndpoint.js";
+import * as PersonEndpoint from "./PersonEndpoint.js";
+import * as ReservedNameEndpoint from "./ReservedNameEndpoint.js";
+import * as ShadowingEndpoint from "./ShadowingEndpoint.js";
+import * as ShadowingProvidedEndpoint from "./ShadowingProvidedEndpoint.js";
+import * as StringEndpoint from "./StringEndpoint.js";
+export { BoxedFileEndpoint, ClientMethodEndpoint, ListedFileEndpoint, MappedFileEndpoint, NameClashEndpoint, PersonEndpoint, ReservedNameEndpoint, ShadowingEndpoint, ShadowingProvidedEndpoint, StringEndpoint };

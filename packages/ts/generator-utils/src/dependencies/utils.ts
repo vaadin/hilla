@@ -1,4 +1,4 @@
-import type { Identifier } from 'typescript';
+import type { Identifier } from '@typescript/typescript6';
 
 export type DependencyRecord = Readonly<{
   id: Identifier;

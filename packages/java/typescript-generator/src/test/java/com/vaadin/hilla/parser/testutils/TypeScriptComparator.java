@@ -16,10 +16,10 @@
 package com.vaadin.hilla.parser.testutils;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Utility for comparing generated TypeScript files against expected snapshots.
@@ -29,13 +29,25 @@ public class TypeScriptComparator {
     /**
      * Compare expected and actual TypeScript files.
      *
-     * Only verifies that expected snapshot files are present and match.
-     * Additional generated files (not in snapshots) are allowed and ignored.
+     * <p>
+     * Every expected file must be generated with the expected content, and no
+     * other file may be generated. The content is compared without its layout
+     * for now, see {@link #withoutFormatting(String)}. This makes the snapshots
+     * a complete description of the generator output, including the location of
+     * each file.
+     *
+     * <p>
+     * A file is keyed by its path in the snapshots folder rather than by its
+     * path in the output folder. The two differ for a file which belongs to the
+     * package of the test case, as that package is left out of the former, so
+     * the imports of a compared file are the only place where an output path
+     * appears in full. {@link AbstractFullStackTest} maps between the two and
+     * rejects two generated files which would share a snapshot.
      *
      * @param expected
-     *            Map of file name to content (expected snapshots)
+     *            Map of snapshot path to content (expected snapshots)
      * @param actual
-     *            Map of file name to content (generated files)
+     *            Map of snapshot path to content (generated files)
      * @throws AssertionError
      *             if files don't match
      */
@@ -44,24 +56,28 @@ public class TypeScriptComparator {
         List<String> errors = new ArrayList<>();
 
         // Check for missing files - expected files MUST be present
-        Set<String> expectedFiles = new HashSet<>(expected.keySet());
-        Set<String> actualFiles = new HashSet<>(actual.keySet());
+        Set<String> expectedFiles = new TreeSet<>(expected.keySet());
+        Set<String> actualFiles = new TreeSet<>(actual.keySet());
 
-        Set<String> missingFiles = new HashSet<>(expectedFiles);
+        Set<String> missingFiles = new TreeSet<>(expectedFiles);
         missingFiles.removeAll(actualFiles);
 
         if (!missingFiles.isEmpty()) {
-            errors.add("Missing expected files: " + missingFiles);
+            errors.add("Expected files which have not been generated: "
+                    + missingFiles);
         }
 
-        // Note: We intentionally do NOT check for extra files.
-        // Tests only verify specific files they care about (snapshots).
-        // Additional generated files (like connect-client.default.ts,
-        // endpoints.ts)
-        // are allowed and will be ignored if not in the snapshots directory.
+        Set<String> unexpectedFiles = new TreeSet<>(actualFiles);
+        unexpectedFiles.removeAll(expectedFiles);
+
+        if (!unexpectedFiles.isEmpty()) {
+            errors.add("Generated files without a snapshot: " + unexpectedFiles
+                    + ". Run the tests with -Dhilla.test.updateSnapshots if the"
+                    + " new files are expected.");
+        }
 
         // Compare content of common files
-        Set<String> commonFiles = new HashSet<>(expectedFiles);
+        Set<String> commonFiles = new TreeSet<>(expectedFiles);
         commonFiles.retainAll(actualFiles);
 
         for (String fileName : commonFiles) {
@@ -92,8 +108,9 @@ public class TypeScriptComparator {
         expected = normalizeLineEndings(expected);
         actual = normalizeLineEndings(actual);
 
-        if (expected.equals(actual)) {
-            return; // Perfect match
+        if (expected.equals(actual) || withoutFormatting(expected)
+                .equals(withoutFormatting(actual))) {
+            return;
         }
 
         // Split into lines for detailed comparison
@@ -161,6 +178,65 @@ public class TypeScriptComparator {
         }
 
         throw new AssertionError(error.toString());
+    }
+
+    /**
+     * The content with what only the layout of a file decides taken out: the
+     * quotes a string is written in, whitespace outside strings, whether an
+     * import of types says so, and trailing commas. A string is read as the
+     * value it stands for and written again in one way, so one which would not
+     * parse still differs from one which would.
+     *
+     * <p>
+     * Temporary: most snapshots are still laid out the way the Node generator
+     * printed them, while the Java writers lay the same code out to be read, so
+     * the comparison looks past the difference until the snapshots are written
+     * again in the layout of the Java writers. Until then, a change in layout
+     * alone goes unnoticed.
+     */
+    private static String withoutFormatting(String content) {
+        var result = new StringBuilder();
+        var i = 0;
+
+        while (i < content.length()) {
+            var c = content.charAt(i);
+
+            if (c == '\'' || c == '"') {
+                var value = new StringBuilder();
+                var end = i + 1;
+
+                while (end < content.length() && content.charAt(end) != c) {
+                    var next = content.charAt(end);
+
+                    // An escaped quote stands for the quote; any other escape
+                    // is kept as it is written
+                    if (next == '\\' && end + 1 < content.length()) {
+                        var escaped = content.charAt(++end);
+
+                        if (escaped != '\'' && escaped != '"') {
+                            value.append('\\');
+                        }
+
+                        next = escaped;
+                    }
+
+                    value.append(next);
+                    end++;
+                }
+
+                result.append('\'').append(value.toString().replace("'", "\\'"))
+                        .append('\'');
+                i = end + 1;
+            } else if (!Character.isWhitespace(c)) {
+                result.append(c);
+                i++;
+            } else {
+                i++;
+            }
+        }
+
+        return result.toString().replace("importtype{", "import{")
+                .replaceAll(",([}\\])])", "$1");
     }
 
     private String normalizeLineEndings(String content) {

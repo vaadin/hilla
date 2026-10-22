@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>tests</artifactId>
-    <version>25.3-SNAPSHOT</version>
+    <version>25.4-SNAPSHOT</version>
   </parent>
 
   <artifactId>tests-csrf</artifactId>
@@ -27,8 +27,8 @@
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
-      <artifactId>fix-lumo</artifactId>
-      <version>${project.version}</version>
+      <artifactId>vaadin-lumo-theme</artifactId>
+      <version>${vaadin.components.version}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

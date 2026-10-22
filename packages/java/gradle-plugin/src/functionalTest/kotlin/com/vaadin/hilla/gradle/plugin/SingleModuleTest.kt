@@ -17,8 +17,6 @@
 package com.vaadin.hilla.gradle.plugin
 
 import com.vaadin.flow.internal.FrontendUtils
-import io.swagger.v3.core.util.Json
-import io.swagger.v3.oas.models.OpenAPI
 import org.gradle.testkit.runner.BuildResult
 import org.junit.Test
 import java.io.File
@@ -33,7 +31,7 @@ import org.gradle.testkit.runner.TaskOutcome
 class SingleModuleTest : AbstractGradleTest() {
 
     @Test
-    fun `endpoints ts and openapi json are generated after hillaGenerate task executed in dev mode`() {
+    fun `endpoints ts is generated after hillaGenerate task executed in dev mode`() {
         createProject(withNpmInstall = true)
 
         addHelloReactEndpoint()
@@ -43,12 +41,11 @@ class SingleModuleTest : AbstractGradleTest() {
 
         buildResult.expectTaskSucceded("hillaGenerate")
 
-        verifyOpenApiJsonFileGeneratedProperly()
         verifyEndpointsTsFileGeneratedProperly()
     }
 
     @Test
-    fun `endpoints ts and openapi json are generated after hillaGenerate task executed in prod mode`() {
+    fun `endpoints ts is generated after hillaGenerate task executed in prod mode`() {
         createProject(withNpmInstall = true, productionMode = true)
 
         addHelloReactEndpoint()
@@ -58,8 +55,29 @@ class SingleModuleTest : AbstractGradleTest() {
 
         buildResult.expectTaskSucceded("hillaGenerate")
 
-        verifyOpenApiJsonFileGeneratedProperly()
         verifyEndpointsTsFileGeneratedProperly()
+    }
+
+    @Test
+    fun `hillaGenerate does not trigger the production frontend build`() {
+        createProject(productionMode = true, disableAllTasksToSimulateDryRun = true)
+
+        addHelloReactEndpoint()
+        addMainClass()
+
+        val buildResult: BuildResult = testProject.build("hillaGenerate", checkTasksSuccessful = false)
+
+        expect(true, "hillaGenerate should depend on the compiled classes") {
+            buildResult.task(":compileJava") != null
+        }
+        // The production frontend bundle is registered as an extra output
+        // directory of the source set, which makes the `classes` lifecycle task
+        // depend on vaadinBuildFrontend. hillaGenerate must not be affected by
+        // that: the bundle would then be built before the endpoints exist, and
+        // the frontend files generated for the bundle are cleaned up afterwards.
+        expect(null, "hillaGenerate should not depend on vaadinBuildFrontend") {
+            buildResult.task(":vaadinBuildFrontend")
+        }
     }
 
     @Test
@@ -122,7 +140,6 @@ class SingleModuleTest : AbstractGradleTest() {
 
         buildResult.expectTaskSucceded("hillaGenerate")
 
-        verifyOpenApiJsonFileGeneratedProperly()
         verifyEndpointsTsFileGeneratedProperly()
 
         // shorthand version
@@ -131,11 +148,16 @@ class SingleModuleTest : AbstractGradleTest() {
         """.trimIndent())
 
         testProject.build("clean")
+        // The TypeScript is written into the project rather than the build
+        // folder, so cleaning leaves it in place and the task has nothing left
+        // to do: taking the barrel of the endpoints away asks for it again,
+        // and fails loudly rather than leaving the task up to date if it
+        // cannot be deleted
+        Files.delete(endpointsTsFile().toPath())
         buildResult = testProject.build("hillaGenerate", checkTasksSuccessful = true)
 
         buildResult.expectTaskSucceded("hillaGenerate")
 
-        verifyOpenApiJsonFileGeneratedProperly()
         verifyEndpointsTsFileGeneratedProperly()
     }
 
@@ -154,26 +176,15 @@ class SingleModuleTest : AbstractGradleTest() {
 
         buildResult.expectTaskSucceded("hillaGenerate")
 
-        verifyOpenApiJsonFileGeneratedProperly()
         verifyEndpointsTsFileGeneratedProperly()
     }
 
-    private fun verifyOpenApiJsonFileGeneratedProperly() {
-        val openApiJsonFileName = "classes/hilla-openapi.json"
-        val openApiJsonFile = testProject.folder("build").resolve(openApiJsonFileName)
-
-        expect(true, "hilla-openapi.json should be created after executing hillaGenerate task!") {
-            openApiJsonFile.exists()
-        }
-
-        val openApi = Json.mapper().readValue(openApiJsonFile, OpenAPI::class.java)
-        expect(true, "Generated hilla-openapi.json file should contain paths for existing endpoints!") {
-            openApi.paths.contains("/HelloReactEndpoint/sayHello")
-        }
-    }
+    private fun endpointsTsFile(): File = testProject.dir
+        .resolve(FrontendUtils.DEFAULT_PROJECT_FRONTEND_GENERATED_DIR)
+        .resolve("endpoints.ts")
 
     private fun verifyEndpointsTsFileGeneratedProperly() {
-        val endpointsTsFile = testProject.dir.resolve(FrontendUtils.DEFAULT_PROJECT_FRONTEND_GENERATED_DIR + "endpoints.ts")
+        val endpointsTsFile = endpointsTsFile()
         expect(true, "Generated endpoints.ts file should exist!") {
             endpointsTsFile.exists()
         }

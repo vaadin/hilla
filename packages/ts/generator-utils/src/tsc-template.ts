@@ -17,7 +17,7 @@ import {
   type TransformerFactory,
   visitEachChild,
   type VisitResult,
-} from 'typescript';
+} from '@typescript/typescript6';
 
 export type Transformer = (node: Node) => VisitResult<Node | undefined>;
 

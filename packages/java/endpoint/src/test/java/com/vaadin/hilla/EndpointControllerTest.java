@@ -44,8 +44,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,6 +53,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jspecify.annotations.NonNull;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -88,9 +87,11 @@ import com.vaadin.hilla.auth.CsrfChecker;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
 import com.vaadin.hilla.endpoints.IterableEndpoint;
 import com.vaadin.hilla.endpoints.PersonEndpoint;
-import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.exception.EndpointException;
 import com.vaadin.hilla.exception.EndpointValidationException;
+import com.vaadin.hilla.nonnullapi.NonNullApiEndpoint;
+import com.vaadin.hilla.nullmarked.NullMarkedEndpoint;
+import com.vaadin.hilla.nullmarked.NullMarkedEntity;
 import com.vaadin.hilla.packages.application.ApplicationComponent;
 import com.vaadin.hilla.packages.application.ApplicationEndpoint;
 import com.vaadin.hilla.packages.library.LibraryEndpoint;
@@ -275,6 +276,17 @@ public class EndpointControllerTest {
 
         public String testNullMethod() {
             return null;
+        }
+    }
+
+    public static class UnmarkedEndpoint {
+        public NullMarkedEntity nullMarkedEntity() {
+            return new NullMarkedEntity();
+        }
+
+        @NonNull
+        public NullMarkedEntity nonNullMarkedEntity() {
+            return new NullMarkedEntity();
         }
     }
 
@@ -1254,6 +1266,71 @@ public class EndpointControllerTest {
     }
 
     @Test
+    public void should_RequireNonNullReturnValue_When_PackageIsNullMarked()
+            throws IOException {
+        EndpointController controller = createVaadinController(
+                new NullMarkedEndpoint(), null, null, null,
+                new ExplicitNullableTypeChecker(), null);
+        assertNullOnlyFromNullableMethod(controller,
+                NullMarkedEndpoint.class.getSimpleName());
+    }
+
+    @Test
+    public void should_RequireNonNullReturnValue_When_PackageIsNonNullApi()
+            throws IOException {
+        EndpointController controller = createVaadinController(
+                new NonNullApiEndpoint(), null, null, null,
+                new ExplicitNullableTypeChecker(), null);
+        assertNullOnlyFromNullableMethod(controller,
+                NonNullApiEndpoint.class.getSimpleName());
+    }
+
+    private void assertNullOnlyFromNullableMethod(EndpointController controller,
+            String endpointName) throws IOException {
+        ResponseEntity<String> response = controller.serveEndpoint(endpointName,
+                "nonNullMethod", createRequestParameters("{}"), requestMock);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
+                response.getStatusCode());
+        assertTrue(new ObjectMapper()
+                .readValue(response.getBody(), ObjectNode.class).get("message")
+                .asText().contains("Unexpected return value"));
+
+        response = controller.serveEndpoint(endpointName, "nullableMethod",
+                createRequestParameters("{}"), requestMock);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    public void should_AllowNullBeanProperty_When_NullMarkedEndpointReturnsUnmarkedBean() {
+        ResponseEntity<String> response = createVaadinController(
+                new NullMarkedEndpoint(), null, null, null,
+                new ExplicitNullableTypeChecker(), null)
+                .serveEndpoint(NullMarkedEndpoint.class.getSimpleName(),
+                        "unmarkedEntity", createRequestParameters("{}"),
+                        requestMock);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    public void should_RejectNullBeanProperty_When_UnmarkedEndpointRequiresNullMarkedBean() {
+        EndpointController controller = createVaadinController(
+                new UnmarkedEndpoint(), null, null, null,
+                new ExplicitNullableTypeChecker(), null);
+        String endpointName = UnmarkedEndpoint.class.getSimpleName();
+
+        ResponseEntity<String> response = controller.serveEndpoint(endpointName,
+                "nonNullMarkedEntity", createRequestParameters("{}"),
+                requestMock);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
+                response.getStatusCode());
+
+        // Return values are only checked when the endpoint requires them
+        response = controller.serveEndpoint(endpointName, "nullMarkedEntity",
+                createRequestParameters("{}"), requestMock);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
     public void should_ReturnResult_When_CallingSuperClassMethodWithGenericTypedParameter() {
         ResponseEntity<?> response = createVaadinController(
                 new PersonEndpoint())
@@ -1351,7 +1428,7 @@ public class EndpointControllerTest {
 
     @Test
     public void should_Instantiate_endpoints_correctly() throws Exception {
-        var endpointRegistry = registerEndpoints("openapi.json");
+        var endpointRegistry = registerEndpoints();
         // this one has a constructor with a parameter, but is instantiated by
         // Spring
         assertNotNull(endpointRegistry.get("applicationEndpoint"));
@@ -1362,29 +1439,7 @@ public class EndpointControllerTest {
         assertNull(endpointRegistry.get("libraryEndpointWithConstructor"));
     }
 
-    @Test
-    public void should_Fallback_to_Spring_Context() throws Exception {
-        // this also tests that an empty definition is not a problem
-        var endpointRegistry = registerEndpoints("openapi-noendpoints.json");
-        // as browser callables are found through Spring, the results are the
-        // same
-        assertNotNull(endpointRegistry.get("applicationEndpoint"));
-        assertNotNull(endpointRegistry.get("libraryEndpoint"));
-        assertNull(endpointRegistry.get("libraryEndpointWithConstructor"));
-    }
-
-    private URL getDefaultOpenApiResourcePathInDevMode() {
-        try {
-            return projectFolder.getRoot().toPath()
-                    .resolve(appConfig.getBuildFolder())
-                    .resolve(EngineAutoConfiguration.OPEN_API_PATH).toUri()
-                    .toURL();
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private EndpointRegistry registerEndpoints(String openApiFilename) {
+    private EndpointRegistry registerEndpoints() {
         var context = Mockito.mock(ApplicationContext.class);
         var applicationComponent = new ApplicationComponent();
         // Suppose that both the "regular" browser callable and the one from a

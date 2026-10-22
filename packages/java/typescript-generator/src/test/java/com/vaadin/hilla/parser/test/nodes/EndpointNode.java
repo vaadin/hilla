@@ -15,19 +15,18 @@
  */
 package com.vaadin.hilla.parser.test.nodes;
 
-import io.swagger.v3.oas.models.tags.Tag;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 
-public final class EndpointNode extends AbstractNode<ClassInfoModel, Tag> {
-    private EndpointNode(@NonNull ClassInfoModel value, @NonNull Tag schema) {
-        super(value, schema);
+public final class EndpointNode extends AbstractNode<ClassInfoModel, String> {
+    private EndpointNode(@NonNull ClassInfoModel value, String name) {
+        super(value, name);
     }
 
     @NonNull
     public static EndpointNode of(@NonNull ClassInfoModel cls) {
-        return new EndpointNode(cls, new Tag());
+        return new EndpointNode(cls, null);
     }
 }

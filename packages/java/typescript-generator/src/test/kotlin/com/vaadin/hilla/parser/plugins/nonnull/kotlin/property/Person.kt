@@ -14,9 +14,12 @@ open class Person(
     private var dateOfBirth: LocalDate?,
     var important: Boolean,
 ): AbstractEntity<Long?>() {
-    var age: Int?
-        get() = dateOfBirth?.let { LocalDate.now().year - it.year }
+    // Backed by a field, so that fullName stays the only property here that
+    // exists as getter and setter alone: the JVM does not keep the order of
+    // methods, and two such properties could swap places in the output
+    var age: Int? = null
         set(value) {
+            field = value
             if (value != null) {
                 dateOfBirth = LocalDate.now().minusYears(value.toLong())
             }

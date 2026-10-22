@@ -15,8 +15,6 @@
  */
 package com.vaadin.hilla;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -35,11 +33,13 @@ import org.springframework.stereotype.Component;
 
 import com.vaadin.flow.internal.FrontendUtils;
 import com.vaadin.flow.server.VaadinContext;
-import com.vaadin.flow.server.frontend.FrontendTools;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
-import com.vaadin.hilla.engine.GeneratorProcessor;
 import com.vaadin.hilla.engine.ParserProcessor;
+import com.vaadin.hilla.engine.TypeScriptProcessor;
+import com.vaadin.hilla.generator.model.EndpointModel;
+import com.vaadin.hilla.generator.model.EntityModel;
+import com.vaadin.hilla.generator.model.Generation;
 
 /**
  * Handles (re)generation of the TypeScript code.
@@ -54,7 +54,7 @@ public class EndpointCodeGenerator {
     private final VaadinContext context;
 
     private ApplicationConfiguration configuration;
-    private Set<String> classesUsedInOpenApi = null;
+    private Set<String> classesUsedInEndpoints = null;
     private EngineAutoConfiguration engineConfiguration;
 
     /**
@@ -115,14 +115,33 @@ public class EndpointCodeGenerator {
                         return null;
                     })).filter(Objects::nonNull).distinct().toList();
 
-            ParserProcessor parser = new ParserProcessor(engineConfiguration);
-            parser.process(browserCallables);
-
-            GeneratorProcessor generator = new GeneratorProcessor(
-                    engineConfiguration);
-            generator.process();
+            generate(engineConfiguration, browserCallables);
             this.endpointController.registerEndpoints();
         });
+    }
+
+    /**
+     * Walks the browser callable classes of the application and writes their
+     * TypeScript, remembering what it is written from, so that the first change
+     * to a class does not have to walk them all again to tell whether it
+     * matters.
+     *
+     * @param engineConfiguration
+     *            the configuration to generate with
+     * @param applicationContext
+     *            the application context to find the browser callable classes
+     *            in
+     */
+    public void generate(EngineAutoConfiguration engineConfiguration,
+            ApplicationContext applicationContext) {
+        generate(engineConfiguration,
+                findBrowserCallables(engineConfiguration, applicationContext));
+    }
+
+    private void generate(EngineAutoConfiguration engineConfiguration,
+            List<Class<?>> browserCallables) {
+        classesUsedInEndpoints = classesUsedIn(TypeScriptProcessor
+                .generate(engineConfiguration, browserCallables));
     }
 
     /**
@@ -152,8 +171,6 @@ public class EndpointCodeGenerator {
         if (configuration == null) {
             configuration = ApplicationConfiguration.get(context);
 
-            var frontendTools = new FrontendTools(configuration,
-                    configuration.getProjectFolder());
             engineConfiguration = new EngineAutoConfiguration.Builder()
                     .baseDir(configuration.getProjectFolder().toPath())
                     .buildDir(configuration.getBuildFolder())
@@ -162,27 +179,51 @@ public class EndpointCodeGenerator {
                                     .getFrontendGeneratedFolder(
                                             configuration.getFrontendFolder())
                                     .toPath())
-                    .productionMode(false).withDefaultAnnotations()
-                    .nodeCommand(frontendTools.getNodeBinary()).build();
+                    .productionMode(false).withDefaultAnnotations().build();
         }
     }
 
-    public Optional<Set<String>> getClassesUsedInOpenApi() throws IOException {
-        if (classesUsedInOpenApi == null) {
+    /**
+     * The classes the TypeScript of the endpoints is written from: the browser
+     * callable ones and the types their methods send and take. They are what a
+     * change has to touch to be worth generating again for.
+     *
+     * @return the classes, or nothing where the browser callable classes have
+     *         not been walked yet
+     */
+    public Optional<Set<String>> getClassesUsedInEndpoints() {
+        if (classesUsedInEndpoints == null) {
             initIfNeeded();
-            var conf = EngineAutoConfiguration.getDefault();
-            var openApiPath = conf.getOpenAPIFile();
-            if (openApiPath != null && openApiPath.toFile().exists()) {
-                try {
-                    classesUsedInOpenApi = OpenAPIUtil
-                            .findOpenApiClasses(Files.readString(openApiPath));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            } else {
-                LOGGER.debug("No OpenAPI file is available yet ...");
+
+            // Asked for rather than queued: the walk is only worth doing where
+            // there is a context to find the browser callable classes in, and
+            // queueing one for later would pile up a walk per question
+            var applicationContext = ApplicationContextProvider
+                    .getApplicationContext();
+
+            if (applicationContext == null) {
+                LOGGER.debug("There is no application context to find the"
+                        + " browser callable classes in yet");
+
+                return Optional.empty();
             }
+
+            classesUsedInEndpoints = classesUsedIn(
+                    new ParserProcessor(engineConfiguration)
+                            .parse(findBrowserCallables(engineConfiguration,
+                                    applicationContext)));
         }
-        return Optional.ofNullable(classesUsedInOpenApi);
+
+        return Optional.ofNullable(classesUsedInEndpoints);
+    }
+
+    /**
+     * The classes one generation is written from.
+     */
+    private static Set<String> classesUsedIn(Generation generation) {
+        return Stream.concat(
+                generation.endpoints().stream().map(EndpointModel::javaClass),
+                generation.entities().stream().map(EntityModel::javaClass))
+                .collect(Collectors.toSet());
     }
 }

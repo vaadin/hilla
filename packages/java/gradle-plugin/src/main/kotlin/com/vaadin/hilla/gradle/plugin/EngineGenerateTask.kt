@@ -15,19 +15,17 @@
  */
 package com.vaadin.hilla.gradle.plugin
 
-import java.io.IOException
 import com.vaadin.flow.gradle.PluginEffectiveConfiguration
 import com.vaadin.flow.gradle.VaadinFlowPluginExtension
+import com.vaadin.hilla.engine.BrowserCallableFinderException
 import com.vaadin.hilla.engine.GeneratorException
-import com.vaadin.hilla.engine.GeneratorProcessor
+import com.vaadin.hilla.engine.TypeScriptProcessor
 import com.vaadin.hilla.engine.ParserException
-import com.vaadin.hilla.engine.ParserProcessor
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CompileClasspath
@@ -35,22 +33,21 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.work.DisableCachingByDefault
 
 /**
  * Task that generates the endpoints.ts and model TS classes
  * needed for calling the backend in a typesafe manner.
  */
+@DisableCachingByDefault(because = "Inputs contain absolute project paths")
 public abstract class EngineGenerateTask : DefaultTask() {
 
     init {
         group = "Vaadin"
         description = "Hilla Generate Task"
-
-        // we need the compiled classes:
-        dependsOn("classes")
 
         // Make sure to run this task before the `war`/`jar` tasks, so that
         // generated endpoints and models will end up packaged in the war/jar archive.
@@ -61,6 +58,21 @@ public abstract class EngineGenerateTask : DefaultTask() {
     }
 
     internal fun configure(project: Project) {
+        val vaadinExtension = VaadinFlowPluginExtension.get(project)
+
+        // We need the compiled classes and the processed resources, but not the
+        // `classes` lifecycle task itself: the production frontend bundle is
+        // registered as an extra output directory of the source set, which makes
+        // `classes` depend on `vaadinBuildFrontend`. Generating TypeScript must
+        // not trigger a frontend build, which would in addition run before the
+        // endpoints are generated.
+        val sourceSet = project.extensions.getByType(SourceSetContainer::class.java)
+            .getByName(vaadinExtension.sourceSetName.get())
+        dependsOn(sourceSet.compileJavaTaskName, sourceSet.processResourcesTaskName)
+        project.plugins.withId("org.jetbrains.kotlin.jvm") {
+            dependsOn(sourceSet.getCompileTaskName("kotlin"))
+        }
+
         groupId.set(project.group.toString())
         artifactId.set(project.name)
         mainClass.set(project.findProperty("com.vaadin.hilla.mainClass") as String?
@@ -69,13 +81,12 @@ public abstract class EngineGenerateTask : DefaultTask() {
             ?: emptyList())
         val engineConfig = HillaPlugin.createEngineConfiguration(
             project,
-            VaadinFlowPluginExtension.get(project)
+            vaadinExtension
         )
         engineConfigurationSettings.set(engineConfig.toInputs())
         effectiveConfig.set(PluginEffectiveConfiguration.get(project))
         classpath.from(engineConfig.classpath.map { it.toFile() })
 
-        openApiFile.set(engineConfig.openAPIFile.toFile())
         outputDir.set(engineConfig.outputDir.toFile())
     }
 
@@ -90,7 +101,7 @@ public abstract class EngineGenerateTask : DefaultTask() {
 
     @get:Optional
     @get:Input
-    internal abstract val mainClass: Property<String?>
+    internal abstract val mainClass: Property<String>
 
     @get:Input
     internal abstract val sourceClasses: ListProperty<String>
@@ -101,10 +112,6 @@ public abstract class EngineGenerateTask : DefaultTask() {
     @get:CompileClasspath
     internal abstract val classpath : ConfigurableFileCollection
 
-    @get:Optional
-    @get:OutputFile
-    internal abstract val openApiFile: RegularFileProperty
-
     @get:OutputDirectory
     internal abstract val outputDir: DirectoryProperty
 
@@ -114,22 +121,17 @@ public abstract class EngineGenerateTask : DefaultTask() {
         logger.info("Running the engineGenerate task with effective Vaadin configuration ${effectiveConfig.get()}")
 
         try {
-            val conf = engineConfigurationSettings.get().toEngineConfiguration()
-
-            val parserProcessor = ParserProcessor(conf)
-            val generatorProcessor = GeneratorProcessor(conf)
-
-            val endpoints = conf.browserCallableFinder.find(conf);
-            parserProcessor.process(endpoints)
-            generatorProcessor.process()
-        } catch (e: IOException) {
-            throw GradleException("Endpoint collection failed", e)
-        } catch (e: InterruptedException) {
-            throw GradleException("Endpoint collection failed", e)
+            TypeScriptProcessor.generate(engineConfigurationSettings.get().toEngineConfiguration())
+        } catch (e: BrowserCallableFinderException) {
+            throw GradleException(EXECUTION_FAILED, e)
         } catch (e: GeneratorException) {
-            throw GradleException("Execution failed", e)
+            throw GradleException(EXECUTION_FAILED, e)
         } catch (e: ParserException) {
-            throw GradleException("Execution failed", e)
+            throw GradleException(EXECUTION_FAILED, e)
         }
+    }
+
+    private companion object {
+        const val EXECUTION_FAILED = "Execution failed"
     }
 }

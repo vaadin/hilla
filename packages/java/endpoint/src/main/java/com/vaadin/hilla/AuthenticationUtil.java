@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -45,6 +46,26 @@ public class AuthenticationUtil {
 
         return authentication;
 
+    }
+
+    /**
+     * Gets the authentication from the Spring SecurityContextHolder the same
+     * way Spring Security does when it authorizes a request: an anonymous user
+     * is reported with its {@link AnonymousAuthenticationToken} instead of
+     * <code>null</code>, and a completely missing authentication is an error.
+     *
+     * @return the current authentication, never <code>null</code>
+     * @throws AuthenticationCredentialsNotFoundException
+     *             if the SecurityContextHolder holds no authentication
+     */
+    public static Authentication getRequiredSecurityHolderAuthentication() {
+        var authentication = SecurityContextHolder.getContext()
+                .getAuthentication();
+        if (authentication == null) {
+            throw new AuthenticationCredentialsNotFoundException(
+                    "An Authentication object was not found in the SecurityContext");
+        }
+        return authentication;
     }
 
     /**

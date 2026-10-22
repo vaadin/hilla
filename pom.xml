@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>hilla-project</artifactId>
-  <version>25.3-SNAPSHOT</version>
+  <version>25.4-SNAPSHOT</version>
   <name>Hilla</name>
   <packaging>pom</packaging>
 
@@ -20,6 +20,7 @@
     <module>packages/java/engine-runtime</module>
     <module>packages/java/maven-plugin</module>
     <module>packages/java/gradle-plugin</module>
+    <module>packages/java/gradle-plugin/pom-portal.xml</module>
     <module>packages/java/hilla</module>
     <module>packages/java/hilla-bom</module>
     <module>packages/java/typescript-generator</module>
@@ -36,16 +37,6 @@
       </activation>
       <modules>
         <module>packages/java/tests</module>
-      </modules>
-    </profile>
-    <profile>
-      <id>gradle</id>
-      <activation>
-        <jdk>(,22]</jdk>
-      </activation>
-      <modules>
-        <module>packages/java/gradle-plugin</module>
-        <module>packages/java/gradle-plugin/pom-portal.xml</module>
       </modules>
     </profile>
     <profile>
@@ -69,23 +60,19 @@
     <maven.compiler.source>${maven.compiler.release}</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.release}</maven.compiler.target>
     <formatter.basedir>${project.basedir}</formatter.basedir>
-    <spotless.plugin.version>3.0.0</spotless.plugin.version>
+    <spotless.plugin.version>3.10.4</spotless.plugin.version>
     <classgraph.version>4.8.184</classgraph.version>
     <gentyref.version>1.2.0.vaadin1</gentyref.version>
     <jsr305.version>3.0.2</jsr305.version>
     <jna.version>5.14.0</jna.version>
-    <swagger.core.version>2.2.38</swagger.core.version>
-    <swagger.models.version>2.2.38</swagger.models.version>
-    <swagger.parser.v3.version>2.1.15</swagger.parser.v3.version>
-    <jackson2.version>2.21.4</jackson2.version>
-    <jackson-annotations.version>2.21</jackson-annotations.version>
-    <jackson.version>3.1.0</jackson.version>
+    <jackson-annotations.version>2.22</jackson-annotations.version>
+    <jackson.version>3.1.7</jackson.version>
     <junit.version>5.10.1</junit.version>
     <mockito.version>4.5.0</mockito.version>
-    <flow.version>25.3-SNAPSHOT</flow.version>
+    <flow.version>25.4-SNAPSHOT</flow.version>
     <slf4j.version>2.0.9</slf4j.version>
-    <spring.boot.version>4.1.0</spring.boot.version>
-    <testbench.version>25.2.0</testbench.version>
+    <spring.boot.version>4.1.1</spring.boot.version>
+    <testbench.version>25.4.0-alpha1</testbench.version>
     <jakarta.validation.version>3.1.1</jakarta.validation.version>
     <jakarta.annotation.api.version>3.0.0</jakarta.annotation.api.version>
     <jakarta.activation.api.version>2.1.2</jakarta.activation.api.version>
@@ -95,7 +82,7 @@
     <github.javaparser.core.version>3.28.2</github.javaparser.core.version>
     <jetty.version>12.0.3</jetty.version>
     <atmosphere.version>3.0.5.slf4jvaadin1</atmosphere.version>
-    <kotlin.version>2.1.21</kotlin.version>
+    <kotlin.version>2.4.20</kotlin.version>
   </properties>
 
   <organization>
@@ -232,11 +219,6 @@
         <version>${jackson.version}</version>
       </dependency>
       <dependency>
-        <groupId>tools.jackson.dataformat</groupId>
-        <artifactId>jackson-dataformat-yaml</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-      <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
         <version>${junit.version}</version>
@@ -343,7 +325,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.10</version>
+        <version>0.8.15</version>
         <executions>
           <execution>
             <goals>

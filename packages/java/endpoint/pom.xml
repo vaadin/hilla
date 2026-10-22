@@ -6,12 +6,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>hilla-project</artifactId>
-        <version>25.3-SNAPSHOT</version>
+        <version>25.4-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
     <artifactId>hilla-endpoint</artifactId>
-    <version>25.3-SNAPSHOT</version>
+    <version>25.4-SNAPSHOT</version>
     <name>Hilla Endpoint</name>
     <packaging>jar</packaging>
 
@@ -144,18 +144,6 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
-        <!-- Jackson 2 dependencies needed by Swagger (which still uses Jackson 2) -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>${jackson2.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jdk8</artifactId>
-            <version>${jackson2.version}</version>
-        </dependency>
-
         <!-- Needed for security annotations and checks -->
         <dependency>
             <groupId>jakarta.annotation</groupId>
@@ -233,6 +221,12 @@
             <artifactId>hilla-typescript-generator</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- The hints of a native image are registered for the classes a scan
+             of the classpath finds -->
+        <dependency>
+            <groupId>io.github.classgraph</groupId>
+            <artifactId>classgraph</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>hilla-runtime-plugin-transfertypes</artifactId>
@@ -280,6 +274,13 @@
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- EndpointInvokerTest asserts the level of the log messages the
+             invoker emits, which needs the SLF4J binding to be logback -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
 

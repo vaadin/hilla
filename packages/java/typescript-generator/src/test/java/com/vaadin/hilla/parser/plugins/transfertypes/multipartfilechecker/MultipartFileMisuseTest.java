@@ -17,39 +17,22 @@ package com.vaadin.hilla.parser.plugins.transfertypes.multipartfilechecker;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.List;
-import java.util.Set;
-
 import org.junit.jupiter.api.Test;
 
-import com.vaadin.hilla.parser.core.Parser;
-import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
-import com.vaadin.hilla.parser.plugins.transfertypes.MultipartFileCheckerPlugin;
 import com.vaadin.hilla.parser.plugins.transfertypes.MultipartFileUsageException;
-import com.vaadin.hilla.parser.plugins.transfertypes.test.helpers.TestHelper;
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+import com.vaadin.hilla.parser.testutils.AbstractFullStackTest;
 
-public class MultipartFileMisuseTest {
-    private final TestHelper helper = new TestHelper(getClass());
-
+public class MultipartFileMisuseTest extends AbstractFullStackTest {
     @Test
     public void should_ThrowWhenMultipartFileIsUsedInEntity() {
         assertThrows(MultipartFileUsageException.class,
-                () -> new Parser()
-                        .classPath(Set.of(helper.getTargetDir().toString()))
-                        .endpointAnnotations(List.of(Endpoint.class))
-                        .addPlugin(new BackbonePlugin())
-                        .addPlugin(new MultipartFileCheckerPlugin())
-                        .execute(List.of(MultipartFileInEntityEndpoint.class)));
+                () -> generator(MultipartFileInEntityEndpoint.class).parse());
     }
 
     @Test
     public void should_ThrowWhenMultipartFileIsUsedAsReturnType() {
-        assertThrows(MultipartFileUsageException.class, () -> new Parser()
-                .classPath(Set.of(helper.getTargetDir().toString()))
-                .endpointAnnotations(List.of(Endpoint.class))
-                .addPlugin(new BackbonePlugin())
-                .addPlugin(new MultipartFileCheckerPlugin())
-                .execute(List.of(MultipartFileAsReturnTypeEndpoint.class)));
+        assertThrows(MultipartFileUsageException.class,
+                () -> generator(MultipartFileAsReturnTypeEndpoint.class)
+                        .parse());
     }
 }

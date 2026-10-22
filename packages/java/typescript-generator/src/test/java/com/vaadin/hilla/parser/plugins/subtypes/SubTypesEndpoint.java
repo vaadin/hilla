@@ -26,4 +26,12 @@ public class SubTypesEndpoint {
 
     public void receiveEvent(BaseEvent event) {
     }
+
+    public Notification sendNotification() {
+        return new EmailNotification();
+    }
+
+    public Shape sendShape() {
+        return new Circle(1);
+    }
 }

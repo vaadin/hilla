@@ -18,6 +18,8 @@ package com.vaadin.hilla;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -30,6 +32,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -81,6 +84,32 @@ public class AuthenticationUtilTest {
         var result = AuthenticationUtil.getSecurityHolderAuthentication();
         assertNotNull(result);
         assertTrue(result instanceof UsernamePasswordAuthenticationToken);
+    }
+
+    @Test
+    public void getRequiredSecurityHolderAuthentication_noAuthentication_throws() {
+        assertThrows(AuthenticationCredentialsNotFoundException.class,
+                AuthenticationUtil::getRequiredSecurityHolderAuthentication);
+    }
+
+    @Test
+    public void getRequiredSecurityHolderAuthentication_anonymousAuthentication_returnsAuthentication() {
+        var anonymousAuth = new AnonymousAuthenticationToken("key", "anonymous",
+                Collections.singletonList(
+                        new SimpleGrantedAuthority("ROLE_ANONYMOUS")));
+        securityContext.setAuthentication(anonymousAuth);
+
+        assertSame(anonymousAuth,
+                AuthenticationUtil.getRequiredSecurityHolderAuthentication());
+    }
+
+    @Test
+    public void getRequiredSecurityHolderAuthentication_validAuthentication_returnsAuthentication() {
+        var auth = createAuthentication("user", "ROLE_USER");
+        securityContext.setAuthentication(auth);
+
+        assertSame(auth,
+                AuthenticationUtil.getRequiredSecurityHolderAuthentication());
     }
 
     @Test

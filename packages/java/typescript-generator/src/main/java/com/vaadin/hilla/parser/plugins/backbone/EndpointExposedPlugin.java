@@ -39,14 +39,6 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 
 public final class EndpointExposedPlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
-    @Override
-    public void enter(NodePath<?> nodePath) {
-    }
-
-    @Override
-    public void exit(NodePath<?> nodePath) {
-    }
-
     @NonNull
     @Override
     public Node<?, ?> resolve(@NonNull Node<?, ?> node,
@@ -107,7 +99,7 @@ public final class EndpointExposedPlugin
     private Node<?, ?> createEndpointHierarchyClassNode(
             ClassInfoModel classInfo) {
         // annotations are compared by name as Gradle can proxy them
-        var endpointExposedAnnotations = getStorage().getParserConfig()
+        var endpointExposedAnnotations = getParserConfig()
                 .getEndpointExposedAnnotations().stream().map(Class::getName)
                 .toList();
         var exposed = classInfo.getAnnotations().stream()

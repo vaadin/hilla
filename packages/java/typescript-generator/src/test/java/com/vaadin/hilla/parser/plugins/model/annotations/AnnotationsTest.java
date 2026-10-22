@@ -15,33 +15,90 @@
  */
 package com.vaadin.hilla.parser.plugins.model.annotations;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Set;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.vaadin.hilla.parser.core.Parser;
-import com.vaadin.hilla.parser.model.test.helpers.TestHelper;
-import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
-import com.vaadin.hilla.parser.plugins.model.ModelPlugin;
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
-import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
+import com.vaadin.hilla.generator.model.AnnotationModel;
+import com.vaadin.hilla.generator.model.EntityModel;
+import com.vaadin.hilla.generator.model.Generation;
+import com.vaadin.hilla.parser.testutils.AbstractFullStackTest;
 
-public class AnnotationsTest {
-    private final TestHelper helper = new TestHelper(getClass());
+/**
+ * The generated TypeScript is covered by the snapshot of this package. The
+ * shape an attribute value takes is asserted on what the parser hands the
+ * writers as well, since that is what the TypeScript is written from.
+ */
+public class AnnotationsTest extends AbstractFullStackTest {
+    private static final String ENTITY = AnnotationsEndpoint.AnnotationTestEntity.class
+            .getName();
+
+    private Generation generation;
+
+    @BeforeEach
+    public void parseEndpoint() {
+        generation = generator(AnnotationsEndpoint.class).parseGeneration();
+    }
 
     @Test
-    public void should_GenerateAnnotations()
-            throws IOException, URISyntaxException {
-        var openAPI = new Parser()
-                .classPath(Set.of(helper.getTargetDir().toString()))
-                .endpointAnnotations(List.of(Endpoint.class))
-                .endpointExposedAnnotations(List.of(EndpointExposed.class))
-                .addPlugin(new BackbonePlugin()).addPlugin(new ModelPlugin())
-                .execute(List.of(AnnotationsEndpoint.class));
+    public void should_GenerateTypescript() {
+        assertTypescriptMatchesSnapshot(AnnotationsEndpoint.class);
+    }
 
-        helper.executeParserWithConfig(openAPI);
+    @Test
+    public void should_IncludeAnnotationAttributes() {
+        var annotations = annotationsOf("manyToManyWithFetchType");
+
+        assertEquals(1, annotations.size());
+
+        var annotation = annotations.get(0);
+        assertEquals("jakarta.persistence.ManyToMany", annotation.name());
+        assertEquals(Map.of("fetch", "EAGER"), annotation.attributes());
+    }
+
+    @Test
+    public void should_ReferenceAClassAttributeByItsJvmType() {
+        var attributes = annotationsOf("oneToManyWithTargetEntity").get(0)
+                .attributes();
+
+        assertEquals(
+                Map.of("jvmType",
+                        AnnotationsEndpoint.NestedEntity.class.getName()),
+                attributes.get("targetEntity"));
+    }
+
+    @Test
+    public void should_ConvertTheElementsOfAnArrayAttribute() {
+        var attributes = annotationsOf("manyToManyWithCascade").get(0)
+                .attributes();
+
+        assertEquals(List.of("PERSIST", "MERGE"), attributes.get("cascade"));
+    }
+
+    @Test
+    public void should_LeaveOutAttributesThatKeepTheirDefaults() {
+        var annotations = annotationsOf("manyToMany");
+
+        assertEquals(1, annotations.size());
+        assertEquals(Map.of(), annotations.get(0).attributes());
+    }
+
+    private List<AnnotationModel> annotationsOf(String propertyName) {
+        var entity = generation.entities().stream()
+                .filter(candidate -> candidate.javaClass().equals(ENTITY))
+                .map(EntityModel.Bean.class::cast).findFirst();
+        assertTrue(entity.isPresent(), "no entity for " + ENTITY);
+
+        var property = entity.get().properties().stream()
+                .filter(candidate -> candidate.name().equals(propertyName))
+                .findFirst();
+        assertTrue(property.isPresent(), "no property " + propertyName);
+
+        return property.get().type().annotations();
     }
 }

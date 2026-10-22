@@ -19,18 +19,9 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.media.MapSchema;
-import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.ObjectSchema;
-import io.swagger.v3.oas.models.media.Schema;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
@@ -41,7 +32,6 @@ import com.vaadin.hilla.parser.models.ArraySignatureModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.ReflectionSignatureModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
-import com.vaadin.hilla.parser.models.SpecializedModel;
 import com.vaadin.hilla.parser.models.TypeArgumentModel;
 import com.vaadin.hilla.parser.models.TypeParameterModel;
 import com.vaadin.hilla.parser.models.TypeVariableModel;
@@ -58,28 +48,11 @@ public final class TypeSignaturePlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
     @Override
     public void enter(NodePath<?> nodePath) {
-        if (nodePath.getNode() instanceof TypedNode) {
-            var typedNode = (TypedNode) nodePath.getNode();
-            var schema = new SchemaProcessor(typedNode.getType(),
+        if (nodePath.getNode() instanceof TypedNode typedNode) {
+            typedNode.setTarget(TypeFacts.of(typedNode.getType(),
                     // Only deal with generics in entities: endpoint methods are
                     // not allowed to emit generic type parameters and arguments
-                    isInEntity(nodePath)).process();
-
-            // Prepare a schema for type arguments if the current node is a
-            // class reference and if its type arguments are not processed
-            // differently
-            if (typedNode.getType() instanceof ClassRefSignatureModel) {
-                var signature = ((ClassRefSignatureModel) typedNode.getType());
-
-                if (!(signature.isIterable() || signature.isMap()
-                        || signature.isOptional()
-                        || signature.getTypeArguments().isEmpty())) {
-                    schema.addExtension("x-type-arguments",
-                            new ComposedSchema());
-                }
-            }
-
-            typedNode.setTarget(schema);
+                    isInEntity(nodePath)));
         }
     }
 
@@ -102,28 +75,13 @@ public final class TypeSignaturePlugin
         }
 
         var node = (TypedNode) nodePath.getNode();
-        var schema = node.getTarget();
+        var type = node.getTarget();
         var parentNode = nodePath.getParentPath().getNode();
-        var grandParentNode = nodePath.getParentPath().getParentPath()
-                .getNode();
-        if (parentNode instanceof MethodNode) {
-            attachSchemaToMethod(schema, (MethodNode) parentNode);
-        } else if (parentNode instanceof MethodParameterNode
-                && grandParentNode instanceof MethodNode) {
-            attachSchemaToParameterOfMethod(schema,
-                    ((MethodParameterNode) parentNode),
-                    ((MethodNode) grandParentNode));
-        } else if (parentNode instanceof EntityNode
-                && schema instanceof ComposedSchema) {
-            attachSchemaToEntitySubclass((ComposedSchema) schema,
-                    (EntityNode) parentNode);
-        } else if (parentNode instanceof PropertyNode
-                && grandParentNode instanceof EntityNode) {
-            attachSchemaToPropertyOfEntity(schema, (PropertyNode) parentNode,
-                    (EntityNode) grandParentNode);
-        } else if (parentNode instanceof TypedNode) {
-            attachSchemaToNestingParentSignature(schema,
-                    (TypedNode) parentNode);
+
+        if (parentNode instanceof PropertyNode propertyNode) {
+            propertyNode.setValueType(type);
+        } else if (parentNode instanceof TypedNode parentTypedNode) {
+            attachToNestingParentSignature(type, parentTypedNode);
         }
     }
 
@@ -151,51 +109,24 @@ public final class TypeSignaturePlugin
         return nodeDependencies;
     }
 
-    private void attachSchemaToEntitySubclass(ComposedSchema schema,
-            EntityNode entityNode) {
-        var subclassSchema = entityNode.getTarget();
-        schema.addAnyOfItem(subclassSchema);
-        schema.setNullable(null);
-        entityNode.setTarget(schema);
-    }
-
-    private void attachSchemaToMethod(Schema<?> schema, MethodNode methodNode) {
-        methodNode.getTarget().getPost().getResponses().get("200")
-                .setContent(new Content().addMediaType(MethodPlugin.MEDIA_TYPE,
-                        new MediaType().schema(schema)));
-    }
-
-    private void attachSchemaToNestingParentSignature(Schema<?> schema,
+    /**
+     * Says what the walk found about a type below one which is written from it:
+     * the items of an array and the values of a map are the type itself, the
+     * types a class is given belong to it, and a type argument, a type variable
+     * or an optional is written as the type it stands for.
+     */
+    private void attachToNestingParentSignature(TypeFacts type,
             TypedNode parentNode) {
-        var parentSchema = parentNode.getTarget();
-        if (parentSchema instanceof ArraySchema) {
-            ((ArraySchema) parentSchema).setItems(schema);
-        } else if (parentSchema instanceof MapSchema) {
-            parentSchema.additionalProperties(schema);
-        } else if (parentSchema.getExtensions() != null && parentSchema
-                .getExtensions().get("x-type-arguments") != null) {
-            // The nested schema is added to the type arguments of the parent
-            ((ComposedSchema) parentSchema.getExtensions()
-                    .get("x-type-arguments")).addAllOfItem(schema);
-        } else {
-            // The nested schema replaces parent for type argument, type
-            // parameter, type variable, and optional signatures
-            parentNode.setTarget(schema);
+        var parentType = parentNode.getType();
+
+        if (parentType.isArray() || parentType.isIterable()
+                || parentType.isMap()) {
+            return;
         }
-    }
 
-    private void attachSchemaToParameterOfMethod(Schema<?> schema,
-            MethodParameterNode methodParameterNode, MethodNode methodNode) {
-        var requestMap = (ObjectSchema) methodNode.getTarget().getPost()
-                .getRequestBody().getContent().get(MethodPlugin.MEDIA_TYPE)
-                .getSchema();
-        requestMap.addProperties(methodParameterNode.getTarget(), schema);
-    }
-
-    private void attachSchemaToPropertyOfEntity(Schema<?> schema,
-            PropertyNode propertyNode, EntityNode entityNode) {
-        var propertyName = propertyNode.getTarget();
-        entityNode.getTarget().addProperties(propertyName, schema);
+        if (!parentNode.getTarget().collectsTypeArguments()) {
+            parentNode.setTarget(type);
+        }
     }
 
     /**
@@ -207,7 +138,8 @@ public final class TypeSignaturePlugin
      * <li>Type argument of an optional and iterable types</li>
      * <li>Item type for a map</li>
      * <li>Known type parameter for a type variable</li>
-     * <li>Known bounds for a type parameter</li>
+     * <li>Known bounds for a type parameter, except the ones leading back to
+     * it</li>
      * </ul>
      *
      * <p>
@@ -260,13 +192,8 @@ public final class TypeSignaturePlugin
                 items = List.of(associatedTypes.get(0));
             }
         } else if (signature.isTypeParameter()) {
-            var bounds = ((TypeParameterModel) signature).getBounds();
-
-            if (!bounds.isEmpty()) {
-                items = bounds.stream().filter(Objects::nonNull)
-                        .filter(Predicate.not(SpecializedModel::isNativeObject))
-                        .collect(Collectors.toList());
-            }
+            items = TypeParameters
+                    .getEffectiveBounds((TypeParameterModel) signature);
         } else if (signature.isTypeVariable()) {
             items = List.of(((TypeVariableModel) signature).resolve());
         } else if (signature.isClassRef()) {

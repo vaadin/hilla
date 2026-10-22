@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { Script } from 'node:vm';
-import ts, { type Node } from 'typescript';
+import ts, { type Node } from '@typescript/typescript6';
 import { convertComponentNameToTitle } from '../shared/convertComponentNameToTitle.js';
 import type { ServerViewConfig } from '../shared/internal.js';
 import { transformTree } from '../shared/transformTree.js';

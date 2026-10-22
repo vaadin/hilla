@@ -12,6 +12,12 @@ Hilla is a web framework that integrates a Spring Boot Java backend with a react
 - Support for both React and Lit frontends
 - Plugin-based code generation architecture
 
+## Guidelines
+
+Design and implementation guidelines live in `guidelines/`. Read the chapters
+mapped in `guidelines/overview.md` selectively for the topics your work
+touches.
+
 ## Build Commands
 
 ### Initial Setup
@@ -103,19 +109,19 @@ This is an Nx-based monorepo with:
 
 #### Engine (`packages/java/engine-core`, `packages/java/engine-runtime`)
 - **EngineConfiguration**: Main configuration for code generation
-- **CodeGenerationEngine**: Orchestrates OpenAPI generation and TypeScript generation
+- **ParserProcessor / TypeScriptProcessor**: Walk the browser callable classes and write the TypeScript of them
 - Integrates with Maven/Gradle plugins
 
-#### Parser (`packages/java/parser-jvm-*`)
-- **parser-jvm-core**: Core Java parsing infrastructure using JavaParser
-- **parser-jvm-plugin-***: Specialized plugins for:
-  - `backbone`: Base OpenAPI structure
-  - `model`: Java model to OpenAPI schema conversion
+#### Parser and generator (`packages/java/typescript-generator`)
+- **parser core**: Walks the browser callable classes with ClassGraph
+- **plugins**: Say what the walk finds:
+  - `backbone`: The endpoints, their methods and the types they send
+  - `model`: What the validation and persistence annotations say about a value
   - `nonnull`: Nullability analysis
   - `subtypes`: Polymorphic type handling
   - `transfertypes`: Data transfer object processing
-
-Generates OpenAPI 3 specification from Java classes.
+- **generator**: The model the writers need, and the TypeScript files written
+  from it
 
 #### Maven/Gradle Plugins
 - **maven-plugin** (`packages/java/maven-plugin`): Configures and runs code generation during Maven build
@@ -123,21 +129,10 @@ Generates OpenAPI 3 specification from Java classes.
 
 ### TypeScript Frontend Architecture
 
-#### Generator Core (`packages/ts/generator-core`)
-- **Generator**: Main orchestrator that processes OpenAPI and runs plugins
-- **PluginManager**: Manages plugin lifecycle and execution order
-- **ReferenceResolver**: Resolves OpenAPI `$ref` references
-- Plugin-based architecture - all code generation happens via plugins
-
-#### Generator Plugins (`packages/ts/generator-plugin-*`)
-Each plugin extends the base Plugin class and generates specific code:
-- **backbone**: Base file structure and utilities
-- **model**: TypeScript interfaces from OpenAPI schemas
-- **client**: Endpoint client methods
-- **barrel**: Index files for clean imports
-- **push**: Server-push/Flux support
-- **signals**: React Signals integration
-- **subtypes**: Polymorphic type guards
+#### Generating the endpoint TypeScript
+The TypeScript of the endpoints is written in Java, by
+`packages/java/typescript-generator`: see its README. The file router writes
+its routes with `generator-utils`.
 
 #### Frontend Utilities
 - **frontend** (`packages/ts/frontend`): Core utilities (Authentication, Connect client, Cookie management)
@@ -152,21 +147,24 @@ Each plugin extends the base Plugin class and generates specific code:
 
 ### Code Generation Flow
 
-1. **Java → OpenAPI**: Parser plugins analyze Java endpoints and generate OpenAPI 3 spec
-2. **OpenAPI → TypeScript**: Generator plugins read OpenAPI and generate TypeScript code
-3. **Output**: Type-safe TypeScript clients matching Java endpoints exactly
+1. **The walk**: The parser plugins walk the browser callable classes and say what
+   they find about the endpoints, their methods and the types of the values
+2. **The model**: A plugin collects what the writers need while that happens
+3. **The writers**: The TypeScript files are filled in from the model
+4. **Output**: Type-safe TypeScript clients matching Java endpoints exactly
 
 Generated code location in apps: `frontend/generated/`
 
 ### Important Technical Details
 
-#### Jackson 2/3 Hybrid Approach
-Hilla uses **Jackson 3** (`tools.jackson.*`) for internal serialization but maintains **Jackson 2** (`com.fasterxml.jackson.*`) for OpenAPI/Swagger compatibility. See `JACKSON.md` for detailed migration notes.
+#### Jackson
+Hilla uses **Jackson 3** (`tools.jackson.*`): the endpoints serialize with it,
+and the parser asks it what a class serializes as. The annotations
+(`com.fasterxml.jackson.annotation.*`) are the ones both versions share.
 
 Key points:
 - Use `tools.jackson.databind.ObjectMapper` for Hilla serialization
-- OpenAPI models still use Jackson 2 annotations
-- `JsonPrinter` detects and routes to correct Jackson version
+- An application may still have an object mapper of Jackson 2 of its own
 
 #### Testing Structure
 - **packages/java/tests/spring/**: Spring Boot integration tests
@@ -187,22 +185,23 @@ Key points:
 
 ## Common Workflows
 
-### Adding a New Generator Plugin
-1. Create new package in `packages/ts/generator-plugin-{name}/`
-2. Extend `Plugin` class from `@vaadin/hilla-generator-core`
-3. Implement `execute(storage: SharedStorage): Promise<void>`
-4. Register in generator configuration
+### Writing Something New in the Generated TypeScript
+1. Add what the writers need to the model in
+   `packages/java/typescript-generator/src/main/java/com/vaadin/hilla/generator/model`
+2. Collect it in `EndpointModelPlugin` while the parser walks the classes
+3. Write it in the matching writer under `.../generator/typescript`
+4. Add a test case, and run the tests once with `-Dhilla.test.updateSnapshots`
 
 ### Adding a New Java Endpoint Feature
 1. Modify/extend classes in `packages/java/endpoint`
-2. Update parser plugins if OpenAPI generation needs changes
-3. Add corresponding generator plugin if TypeScript generation needs changes
+2. Update parser plugins if what the parser has to see changes
+3. Extend the Java TypeScript writers if the generated TypeScript changes
 4. Add integration tests in `packages/java/tests/spring/`
 
 ### Debugging Code Generation
-1. Check OpenAPI output in application's `target/generated-resources/openapi.json`
-2. Check generated TypeScript in `frontend/generated/`
-3. Enable debug logging in EngineConfiguration
+1. Check generated TypeScript in `frontend/generated/`, which
+   `generated-file-list.txt` lists
+2. Enable debug logging in EngineConfiguration
 
 ## Dependencies
 
@@ -213,10 +212,9 @@ Key points:
 - **Maven**: >= 3
 
 ### Key Java Dependencies
-- Spring Boot 4.0.0-M3
-- Jackson 3.0.0-rc9 (with Jackson 2 for OpenAPI)
-- Vaadin Flow 25.3-SNAPSHOT
-- Swagger Parser 2.1.15
+- Spring Boot 4
+- Jackson 3
+- Vaadin Flow 25.4-SNAPSHOT
 
 ### Key TypeScript Dependencies
 - TypeScript 5.9.3
