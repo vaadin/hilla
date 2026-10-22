@@ -12,7 +12,7 @@
 
   <artifactId>hilla-typescript-generator</artifactId>
   <name>Hilla TypeScript Generator</name>
-  <description>Generates TypeScript from Java endpoints. Internal to Hilla, not public API: used only by the development mode server and the production build.</description>
+  <description>Generates TypeScript from Java endpoints. Internal to Hilla, not public API, except for JacksonObjectMapperFactory.</description>
   <url>https://vaadin.com/hilla</url>
   <packaging>jar</packaging>
 
