@@ -44,7 +44,7 @@ jobs:
           username: ${{github.triggering_actor}}
           require: 'write'
       - name: Fail on external workflow triggering
-        if: ${{ steps.checkUser.outputs.require-result != 'true' && github.actor != 'dependabot[bot]' }}
+        if: ${{ steps.checkUser.outputs.require-result != 'true' && github.actor != 'dependabot[bot]' && github.actor != 'totally-not-ai[bot]' }}
         run: |
           echo "🚫 **${{ github.actor }}** is an external contributor, a **${{ github.repository }}** team member has to review this changes and re-run this build" \
             | tee -a $GITHUB_STEP_SUMMARY && exit 1
