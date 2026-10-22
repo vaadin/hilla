@@ -1,0 +1,93 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.hilla.generator;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
+
+import com.vaadin.hilla.generator.model.EntityModel;
+import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
+import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
+import com.vaadin.hilla.parser.plugins.backbone.BackbonePluginConfiguration;
+import com.vaadin.hilla.parser.plugins.backbone.config.CustomConfigEndpoint;
+import com.vaadin.hilla.parser.plugins.backbone.config.CustomFactory;
+import com.vaadin.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint;
+import com.vaadin.hilla.parser.testutils.FullStackGenerator;
+
+/**
+ * A generated enum holds what the server writes, and a form sends one of those
+ * values back, so the mapper the endpoints use has to read each value as the
+ * constant it was written from. The snapshots pin the values, not that they
+ * read back.
+ */
+public class EnumValuesTest {
+    @Test
+    public void should_ReadBackEveryValueWithTheDefaultMapper() {
+        assertReadBack(
+                new FullStackGenerator(EnumValuesTest.class,
+                        EnumTypeEndpoint.class),
+                new JacksonObjectMapperFactory.Json().build());
+    }
+
+    @Test
+    public void should_ReadBackEveryValueWithTheMapperOfTheApplication() {
+        var configuration = new BackbonePluginConfiguration();
+        configuration
+                .setObjectMapperFactoryClassName(CustomFactory.class.getName());
+        var plugin = new BackbonePlugin();
+        plugin.setConfiguration(configuration);
+
+        assertReadBack(
+                new FullStackGenerator(EnumValuesTest.class,
+                        CustomConfigEndpoint.class).withPlugin(plugin),
+                new CustomFactory().build());
+    }
+
+    private static void assertReadBack(FullStackGenerator generator,
+            ObjectMapper mapper) {
+        List<EntityModel.Enumeration> enums = generator.parseGeneration()
+                .entities().stream()
+                .filter(EntityModel.Enumeration.class::isInstance)
+                .map(EntityModel.Enumeration.class::cast).toList();
+        assertFalse(enums.isEmpty());
+
+        for (var enumeration : enums) {
+            var cls = load(enumeration.javaClass());
+
+            for (var constant : enumeration.constants()) {
+                assertEquals(constant.name(),
+                        ((Enum<?>) mapper.readValue(
+                                mapper.writeValueAsString(constant.value()),
+                                cls)).name(),
+                        enumeration.javaClass() + " value "
+                                + constant.value());
+            }
+        }
+    }
+
+    private static Class<?> load(String name) {
+        try {
+            return Class.forName(name);
+        } catch (ClassNotFoundException e) {
+            throw new AssertionError(e);
+        }
+    }
+}

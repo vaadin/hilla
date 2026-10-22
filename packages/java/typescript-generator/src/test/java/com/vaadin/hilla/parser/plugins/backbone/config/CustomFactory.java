@@ -16,6 +16,7 @@
 package com.vaadin.hilla.parser.plugins.backbone.config;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import tools.jackson.databind.MapperFeature;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.cfg.DateTimeFeature;
 import tools.jackson.databind.cfg.EnumFeature;
@@ -34,7 +35,10 @@ public class CustomFactory extends JacksonObjectMapperFactory.Json {
     public ObjectMapper build() {
         return JsonMapper.builder().addModule(new ByteArrayModule())
                 .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+                // Written in lower case, and read back whatever the case, as
+                // an application writing its enums so has to
                 .enable(EnumFeature.WRITE_ENUMS_TO_LOWERCASE)
+                .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
                 .addMixIn(CustomConfigEndpoint.CustomConfigEntity.class,
                         VisibilityMixIn.class)
                 .build();
