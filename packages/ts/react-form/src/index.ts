@@ -287,6 +287,18 @@ export function useForm<M extends ProvisionalModel>(
   };
 }
 
+/**
+ * Hook to access a part of a form: the state of the given model's binder node,
+ * and a `field` directive to bind elements to its nested models.
+ *
+ * The hook does not subscribe to changes of its own node: the component
+ * re-renders when the form root changes, through the `useForm` component.
+ * Changes dispatched only on this node, such as `setVisited` or
+ * `setValidators`, do not re-render it by themselves.
+ *
+ * @param model - The model of the form part, nested in the `useForm` model
+ * @returns The form part state and its `field` directive
+ */
 export function useFormPart<M extends ProvisionalModel>(model: M): UseFormPartResult<M> {
   isRendering = true;
   const binderNode = getBinderNode(model);
@@ -302,6 +314,10 @@ export function useFormPart<M extends ProvisionalModel>(model: M): UseFormPartRe
 /**
  * Hook to access an array model part of a form. It provides the same API as `useFormPart`,
  * but adds an `items` property that allows to iterate over the items in form of an array of models.
+ *
+ * Works with the legacy `ArrayModel` of `@vaadin/hilla-lit-form` only. With a
+ * generated array model from `@vaadin/hilla-models`, use `useFormPart` and
+ * iterate the items with `m.items(model)`.
  *
  * @param model - The array model to access
  * @returns The array model part of the form
