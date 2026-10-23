@@ -1,343 +1,99 @@
-import type {
-  ActionOnLostSubscription,
-  ConnectClient,
-  EndpointRequestInit,
-  Subscription,
-} from '@vaadin/hilla-frontend';
-import { createSetCommand, type SignalCommand } from './commands.js';
-import { computed, signal, Signal } from './core.js';
+import type { SignalCommand } from './commands.js';
+import type { ServerConnectionConfig } from './Connection.js';
+import { computed, Signal, type ReadonlySignal } from './core.js';
+import { ROOT, type NodeId, type NodeTree } from './NodeTree.js';
+import type { Operation } from './Operation.js';
+import { SignalTree } from './SignalTree.js';
 import { randomId } from './utils.js';
 
-const ENDPOINT = 'SignalsHandler';
+export type { ServerConnectionConfig } from './Connection.js';
+export type { InsertOperation, Operation } from './Operation.js';
 
 /**
- * A return type for signal operations that exposes a `result` property of type
- * `Promise`, that resolves when the operation is completed. It allows defining
- * callbacks to be run after the operation is completed, or error handling when
- * the operation fails.
- *
- * @example
- * ```ts
- * const sharedName = NameService.sharedName({ defaultValue: '' });
- * sharedName.replace('John').result
- *    .then(() => console.log('Name updated successfully'))
- *    .catch((error) => console.error('Failed to update the name:', error));
- * ```
- */
-export interface Operation {
-  result: Promise<void>;
-}
-
-/**
- * An abstraction of a signal that tracks the number of subscribers, and calls
- * the provided `onSubscribe` and `onUnsubscribe` callbacks for the first
- * subscription and the last unsubscription, respectively.
- * @internal
- */
-export abstract class DependencyTrackingSignal<T> extends Signal<T> {
-  readonly #onFirstSubscribe: () => void;
-  readonly #onLastUnsubscribe: () => void;
-
-  // -1 means to ignore the first subscription that is created internally in the
-  // FullStackSignal constructor.
-  #subscribeCount = -1;
-
-  protected constructor(value: T | undefined, onFirstSubscribe: () => void, onLastUnsubscribe: () => void) {
-    super(value);
-    this.#onFirstSubscribe = onFirstSubscribe;
-    this.#onLastUnsubscribe = onLastUnsubscribe;
-  }
-
-  protected override S(node: unknown): void {
-    super.S(node);
-    if (this.#subscribeCount === 0) {
-      this.#onFirstSubscribe();
-    }
-    this.#subscribeCount += 1;
-  }
-
-  protected override U(node: unknown): void {
-    super.U(node);
-    this.#subscribeCount -= 1;
-    if (this.#subscribeCount === 0) {
-      this.#onLastUnsubscribe();
-    }
-  }
-}
-
-/**
- * An object that describes a data object to connect to the signal provider
- * service.
- */
-export type ServerConnectionConfig = Readonly<{
-  /**
-   * The client instance to be used for communication.
-   */
-  client: ConnectClient;
-
-  /**
-   * The name of the signal provider service endpoint.
-   */
-  endpoint: string;
-
-  /**
-   * The name of the signal provider service method.
-   */
-  method: string;
-
-  /**
-   * Optional object with method call arguments to be sent to the endpoint
-   * method that provides the signal when subscribing to it.
-   */
-  params?: Record<string, unknown>;
-}>;
-
-/**
- * A server connection manager.
- */
-class ServerConnection {
-  readonly #id: string;
-  readonly config: ServerConnectionConfig;
-  #subscription?: Subscription<SignalCommand>;
-
-  constructor(id: string, config: ServerConnectionConfig) {
-    this.config = config;
-    this.#id = id;
-  }
-
-  get subscription() {
-    return this.#subscription;
-  }
-
-  connect() {
-    const { client, endpoint, method, params } = this.config;
-
-    this.#subscription ??= client.subscribe(ENDPOINT, 'subscribe', {
-      providerEndpoint: endpoint,
-      providerMethod: method,
-      clientSignalId: this.#id,
-      params,
-    });
-
-    return this.#subscription;
-  }
-
-  async update(command: SignalCommand, init?: EndpointRequestInit): Promise<void> {
-    const onTheFly = !this.#subscription;
-
-    if (onTheFly) {
-      this.connect();
-    }
-
-    await this.config.client.call(
-      ENDPOINT,
-      'update',
-      {
-        clientSignalId: this.#id,
-        command,
-      },
-      init ?? { mute: true },
-    );
-
-    if (onTheFly) {
-      this.disconnect();
-    }
-  }
-
-  disconnect() {
-    this.#subscription?.cancel();
-    this.#subscription = undefined;
-  }
-}
-
-export const $update = Symbol('update');
-export const $processServerResponse = Symbol('processServerResponse');
-export const $setValueQuietly = Symbol('setValueQuietly');
-export const $resolveOperation = Symbol('resolveOperation');
-export const $createOperation = Symbol('createOperation');
-
-/**
- * A signal that holds a shared value. Each change to the value is propagated to
- * the server-side signal provider. At the same time, each change received from
- * the server-side signal provider is propagated to the local signal and it's
+ * A signal that is backed by a signal on the server. Each change to the value
+ * is sent to the server and applied locally right away, and it is reverted
+ * again if the server rejects it. At the same time, each change made by any
+ * other client is applied to the local signal and propagated to its
  * subscribers.
+ * <p>
+ * A full-stack signal is a view into a node of a {@link SignalTree}. A signal
+ * that represents a collection shares its tree with the signals of its
+ * children, which means that a child signal is a first-class signal: it stays
+ * up to date, it can be subscribed to, and it can be used in a computed signal.
  *
  * @internal
  */
-export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
+export abstract class FullStackSignal<T> extends Signal<T> {
   /**
-   * The unique identifier of the signal necessary to communicate with the
-   * server.
+   * The id of the tree node that this signal represents. The signal of the
+   * value provided by the endpoint is the root node of the tree.
    */
-  readonly id: string;
+  readonly id: NodeId;
 
   /**
-   * The server connection manager.
+   * The tree that holds the state shared by this signal and its children.
    */
-  readonly server: ServerConnection;
+  readonly tree: SignalTree;
 
   /**
-   * Defines whether the signal is currently awaits a server-side response.
+   * Defines whether the signal is currently awaiting a server-side response.
    */
-  readonly pending = computed(() => this.#pending.value);
+  readonly pending: ReadonlySignal<boolean>;
 
   /**
    * Defines whether the signal has an error.
    */
-  readonly error = computed(() => this.#error.value);
+  readonly error: ReadonlySignal<Error | undefined>;
 
-  readonly #pending = signal(false);
-  readonly #error = signal<Error | undefined>(undefined);
+  readonly #derived: ReadonlySignal<T>;
 
-  // Paused at the very start to prevent the signal from sending the initial
-  // value to the server.
-  #paused = true;
+  protected constructor(source: ServerConnectionConfig | SignalTree, id: NodeId = ROOT, defaultValue?: unknown) {
+    super(undefined);
 
-  /**
-   * Optional parent signal for command routing.
-   */
-  protected readonly parent?: FullStackSignal<any>;
-
-  constructor(value: T | undefined, config: ServerConnectionConfig, id?: string, parent?: FullStackSignal<any>) {
-    super(
-      value,
-      () => (!parent ? this.#connect() : undefined),
-      () => (!parent ? this.#disconnect() : undefined),
-    );
-    this.id = id ?? randomId();
-    this.server = new ServerConnection(this.id, config);
-    this.parent = parent;
-
-    this.subscribe((v) => {
-      if (!this.#paused) {
-        this.#pending.value = true;
-        this.#error.value = undefined;
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this[$update](createSetCommand('', v));
-      }
-    });
-
-    this.#paused = false;
+    this.tree = source instanceof SignalTree ? source : new SignalTree(randomId(), source, defaultValue);
+    this.id = id;
+    this.pending = this.tree.pending;
+    this.error = this.tree.error;
+    this.#derived = computed(() => this.deriveValue(this.tree.nodes.value));
   }
 
-  // stores the promise handlers associated to operations
-  readonly #operationPromises = new Map<
-    string,
-    {
-      resolve(value: PromiseLike<void> | void): void;
-      reject(reason?: any): void;
-    }
-  >();
+  override get value(): T {
+    return this.#derived.value;
+  }
 
-  // creates the object to be returned by operations to allow defining callbacks
-  protected [$createOperation]({ id, promise }: { id?: string; promise?: Promise<void> }): Operation {
-    const thens = this.#operationPromises;
-    const promises: Array<Promise<void>> = [];
+  override set value(_: T) {
+    throw new Error('The value of this signal cannot be set directly.');
+  }
 
-    if (promise) {
-      // Add the provided promise to the list of promises
-      promises.push(promise);
-    }
-
-    if (id) {
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      const { promise: p, resolve, reject } = Promise.withResolvers<void>();
-
-      // Create a promise to be associated to the provided id
-      promises.push(p);
-      thens.set(id, { resolve, reject });
-    }
-
-    if (promises.length === 0) {
-      // If no promises were added, return a resolved promise
-      promises.push(Promise.resolve());
-    }
-
-    return {
-      result: Promise.allSettled(promises).then((results) => {
-        const lastResult = results[results.length - 1];
-        if (lastResult.status === 'fulfilled') {
-          return undefined;
-        }
-        throw lastResult.reason;
-      }),
-    };
+  override peek(): T {
+    return this.#derived.peek();
   }
 
   /**
-   * Sets the local value of the signal without sending any events to the server
-   * @param value - The new value.
-   * @internal
-   */
-  protected [$setValueQuietly](value: T): void {
-    this.#paused = true;
-    super.value = value;
-    this.#paused = false;
-  }
-
-  /**
-   * A method to update the server with the new value or via parent.
+   * Derives the value of this signal from the current state of the tree. Each
+   * type of signal defines what part of the tree it represents.
    *
-   * @param command - The command to update the server with.
-   * @returns The server response promise.
+   * @param nodes - The current state of the tree
    */
-  protected async [$update](command: SignalCommand): Promise<void> {
-    if (this.parent) {
-      // Route command via parent
-      const routedCommand = { ...command, targetNodeId: this.id };
-      return this.parent[$update](routedCommand);
-    }
-    return this.server
-      .update(command)
-      .catch((error: unknown) => {
-        this.#error.value = error instanceof Error ? error : new Error(String(error));
-      })
-      .finally(() => {
-        this.#pending.value = false;
-      });
+  protected abstract deriveValue(nodes: NodeTree): T;
+
+  /**
+   * Submits a command to the server, applying it optimistically until the
+   * server confirms or rejects it.
+   *
+   * @param command - The command to submit
+   * @returns An operation that allows reacting to the outcome
+   */
+  protected submit(command: SignalCommand): Operation {
+    return this.tree.submit(command);
   }
 
   /**
-   * Resolves the operation promise associated with the given event id.
-   *
-   * @param commandId - The command id.
-   * @param reason - The reason to reject the promise (if any).
+   * Creates an operation for a change that doesn't need to be sent to the
+   * server at all.
    */
-  protected [$resolveOperation](commandId: string, reason?: string): void {
-    const operationPromise = this.#operationPromises.get(commandId);
-    if (operationPromise) {
-      this.#operationPromises.delete(commandId);
-      if (reason) {
-        operationPromise.reject(reason);
-      } else {
-        operationPromise.resolve();
-      }
-    }
-  }
-
-  /**
-   * A method with to process the server response. The implementation is
-   * specific for each signal type.
-   *
-   * @param command - The server response command.
-   */
-  protected abstract [$processServerResponse](command: SignalCommand): void;
-
-  #connect() {
-    this.server
-      .connect()
-      .onSubscriptionLost(() => 'resubscribe' as ActionOnLostSubscription)
-      .onNext((command: SignalCommand) => {
-        this.#paused = true;
-        this[$processServerResponse](command);
-        this.#paused = false;
-      });
-  }
-
-  #disconnect() {
-    if (this.server.subscription === undefined) {
-      return;
-    }
-    this.server.disconnect();
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  protected noopOperation(): Operation {
+    return { result: Promise.resolve() };
   }
 }

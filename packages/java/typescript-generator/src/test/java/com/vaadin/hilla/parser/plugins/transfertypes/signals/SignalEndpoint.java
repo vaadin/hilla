@@ -17,6 +17,7 @@ package com.vaadin.hilla.parser.plugins.transfertypes.signals;
 
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.shared.SharedListSignal;
+import com.vaadin.flow.signals.shared.SharedMapSignal;
 import com.vaadin.flow.signals.shared.SharedNumberSignal;
 import com.vaadin.flow.signals.shared.SharedValueSignal;
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
@@ -36,6 +37,10 @@ public class SignalEndpoint {
     }
 
     public SharedListSignal<String> getStringListSignal() {
+        return null;
+    }
+
+    public SharedMapSignal<String> getStringMapSignal() {
         return null;
     }
 }

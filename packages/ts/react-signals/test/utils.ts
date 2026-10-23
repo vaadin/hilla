@@ -1,4 +1,3 @@
-import type { Signal } from '@preact/signals-react';
 import type { Subscription } from '@vaadin/hilla-frontend';
 import sinon from 'sinon';
 import type { SignalCommand } from '../src/commands.js';
@@ -44,7 +43,11 @@ export function simulateReceivedChange(
   onNextCallback(command);
 }
 
-export function subscribeToSignalViaEffect<T>(signal: Signal<T>): Array<T | undefined> {
+/**
+ * Subscribes to a FullStackSignal or Signal via effect, collecting values.
+ * Works with both `Signal<T>` and `FullStackSignal<T>` since both have `.value`.
+ */
+export function subscribeToSignalViaEffect<T>(signal: { readonly value: T }): Array<T | undefined> {
   const results: Array<T | undefined> = [];
   effect(() => {
     results.push(signal.value);
