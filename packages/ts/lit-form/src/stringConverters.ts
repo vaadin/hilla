@@ -52,7 +52,9 @@ export function getStringConverter<V>(model: ProvisionalModel<V>): StringConvert
     const enumStringConverter = {
       toString,
       fromString(this: void, value: string): V | undefined {
-        return value in modelEnum ? (value as V) : undefined;
+        // A constant arrives as the value the server sends for it, which is
+        // not always its name
+        return Object.values(modelEnum).includes(value) ? (value as V) : undefined;
       },
     };
     enumStringConverters.set(model, enumStringConverter as StringConverter<typeof Enum>);

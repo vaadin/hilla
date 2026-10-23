@@ -389,6 +389,19 @@ describe('@vaadin/hilla-lit-form', () => {
         expect(binder.model.fieldEnum[_fromString]('UPDATED')).to.equal(RecordStatus.UPDATED);
         expect(binder.model.fieldEnum[_fromString]('unknown')).to.be.undefined;
       });
+
+      it('should extract a value which differs from the name of its constant', () => {
+        enum Priority {
+          VERY_LOW = 'very-low',
+        }
+        class PriorityModel extends EnumModel<typeof Priority> {
+          readonly [_enum] = Priority;
+        }
+        const model = new PriorityModel(binder.model, 'fieldEnum', false);
+
+        expect(model[_fromString]('very-low')).to.equal(Priority.VERY_LOW);
+        expect(model[_fromString]('VERY_LOW')).to.be.undefined;
+      });
     });
 
     describe('misc', () => {
