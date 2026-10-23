@@ -1,6 +1,6 @@
 # Hilla React Form
 
-[![Latest Stable Version](https://img.shields.io/npm/v/@hilla/react-form.svg)](https://www.npmjs.com/package/@hilla/react-form)
+[![Latest Stable Version](https://img.shields.io/npm/v/@vaadin/hilla-react-form.svg)](https://www.npmjs.com/package/@vaadin/hilla-react-form)
 
 A set of utilities for building forms with TypeScript and React.
 
@@ -9,7 +9,7 @@ A part of the Hilla project.
 ## Installation
 
 ```bash
-$ npm install @hilla/react-form
+$ npm install @vaadin/hilla-react-form
 ```
 
 ## Contribution

@@ -1,15 +1,18 @@
 # Hilla React Auth
 
-[![Latest Stable Version](https://img.shields.io/npm/v/@hilla/auth.svg)](https://www.npmjs.com/package/@vaadin/react-auth)
+[![Latest Stable Version](https://img.shields.io/npm/v/@vaadin/hilla-react-auth.svg)](https://www.npmjs.com/package/@vaadin/hilla-react-auth)
 
 A set of utilities to help with authentication and authorization in a Hilla+React application.
+
+How the authentication state is kept and how routes are protected is described
+in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 A part of the Hilla project.
 
 ## Installation
 
 ```bash
-$ npm install @vaadin/react-auth
+$ npm install @vaadin/hilla-react-auth
 ```
 
 ## Contribution

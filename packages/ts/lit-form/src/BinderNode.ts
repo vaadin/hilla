@@ -86,6 +86,9 @@ export function getBinderNode<M extends Model>(model: M): BinderNode<M> {
 /**
  * Returns the corresponding validator for the given constraint.
  *
+ * The validator is looked up by name: the constraint's name must match the
+ * name of a validator class exported from `Validators.ts`.
+ *
  * @param constraint - The constraint to get the validator for
  * @returns The corresponding validator
  */

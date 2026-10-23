@@ -274,6 +274,18 @@ export function useForm<M extends Model>(model: M, config?: BinderConfiguration<
   };
 }
 
+/**
+ * Hook to access a part of a form: the state of the given model's binder node,
+ * and a `field` directive to bind elements to its nested models.
+ *
+ * The hook does not subscribe to changes of its own node: the component
+ * re-renders when the form root changes, through the `useForm` component.
+ * Changes dispatched only on this node, such as `setVisited` or
+ * `setValidators`, do not re-render it by themselves.
+ *
+ * @param model - The model of the form part, nested in the `useForm` model
+ * @returns The form part state and its `field` directive
+ */
 export function useFormPart<M extends Model>(model: M): UseFormPartResult<M> {
   isRendering = true;
   const binderNode = getBinderNode(model);
