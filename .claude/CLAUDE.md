@@ -20,6 +20,9 @@ touches.
 
 ## Build Commands
 
+How the build keeps the npm versions in step with Flow and the platform, and
+which script does what: `scripts/README.md`.
+
 ### Initial Setup
 ```bash
 npm install
