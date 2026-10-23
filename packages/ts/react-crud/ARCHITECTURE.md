@@ -28,8 +28,8 @@ the form hooks `AutoForm` uses in
   them by hand, or get all of them from `CrudRepositoryService` on a Spring
   Data JPA repository.
 - **Generated models only.** Every component takes a model from
-  `@vaadin/hilla-models`, as the generator writes it. `ModelInfo` is the one
-  place that reads it.
+  `@vaadin/hilla-models`, as the generator writes it. `ModelInfo` is where
+  its property structure is read.
 
 ## Reading the model: `ModelInfo`
 
