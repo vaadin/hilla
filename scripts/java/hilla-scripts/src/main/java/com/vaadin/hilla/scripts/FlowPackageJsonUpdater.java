@@ -55,14 +55,14 @@ public class FlowPackageJsonUpdater {
      * Dependencies that Hilla declares differently from Flow on purpose, and
      * which must therefore keep their value when the rest is aligned.
      * <p>
-     * Flow pins "typescript" to TypeScript 7, which ships the native compiler
-     * alone. Hilla's own sources import the JavaScript compiler API from
-     * "@typescript/typescript6" by name, but typescript-eslint, the Nx js
-     * plugin and the editors ask for "typescript", so the root keeps resolving
-     * that name to "@typescript/typescript6", whose binary is "tsc6", while
-     * TypeScript 7 is installed as "@typescript/native", which owns "tsc".
-     * Aligning the value would leave two packages competing for "tsc". Keep
-     * "@typescript/native" in step with Flow manually.
+     * TypeScript 7 ships the native compiler alone. Hilla's own sources import
+     * the JavaScript compiler API from "@typescript/typescript6" by name, but
+     * typescript-eslint, the Nx js plugin and the editors ask for "typescript",
+     * so the root keeps resolving that name to "@typescript/typescript6", whose
+     * binary is "tsc6", while TypeScript 7 is installed as
+     * "@typescript/native", which owns "tsc". Flow declares the same today;
+     * skipping "typescript" keeps the alias if Flow changes it, which would
+     * otherwise leave two packages competing for "tsc".
      */
     private static final Set<String> NOT_ALIGNED = Set.of("typescript");
 
