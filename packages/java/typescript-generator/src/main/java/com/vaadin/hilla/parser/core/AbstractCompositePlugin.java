@@ -24,6 +24,16 @@ import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.utils.PluginException;
 
+/**
+ * A plugin made of other plugins, run in the order they are given in: each one
+ * scans, resolves and enters a node after the ones before it, and exits it in
+ * the reverse order, so that the first plugin is the first to enter a node and
+ * the last to exit it.
+ *
+ * <p>
+ * Creating it checks that every plugin comes after the plugins it requires
+ * ({@link Plugin#getRequiredPlugins()}).
+ */
 public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
         extends AbstractPlugin<C> {
     private final LinkedList<Plugin> plugins = new LinkedList<>();
