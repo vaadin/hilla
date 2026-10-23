@@ -70,9 +70,10 @@ add the new file to `componentSources` in `prepare/config.ts`.
   tooling, and some parts (typescript-eslint, Nx, file router) need the
   JavaScript API, so the root aliases `typescript` to
   `@typescript/typescript6`, and installs TypeScript 7 as `@typescript/native`,
-  which owns `tsc`. Flow declares the same today, but both alignment steps
-  skip `typescript` (`NOT_ALIGNED` in the updater, `NOT_PROPAGATED` in
-  prepare), so the alias survives if Flow changes it.
+  which owns `tsc`. Flow declares the same today, but the two skips serve
+  different purposes: `NOT_ALIGNED` prevents Flow's version from replacing
+  the root alias, while `NOT_PROPAGATED` prevents that alias from being copied
+  into workspaces, letting test applications keep Flow's plain `typescript`.
 - **`.npmrc`.** Alignment changes the versions in `package.json` files whose
   `node_modules` and `package-lock.json` already exist, and the build installs
   over them:
