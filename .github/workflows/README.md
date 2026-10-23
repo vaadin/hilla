@@ -33,11 +33,15 @@ snapshots of the same branch name:
   (`flow-bom` `25.4.my-thing-SNAPSHOT` for a branch that builds against Flow
   `25.4-SNAPSHOT`), the snapshot is built against it instead of the Flow
   version of the branch.
-- When it holds a Flow Components snapshot of that version, the workflow reads
-  the npm versions of the components from the vaadin/flow-components branch
-  with exactly the same name as this one, if there is such a branch. A Flow
-  Components branch that pins npm versions nobody published fails the
-  TypeScript build here as well.
+- When it holds a Flow Components snapshot of that version and
+  vaadin/flow-components has a branch with exactly the same name as this one,
+  prefix included, the workflow reads the npm versions of the components from
+  that branch and pairs the snapshot with it. Without such a branch it does
+  not pair at all, even if the Flow Components snapshot exists: the component
+  npm versions then come from the branch of the platform, and the comment
+  leaves the `flow-components-bom` import out rather than hand out components
+  the Hilla packages were not built with. A Flow Components branch that pins
+  npm versions nobody published fails the TypeScript build here as well.
 
 The workflow comments the version on the pull request, with a copy-pasteable
 `hilla-bom` import, the `flow-bom` and `flow-components-bom` imports of the

@@ -162,18 +162,23 @@ jobs:
 
           # A Flow Components snapshot of the same branch name. Hilla does not
           # build against Flow Components, but reads the npm versions of the
-          # components from their sources, so with such a snapshot these are
-          # read from the branch it was built from - when that branch has
-          # exactly the same name, prefix included, as the qualifier alone
-          # does not tell which branch it was.
+          # components from their sources, so it is only paired with such a
+          # snapshot when it can read them from the branch the snapshot was
+          # built from: one with exactly the same name, prefix included, as
+          # the qualifier alone does not tell which branch it was. Without
+          # that branch the npm versions come from the branch of the platform,
+          # and the comment must not hand out a flow-components-bom whose
+          # components the Hilla packages were not built with.
           candidate="$base.$qualifier-SNAPSHOT"
           if published flow-components-bom "$candidate"; then
-            echo "flow-components-version=$candidate" >> "$GITHUB_OUTPUT"
-            echo "Pairing with Flow Components $candidate" | tee -a "$GITHUB_STEP_SUMMARY"
             if git ls-remote --exit-code --heads https://github.com/vaadin/flow-components.git \
               "refs/heads/$_HEAD_REF" > /dev/null; then
+              echo "flow-components-version=$candidate" >> "$GITHUB_OUTPUT"
               echo "flow-components-branch=$_HEAD_REF" >> "$GITHUB_OUTPUT"
-              echo "Reading the component npm versions from vaadin/flow-components \`$_HEAD_REF\`" \
+              echo "Pairing with Flow Components $candidate, reading the component npm versions from vaadin/flow-components \`$_HEAD_REF\`" \
+                | tee -a "$GITHUB_STEP_SUMMARY"
+            else
+              echo "Not pairing with Flow Components $candidate: vaadin/flow-components has no branch \`$_HEAD_REF\` to read the component npm versions from" \
                 | tee -a "$GITHUB_STEP_SUMMARY"
             fi
           fi
