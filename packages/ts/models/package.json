@@ -42,7 +42,9 @@
   "publishConfig": {
     "access": "public"
   },
-  "dependencies": {},
+  "dependencies": {
+    "type-fest": "4.35.0"
+  },
   "peerDependencies": {
     "react": "18 || 19",
     "react-dom": "18 || 19"

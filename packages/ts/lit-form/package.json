@@ -71,6 +71,7 @@
   "dependencies": {
     "@vaadin/hilla-frontend": "25.4.0-alpha4",
     "@vaadin/hilla-models": "25.4.0-alpha4",
+    "type-fest": "4.35.0",
     "validator": "13.15.22"
   },
   "peerDependencies": {
