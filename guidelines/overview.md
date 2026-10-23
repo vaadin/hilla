@@ -10,9 +10,10 @@ be followed by default, but can be deviated from when necessary to make
 something work.
 
 For repository-level commands (build, test, format) see
-[`.claude/CLAUDE.md`](../.claude/CLAUDE.md). For how the TypeScript generator
-works and how its snapshot tests are written, see the
-[generator README](../packages/java/typescript-generator/README.md).
+[`.claude/CLAUDE.md`](../.claude/CLAUDE.md). The architecture notes of the
+individual subsystems — the parser and generator, the form models and binder,
+the file router and others — live next to their code and are listed in
+[Architecture](architecture.md).
 
 ## Chapters
 

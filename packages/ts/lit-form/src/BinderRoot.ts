@@ -192,6 +192,10 @@ export class BinderRoot<M extends ProvisionalModel = ProvisionalModel> extends B
   /**
    * Submit the current form value to callback
    *
+   * Once the callback has been called, the submitted value becomes the
+   * `defaultValue`, whether the callback succeeds or fails, so the form is no
+   * longer dirty after a failed submit either.
+   *
    * @param endpointMethod - the callback function
    */
   async submitTo<V>(endpointMethod: (value: Value<M>) => Promise<V>): Promise<V> {

@@ -4,6 +4,9 @@
 
 A set of utilities for internationalizing apps with TypeScript and React.
 
+How the translations are loaded and kept up to date is described in
+[ARCHITECTURE.md](ARCHITECTURE.md).
+
 A part of the Hilla project.
 
 ## Installation
