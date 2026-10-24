@@ -35,6 +35,11 @@ import java.util.function.BiPredicate;
 import io.github.classgraph.ClassInfo;
 import org.jspecify.annotations.NonNull;
 
+/**
+ * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
+ * itself, and may change or be removed in any release without notice or
+ * deprecation. Do not use it in application code or libraries.
+ */
 public abstract class ClassInfoModel extends AnnotatedAbstractModel
         implements Model, NamedModel, SpecializedModel, ParameterizedModel {
     static final Comparator<ClassInfoModel> CLASS_ORDER = Comparator

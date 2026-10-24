@@ -26,6 +26,10 @@ import java.util.Objects;
  * Notably, whether a value can be absent is decided here, from the Java type,
  * the nullability annotations and the Kotlin metadata, rather than being
  * rediscovered by whatever writes the TypeScript.
+ * <p>
+ * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
+ * itself, and may change or be removed in any release without notice or
+ * deprecation. Do not use it in application code or libraries.
  */
 public sealed interface TypeModel {
     /**

@@ -21,6 +21,11 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode
 import com.vaadin.hilla.parser.plugins.backbone.TypeFacts
 import kotlin.reflect.KType
 
+/**
+ * **Internal API.** Not part of the public Hilla API: used only by Hilla
+ * itself, and may change or be removed in any release without notice or
+ * deprecation. Do not use it in application code or libraries.
+ */
 class KTypeSignatureNode(
     source: SignatureModel,
     target: TypeFacts,

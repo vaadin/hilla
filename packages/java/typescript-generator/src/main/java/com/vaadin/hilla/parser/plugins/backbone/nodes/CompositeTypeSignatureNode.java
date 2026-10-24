@@ -28,6 +28,11 @@ import com.vaadin.hilla.parser.models.AnnotationInfoModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 
+/**
+ * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
+ * itself, and may change or be removed in any release without notice or
+ * deprecation. Do not use it in application code or libraries.
+ */
 public final class CompositeTypeSignatureNode extends
         AbstractNode<List<SignatureModel>, TypeFacts> implements TypedNode {
 

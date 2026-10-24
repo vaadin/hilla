@@ -21,6 +21,10 @@ import java.util.Collections;
 import org.jspecify.annotations.NonNull;
 
 /**
+ * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
+ * itself, and may change or be removed in any release without notice or
+ * deprecation. Do not use it in application code or libraries.
+ *
  * A part of the parser which handles one feature of the walk over the browser
  * callable classes. For every node, the parser asks the plugins what is below
  * it ({@link #scan}), lets them replace each node found there

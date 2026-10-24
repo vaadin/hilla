@@ -12,11 +12,9 @@ often touches all three:
 ## Before you start
 
 - **Find the precedent.** Hilla already has patterns for endpoint annotations,
-  access control, mapped types (`Pageable`, `Flux`, signals), parser plugins and
-  their configuration, React hooks and form binders. Look at
-  `@BrowserCallable`, `EndpointSubscription`, the plugins under
-  `com.vaadin.hilla.parser.plugins`, `useForm` and `AutoGrid` — match the
-  existing shape rather than inventing a new one.
+  access control, mapped types (`Pageable`, `Flux`, signals), React hooks and
+  form binders. Look at `@BrowserCallable`, `EndpointSubscription`, `useForm`
+  and `AutoGrid` — match the existing shape rather than inventing a new one.
 - **Understand the blast radius.** See [Repository](repository.md) — changes to
   the parser, the generator model or the wire format reach every application.
 - **The packages are a contract.** A change that spans the Java runtime, the
@@ -48,10 +46,17 @@ behavior.
 
 ## Java API
 
+The Java API of `hilla-typescript-generator` (`com.vaadin.hilla.parser.*`,
+`com.vaadin.hilla.generator.*`, including the parser plugins and their
+configuration) is internal: it is run only by Hilla, and its types say so in
+their Javadoc. Do not present it as API an application writes against. The
+exceptions are `JacksonObjectMapperFactory` and `ByteArrayModule`, which an
+application uses to customize endpoint serialization.
+
 ### Accepting a type the application writes
 
-Browser callable classes, the types they send, and plugin configuration are
-written by the application and interpreted by Hilla. Validate such a type where
+Browser callable classes and the types they send are written by the
+application and interpreted by Hilla. Validate such a type where
 it is accepted — at registration or during the walk — and report what is wrong
 with it in terms of the application's code.
 

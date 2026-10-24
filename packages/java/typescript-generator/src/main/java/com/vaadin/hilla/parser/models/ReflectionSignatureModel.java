@@ -17,6 +17,11 @@ package com.vaadin.hilla.parser.models;
 
 import java.lang.reflect.AnnotatedElement;
 
+/**
+ * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
+ * itself, and may change or be removed in any release without notice or
+ * deprecation. Do not use it in application code or libraries.
+ */
 public interface ReflectionSignatureModel extends ReflectionModel {
     @Override
     AnnotatedElement get();

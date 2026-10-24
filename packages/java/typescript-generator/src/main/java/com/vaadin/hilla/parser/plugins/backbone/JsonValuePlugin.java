@@ -33,6 +33,10 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 
 /**
  * Adds support for Jackson's {@code JsonValue} annotation.
+ * <p>
+ * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
+ * itself, and may change or be removed in any release without notice or
+ * deprecation. Do not use it in application code or libraries.
  */
 public class JsonValuePlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {

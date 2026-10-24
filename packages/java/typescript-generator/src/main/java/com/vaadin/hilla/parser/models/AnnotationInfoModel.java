@@ -23,6 +23,11 @@ import java.util.Set;
 import io.github.classgraph.AnnotationInfo;
 import org.jspecify.annotations.NonNull;
 
+/**
+ * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
+ * itself, and may change or be removed in any release without notice or
+ * deprecation. Do not use it in application code or libraries.
+ */
 public abstract class AnnotationInfoModel implements Model, NamedModel {
     private Optional<ClassInfoModel> classInfo;
     private Set<AnnotationParameterModel> parameters;

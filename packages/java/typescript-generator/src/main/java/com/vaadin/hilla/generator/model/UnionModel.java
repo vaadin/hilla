@@ -29,6 +29,11 @@ import java.util.Optional;
  * value can be, so that reading the discriminator of a value tells TypeScript
  * which subtype it is looking at.
  *
+ * <p>
+ * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
+ * itself, and may change or be removed in any release without notice or
+ * deprecation. Do not use it in application code or libraries.
+ *
  * @param javaClass
  *            the fully qualified name of the Java class declaring the subtypes
  * @param subTypes

@@ -25,6 +25,10 @@ import org.jspecify.annotations.NonNull;
 import com.vaadin.hilla.parser.utils.PluginException;
 
 /**
+ * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
+ * itself, and may change or be removed in any release without notice or
+ * deprecation. Do not use it in application code or libraries.
+ *
  * A plugin made of other plugins, run in the order they are given in: each one
  * scans, resolves and enters a node after the ones before it, and exits it in
  * the reverse order, so that the first plugin is the first to enter a node and
