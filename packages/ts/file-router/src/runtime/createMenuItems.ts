@@ -16,10 +16,25 @@ function hasVariablePathSegment(path: string): boolean {
 }
 
 /**
+ * Converts a route path to a path relative to the application base URI by removing the leading slash. This way the
+ * path keeps pointing to the correct view even when the application is deployed under a context path, e.g. when it is
+ * used as the `path` of a side nav item or as the `href` of a link.
+ */
+function toBaseRelativePath(path: string): string {
+  return path.startsWith('/') ? path.substring(1) : path;
+}
+
+/**
  * Creates menu items from the views provided by the server. The views are sorted according to the
  * {@link ViewConfig.menu.order}, filtered out if they are explicitly excluded via {@link ViewConfig.menu.exclude}.
  * Note that views with no order are put below views with an order. Ties are resolved based on the path string
  * comparison.
+ *
+ * The `to` property of the returned items is relative to the application base URI, i.e. it has no leading slash, so
+ * that it also resolves correctly when the application is deployed under a context path. It can be used as is as the
+ * `path` of a side nav item or the `href` of a link. When it is given to a React Router API instead, such as
+ * `navigate()` or `<Link>`, from a layout that is not the root one, prefix it with a slash, e.g.
+ * `navigate('/' + to)`, so that it is resolved from the router root instead of the enclosing route.
  *
  * @returns A list of menu items.
  */
@@ -40,7 +55,7 @@ export function createMenuItems<T = unknown>(): ReadonlyArray<MenuItem<T>> {
       .filter(([path, value]) => !isExcluded(value) && !hasVariablePathSegment(path))
       // Map the views to menu items.
       .map(([path, config]) => ({
-        to: path,
+        to: toBaseRelativePath(path),
         icon: config.menu?.icon,
         title: config.menu?.title ?? config.title,
         order: config.menu?.order,
