@@ -570,6 +570,51 @@ public class ExplicitNullableTypeCheckerTest {
     }
 
     @Test
+    public void should_SkipProperty_When_JsonIgnored() {
+        NullMarkedProperties properties = new NullMarkedProperties();
+        properties.setIgnoredOnGetter(null);
+        Assert.assertNull(
+                "Property ignored on the getter should not be checked",
+                checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.setIgnoredOnSetter(null);
+        Assert.assertNull(
+                "Property ignored on the setter should not be checked",
+                checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.setIgnoredOnGetterIncludedOnSetter(null);
+        Assert.assertNull(
+                "Property ignored on the getter and only included on the "
+                        + "setter should not be checked",
+                checkNullMarkedProperties(properties));
+    }
+
+    @Test
+    public void should_CheckProperty_When_JsonPropertyOverridesJsonIgnore() {
+        NullMarkedProperties properties = new NullMarkedProperties();
+        properties.setIgnoredOnSetterIncludedOnGetter(null);
+        Assert.assertNotNull(
+                "Property ignored on the setter but included on the getter "
+                        + "should be checked",
+                checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.setIgnoredOnGetterIncludedOnField(null);
+        Assert.assertNotNull(
+                "Property ignored on the getter but included on the field "
+                        + "should be checked",
+                checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.setNotIgnoredOnGetter(null);
+        Assert.assertNotNull(
+                "Property with JsonIgnore(false) should be checked",
+                checkNullMarkedProperties(properties));
+    }
+
+    @Test
     public void should_FollowGetterAndSetterAnnotations_When_RequiredByNonNullApiPackage() {
         NonNullApiProperties properties = new NonNullApiProperties();
         properties.setNullableGetter(null);
