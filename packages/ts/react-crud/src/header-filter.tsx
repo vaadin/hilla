@@ -1,4 +1,4 @@
-import { _enum, type EnumModel } from '@vaadin/hilla-lit-form';
+import { $enum, type Enum, type EnumModel } from '@vaadin/hilla-models';
 import { DatePicker } from '@vaadin/react-components/DatePicker.js';
 import type { GridColumnProps } from '@vaadin/react-components/GridColumn.js';
 import { Item } from '@vaadin/react-components/Item.js';
@@ -208,13 +208,13 @@ export function NumberHeaderFilter(): ReactElement {
 export function EnumHeaderFilter(): ReactElement {
   const { filterValue, updateFilter } = useFilterState(Matcher.EQUALS);
   const context = useContext(ColumnContext)!;
-  const model = context.propertyInfo.model as EnumModel;
+  const model = context.propertyInfo.model as EnumModel<typeof Enum>;
   const options = [
     {
       value: '',
       label: '',
     },
-    ...Object.keys(model[_enum]).map((value) => ({
+    ...Object.keys(model[$enum]).map((value) => ({
       label: convertToTitleCase(value),
       value,
     })),

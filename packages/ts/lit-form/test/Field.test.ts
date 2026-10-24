@@ -24,7 +24,6 @@ import {
   SelectedFieldStrategy,
   VaadinDateTimeFieldStrategy,
   VaadinFieldStrategy,
-  type ProvisionalModel,
 } from '../src/index.js';
 // API to test
 import { OrderModel, TestModel } from './TestModels.js';
@@ -1238,7 +1237,7 @@ describe('@vaadin/hilla-lit-form', () => {
             super(elm, TestModel);
           }
 
-          override getFieldStrategy(elm: any, model?: ProvisionalModel): FieldStrategy {
+          override getFieldStrategy(elm: any, model?: Model): FieldStrategy {
             return new MyStrategy(elm, model);
           }
         }

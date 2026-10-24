@@ -33,28 +33,16 @@ binder: see [../react-form/ARCHITECTURE.md](../react-form/ARCHITECTURE.md).
   on every node. Operations that don't change what the user entered, such as
   adding an empty array item, keep the form pristine.
 
-## Two model systems
+## Models
 
-The binder accepts two kinds of model, and every branch in the code that
-checks a model's class checks both.
+The binder works on models from `@vaadin/hilla-models` (`Model`), which is
+what the generator writes. They carry constraints as data (`$constraints`),
+and their empty value is `$defaultValue`. Every signature takes a `Model`.
 
-- **Legacy models** are the classes in [src/Models.ts](src/Models.ts):
-  `AbstractModel`, `ObjectModel`, `ArrayModel` and the primitives. They are
-  instantiated per form (`createDetachedModel`), carry their validators in
-  `_validators`, and create their empty value with the static
-  `createEmptyValue`.
-- **Models from `@vaadin/hilla-models`** (`Model`) are what the generator
-  writes today. They carry constraints as data (`$constraints`), and their
-  empty value is `$defaultValue`.
-- `ProvisionalModel` is the union of both, used in every signature during the
-  transition. It is deprecated in favour of `Model`.
-- The `_key`, `_optional`, `_parent`, `_meta` and `_enum` symbols in
-  `Models.ts` are deprecated aliases of `$key`, `$optional`, `$owner`, `$meta`
-  and `$enum` from `@vaadin/hilla-models`; the symbols are the same, so both
-  work on both kinds of model.
-- Legacy models are still used by hand-written models in applications, by the
-  `src/types` models in `@vaadin/hilla-react-crud`, by `useFormArrayPart` in
-  `@vaadin/hilla-react-form`, and by the tests under `test/old`.
+- [src/Models.ts](src/Models.ts) only holds types: `Value`, the value type of
+  a model, and `ArrayItemModel`, the item model of an array model.
+- This package defines no models of its own. A hand-written model is built
+  with the `m` builders of `@vaadin/hilla-models`.
 
 ## Binder, BinderRoot and BinderNode
 
@@ -71,11 +59,9 @@ checks a model's class checks both.
 
 The root's constructor gets the top-level model.
 
-- A `Model` is attached to the binder with `m.attach`, so its `$owner` is the
+- The model is attached to the binder with `m.attach`, so its `$owner` is the
   binder. This makes a per-form copy of the generated model, which is shared
   between forms.
-- A legacy model class is instantiated with `createDetachedModel`, and its
-  owner is set to the binder.
 - The root then fills itself with the model's empty value, which it keeps for
   `clear()`.
 
@@ -128,8 +114,7 @@ gets a new value. The same walk updates the default value when it has to:
 A node's value is created when the node is first used, not when the form is.
 `initializeValue` first makes sure the parent has a value, then fills in the
 node's empty value if it has none: always for the root or when forced (the
-value setter forces it), and as an explicit `undefined` key for a property
-missing from a legacy object model's value.
+value setter forces it).
 
 Models may be cyclic (a `Person` with a `manager: Person`), so the tree of
 nodes is never walked by model alone. When looking for child nodes (for
@@ -201,8 +186,7 @@ with value '…', validation error: '…'`), which gives the property path,
 A node's validators are built once, when the node is created
 (`getModelValidators`):
 
-- For a legacy model, they are the model's `_validators`.
-- For a `Model`, each of its `$constraints` is turned into the validator
+- Each of the model's `$constraints` is turned into the validator
   class in [src/Validators.ts](src/Validators.ts) of the same name
   (`getConstraintValidator`), with the constraint's attributes. A
   `NumberModel` gets an `IsNumber` validator first, which reports `NaN`, the
@@ -316,7 +300,6 @@ overlay, for example) don't fire `input`.
 ### String converters
 
 Most fields give a string. Before writing it to the node, the directive
-converts it by the model: for `Model`s with the converters in
-[src/stringConverters.ts](src/stringConverters.ts) (boolean, number, enum),
-and for legacy models with their `_fromString`. An empty number field gives
+converts it by the model, with the converters in
+[src/stringConverters.ts](src/stringConverters.ts) (boolean, number, enum). An empty number field gives
 `undefined`, and an unparsable one `NaN`, which `IsNumber` reports.
