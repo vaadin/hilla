@@ -42,8 +42,10 @@ import org.junit.Test;
 import org.springframework.lang.Nullable;
 
 import com.vaadin.hilla.endpoints.Id;
+import com.vaadin.hilla.nonnullapi.NonNullApiProperties;
 import com.vaadin.hilla.nonnullapi.NonNullableEntity;
 import com.vaadin.hilla.nullmarked.NullMarkedEntity;
+import com.vaadin.hilla.nullmarked.NullMarkedProperties;
 
 public class ExplicitNullableTypeCheckerTest {
     private ExplicitNullableTypeChecker explicitNullableTypeChecker;
@@ -514,6 +516,83 @@ public class ExplicitNullableTypeCheckerTest {
     }
 
     @Test
+    public void should_FollowGetterAndSetterAnnotations_When_RequiredByNullMarkedPackage() {
+        NullMarkedProperties properties = new NullMarkedProperties();
+        properties.setNullableGetter(null);
+        Assert.assertNull("Nullable getter should allow null value",
+                checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.setNullableSetter(null);
+        Assert.assertNull("Nullable setter parameter should allow null value",
+                checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.getNullableGetterItems().add(null);
+        Assert.assertNull("Nullable getter list item should allow null value",
+                checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.getNullableSetterItems().add(null);
+        Assert.assertNull(
+                "Nullable setter parameter list item should allow null value",
+                checkNullMarkedProperties(properties));
+
+    }
+
+    @Test
+    public void should_ReturnError_When_GetterOrSetterAnnotationsDoNotAllowNull() {
+        NullMarkedProperties properties = new NullMarkedProperties();
+        properties.setNullableGetterNonnullSetter(null);
+        Assert.assertNotNull("Nonnull should take precedence over nullable",
+                checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.getNullableFieldOfOtherTypeItems().add(null);
+        Assert.assertNotNull(
+                "Nullable list item of a field with another type than the "
+                        + "getter should be ignored",
+                checkNullMarkedProperties(properties));
+    }
+
+    @Test
+    public void should_FollowGetterAndSetterAnnotations_When_RequiredByNonNullApiPackage() {
+        NonNullApiProperties properties = new NonNullApiProperties();
+        properties.setNullableGetter(null);
+        Assert.assertNull("Nullable getter should allow null value",
+                checkNonNullApiProperties(properties));
+
+        properties = new NonNullApiProperties();
+        properties.setNullableSetter(null);
+        Assert.assertNull("Nullable setter parameter should allow null value",
+                checkNonNullApiProperties(properties));
+    }
+
+    private String checkNonNullApiProperties(NonNullApiProperties properties) {
+        return explicitNullableTypeChecker.checkValueForType(properties,
+                NonNullApiProperties.class);
+    }
+
+    private String checkNullMarkedProperties(NullMarkedProperties properties) {
+        return explicitNullableTypeChecker.checkValueForType(properties,
+                NullMarkedProperties.class);
+    }
+
+    @Test
+    public void should_ReturnError_When_NonnullGetterAndBeanNotRequiredByContext() {
+        NonnullGetterBean bean = new NonnullGetterBean();
+        bean.setName("foo");
+        Assert.assertNull(explicitNullableTypeChecker.checkValueForType(bean,
+                NonnullGetterBean.class));
+
+        bean.setName(null);
+        String error = explicitNullableTypeChecker.checkValueForType(bean,
+                NonnullGetterBean.class);
+        Assert.assertNotNull(error);
+        Assert.assertTrue(error.contains("property 'name'"));
+    }
+
+    @Test
     public void should_FollowNestedTypeAnnotations_When_BeanNotRequiredByContext() {
         UnmarkedListBean bean = new UnmarkedListBean();
         bean.getItems().add(null);
@@ -690,6 +769,18 @@ public class ExplicitNullableTypeCheckerTest {
     @jakarta.annotation.Nonnull
     public String stringNonnull() {
         return "";
+    }
+
+    static private class NonnullGetterBean {
+        private String name;
+
+        public @NonNull String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
     }
 
     static private class UnmarkedListBean {
