@@ -2,7 +2,7 @@ import { _getPropertyModel, BooleanModel, NumberModel, ObjectModel, StringModel 
 import m, { StringModel as ModelsStringModel } from '@vaadin/hilla-models';
 import { describe, expect, it } from 'vitest';
 import { getDefaultProperties, ModelInfo } from '../src/model-info.js';
-import { PersonModel } from './test-models-and-services.js';
+import { NicknamedModel, PersonModel } from './test-models-and-services.js';
 
 describe('@vaadin/hilla-react-crud', () => {
   describe('ModelInfo', () => {
@@ -100,6 +100,30 @@ describe('@vaadin/hilla-react-crud', () => {
           'address',
           'department',
         ]);
+      });
+
+      it('returns property information for a model with a deferred base', () => {
+        const modelInfo = new ModelInfo(NicknamedModel);
+
+        const propertyNames = modelInfo.getRootProperties().map((prop) => prop.name);
+
+        // the base is kept out of the prototype chain, so its properties have to
+        // arrive exactly once and still ahead of the ones declared here
+        expect(propertyNames).to.eql(['firstName', 'lastName', 'nickname']);
+      });
+
+      it('returns property information in order for a deferred base that inherits properties', () => {
+        const modelInfo = new ModelInfo(
+          m
+            .extend(() => NicknamedModel)
+            .object('Pseudonymous')
+            .build(),
+        );
+
+        const propertyNames = modelInfo.getRootProperties().map((prop) => prop.name);
+
+        // the properties the base inherits come ahead of its own
+        expect(propertyNames).to.eql(['firstName', 'lastName', 'nickname']);
       });
 
       it('returns property information for nested model', () => {

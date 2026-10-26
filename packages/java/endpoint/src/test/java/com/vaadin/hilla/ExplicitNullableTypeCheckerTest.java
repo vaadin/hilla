@@ -39,6 +39,7 @@ import org.springframework.lang.Nullable;
 
 import com.vaadin.hilla.endpoints.Id;
 import com.vaadin.hilla.nonnullapi.NonNullableEntity;
+import com.vaadin.hilla.nullmarked.NullMarkedEntity;
 
 public class ExplicitNullableTypeCheckerTest {
     private ExplicitNullableTypeChecker explicitNullableTypeChecker;
@@ -466,6 +467,31 @@ public class ExplicitNullableTypeCheckerTest {
                 .checkValueForType(nonNullableEntity, NonNullableEntity.class));
     }
 
+    @Test
+    public void should_ReturnError_When_GivenNestedNullAndRequiredByNullMarkedPackage() {
+        NullMarkedEntity nullMarkedEntity = new NullMarkedEntity();
+        nullMarkedEntity.setValue("value");
+        nullMarkedEntity.setNullableValue(null);
+        Assert.assertNull("Nullable property should allow null value",
+                explicitNullableTypeChecker.checkValueForType(nullMarkedEntity,
+                        NullMarkedEntity.class));
+
+        nullMarkedEntity.setValue(null);
+        Assert.assertNotNull(explicitNullableTypeChecker
+                .checkValueForType(nullMarkedEntity, NullMarkedEntity.class));
+    }
+
+    @Test
+    public void should_ReturnNull_When_ReturnTypeAnnotatedNullableAndRequiredByContext()
+            throws NoSuchMethodException {
+        String error = explicitNullableTypeChecker
+                .checkValueForAnnotatedElement(null,
+                        getClass().getMethod("stringTypeUseNullable"), true);
+
+        Assert.assertNull(
+                "Type-use nullable return type should allow null value", error);
+    }
+
     public List<String> parametrizedListMethod(String... args) {
         final List<String> list = new ArrayList<String>();
         for (String arg : args) {
@@ -491,6 +517,13 @@ public class ExplicitNullableTypeCheckerTest {
      */
     @Nullable
     public String stringNullable() {
+        return "";
+    }
+
+    /**
+     * Method for testing
+     */
+    public @org.jspecify.annotations.Nullable String stringTypeUseNullable() {
         return "";
     }
 

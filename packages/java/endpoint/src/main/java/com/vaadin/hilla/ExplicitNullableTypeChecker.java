@@ -61,6 +61,10 @@ public class ExplicitNullableTypeChecker {
         } else if (element instanceof Parameter) {
             annotations = Stream.concat(annotations, Stream.of(
                     ((Parameter) element).getAnnotatedType().getAnnotations()));
+        } else if (element instanceof Method) {
+            annotations = Stream.concat(annotations,
+                    Stream.of(((Method) element).getAnnotatedReturnType()
+                            .getAnnotations()));
         }
 
         if (requiredByContext) {

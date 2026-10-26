@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -46,6 +47,13 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 
 public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
+    /**
+     * Annotations which can be placed on other elements too, but are only
+     * supported on packages, as the endpoint runtime only checks them there.
+     */
+    private static final Set<String> PACKAGE_ONLY_ANNOTATIONS = Set
+            .of("org.jspecify.annotations.NullMarked");
+
     private Map<String, AnnotationMatcher> annotationsMap = mapByName(
             NonnullPluginConfig.Processor.defaults);
 
@@ -71,17 +79,23 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                 // Optional is always nullable, regardless of annotations
                 type.setOptional(true);
             } else {
-                // Apply annotations from package (NonNullApi)
-                var annotations = getPackageAnnotationsStream(nodePath);
+                Stream<AnnotationInfoModel> annotations = Stream.empty();
 
                 // Apply from current node, if it is annotated
                 if (node instanceof AnnotatedNode) {
-                    annotations = Stream.concat(annotations,
-                            ((AnnotatedNode) node).getAnnotations().stream());
+                    annotations = ((AnnotatedNode) node).getAnnotations()
+                            .stream();
                 }
 
                 annotations = considerAscendantAnnotations(annotations,
                         nodePath);
+
+                // Apply annotations from package (NonNullApi, NullMarked)
+                annotations = Stream.concat(
+                        getPackageAnnotationsStream(nodePath),
+                        annotations
+                                .filter(annotation -> !PACKAGE_ONLY_ANNOTATIONS
+                                        .contains(annotation.getName())));
 
                 computeNullabilityFromAnnotations(annotations)
                         .ifPresent(type::setOptional);
