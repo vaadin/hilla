@@ -45,7 +45,17 @@ public class GradleRunnerTest {
         assertTrue(opt.isPresent());
         var runner = opt.orElseThrow();
         assertEquals(1, runner.arguments().length);
-        assertDoesNotThrow(() -> runner.run(null));
+        // A custom executable would be tried before the project's wrapper
+        String originalValue = System
+                .clearProperty(GradleRunner.EXECUTABLE_PROPERTY);
+        try {
+            assertDoesNotThrow(() -> runner.run(null));
+        } finally {
+            if (originalValue != null) {
+                System.setProperty(GradleRunner.EXECUTABLE_PROPERTY,
+                        originalValue);
+            }
+        }
         // The wrapper is first tested with "-v", then run with the arguments
         assertEquals(List.of("-v", "build"), Files
                 .readAllLines(tmpDir.resolve(INVOCATIONS_FILE)).stream()
@@ -79,7 +89,7 @@ public class GradleRunnerTest {
                 System.setProperty(GradleRunner.EXECUTABLE_PROPERTY,
                         originalValue);
             } else {
-                System.clearProperty(MavenRunner.EXECUTABLE_PROPERTY);
+                System.clearProperty(GradleRunner.EXECUTABLE_PROPERTY);
             }
         }
     }
