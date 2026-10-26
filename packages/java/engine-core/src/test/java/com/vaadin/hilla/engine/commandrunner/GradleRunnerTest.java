@@ -18,15 +18,11 @@ package com.vaadin.hilla.engine.commandrunner;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -35,6 +31,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 public class GradleRunnerTest {
 
+    private static final String INVOCATIONS_FILE = "invocations.txt";
+
     @TempDir
     Path tmpDir;
 
@@ -42,12 +40,16 @@ public class GradleRunnerTest {
     @ValueSource(strings = { "build.gradle", "build.gradle.kts" })
     void shouldRunIfBuildFileIsAvailable(String buildFile) throws IOException {
         Files.createFile(tmpDir.resolve(buildFile));
-        var opt = GradleRunner.forProject(tmpDir.toFile(), "-v");
+        createGradleWrapperStub();
+        var opt = GradleRunner.forProject(tmpDir.toFile(), "build");
         assertTrue(opt.isPresent());
         var runner = opt.orElseThrow();
         assertEquals(1, runner.arguments().length);
-        assumeTrue(isGradleAvailable(), "Gradle is not available");
         assertDoesNotThrow(() -> runner.run(null));
+        // The wrapper is first tested with "-v", then run with the arguments
+        assertEquals(List.of("-v", "build"), Files
+                .readAllLines(tmpDir.resolve(INVOCATIONS_FILE)).stream()
+                .map(String::strip).toList());
     }
 
     @Test
@@ -82,17 +84,20 @@ public class GradleRunnerTest {
         }
     }
 
-    private static boolean isGradleAvailable() {
-        if (System.getProperty(GradleRunner.EXECUTABLE_PROPERTY) != null) {
-            return true;
+    /**
+     * Creates a Gradle wrapper stub in the project directory that only records
+     * the arguments it is called with, so that the runner can be tested
+     * without a Gradle installation.
+     */
+    private void createGradleWrapperStub() throws IOException {
+        if (CommandRunner.IS_WINDOWS) {
+            Files.writeString(tmpDir.resolve("gradlew.bat"),
+                    "@echo %*>> " + INVOCATIONS_FILE + "\r\n");
+        } else {
+            var wrapper = tmpDir.resolve("gradlew");
+            Files.writeString(wrapper, "#!/bin/sh\necho \"$@\" >> "
+                    + INVOCATIONS_FILE + "\n");
+            assertTrue(wrapper.toFile().setExecutable(true));
         }
-        var executables = CommandRunner.IS_WINDOWS
-                ? List.of("gradle.bat", "gradle.cmd", "gradle.exe", "gradle")
-                : List.of("gradle");
-        return Optional.ofNullable(System.getenv("PATH")).stream()
-                .flatMap(path -> Stream.of(path.split(File.pathSeparator)))
-                .flatMap(dir -> executables.stream()
-                        .map(executable -> new File(dir, executable)))
-                .anyMatch(File::canExecute);
     }
 }
