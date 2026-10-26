@@ -57,9 +57,9 @@ public class GradleRunnerTest {
             }
         }
         // The wrapper is first tested with "-v", then run with the arguments
-        assertEquals(List.of("-v", "build"), Files
-                .readAllLines(tmpDir.resolve(INVOCATIONS_FILE)).stream()
-                .map(String::strip).toList());
+        assertEquals(List.of("-v", "build"),
+                Files.readAllLines(tmpDir.resolve(INVOCATIONS_FILE)).stream()
+                        .map(String::strip).toList());
     }
 
     @Test
@@ -96,8 +96,8 @@ public class GradleRunnerTest {
 
     /**
      * Creates a Gradle wrapper stub in the project directory that only records
-     * the arguments it is called with, so that the runner can be tested
-     * without a Gradle installation.
+     * the arguments it is called with, so that the runner can be tested without
+     * a Gradle installation.
      */
     private void createGradleWrapperStub() throws IOException {
         if (CommandRunner.IS_WINDOWS) {
@@ -105,8 +105,8 @@ public class GradleRunnerTest {
                     "@echo %*>> " + INVOCATIONS_FILE + "\r\n");
         } else {
             var wrapper = tmpDir.resolve("gradlew");
-            Files.writeString(wrapper, "#!/bin/sh\necho \"$@\" >> "
-                    + INVOCATIONS_FILE + "\n");
+            Files.writeString(wrapper,
+                    "#!/bin/sh\necho \"$@\" >> " + INVOCATIONS_FILE + "\n");
             assertTrue(wrapper.toFile().setExecutable(true));
         }
     }
