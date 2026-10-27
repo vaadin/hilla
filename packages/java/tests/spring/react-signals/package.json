@@ -27,7 +27,7 @@
   "devDependencies": {
     "@babel/core": "7.29.7",
     "@babel/plugin-transform-react-jsx-development": "7.29.7",
-    "@babel/types": "7.29.8",
+    "@babel/types": "7.29.11",
     "@preact/signals-react": "3.12.0",
     "@preact/signals-react-transform": "0.8.3",
     "@rolldown/plugin-babel": "0.2.4",
@@ -43,7 +43,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "npm:@typescript/typescript6@6.0.2",
-    "vite": "8.3.4",
+    "vite": "8.3.5",
     "vite-plugin-checker": "0.14.5"
   },
   "vaadin": {
@@ -72,7 +72,7 @@
     "devDependencies": {
       "@babel/core": "7.29.7",
       "@babel/plugin-transform-react-jsx-development": "7.29.7",
-      "@babel/types": "7.29.8",
+      "@babel/types": "7.29.11",
       "@preact/signals-react": "3.12.0",
       "@preact/signals-react-transform": "0.8.3",
       "@rolldown/plugin-babel": "0.2.4",
@@ -88,10 +88,10 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "npm:@typescript/typescript6@6.0.2",
-      "vite": "8.3.4",
+      "vite": "8.3.5",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "e8fb963139e5e4d9b5211989a75d6efdce69badeab24eae5dc973d2c866837d5"
+    "hash": "f9e4f63e3125c843f6cc7c7624ff0aa173ba10d782ef7f72698b5ee6f8e20b09"
   },
   "overrides": {
     "@vaadin/a11y-base": "$@vaadin/a11y-base",
