@@ -29,10 +29,10 @@
   },
   "devDependencies": {
     "@babel/preset-react": "7.29.7",
-    "@babel/types": "7.29.8",
+    "@babel/types": "7.29.11",
     "@preact/signals-react-transform": "0.8.3",
     "@rollup/plugin-replace": "6.0.3",
-    "@rollup/pluginutils": "5.4.0",
+    "@rollup/pluginutils": "5.5.1",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
@@ -85,10 +85,10 @@
     },
     "devDependencies": {
       "@babel/preset-react": "7.29.7",
-      "@babel/types": "7.29.8",
+      "@babel/types": "7.29.11",
       "@preact/signals-react-transform": "0.8.3",
       "@rollup/plugin-replace": "6.0.3",
-      "@rollup/pluginutils": "5.4.0",
+      "@rollup/pluginutils": "5.5.1",
       "@types/react": "19.3.0",
       "@types/react-dom": "19.3.0",
       "@vaadin/hilla-generator-cli": "24.9.26",
@@ -113,7 +113,7 @@
       "vite": "7.3.7",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "84cb4a63023499d73917c76bb4f8af1507be673321f710f9fd0bacdd54881176",
+    "hash": "163e0a478b8b2742d85472b53d9f241b8c8fbb3be48df8516900732e16cebafa",
     "overrides": {
       "@polymer/polymer": "$@polymer/polymer",
       "@vaadin/a11y-base": "24.9.20",
