@@ -27,12 +27,12 @@
     "@babel/core": "7.29.7",
     "@babel/plugin-transform-react-jsx-development": "7.29.7",
     "@babel/preset-react": "7.29.7",
-    "@babel/types": "7.29.8",
+    "@babel/types": "7.29.11",
     "@preact/signals-react": "3.12.0",
     "@preact/signals-react-transform": "0.8.3",
     "@rolldown/plugin-babel": "0.2.4",
     "@rollup/plugin-replace": "6.0.3",
-    "@rollup/pluginutils": "5.4.0",
+    "@rollup/pluginutils": "5.5.1",
     "@types/node": "25.9.9",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
@@ -54,7 +54,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "6.0.3",
-    "vite": "8.3.4",
+    "vite": "8.3.5",
     "vite-plugin-checker": "0.14.5"
   },
   "vaadin": {
@@ -83,12 +83,12 @@
       "@babel/core": "7.29.7",
       "@babel/plugin-transform-react-jsx-development": "7.29.7",
       "@babel/preset-react": "7.29.7",
-      "@babel/types": "7.29.8",
+      "@babel/types": "7.29.11",
       "@preact/signals-react": "3.12.0",
       "@preact/signals-react-transform": "0.8.3",
       "@rolldown/plugin-babel": "0.2.4",
       "@rollup/plugin-replace": "6.0.3",
-      "@rollup/pluginutils": "5.4.0",
+      "@rollup/pluginutils": "5.5.1",
       "@types/node": "25.9.9",
       "@types/react": "19.3.0",
       "@types/react-dom": "19.3.0",
@@ -110,10 +110,10 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "6.0.3",
-      "vite": "8.3.4",
+      "vite": "8.3.5",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "0440d73f8e71abfd658f87c9330cfe2c14663975300c91988df4859eb01f8cfc"
+    "hash": "8359de644b195d492cd54e045a1391c2a816dd1e6e9576c3ca478a2777c14db4"
   },
   "overrides": {
     "@vaadin/a11y-base": "25.2.16",
