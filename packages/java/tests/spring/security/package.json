@@ -26,7 +26,7 @@
   "devDependencies": {
     "@babel/core": "7.29.7",
     "@babel/plugin-transform-react-jsx-development": "7.29.7",
-    "@babel/types": "7.29.8",
+    "@babel/types": "7.29.11",
     "@preact/signals-react": "3.12.0",
     "@preact/signals-react-transform": "0.8.3",
     "@rolldown/plugin-babel": "0.2.4",
@@ -40,7 +40,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "npm:@typescript/typescript6@6.0.2",
-    "vite": "8.3.4",
+    "vite": "8.3.5",
     "vite-plugin-checker": "0.14.5"
   },
   "vaadin": {
@@ -52,6 +52,7 @@
       "@vaadin/field-base": "25.4.0-alpha4",
       "@vaadin/hilla-frontend": "25.4.0-alpha4",
       "@vaadin/hilla-lit-form": "25.4.0-alpha4",
+      "@vaadin/hilla-models": "25.4.0-alpha4",
       "@vaadin/icon": "25.4.0-alpha4",
       "@vaadin/icons": "25.4.0-alpha4",
       "@vaadin/input-container": "25.4.0-alpha4",
@@ -62,13 +63,12 @@
       "@vaadin/vaadin-lumo-styles": "25.4.0-alpha4",
       "@vaadin/vaadin-themable-mixin": "25.4.0-alpha4",
       "lit": "3.3.3",
-      "mobx": "6.3.3",
-      "@vaadin/hilla-models": "25.4.0-alpha4"
+      "mobx": "6.3.3"
     },
     "devDependencies": {
       "@babel/core": "7.29.7",
       "@babel/plugin-transform-react-jsx-development": "7.29.7",
-      "@babel/types": "7.29.8",
+      "@babel/types": "7.29.11",
       "@preact/signals-react": "3.12.0",
       "@preact/signals-react-transform": "0.8.3",
       "@rolldown/plugin-babel": "0.2.4",
@@ -82,10 +82,10 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "npm:@typescript/typescript6@6.0.2",
-      "vite": "8.3.4",
+      "vite": "8.3.5",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "8301765f12cc1dd0eb6fb958637cadd8495abe4c03ddacb5323cea082eae05a7"
+    "hash": "32e5f950dd9a96581fe763c70e8900a395a7440bea0e0b9d470c36e0f54ac7d8"
   },
   "overrides": {
     "@adobe/lit-mobx": "$@adobe/lit-mobx",
