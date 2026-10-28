@@ -4,7 +4,7 @@
   "type": "module",
   "dependencies": {
     "@adobe/lit-mobx": "2.0.0-rc.4",
-    "@vaadin/common-frontend": "0.0.24",
+    "@vaadin/common-frontend": "0.0.25",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
     "@vaadin/icon": "25.3.4",
@@ -52,7 +52,7 @@
   "vaadin": {
     "dependencies": {
       "@adobe/lit-mobx": "2.0.0-rc.4",
-      "@vaadin/common-frontend": "0.0.24",
+      "@vaadin/common-frontend": "0.0.25",
       "@vaadin/hilla-frontend": "25.3.4",
       "@vaadin/hilla-lit-form": "25.3.4",
       "@vaadin/icon": "25.3.4",
@@ -97,7 +97,7 @@
       "vite": "8.3.5",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "cfcc079484705130db3db3960eb2e36c0f3d56e7b57be22c14739e2b9f95bd0a"
+    "hash": "481f1601ae0a6475adae504c7bdb97624f13e8f404ddfb2326430b6df0fcfc30"
   },
   "overrides": {
     "@adobe/lit-mobx": "$@adobe/lit-mobx",
