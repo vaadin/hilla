@@ -298,12 +298,12 @@ public class EndpointInvoker {
             Class<?> classType) {
         TypeFactory typeFactory = endpointObjectMapper.getTypeFactory();
         // Bindings of the type variables of the declaring class, e.g. T of a
-        // generic super class of the endpoint
-        JavaType declaringType = typeFactory.constructType(classType)
-                .findSuperType(methodToInvoke.getDeclaringClass());
-        TypeBindings bindings = declaringType == null
-                ? TypeBindings.emptyBindings()
-                : declaringType.getBindings();
+        // generic super class of the endpoint. The endpoint methods are
+        // looked up from the endpoint class, so it is always a subtype of the
+        // declaring class.
+        TypeBindings bindings = typeFactory.constructType(classType)
+                .findSuperType(methodToInvoke.getDeclaringClass())
+                .getBindings();
         return Stream.of(methodToInvoke.getGenericParameterTypes())
                 .map(type -> typeFactory.resolveMemberType(type, bindings))
                 .toArray(JavaType[]::new);
