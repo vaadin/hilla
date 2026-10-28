@@ -4,7 +4,7 @@
   "type": "module",
   "dependencies": {
     "@vaadin/a11y-base": "25.4.0-alpha4",
-    "@vaadin/common-frontend": "0.0.24",
+    "@vaadin/common-frontend": "0.0.25",
     "@vaadin/field-base": "25.4.0-alpha4",
     "@vaadin/hilla-file-router": "file:../../../../ts/file-router",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
@@ -49,7 +49,7 @@
   "vaadin": {
     "dependencies": {
       "@vaadin/a11y-base": "25.4.0-alpha4",
-      "@vaadin/common-frontend": "0.0.24",
+      "@vaadin/common-frontend": "0.0.25",
       "@vaadin/field-base": "25.4.0-alpha4",
       "@vaadin/hilla-file-router": "25.4.0-alpha4",
       "@vaadin/hilla-frontend": "25.4.0-alpha4",
@@ -91,7 +91,7 @@
       "vite": "8.3.5",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "f9e4f63e3125c843f6cc7c7624ff0aa173ba10d782ef7f72698b5ee6f8e20b09"
+    "hash": "197e188b16c3331d1e57233f003dca43543310b3aa4f4c3a997d96ca0a0dafd7"
   },
   "overrides": {
     "@vaadin/a11y-base": "$@vaadin/a11y-base",
