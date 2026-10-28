@@ -10,7 +10,7 @@
     "@polymer/iron-meta": "3.0.1",
     "@polymer/iron-resizable-behavior": "3.0.1",
     "@vaadin/a11y-base": "25.4.0-alpha4",
-    "@vaadin/common-frontend": "0.0.24",
+    "@vaadin/common-frontend": "0.0.25",
     "@vaadin/component-base": "25.4.0-alpha4",
     "@vaadin/field-base": "25.4.0-alpha4",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
@@ -52,7 +52,7 @@
     "dependencies": {
       "@adobe/lit-mobx": "2.0.0-rc.4",
       "@vaadin/a11y-base": "25.4.0-alpha4",
-      "@vaadin/common-frontend": "0.0.24",
+      "@vaadin/common-frontend": "0.0.25",
       "@vaadin/component-base": "25.4.0-alpha4",
       "@vaadin/field-base": "25.4.0-alpha4",
       "@vaadin/hilla-frontend": "25.4.0-alpha4",
@@ -90,7 +90,7 @@
       "vite": "8.3.5",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "cbd7add0550e446e24273b83c04b73ec0408f2eb0f34ca6852f71cb7a5d6767c"
+    "hash": "3bdff45b92c270a0b7a50bc2174bb9686bbb4f34b948d027ba6fd470272559d0"
   },
   "overrides": {
     "@adobe/lit-mobx": "$@adobe/lit-mobx",
