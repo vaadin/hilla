@@ -3,7 +3,7 @@
   "license": "UNLICENSED",
   "type": "module",
   "dependencies": {
-    "@vaadin/common-frontend": "0.0.24",
+    "@vaadin/common-frontend": "0.0.25",
     "@vaadin/hilla-file-router": "file:../../../../ts/file-router",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
@@ -59,7 +59,7 @@
   },
   "vaadin": {
     "dependencies": {
-      "@vaadin/common-frontend": "0.0.24",
+      "@vaadin/common-frontend": "0.0.25",
       "@vaadin/hilla-file-router": "25.2.13",
       "@vaadin/hilla-frontend": "25.2.13",
       "@vaadin/hilla-lit-form": "25.2.13",
@@ -113,7 +113,7 @@
       "vite": "8.3.5",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "8359de644b195d492cd54e045a1391c2a816dd1e6e9576c3ca478a2777c14db4"
+    "hash": "73c2fb14a7b06c18955eb9d6801e10c42a4c815df23fa06ef87a424815ed6e04"
   },
   "overrides": {
     "@vaadin/a11y-base": "25.2.16",
