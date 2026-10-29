@@ -3,6 +3,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import type { EnvironmentModuleNode, HotUpdateOptions, Logger, Plugin, Rolldown } from 'vite';
 import { generateRuntimeFiles, type RuntimeFileUrls } from './vite-plugin/generateRuntimeFiles.js';
 
+// Vite types its plugin hooks with Rolldown, not Rollup.
+type TransformResult = Rolldown.TransformResult;
+
 const REFRESH_IGNORE_VIRTUAL_ID = 'virtual:hilla-file-router-refresh-ignore';
 const RESOLVED_REFRESH_IGNORE_VIRTUAL_ID = `\0${REFRESH_IGNORE_VIRTUAL_ID}`;
 
@@ -205,7 +208,7 @@ export default function vitePluginFileSystemRouter({
 
       return undefined;
     },
-    transform(code, id): Promise<Rolldown.TransformResult> | Rolldown.TransformResult {
+    transform(code, id): Promise<TransformResult> | TransformResult {
       let modifiedCode = code;
       if (id.startsWith(_viewsDirPosix) && !basename(id).startsWith('_')) {
         if (isDevMode) {
