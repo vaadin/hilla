@@ -79,6 +79,7 @@
     <hibernate.validator.version>8.0.2.Final</hibernate.validator.version>
     <jaxb.version>4.0.4</jaxb.version>
     <github.javaparser.core.version>3.28.2</github.javaparser.core.version>
+    <guava.version>33.7.2-jre</guava.version>
     <jetty.version>12.0.3</jetty.version>
     <atmosphere.version>3.0.5.slf4jvaadin1</atmosphere.version>
     <kotlin.version>2.4.20</kotlin.version>
