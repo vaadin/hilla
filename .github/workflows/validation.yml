@@ -5,12 +5,9 @@ defaults:
     shell: bash
 
 # No `paths-ignore` on `push` and `pull_request`: a pull request that only
-# changes documentation still needs the Tests Summary check to be mergeable.
-# The changes job below skips the build and the tests for such changes
-# instead, so that this workflow is the only one reporting that check. A
-# separate workflow reporting it for documentation changes also reported it,
-# within seconds, for a pull request that changed a README next to the code,
-# which made that pull request mergeable while its tests were still running.
+# changes documentation still needs the Tests Summary check to be mergeable,
+# so the changes job below skips the build and the tests for such changes
+# instead, and this workflow is the only one that reports that check.
 on:
   push:
     branches: [main, '25.2', '25.1', '24.10', '24.9', '2.5', '1.5']
