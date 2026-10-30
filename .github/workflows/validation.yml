@@ -4,15 +4,17 @@ defaults:
   run:
     shell: bash
 
+# No `paths-ignore` on `push` and `pull_request`: a pull request that only
+# changes documentation still needs the Tests Summary check to be mergeable,
+# so the changes job below skips the build and the tests for such changes
+# instead, and this workflow is the only one that reports that check.
 on:
   push:
-    branches: [main, '25.3', '25.2', '25.1', '24.10', '24.9', '2.5', '1.5']
-    paths-ignore:
-      - 'hilla-logo.svg'
-      - 'README.md'
-      - '.github/ISSUE_TEMPLATE/*'
-      - 'packages/**/README.md'
-      - 'scripts/generator/templates/**/*.md'
+    # Every version branch rather than a list of them, which fell behind each
+    # time a branch was created and then left out its pushes. The release
+    # branches carry a copy of this file, and this way the copy is the same
+    # on all of them.
+    branches: [main, '[0-9]+.[0-9]+']
   # No `branches` filter here: it matches the pull request's base branch, so
   # listing only the long-lived branches skipped every stacked pull request -
   # one based on the branch below it in the stack instead of on main. Those
@@ -23,17 +25,28 @@ on:
   # this file.
   pull_request:
     types: [opened, synchronize, reopened]
-    paths-ignore:
-      - 'hilla-logo.svg'
-      - 'README.md'
-      - '.github/ISSUE_TEMPLATE/*'
-      - 'packages/**/README.md'
-      - 'scripts/generator/templates/**/*.md'
+  # Called by validation-label.yml for the two labels that ask for a job the
+  # other events leave out - `run-windows-tests` and `run-native-build` - so
+  # that adding one starts that job on a pull request that is already open,
+  # without a commit to push. The `labeled` event is there rather than here
+  # because it fires for every label: a run of this workflow started by any
+  # other label skipped all of its jobs, which listed skipped copies of the
+  # real checks on the pull request. A called workflow sees the event of its
+  # caller, so a run started by a label runs only what the label asks for:
+  # what that is, the init job below works out once and the jobs after it
+  # read from its outputs.
+  workflow_call:
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: ${{ github.head_ref || github.ref_name }}
+  # A run a label started gets a group of its own, one per label, so that it
+  # neither cancels the runs of the pull request itself nor is cancelled by
+  # them.
+  group: >-
+    ${{ github.event.action == 'labeled'
+    && format('{0}-{1}', github.head_ref, github.event.label.name)
+    || github.head_ref || github.ref_name }}
   cancel-in-progress: true
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -42,12 +55,73 @@ env:
   _REF_NAME: ${{ github.ref_name }}
   _HEAD_SHA: ${{ github.event.pull_request.head.sha }}
 jobs:
+  # Whether anything other than documentation changed, which is all the build
+  # and the tests are skipped for. A run that a label or workflow_dispatch
+  # started asks for its jobs explicitly, so it always counts as a change, and
+  # so does a push whose files the compare API cannot list in full (a new
+  # branch, or more than the 300 files it returns).
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      code: ${{ steps.detect.outputs.code }}
+    steps:
+      - id: detect
+        env:
+          GH_TOKEN: ${{ github.token }}
+          _EVENT: ${{ github.event_name }}
+          _ACTION: ${{ github.event.action }}
+          _PR_NUMBER: ${{ github.event.pull_request.number }}
+          _BEFORE: ${{ github.event.before }}
+          _AFTER: ${{ github.sha }}
+        run: |
+          code=true
+          if [ "$_EVENT" = pull_request ] && [ "$_ACTION" != labeled ]; then
+            files=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$_PR_NUMBER/files" --jq '.[].filename')
+            code=false
+          elif [ "$_EVENT" = push ] && [ -n "${_BEFORE//0/}" ]; then
+            compare=$(gh api "repos/$GITHUB_REPOSITORY/compare/$_BEFORE...$_AFTER")
+            if [ "$(jq '.files | length' <<< "$compare")" -lt 300 ]; then
+              files=$(jq -r '.files[].filename' <<< "$compare")
+              code=false
+            fi
+          fi
+          if [ "$code" = false ]; then
+            while IFS= read -r file; do
+              case "$file" in
+                ''|hilla-logo.svg|README.md|.github/ISSUE_TEMPLATE/*|packages/*/README.md|scripts/generator/templates/*.md) ;;
+                *) echo "Not documentation: $file"; code=true; break ;;
+              esac
+            done <<< "$files"
+          fi
+          echo "code=$code" | tee -a "$GITHUB_OUTPUT"
+
   init:
+    needs: changes
     name: Build Java and TypeScript for other tasks
+    if: ${{ needs.changes.outputs.code != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
       NX_SKIP_NX_CACHE: true
+    # What a run started by a label asks for, read once here and by the jobs
+    # below as `needs.init.outputs`, rather than repeated in every condition.
+    # A run any other event started asks for everything. The conditions read
+    # these as "not false", so that a job runs rather than skips if it ever
+    # sees no answer at all - re-running the failed jobs of a run does not
+    # run this one again.
+    outputs:
+      everything: ${{ github.event.action != 'labeled' }}
+      windows_tests: >-
+        ${{ github.event.action != 'labeled'
+        || github.event.label.name == 'run-windows-tests' }}
+      native_build: >-
+        ${{ github.event.action != 'labeled'
+        || github.event.label.name == 'run-native-build' }}
 
     steps:
       - name: Check secrets
@@ -92,6 +166,7 @@ jobs:
   check-style:
     needs: init
     name: Check style
+    if: ${{ needs.init.outputs.everything != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -119,6 +194,7 @@ jobs:
   test-java:
     needs: init
     name: Test Java
+    if: ${{ needs.init.outputs.everything != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -142,10 +218,14 @@ jobs:
         run: mvn -B -am -P\!it-modules verify -pl '!:hilla-gradle-plugin'
       - name: Collect Coverage
         run: |
-          COVFILES=$(find packages/java -wholename 'target/site/jacoco/jacoco.xml' | tr '\n' ',' | sed '$s/,$//')
+          COVFILES=$(find packages/java -wholename '*/target/site/jacoco/jacoco.xml' | tr '\n' ',' | sed '$s/,$//')
+          if [ -z "$COVFILES" ]; then
+            echo "::error::No JaCoCo report found under packages/java, so there is nothing to upload."
+            exit 1
+          fi
           echo "COVFILES=$COVFILES" >> $GITHUB_ENV
       - name: Send Coverage to Codecov
-        if: ${{ env.COVFILES != '' && !github.event.pull_request.head.repo.fork }}
+        if: ${{ !github.event.pull_request.head.repo.fork }}
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -157,6 +237,7 @@ jobs:
   test-typescript:
     needs: init
     name: Test TypeScript
+    if: ${{ needs.init.outputs.everything != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -201,7 +282,9 @@ jobs:
   test-it:
     needs:
       - init
-    if: ${{ !github.event.pull_request.head.repo.fork }}
+    if: >-
+      ${{ !github.event.pull_request.head.repo.fork
+      && needs.init.outputs.everything != 'false' }}
     name: ITs
     timeout-minutes: 25
     strategy:
@@ -244,7 +327,6 @@ jobs:
             mvn -B -am -ntp -fae \
               -Dfailsafe.forkCount=4 \
               -Dcom.vaadin.testbench.Parameters.testsInParallel=5 \
-              -Dfailsafe.rerunFailingTestsCount=2 \
               -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \
               -Dmaven.wagon.http.retryHandler.count=3 \
               -P\!it-modules \
@@ -263,28 +345,36 @@ jobs:
   test-gradle:
     needs:
       - init
-    if: ${{ !github.event.pull_request.head.repo.fork }}
+    if: >-
+      ${{ !github.event.pull_request.head.repo.fork
+      && needs.init.outputs.windows_tests != 'false' }}
     name: Gradle tests
     timeout-minutes: 25
     strategy:
       fail-fast: false
-      # The Windows leg takes ~11 minutes while every other validation job is
-      # done in 5, so it alone decides how long a PR waits. It guards
+      # The Windows legs take ~10 and ~6 minutes while every other validation
+      # job is done in 4, so they alone decide how long a PR waits. They guard
       # path-separator and file-locking behaviour, which rarely changes, so run
-      # it on pushes to main and the release branches (i.e. on every merge) and
-      # on workflow_dispatch, but not on pull requests. To get it on a PR, add
-      # the `run-windows-tests` label and then push a commit; `labeled` is not
-      # among the pull_request types above, and re-running an existing run
-      # replays the original event payload, so neither picks up a label added
-      # after the fact. Dispatching the workflow manually on the branch runs
-      # both legs too, but it lands in the same concurrency group as the pull
-      # request's own runs, so the two cancel each other - prefer the label.
+      # them on pushes to main and the release branches (i.e. on every merge)
+      # and on workflow_dispatch, but not on pull requests. To get them on a
+      # PR, add the `run-windows-tests` label: that starts a run of the
+      # Windows legs alone, since the Ubuntu ones have already run with the
+      # rest of the validation. Re-running an existing run does not pick the
+      # label up, because it replays the original event payload.
       matrix:
         os: >-
-          ${{ fromJSON(github.event_name == 'pull_request'
+          ${{ fromJSON(github.event.action == 'labeled'
+          && '["windows-latest"]'
+          || (github.event_name == 'pull_request'
           && !contains(github.event.pull_request.labels.*.name, 'run-windows-tests')
-          && '["ubuntu-latest"]'
+          && '["ubuntu-latest"]')
           || '["ubuntu-latest", "windows-latest"]') }}
+        # The plugin leg (the gradle-plugin functional tests) and the IT leg
+        # (kotlin-gradle-test) are independent once the plugin is in the local
+        # Maven repository, and running them one after the other made this the
+        # longest validation job. Both legs publish the plugin first, which
+        # costs half a minute each, and the tests then run in parallel.
+        task: [plugin, its]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -312,6 +402,7 @@ jobs:
       # downloaded again on every run. Keep the version in sync with
       # TestProject.gradleVersion in TestUtils.kt.
       - name: Cache the Gradle distribution used by TestKit
+        if: ${{ matrix.task == 'plugin' }}
         uses: actions/cache@v5
         with:
           path: ${{ env.GRADLE_USER_HOME || '~/.gradle' }}/wrapper/dists/gradle-8.14-bin
@@ -326,13 +417,15 @@ jobs:
       - name: publish plugin to Maven Local
         run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin build publishToMavenLocal -x functionalTest
       - name: Test gradle-plugin's functional tests
+        if: ${{ matrix.task == 'plugin' }}
         run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin functionalTest
       - name: Gradle ITs
+        if: ${{ matrix.task == 'its' }}
         run: ./packages/java/tests/gradle/kotlin-gradle-test/gradlew --info --stacktrace -p packages/java/tests/gradle/kotlin-gradle-test clean integrationTest
       - uses: actions/upload-artifact@v6
         if: ${{ failure() || success() }}
         with:
-          name: saved-outputs-gradle-${{ matrix.os }}
+          name: saved-outputs-gradle-${{ matrix.os }}-${{ matrix.task }}
           path: |
             packages/java/tests/**/target/*-reports/*
             packages/java/tests/**/error-screenshots/*.png
@@ -340,21 +433,37 @@ jobs:
             packages/java/gradle-plugin/build/reports/*
 
   test-all:
+    # A static name, as this is the required check of a pull request. A run a
+    # label started is called from validation-label.yml, so its summary is
+    # listed as `Requested by label / Tests Summary` and does not replace the
+    # one of the run that validated the commit.
     name: Tests Summary
     runs-on: ubuntu-latest
     if: ${{ always() }}
     needs:
+      - changes
+      - init
       - check-style
       - test-java
       - test-typescript
       - test-it
       - test-gradle
     steps:
+      # Documentation-only changes upload no outputs to merge, and the action
+      # fails when it finds none.
       - name: Merge Artifacts
+        if: ${{ needs.changes.outputs.code != 'false' }}
         uses: actions/upload-artifact/merge@v6
         with:
           name: saved-outputs
           pattern: saved-outputs-*
+      # A skipped job is not a failure: which jobs run depends on the event,
+      # on the labels of the pull request and on whether it comes from a
+      # fork, and all of them skip for documentation-only changes. A job
+      # that failed takes the rest of the run with it, and so do `changes`
+      # and `init`, whose failure leaves everything after them skipped.
       - name: Fail if test jobs did not succeed
-        if: ${{ needs.check-style.result != 'success' || needs.test-java.result != 'success' || needs.test-typescript.result != 'success' || (needs.test-it.result != 'success' && needs.test-it.result != 'skipped') || (needs.test-gradle.result != 'success' && needs.test-gradle.result != 'skipped') }}
+        if: >-
+          ${{ contains(needs.*.result, 'failure')
+          || contains(needs.*.result, 'cancelled') }}
         run: exit 1
