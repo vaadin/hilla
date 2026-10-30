@@ -80,12 +80,14 @@
     <slf4j.version>2.0.9</slf4j.version>
     <spring.boot.version>3.2.12</spring.boot.version>
     <testbench.version>9.3.15</testbench.version>
+    <license.checker.version>2.3.4</license.checker.version>
     <jakarta.validation.version>3.0.2</jakarta.validation.version>
     <jakarta.annotation.api.version>2.1.1</jakarta.annotation.api.version>
     <jakarta.activation.api.version>2.1.2</jakarta.activation.api.version>
     <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
     <jaxb.version>4.0.4</jaxb.version>
-    <github.javaparser.core.version>3.25.10</github.javaparser.core.version>
+    <github.javaparser.core.version>3.28.2</github.javaparser.core.version>
+    <guava.version>33.7.2-jre</guava.version>
     <jetty.version>12.0.3</jetty.version>
     <atmosphere.version>3.0.5.slf4jvaadin1</atmosphere.version>
   </properties>
@@ -176,6 +178,14 @@
         <version>${flow.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <!-- TestBench brings an older license-checker that lacks APIs used by Flow.
+           Keep in sync with the license-checker version of Flow 24.4, or remove
+           once TestBench depends on the same version. -->
+      <dependency>
+        <groupId>com.vaadin</groupId>
+        <artifactId>license-checker</artifactId>
+        <version>${license.checker.version}</version>
       </dependency>
       <dependency>
         <groupId>com.vaadin</groupId>
