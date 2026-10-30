@@ -15,6 +15,11 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone;
 
+import java.lang.reflect.AnnotatedArrayType;
+import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.AnnotatedTypeVariable;
+import java.lang.reflect.AnnotatedWildcardType;
+import java.lang.reflect.TypeVariable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -22,13 +27,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import com.vaadin.hilla.parser.models.ArraySignatureModel;
-import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
-import com.vaadin.hilla.parser.models.SignatureModel;
-import com.vaadin.hilla.parser.models.SpecializedModel;
-import com.vaadin.hilla.parser.models.TypeArgumentModel;
-import com.vaadin.hilla.parser.models.TypeParameterModel;
-import com.vaadin.hilla.parser.models.TypeVariableModel;
+import com.vaadin.hilla.parser.utils.Signatures;
 
 /**
  * Reading the bounds of a type parameter.
@@ -54,10 +53,11 @@ public final class TypeParameters {
      *            the type parameter to read the bounds of
      * @return the bounds which constrain the type parameter
      */
-    static List<SignatureModel> getEffectiveBounds(
-            TypeParameterModel typeParameter) {
-        return typeParameter.getBounds().stream().filter(Objects::nonNull)
-                .filter(Predicate.not(SpecializedModel::isNativeObject))
+    static List<AnnotatedType> getEffectiveBounds(
+            TypeVariable<?> typeParameter) {
+        return Signatures.getBounds(typeParameter).stream()
+                .filter(Objects::nonNull)
+                .filter(Predicate.not(Signatures::isNativeObject))
                 .filter(bound -> !leadsTo(bound, typeParameter.getName(),
                         new HashSet<>()))
                 .collect(Collectors.toList());
@@ -71,7 +71,7 @@ public final class TypeParameters {
      *            the type parameter to check
      * @return {@code true} if the type parameter has no effective bound
      */
-    public static boolean isUnbounded(TypeParameterModel typeParameter) {
+    public static boolean isUnbounded(TypeVariable<?> typeParameter) {
         return getEffectiveBounds(typeParameter).isEmpty();
     }
 
@@ -88,32 +88,30 @@ public final class TypeParameters {
      *            a set of type parameters bounded by each other from being
      *            followed forever
      */
-    private static boolean leadsTo(SignatureModel signature,
+    private static boolean leadsTo(AnnotatedType signature,
             String typeParameterName, Set<String> visited) {
-        if (signature.isTypeVariable()) {
-            var name = ((TypeVariableModel) signature).getName();
+        if (signature instanceof AnnotatedTypeVariable typeVariable) {
+            var typeParameter = Signatures.resolve(typeVariable);
+            var name = typeParameter.getName();
 
             if (name.equals(typeParameterName)) {
                 return true;
             }
 
-            return visited.add(name) && ((TypeVariableModel) signature)
-                    .resolve().getBounds().stream().filter(Objects::nonNull)
+            return visited.add(name) && Signatures.getBounds(typeParameter)
+                    .stream().filter(Objects::nonNull)
                     .anyMatch(bound -> leadsTo(bound, typeParameterName,
                             visited));
-        } else if (signature.isTypeArgument()) {
-            return ((TypeArgumentModel) signature).getAssociatedTypes().stream()
-                    .anyMatch(
-                            type -> leadsTo(type, typeParameterName, visited));
-        } else if (signature.isClassRef()) {
-            return ((ClassRefSignatureModel) signature).getTypeArguments()
-                    .stream().anyMatch(typeArgument -> leadsTo(typeArgument,
-                            typeParameterName, visited));
-        } else if (signature.isArray()) {
-            return leadsTo(((ArraySignatureModel) signature).getNestedType(),
+        } else if (signature instanceof AnnotatedWildcardType wildcard) {
+            return Signatures.getBounds(wildcard).stream().anyMatch(
+                    type -> leadsTo(type, typeParameterName, visited));
+        } else if (signature instanceof AnnotatedArrayType array) {
+            return leadsTo(array.getAnnotatedGenericComponentType(),
                     typeParameterName, visited);
         }
 
-        return false;
+        return Signatures.getTypeArguments(signature).stream()
+                .anyMatch(typeArgument -> leadsTo(typeArgument,
+                        typeParameterName, visited));
     }
 }

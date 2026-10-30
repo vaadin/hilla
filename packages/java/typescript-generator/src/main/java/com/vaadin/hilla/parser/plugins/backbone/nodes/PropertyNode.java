@@ -15,16 +15,28 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.nodes;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
 import org.jspecify.annotations.NonNull;
+import tools.jackson.databind.introspect.BeanPropertyDefinition;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
-import com.vaadin.hilla.parser.models.jackson.JacksonPropertyModel;
 import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 
-public class PropertyNode extends AbstractNode<JacksonPropertyModel, String> {
+public class PropertyNode extends AbstractNode<BeanPropertyDefinition, String>
+        implements AnnotatedNode {
     private TypeFacts valueType = TypeFacts.unknown();
 
-    protected PropertyNode(@NonNull JacksonPropertyModel source,
+    protected PropertyNode(@NonNull BeanPropertyDefinition source,
             @NonNull String target) {
         super(source, target);
     }
@@ -42,8 +54,69 @@ public class PropertyNode extends AbstractNode<JacksonPropertyModel, String> {
         this.valueType = valueType;
     }
 
+    /**
+     * The annotations of the field, the getter and the setter parameter of the
+     * property, in this order.
+     */
+    @Override
+    public List<Annotation> getAnnotations() {
+        var property = getSource();
+
+        return Stream
+                .of(field(property).map(Field::getAnnotations),
+                        getter(property).map(Method::getAnnotations),
+                        setter(property).map(setter -> setter.getParameters()[0]
+                                .getAnnotations()))
+                .flatMap(Optional::stream).flatMap(Arrays::stream).toList();
+    }
+
+    /**
+     * The types the getter returns, the setter takes and the field holds, in
+     * this order, for those the property has.
+     */
+    public List<AnnotatedType> getAssociatedTypes() {
+        var property = getSource();
+
+        return Stream
+                .of(getter(property).map(Method::getAnnotatedReturnType),
+                        setter(property).map(setter -> setter.getParameters()[0]
+                                .getAnnotatedType()),
+                        field(property).map(Field::getAnnotatedType))
+                .flatMap(Optional::stream).toList();
+    }
+
+    /**
+     * The member the property is read through: the getter, or else the setter,
+     * or else the field.
+     */
+    public Member getPrimaryMember() {
+        var property = getSource();
+
+        return getter(property).<Member> map(Function.identity())
+                .or(() -> setter(property)).or(() -> field(property))
+                .orElseThrow();
+    }
+
     @NonNull
-    static public PropertyNode of(@NonNull JacksonPropertyModel source) {
+    static public PropertyNode of(@NonNull BeanPropertyDefinition source) {
         return new PropertyNode(source, "");
+    }
+
+    private static Optional<Field> field(BeanPropertyDefinition property) {
+        return property.hasField()
+                ? Optional.of(property.getField().getAnnotated())
+                : Optional.empty();
+    }
+
+    private static Optional<Method> getter(BeanPropertyDefinition property) {
+        return property.hasGetter()
+                ? Optional.of(property.getGetter().getAnnotated())
+                : Optional.empty();
+    }
+
+    private static Optional<Method> setter(BeanPropertyDefinition property) {
+        return property.hasSetter()
+                ? Optional.of(property.getSetter().getAnnotated())
+                : Optional.empty();
     }
 }

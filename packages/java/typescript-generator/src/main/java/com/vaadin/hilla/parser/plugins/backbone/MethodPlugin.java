@@ -15,13 +15,17 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
 import com.vaadin.hilla.parser.core.NodeDependencies;
-import com.vaadin.hilla.parser.models.ClassInfoModel;
-import com.vaadin.hilla.parser.models.MethodInfoModel;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointExposedNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
@@ -34,14 +38,23 @@ public final class MethodPlugin
         var node = nodeDependencies.getNode();
         if (node instanceof EndpointNode
                 || node instanceof EndpointExposedNode) {
-            var endpointCls = (ClassInfoModel) node.getSource();
-            var methodNodes = endpointCls.getMethods().stream()
-                    .filter(MethodInfoModel::isPublic)
+            var endpointCls = (Class<?>) node.getSource();
+            var methodNodes = getMethods(endpointCls).stream()
+                    .filter(method -> Modifier.isPublic(method.getModifiers()))
                     .<Node<?, ?>> map(MethodNode::of);
             return nodeDependencies.appendChildNodes(methodNodes);
         }
 
         return nodeDependencies;
+    }
+
+    /**
+     * The methods a class declares, except synthetic ones, ordered by name.
+     */
+    static List<Method> getMethods(Class<?> cls) {
+        return Arrays.stream(cls.getDeclaredMethods())
+                .filter(method -> !method.isSynthetic())
+                .sorted(Comparator.comparing(Method::getName)).toList();
     }
 
 }

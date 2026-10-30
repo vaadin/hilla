@@ -15,13 +15,13 @@
  */
 package com.vaadin.hilla.parser.core;
 
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Member;
+import java.lang.reflect.Parameter;
 import java.util.Objects;
 
 import org.jspecify.annotations.NonNull;
-
-import com.vaadin.hilla.parser.models.ClassInfoModel;
-import com.vaadin.hilla.parser.models.NamedModel;
-import com.vaadin.hilla.parser.models.SignatureModel;
+import tools.jackson.databind.introspect.BeanPropertyDefinition;
 
 public abstract class AbstractNode<S, T> implements Node<S, T> {
     private final S source;
@@ -67,16 +67,14 @@ public abstract class AbstractNode<S, T> implements Node<S, T> {
 
     @Override
     public String toString() {
-        var sourceName = "";
-        if (source instanceof ClassInfoModel) {
-            sourceName = ((ClassInfoModel) source).getSimpleName();
-        } else if (source instanceof SignatureModel) {
-            sourceName = source.toString();
-        } else if (source instanceof NamedModel) {
-            sourceName = ((NamedModel) source).getName();
-        } else {
-            sourceName = source.getClass().getSimpleName();
-        }
+        var sourceName = switch (source) {
+        case Class<?> cls -> cls.getSimpleName();
+        case Member member -> member.getName();
+        case Parameter parameter -> parameter.getName();
+        case BeanPropertyDefinition property -> property.getName();
+        case AnnotatedElement signature -> signature.toString();
+        default -> source.getClass().getSimpleName();
+        };
 
         return getClass().getSimpleName().replaceAll("Node$", "") + "("
                 + sourceName + ")";

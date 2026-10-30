@@ -15,11 +15,11 @@
  */
 package com.vaadin.hilla.parser.core.basic;
 
-import static com.vaadin.hilla.parser.test.helpers.ClassMemberUtils.cleanup;
 import static com.vaadin.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethod;
+import static com.vaadin.hilla.parser.test.helpers.ClassMemberUtils.getMethods;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.NonNull;
@@ -29,8 +29,6 @@ import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.core.RootNode;
-import com.vaadin.hilla.parser.models.ClassInfoModel;
-import com.vaadin.hilla.parser.models.MethodInfoModel;
 import com.vaadin.hilla.parser.test.nodes.EndpointNode;
 import com.vaadin.hilla.parser.test.nodes.EntityNode;
 import com.vaadin.hilla.parser.test.nodes.FieldNode;
@@ -51,33 +49,31 @@ final class AddPlugin extends AbstractPlugin<PluginConfiguration> {
         var node = nodeDependencies.getNode();
         if (node instanceof RootNode) {
             var rootNode = (RootNode) node;
-            var endpoints = rootNode.getSource().stream()
-                    .map(ClassInfoModel::of).collect(Collectors.toList());
+            var endpoints = rootNode.getSource();
             return nodeDependencies
                     .appendChildNodes(endpoints.stream().map(EndpointNode::of))
                     .appendRelatedNodes(endpoints.stream()
-                            .map(ClassInfoModel::getInnerClasses)
-                            .flatMap(Collection::stream).map(EntityNode::of));
+                            .flatMap(endpoint -> Arrays
+                                    .stream(endpoint.getDeclaredClasses())
+                                    .sorted(Comparator
+                                            .comparing(Class::getSimpleName)))
+                            .map(EntityNode::of));
         } else if (node instanceof EndpointNode) {
             return nodeDependencies
                     .appendChildNodes(Stream.concat(
-                            ((EndpointNode) node).getSource().getFields()
-                                    .stream().map(FieldNode::of),
-                            cleanup(((EndpointNode) node).getSource()
-                                    .getMethods().stream())
+                            Arrays.stream(((EndpointNode) node).getSource()
+                                    .getDeclaredFields()).map(FieldNode::of),
+                            getMethods(((EndpointNode) node).getSource())
                                     .map(MethodNode::of)))
-                    .appendRelatedNodes(Stream.of(
-                            EntityNode.of(ClassInfoModel.of(Sample.class))));
+                    .appendRelatedNodes(Stream.of(EntityNode.of(Sample.class)));
         }
 
         if (node instanceof EntityNode && ((EntityNode) node).getSource()
                 .getName().equals(Sample.class.getName())) {
-            return nodeDependencies
-                    .appendChildNodes(Stream
-                            .of(getDeclaredMethod(Sample.class, "methodFoo"),
-                                    getDeclaredMethod(Sample.class,
-                                            "methodBar"))
-                            .map(MethodInfoModel::of).map(MethodNode::of));
+            return nodeDependencies.appendChildNodes(Stream
+                    .of(getDeclaredMethod(Sample.class, "methodFoo"),
+                            getDeclaredMethod(Sample.class, "methodBar"))
+                    .map(MethodNode::of));
         }
 
         return nodeDependencies;

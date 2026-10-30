@@ -24,7 +24,6 @@ import com.vaadin.hilla.parser.core.Node;
 import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
-import com.vaadin.hilla.parser.models.FieldInfoModel;
 import com.vaadin.hilla.parser.test.nodes.EndpointNode;
 import com.vaadin.hilla.parser.test.nodes.FieldNode;
 import com.vaadin.hilla.parser.test.nodes.MethodNode;
@@ -58,7 +57,7 @@ final class ReplacePlugin extends AbstractPlugin<PluginConfiguration> {
             return Stream
                     .of(Sample.class.getDeclaredField("fieldFoo"),
                             Sample.class.getDeclaredField("fieldBar"))
-                    .map(FieldInfoModel::of).map(FieldNode::of);
+                    .map(FieldNode::of);
         } catch (NoSuchFieldException e) {
             return Stream.empty();
         }

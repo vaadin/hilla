@@ -15,9 +15,12 @@
  */
 package com.vaadin.hilla.parser.plugins.model;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
@@ -32,18 +35,12 @@ import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
-import com.vaadin.hilla.parser.models.AnnotatedModel;
-import com.vaadin.hilla.parser.models.AnnotationInfoModel;
-import com.vaadin.hilla.parser.models.AnnotationParameterEnumValueModel;
-import com.vaadin.hilla.parser.models.AnnotationParameterModel;
-import com.vaadin.hilla.parser.models.ClassInfoModel;
-import com.vaadin.hilla.parser.models.Model;
-import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.AnnotatedNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
+import com.vaadin.hilla.parser.utils.Signatures;
 
 public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
     private static final String VALIDATION_CONSTRAINTS_PACKAGE_NAME = "jakarta.validation.constraints";
@@ -59,54 +56,78 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
     }
 
     private static ValidationConstraint convertValidationConstraintAnnotation(
-            AnnotationInfoModel annotation) {
-        var simpleName = extractSimpleName(annotation.getName());
+            java.lang.annotation.Annotation annotation) {
+        var simpleName = extractSimpleName(
+                annotation.annotationType().getName());
 
         return new ValidationConstraint(simpleName,
                 extractAttributes(annotation));
     }
 
     private static Annotation convertAnnotation(
-            AnnotationInfoModel annotation) {
-        return new Annotation(annotation.getName(),
+            java.lang.annotation.Annotation annotation) {
+        return new Annotation(annotation.annotationType().getName(),
                 extractAttributes(annotation));
     }
 
     private static Map<String, Object> extractAttributes(
-            AnnotationInfoModel annotation) {
+            java.lang.annotation.Annotation annotation) {
         // Ordered by name: the parameters of an annotation come in the order
         // reflection lists its methods in, which is no order at all
-        var attributes = annotation.getParameters().stream()
-                .filter(Predicate.not(AnnotationParameterModel::isDefault))
-                .collect(Collectors.toMap(AnnotationParameterModel::getName,
-                        parameter -> convertAttributeValue(
-                                parameter.getValue()),
+        var attributes = parametersOf(annotation).stream()
+                .filter(Predicate.not(Parameter::isDefault))
+                .collect(Collectors.toMap(Parameter::name,
+                        parameter -> convertAttributeValue(parameter.value()),
                         (first, second) -> first, TreeMap::new));
 
         return !attributes.isEmpty() ? attributes : null;
     }
 
     /**
+     * Reads the parameters of an annotation, telling which of them keep their
+     * default value.
+     */
+    private static List<Parameter> parametersOf(
+            java.lang.annotation.Annotation annotation) {
+        return Arrays.stream(annotation.annotationType().getDeclaredMethods())
+                .map(method -> {
+                    // An annotation method is public and takes no arguments,
+                    // so invoking it gives the value of the parameter
+                    try {
+                        var value = method.invoke(annotation);
+                        return new Parameter(method.getName(), value, Objects
+                                .deepEquals(method.getDefaultValue(), value));
+                    } catch (InvocationTargetException
+                            | IllegalAccessException e) {
+                        throw new IllegalStateException(
+                                "Unable to read the parameter "
+                                        + method.getName() + " of "
+                                        + annotation,
+                                e);
+                    }
+                }).toList();
+    }
+
+    /**
      * Converts an annotation parameter value into something the form model
-     * writer can write as TypeScript. The parser hands back its own models for
-     * enum constants and class references. An array arrives as a list of such
-     * values.
+     * writer can write as TypeScript: an enum constant becomes its name, a
+     * class becomes a reference to it, and an array of objects becomes a list
+     * of such values.
      */
     private static Object convertAttributeValue(Object value) {
         return switch (value) {
-        case AnnotationParameterEnumValueModel enumValue ->
-            enumValue.getValueName();
-        case ClassInfoModel classInfo -> new JvmTypeRef(classInfo.getName());
-        case Collection<?> collection -> collection.stream()
+        case Enum<?> enumValue -> enumValue.name();
+        case Class<?> cls -> new JvmTypeRef(cls.getName());
+        case Object[] array -> Arrays.stream(array)
                 .map(ModelPlugin::convertAttributeValue).toList();
-        // Every other model carries a whole type graph behind it, which has
-        // no TypeScript value to be written as. The only kind left is a
-        // nested annotation, which nothing reaching this plugin has: the
-        // include-list holds none, and a repeated constraint is unwrapped
-        // before it gets here. Adding one means adding its conversion too.
-        case Model model -> throw new IllegalStateException(
-                "No TypeScript representation for the annotation attribute value "
-                        + model);
+        // A nested annotation has no TypeScript value to be written as, and
+        // nothing reaching this plugin has one: the include-list holds none,
+        // and a repeated constraint is unwrapped before it gets here. Adding
+        // one means adding its conversion too.
+        case java.lang.annotation.Annotation annotation ->
+            throw new IllegalStateException(
+                    "No TypeScript representation for the annotation attribute value "
+                            + annotation);
         default -> value;
         };
     }
@@ -125,18 +146,17 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
      * A container is recognized by its shape rather than by its name: a single
      * {@code value} parameter holding the repeated annotations.
      */
-    private static Stream<AnnotationInfoModel> unwrapRepeatableContainer(
-            AnnotationInfoModel annotation) {
-        var parameters = annotation.getParameters();
+    private static Stream<java.lang.annotation.Annotation> unwrapRepeatableContainer(
+            java.lang.annotation.Annotation annotation) {
+        var parameters = parametersOf(annotation);
 
         if (parameters.size() == 1) {
-            var parameter = parameters.iterator().next();
+            var parameter = parameters.get(0);
 
-            if ("value".equals(parameter.getName())
-                    && parameter.getValue() instanceof Collection<?> values
-                    && !values.isEmpty() && values.stream()
-                            .allMatch(AnnotationInfoModel.class::isInstance)) {
-                return values.stream().map(AnnotationInfoModel.class::cast);
+            if ("value".equals(parameter.name()) && parameter
+                    .value() instanceof java.lang.annotation.Annotation[] values
+                    && values.length > 0) {
+                return Arrays.stream(values);
             }
         }
 
@@ -144,14 +164,15 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
     }
 
     private static boolean isValidationConstraintAnnotation(
-            AnnotationInfoModel annotation) {
-        return annotation.getName()
+            java.lang.annotation.Annotation annotation) {
+        return annotation.annotationType().getName()
                 .startsWith(VALIDATION_CONSTRAINTS_PACKAGE_NAME);
     }
 
     private static boolean isIncludedAnnotation(
-            AnnotationInfoModel annotation) {
-        return INCLUDED_ANNOTATIONS.contains(annotation.getName());
+            java.lang.annotation.Annotation annotation) {
+        return INCLUDED_ANNOTATIONS
+                .contains(annotation.annotationType().getName());
     }
 
     @Override
@@ -160,8 +181,9 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
             return;
         }
 
-        var signature = (SignatureModel) typedNode.getType();
-        if (signature.isTypeArgument() || signature.isTypeParameter()) {
+        var signature = typedNode.getType();
+        if (Signatures.isTypeArgument(signature)
+                || Signatures.isTypeParameter(signature)) {
             return;
         }
 
@@ -172,7 +194,7 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
         // form model of it as well
         if (nodePath.getParentPath() != null && nodePath.getParentPath()
                 .getNode() instanceof PropertyNode propertyNode) {
-            noteAnnotations(propertyNode.getSource(), type);
+            noteAnnotations(propertyNode, type);
         }
     }
 
@@ -193,7 +215,7 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
      * well, but Bean Validation checks the array itself with it, so the array
      * gets the annotations of the property instead of the values in it.
      */
-    private static List<AnnotationInfoModel> constrainingAnnotations(
+    private static List<java.lang.annotation.Annotation> constrainingAnnotations(
             NodePath<?> nodePath, AnnotatedNode annotatedNode) {
         var annotations = annotatedNode.getAnnotations();
         var arrayProperty = findArrayProperty(nodePath);
@@ -201,7 +223,7 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
             return annotations;
         }
 
-        var declared = arrayProperty.get().getSource().getAnnotations();
+        var declared = arrayProperty.get().getAnnotations();
         if (nodePath.getParentPath().getNode() == arrayProperty.get()) {
             return Stream.concat(annotations.stream(), declared.stream())
                     .distinct().collect(Collectors.toList());
@@ -219,13 +241,13 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
         var path = nodePath;
         while (path.getParentPath() != null
                 && path.getParentPath().getNode() instanceof TypedNode parent
-                && parent.getType().isArray()) {
+                && Signatures.isArray(parent.getType())) {
             path = path.getParentPath();
         }
 
         if (path.getNode() instanceof TypedNode typedNode
-                && typedNode.getType().isArray() && path.getParentPath() != null
-                && path.getParentPath()
+                && Signatures.isArray(typedNode.getType())
+                && path.getParentPath() != null && path.getParentPath()
                         .getNode() instanceof PropertyNode propertyNode) {
             return Optional.of(propertyNode);
         }
@@ -233,8 +255,8 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
         return Optional.empty();
     }
 
-    private void noteConstraints(List<AnnotationInfoModel> annotations,
-            TypeFacts type) {
+    private void noteConstraints(
+            List<java.lang.annotation.Annotation> annotations, TypeFacts type) {
         var constraints = annotations.stream()
                 .filter(ModelPlugin::isValidationConstraintAnnotation)
                 .flatMap(ModelPlugin::unwrapRepeatableContainer)
@@ -246,9 +268,8 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
         }
     }
 
-    private void noteAnnotations(AnnotatedModel annotatedModel,
-            TypeFacts type) {
-        var annotations = annotatedModel.getAnnotations().stream()
+    private void noteAnnotations(AnnotatedNode annotatedNode, TypeFacts type) {
+        var annotations = annotatedNode.getAnnotations().stream()
                 .filter(ModelPlugin::isIncludedAnnotation)
                 .map(ModelPlugin::convertAnnotation)
                 .collect(Collectors.toList());
@@ -258,4 +279,6 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
         }
     }
 
+    private record Parameter(String name, Object value, boolean isDefault) {
+    }
 }

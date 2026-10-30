@@ -79,8 +79,11 @@ then handed to the node above.
 
 A node (`Node`) has two halves:
 
-- Its **source** is what was found: a class, a method, a signature or a Jackson
-  property, as a model of `com.vaadin.hilla.parser.models`.
+- Its **source** is what was found, as the reflection object for it: a
+  `Class`, a `Method`, a `Parameter`, a type signature or a Jackson
+  `BeanPropertyDefinition`. A type signature is an `AnnotatedType` where a
+  type is used, or a `TypeVariable` where a type parameter is declared;
+  `Signatures` (in `parser.utils`) tells what kind of type it is.
 - Its **target** is what the plugins say about it. It is mutable, and it is set
   during the walk.
 
@@ -160,10 +163,16 @@ gives a typed node fresh `TypeFacts` every time it enters it.
 
 ## Reflection only
 
-The walk runs on reflection: the endpoints are `Class` objects, and the models
-of `com.vaadin.hilla.parser.models` are built with `ClassInfoModel.of(Class)`
-and the like. `Parser` requires a class path, but the walk never reads
-`classPathElements`.
+The walk runs on reflection: the endpoints are `Class` objects, and the nodes
+hold the reflection objects found from them. `Parser` requires a class path,
+but the walk never reads `classPathElements`.
+
+A type argument is walked as the type it is: the `String` of a `List<String>`
+is a `TypeSignatureNode` right below the list, at the position of the argument.
+Only a wildcard argument has a node of its own, with its bound below it. A type
+variable has the type parameter it stands for below it, and the type parameter
+has its bounds below it, so that the annotations of the declaration are read
+too.
 
 ## Ordering
 

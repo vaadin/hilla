@@ -15,13 +15,13 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone;
 
+import java.lang.reflect.AnnotatedElement;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
-import com.vaadin.hilla.parser.models.SignatureModel;
+import com.vaadin.hilla.parser.utils.Signatures;
 
 /**
  * What the walk says about the type of a value: whether a value of it can be
@@ -65,7 +65,7 @@ public final class TypeFacts {
      *            whether a type variable stands for itself, which it does in an
      *            entity and does not in the signature of an endpoint method
      */
-    public static TypeFacts of(SignatureModel type, boolean handleGenerics) {
+    public static TypeFacts of(AnnotatedElement type, boolean handleGenerics) {
         return new TypeFacts(canBeAbsent(type, handleGenerics),
                 collectsTypeArguments(type));
     }
@@ -117,32 +117,35 @@ public final class TypeFacts {
                 .filter(type::isInstance).map(type::cast);
     }
 
-    private static boolean canBeAbsent(SignatureModel type,
+    private static boolean canBeAbsent(AnnotatedElement type,
             boolean handleGenerics) {
-        if (type.isCharacter() || type.isString() || type.isBoolean()
-                || type.hasIntegerType() || type.isBigInteger()
-                || type.hasFloatType() || type.isBigDecimal()) {
-            return !type.isPrimitive();
+        if (Signatures.isCharacter(type) || Signatures.isString(type)
+                || Signatures.isBoolean(type) || Signatures.hasIntegerType(type)
+                || Signatures.isBigInteger(type)
+                || Signatures.hasFloatType(type)
+                || Signatures.isBigDecimal(type)) {
+            return !Signatures.isPrimitive(type);
         }
 
-        if (type.isArray() || type.isIterable() || type.isMap() || type.isDate()
-                || type.isDateTime()) {
+        if (Signatures.isArray(type) || Signatures.isIterable(type)
+                || Signatures.isMap(type) || Signatures.isDate(type)
+                || Signatures.isDateTime(type)) {
             return true;
         }
 
-        if (type.isClassRef()) {
+        if (Signatures.isClassRef(type)) {
             // A class of the JDK is a value of a type the browser has one of
             // its own for, which the walk carries below it
-            return type.isNonJDKClass();
+            return Signatures.isNonJDKClass(type);
         }
 
-        return handleGenerics
-                && (type.isTypeVariable() || type.isTypeParameter());
+        return handleGenerics && (Signatures.isTypeVariable(type)
+                || Signatures.isTypeParameter(type));
     }
 
-    private static boolean collectsTypeArguments(SignatureModel type) {
-        return type instanceof ClassRefSignatureModel ref
-                && !(ref.isIterable() || ref.isMap() || ref.isOptional()
-                        || ref.getTypeArguments().isEmpty());
+    private static boolean collectsTypeArguments(AnnotatedElement type) {
+        return Signatures.isClassRef(type) && !(Signatures.isIterable(type)
+                || Signatures.isMap(type) || Signatures.isOptional(type)
+                || Signatures.getTypeArguments(type).isEmpty());
     }
 }

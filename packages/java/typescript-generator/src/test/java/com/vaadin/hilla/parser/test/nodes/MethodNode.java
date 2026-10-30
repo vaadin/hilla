@@ -15,18 +15,19 @@
  */
 package com.vaadin.hilla.parser.test.nodes;
 
+import java.lang.reflect.Method;
+
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
-import com.vaadin.hilla.parser.models.MethodInfoModel;
 
-public final class MethodNode extends AbstractNode<MethodInfoModel, Void> {
-    private MethodNode(@NonNull MethodInfoModel source) {
+public final class MethodNode extends AbstractNode<Method, Void> {
+    private MethodNode(@NonNull Method source) {
         super(source, null);
     }
 
     @NonNull
-    static public MethodNode of(@NonNull MethodInfoModel model) {
+    static public MethodNode of(@NonNull Method model) {
         return new MethodNode(model);
     }
 }
