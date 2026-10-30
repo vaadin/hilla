@@ -19,11 +19,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -56,11 +56,11 @@ public class PackageInfoModelTests {
     @DisplayName("It should get annotations with ClassInfo")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
-    @Disabled("Probably, ClassGraph issue: ScanResult is null for package-level annotations for now")
     public void should_GetAnnotationsWithClassInfo(PackageInfoModel model) {
         assertEquals(List.of(ClassInfoModel.of(Foo.class)),
                 model.getAnnotations().stream()
                         .map(AnnotationInfoModel::getClassInfo)
+                        .flatMap(Optional::stream)
                         .collect(Collectors.toList()));
     }
 

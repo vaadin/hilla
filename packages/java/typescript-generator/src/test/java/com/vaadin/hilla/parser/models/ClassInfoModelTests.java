@@ -110,7 +110,9 @@ public class ClassInfoModelTests {
 
         assertEquals(model, model);
         assertEquals(model, reflectionModel);
+        assertEquals(reflectionModel, model);
         assertNotEquals(model, otherReflectionModel);
+        assertNotEquals(model, new Object());
         assertNotEquals(model, mock(MethodInfoModel.class));
     }
 
@@ -235,19 +237,6 @@ public class ClassInfoModelTests {
         var other = ClassInfoModel.of(ctx.getReflectionOrigin());
 
         assertEquals(model.hashCode(), other.hashCode());
-    }
-
-    @DisplayName("It should have models of the same origin equal")
-    @Test
-    public void should_HaveModelsOfSameOriginEqual() {
-        var model = ClassInfoModel.of(ctx.getReflectionOrigin());
-        var other = ClassInfoModel.of(ctx.getReflectionOrigin());
-
-        assertEquals(model, model);
-        assertEquals(model, other);
-        assertEquals(other, model);
-
-        assertNotEquals(model, new Object());
     }
 
     @DisplayName("It should provide correct origin")
