@@ -40,14 +40,14 @@ export class Connection {
   readonly id: string;
 
   readonly config: ServerConnectionConfig;
-  #subscription: Subscription<SignalCommand> | null = null;
+  #subscription?: Subscription<SignalCommand>;
 
   constructor(id: string, config: ServerConnectionConfig) {
     this.config = config;
     this.id = id;
   }
 
-  get subscription(): Subscription<SignalCommand> | null {
+  get subscription(): Subscription<SignalCommand> | undefined {
     return this.#subscription;
   }
 
@@ -56,7 +56,7 @@ export class Connection {
    * commands to this client.
    */
   isConnected(): boolean {
-    return this.#subscription !== null;
+    return this.#subscription !== undefined;
   }
 
   connect(): Subscription<SignalCommand> {
@@ -96,6 +96,6 @@ export class Connection {
 
   disconnect(): void {
     this.#subscription?.cancel();
-    this.#subscription = null;
+    this.#subscription = undefined; // NOSONAR: client state uses undefined, not null
   }
 }

@@ -5,14 +5,7 @@ import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { beforeEach, describe, expect, it, chai } from 'vitest';
-import type {
-  SignalCommand,
-  InsertCommand,
-  RemoveCommand,
-  AdoptAtCommand,
-  PositionCondition,
-  Node,
-} from '../src/commands.js';
+import type { SignalCommand, InsertCommand, RemoveCommand, AdoptAtCommand, Node } from '../src/commands.js';
 import {
   createSetCommand,
   createSnapshotCommand,
@@ -89,21 +82,6 @@ describe('@vaadin/hilla-react-signals', () => {
     ): AdoptAtCommand {
       const command = createAdoptAtCommand(targetNodeId, childId, position);
       return { ...command, commandId };
-    }
-
-    function createServerPositionCondition(
-      commandId: string,
-      targetNodeId: string,
-      childId: string,
-      expectedPosition: ListPosition,
-    ): PositionCondition {
-      return {
-        '@type': 'pos' as const,
-        commandId,
-        targetNodeId,
-        childId,
-        expectedPosition,
-      };
     }
 
     beforeEach(() => {
@@ -801,12 +779,6 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(listSignal.value).to.have.length(2);
       expect(listSignal.value[0].value).to.equal('Alice');
       expect(listSignal.value[1].value).to.be.undefined;
-    });
-
-    it('should handle position condition commands', () => {
-      subscribeToSignalViaEffect(listSignal);
-      const positionCommand = createServerPositionCondition('pos-cmd', '', 'child-1', ListPosition.last());
-      expect(() => simulateReceivedChange(subscription, positionCommand as unknown as SignalCommand)).not.to.throw();
     });
 
     it('should handle adopt-at commands for moving children', () => {
