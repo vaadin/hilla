@@ -17,8 +17,11 @@ on:
       - '.github/ISSUE_TEMPLATE/*'
       - 'packages/**/README.md'
       - 'scripts/generator/templates/**/*.md'
+# The called workflow cannot ask for more than this, and its changes job reads
+# the files of the pull request.
 permissions:
   contents: read
+  pull-requests: read
 # No concurrency group here: the called workflow has one that gives a run a
 # label started a group of its own, and the same group on both levels would
 # make the called run wait for its caller forever.
