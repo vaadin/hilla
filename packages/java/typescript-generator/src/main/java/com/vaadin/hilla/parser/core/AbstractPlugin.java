@@ -17,6 +17,14 @@ package com.vaadin.hilla.parser.core;
 
 import java.lang.reflect.ParameterizedType;
 
+/**
+ * @deprecated Internal API, not deprecated for removal. The Java API of
+ *             {@code hilla-typescript-generator} is used only by Hilla itself,
+ *             and may change or be removed in any release without notice. Do
+ *             not use it in application code or libraries. It is marked
+ *             deprecated only to make the compiler warn about such use.
+ */
+@Deprecated
 public abstract class AbstractPlugin<C extends PluginConfiguration>
         implements Plugin {
     private C configuration;
