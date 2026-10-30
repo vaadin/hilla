@@ -16,8 +16,8 @@
     "@vaadin/icons": "25.3.5",
     "@vaadin/router": "2.0.1",
     "@vaadin/tooltip": "25.3.5",
-    "@vaadin/vaadin-lumo-styles": "25.3.4",
-    "@vaadin/vaadin-themable-mixin": "25.3.4",
+    "@vaadin/vaadin-lumo-styles": "25.3.5",
+    "@vaadin/vaadin-themable-mixin": "25.3.5",
     "lit": "3.3.3",
     "mobx": "6.3.3"
   },
@@ -64,8 +64,8 @@
       "@vaadin/icons": "25.3.5",
       "@vaadin/router": "2.0.1",
       "@vaadin/tooltip": "25.3.5",
-      "@vaadin/vaadin-lumo-styles": "25.3.4",
-      "@vaadin/vaadin-themable-mixin": "25.3.4",
+      "@vaadin/vaadin-lumo-styles": "25.3.5",
+      "@vaadin/vaadin-themable-mixin": "25.3.5",
       "lit": "3.3.3",
       "mobx": "6.3.3"
     },
@@ -102,7 +102,7 @@
       "vite": "8.3.5",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "213c37ada3e0adcc58eb5d8b776e6b0c199cede1eae691746cb24cc2a5243469"
+    "hash": "06b13d6669c6ccd54711927bc83aec76604b1cdc8be84c535a3be781fbbc9992"
   },
   "overrides": {
     "@adobe/lit-mobx": "$@adobe/lit-mobx",
