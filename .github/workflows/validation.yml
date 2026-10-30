@@ -195,9 +195,12 @@ jobs:
     timeout-minutes: 25
 
     steps:
+      # setup-chrome@v2 installs a Chrome that fails to start under the plain
+      # ChromeHeadless launcher the Karma config of this branch uses, with
+      # "No usable sandbox".
       - name: Install Chrome
         id: setup-chrome
-        uses: browser-actions/setup-chrome@v2
+        uses: browser-actions/setup-chrome@v1
       - name: Checkout Project Code
         uses: actions/checkout@v5
         with:
