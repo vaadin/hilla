@@ -66,6 +66,7 @@
     "mocha": "^10.3.0",
     "monocart-coverage-reports": "^2.11.6",
     "nx": "^18.0.4",
+    "pkg-pr-new": "0.0.91",
     "postcss": "^8.4.49",
     "prettier": "^3.2.5",
     "react-dom": "^18.3.1",
