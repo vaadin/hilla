@@ -19,7 +19,9 @@ describe('@vaadin/hilla-file-router', () => {
 
     async function expectRuntimeFileGeneratedOnFileChange(changedFileName: string, expectGeneration: boolean) {
       await createTestingRouteFiles(viewsDir);
-      rmSync(new URL('file-routes.json', generatedDir));
+      // The file is generated asynchronously by the earlier watcher events, so
+      // it might not exist yet.
+      rmSync(new URL('file-routes.json', generatedDir), { force: true });
       mockServer.watcher.emit('change', fileURLToPath(new URL(changedFileName, generatedDir)));
       await new Promise((resolve) => {
         // Wait some time to ensure that the files have been written
