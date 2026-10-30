@@ -437,12 +437,13 @@ com.vaadin.hilla.generator
 
 com.vaadin.hilla.parser
 ├── core/              - The walk: nodes, paths and plugins
-├── models/            - What a Java class, method or signature says about itself
-└── plugins/
-    ├── backbone/      - The endpoints, their methods and the types they send
-    ├── model/         - What the annotations of a value say about it
-    ├── nonnull/       - Nullability
-    │   └── kotlin/    - Kotlin nullability (Kotlin source)
-    ├── subtypes/      - Polymorphic types
-    └── transfertypes/ - Mapped types and the MultipartFile check
+├── plugins/
+│   ├── backbone/      - The endpoints, their methods and the types they send
+│   ├── model/         - What the annotations of a value say about it
+│   ├── nonnull/       - Nullability
+│   │   └── kotlin/    - Kotlin nullability (Kotlin source)
+│   ├── subtypes/      - Polymorphic types
+│   └── transfertypes/ - Mapped types and the MultipartFile check
+└── utils/             - Helpers, among them Signatures: what a type
+                         signature stands for
 ```

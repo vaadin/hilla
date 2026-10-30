@@ -97,6 +97,11 @@ public class PropertyNode extends AbstractNode<BeanPropertyDefinition, String>
                 .orElseThrow();
     }
 
+    @Override
+    protected String getSourceName() {
+        return getSource().getName();
+    }
+
     @NonNull
     static public PropertyNode of(@NonNull BeanPropertyDefinition source) {
         return new PropertyNode(source, "");

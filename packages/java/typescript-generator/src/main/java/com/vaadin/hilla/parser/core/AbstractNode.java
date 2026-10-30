@@ -21,7 +21,6 @@ import java.lang.reflect.Parameter;
 import java.util.Objects;
 
 import org.jspecify.annotations.NonNull;
-import tools.jackson.databind.introspect.BeanPropertyDefinition;
 
 public abstract class AbstractNode<S, T> implements Node<S, T> {
     private final S source;
@@ -67,16 +66,20 @@ public abstract class AbstractNode<S, T> implements Node<S, T> {
 
     @Override
     public String toString() {
-        var sourceName = switch (source) {
+        return getClass().getSimpleName().replaceAll("Node$", "") + "("
+                + getSourceName() + ")";
+    }
+
+    /**
+     * The name of the source, as {@link #toString()} shows it.
+     */
+    protected String getSourceName() {
+        return switch (source) {
         case Class<?> cls -> cls.getSimpleName();
         case Member member -> member.getName();
         case Parameter parameter -> parameter.getName();
-        case BeanPropertyDefinition property -> property.getName();
         case AnnotatedElement signature -> signature.toString();
         default -> source.getClass().getSimpleName();
         };
-
-        return getClass().getSimpleName().replaceAll("Node$", "") + "("
-                + sourceName + ")";
     }
 }

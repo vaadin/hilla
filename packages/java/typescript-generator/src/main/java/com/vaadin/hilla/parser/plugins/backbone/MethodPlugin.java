@@ -51,7 +51,7 @@ public final class MethodPlugin
     /**
      * The methods a class declares, except synthetic ones, ordered by name.
      */
-    static List<Method> getMethods(Class<?> cls) {
+    private static List<Method> getMethods(Class<?> cls) {
         return Arrays.stream(cls.getDeclaredMethods())
                 .filter(method -> !method.isSynthetic())
                 .sorted(Comparator.comparing(Method::getName)).toList();

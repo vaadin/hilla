@@ -41,8 +41,8 @@ public final class EndpointPlugin
 
     private static void checkIfJavaCompilerParametersFlagIsEnabled(
             Collection<Class<?>> endpoints) {
-        endpoints.stream().map(MethodPlugin::getMethods)
-                .flatMap(Collection::stream).map(Method::getParameters)
+        endpoints.stream().map(Class::getDeclaredMethods)
+                .flatMap(Arrays::stream).map(Method::getParameters)
                 .flatMap(Arrays::stream).findFirst().ifPresent((parameter) -> {
                     if (parameter.getName() == null) {
                         logger.info("Missing endpoint method parameter names"
