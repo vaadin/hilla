@@ -1,8 +1,8 @@
 name: Validation on label
 
-# Starts the jobs of validation.yml that a pull request leaves out when the
-# label that asks for them - `run-windows-tests` - is added to a pull request
-# that is already open. This is a workflow of its own
+# Starts the jobs of validation.yml that a pull request leaves out when one of
+# the labels that ask for them - `run-windows-tests` or `run-native-build` - is
+# added to a pull request that is already open. This is a workflow of its own
 # because GitHub cannot filter the `labeled` event by label name: every other
 # label (e.g. the `target/*` ones) starts a run too, and that run now shows up
 # as the single skipped job below instead of a skipped copy of every
@@ -25,6 +25,8 @@ permissions:
 jobs:
   validation:
     name: Requested by label
-    if: ${{ github.event.label.name == 'run-windows-tests' }}
+    if: >-
+      ${{ github.event.label.name == 'run-windows-tests'
+      || github.event.label.name == 'run-native-build' }}
     uses: ./.github/workflows/validation.yml
     secrets: inherit
