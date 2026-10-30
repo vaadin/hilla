@@ -15,7 +15,10 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -25,6 +28,7 @@ import java.util.Optional;
  */
 public final class EntityFacts {
     private Discriminator discriminator;
+    private Map<String, String> enumValues = Map.of();
 
     /**
      * The property saying which subtype of a polymorphic type a value is, which
@@ -36,6 +40,21 @@ public final class EntityFacts {
 
     public void setDiscriminator(Discriminator discriminator) {
         this.discriminator = discriminator;
+    }
+
+    /**
+     * The value each constant of an enum is serialized as, keyed by the name of
+     * the constant, in the order the enum declares them. A constant which is
+     * not serialized as a string has its name as the value. Empty for a type
+     * which is not an enum.
+     */
+    public Map<String, String> getEnumValues() {
+        return enumValues;
+    }
+
+    public void setEnumValues(Map<String, String> enumValues) {
+        this.enumValues = Collections
+                .unmodifiableMap(new LinkedHashMap<>(enumValues));
     }
 
     /**

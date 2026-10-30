@@ -230,7 +230,9 @@ others require it:
   serialized properties, using the application's object mapper when
   `BackbonePluginConfiguration` names a factory for it. It keeps only the
   properties that the class itself declares; inherited ones come from the
-  superclass entity.
+  superclass entity. For an enum it records, in `EntityFacts`, the string each
+  constant is serialized as, falling back to the constant's name when the
+  mapper writes something other than a string.
 - `JsonValuePlugin` resolves a type whose class has a `@JsonValue` method to
   the type that method returns.
 
@@ -324,7 +326,8 @@ nodes:
   the type arguments of a type belong to the type itself. It also carries named
   _notes_ that a plugin writes and the model reads back, such as the
   constraints and annotations from `ModelPlugin`.
-- `EntityFacts`, on entity nodes, carries the discriminator.
+- `EntityFacts`, on entity nodes, carries the discriminator and, for an enum,
+  the value each constant is serialized as.
 - `UnionNode`'s target lists the subtypes of a polymorphic type.
 
 A new kind of fact goes in the same way: as a note, or as a field on one of

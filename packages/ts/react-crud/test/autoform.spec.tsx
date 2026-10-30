@@ -28,7 +28,9 @@ import {
   PersonModel,
   personService,
   PersonWithSimpleIdPropertyModel,
+  Priority,
   NamedModel,
+  TaskModel,
 } from './test-models-and-services.js';
 import { nextFrame } from './test-utils.js';
 
@@ -1091,6 +1093,25 @@ describe('@vaadin/hilla-react-crud', () => {
             value: 'NON_BINARY',
           },
         ]);
+      });
+
+      it('offers the values the constants are sent as', async () => {
+        const task = { id: 1, version: 1, priority: Priority.HIGH };
+        const result = render(<AutoForm service={createService([task])} model={TaskModel} item={task} />);
+        const form = await FormController.init(user, result.container);
+        const select = (await form.getField('Priority')) as SelectElement;
+
+        expect(select.items).to.eql([
+          {
+            label: 'Very Low',
+            value: 'very-low',
+          },
+          {
+            label: 'High',
+            value: 'high',
+          },
+        ]);
+        expect(select.value).to.equal('high');
       });
     });
 
