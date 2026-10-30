@@ -116,7 +116,7 @@ module.exports = (config) => {
 
     browserNoActivityTimeout: isCI ? 30000 : 0,
 
-    browsers: ['ChromeHeadless'],
+    browsers: [isCI ? 'ChromeHeadlessNoSandbox' : 'ChromeHeadless'],
 
     customLaunchers: {
       ChromeHeadlessNoSandbox: {
