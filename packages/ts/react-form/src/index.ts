@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import {
-  _fromString,
   _validity,
-  type ProvisionalModel,
   type BinderConfiguration,
   type BinderNode,
   BinderRoot,
@@ -10,17 +8,14 @@ import {
   type FieldStrategy,
   getBinderNode,
   getDefaultFieldStrategy,
-  hasFromString,
   isFieldElement,
   type Validator,
   type Value,
   type ValueError,
-  type ArrayModel as BinderArrayModel,
   type ArrayItemModel,
   getStringConverter,
-  type ProvisionalModelConstructor,
 } from '@vaadin/hilla-lit-form';
-import { type ArrayModel, Model } from '@vaadin/hilla-models';
+import m, { type ArrayModel, Model } from '@vaadin/hilla-models';
 import { useEffect, useMemo, useReducer, useRef } from 'react';
 import type { Writable } from 'type-fest';
 
@@ -48,9 +43,9 @@ export type FieldDirectiveResult = Readonly<{
   ref(element: HTMLElement | null): void;
 }>;
 
-export type FieldDirective = (model: ProvisionalModel) => FieldDirectiveResult;
+export type FieldDirective = (model: Model) => FieldDirectiveResult;
 
-export type UseFormPartResult<M extends ProvisionalModel> = Readonly<{
+export type UseFormPartResult<M extends Model> = Readonly<{
   defaultValue?: Value<M>;
   dirty: boolean;
   errors: readonly ValueError[];
@@ -70,7 +65,7 @@ export type UseFormPartResult<M extends ProvisionalModel> = Readonly<{
   validate(): Promise<readonly ValueError[]>;
 }>;
 
-export type UseFormResult<M extends ProvisionalModel> = Omit<UseFormPartResult<M>, 'setValue' | 'value'> &
+export type UseFormResult<M extends Model> = Omit<UseFormPartResult<M>, 'setValue' | 'value'> &
   Readonly<{
     value: Value<M>;
     submitting: boolean;
@@ -83,7 +78,7 @@ export type UseFormResult<M extends ProvisionalModel> = Omit<UseFormPartResult<M
     update(): void;
   }>;
 
-export type UseFormArrayPartResult<M extends BinderArrayModel | ArrayModel> = Omit<UseFormPartResult<M>, 'field'> & {
+export type UseFormArrayPartResult<M extends ArrayModel> = Omit<UseFormPartResult<M>, 'field'> & {
   items: ReadonlyArray<ArrayItemModel<M>>;
 };
 
@@ -99,7 +94,7 @@ type FieldState<T = unknown> = {
   ref(element: HTMLElement | null): void;
 };
 
-function convertFieldValue<T extends ProvisionalModel>(model: T, fieldValue: unknown) {
+function convertFieldValue<T extends Model>(model: T, fieldValue: unknown) {
   if (typeof fieldValue !== 'string') {
     return fieldValue;
   }
@@ -111,15 +106,10 @@ function convertFieldValue<T extends ProvisionalModel>(model: T, fieldValue: unk
     return stringConverter.fromString(fieldValue);
   }
 
-  if (hasFromString(model)) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    return model[_fromString](fieldValue);
-  }
-
   return fieldValue;
 }
 
-function getFormPart<M extends ProvisionalModel>(node: BinderNode<M>): Omit<UseFormPartResult<M>, 'field'> {
+function getFormPart<M extends Model>(node: BinderNode<M>): Omit<UseFormPartResult<M>, 'field'> {
   return {
     addValidator: node.addValidator.bind(node),
     get defaultValue() {
@@ -150,13 +140,13 @@ function getFormPart<M extends ProvisionalModel>(node: BinderNode<M>): Omit<UseF
   };
 }
 
-function useFields<M extends ProvisionalModel>(node: BinderNode<M>): FieldDirective {
+function useFields<M extends Model>(node: BinderNode<M>): FieldDirective {
   const update = useUpdate();
 
   return useMemo(() => {
-    const registry = new WeakMap<ProvisionalModel, FieldState>();
+    const registry = new WeakMap<Model, FieldState>();
 
-    return ((model: ProvisionalModel) => {
+    return ((model: Model) => {
       isRendering = true;
       const n = getBinderNode(model);
 
@@ -250,15 +240,12 @@ function useFields<M extends ProvisionalModel>(node: BinderNode<M>): FieldDirect
   }, [node]);
 }
 
-export function useForm<M extends ProvisionalModel>(
-  modelClass: ProvisionalModelConstructor<M>,
-  config?: BinderConfiguration<Value<M>>,
-): UseFormResult<M> {
+export function useForm<M extends Model>(model: M, config?: BinderConfiguration<Value<M>>): UseFormResult<M> {
   const configRef = useRef<Writable<BinderConfiguration<Value<M>>>>({});
   configRef.current.onSubmit = config?.onSubmit;
   configRef.current.onChange = config?.onChange;
   const update = useUpdate();
-  const binder = useMemo(() => new BinderRoot(modelClass, configRef.current), [Model]);
+  const binder = useMemo(() => new BinderRoot(model, configRef.current), [Model]);
   const field = useFields(binder);
   const clear = binder.clear.bind(binder);
 
@@ -299,7 +286,7 @@ export function useForm<M extends ProvisionalModel>(
  * @param model - The model of the form part, nested in the `useForm` model
  * @returns The form part state and its `field` directive
  */
-export function useFormPart<M extends ProvisionalModel>(model: M): UseFormPartResult<M> {
+export function useFormPart<M extends Model>(model: M): UseFormPartResult<M> {
   isRendering = true;
   const binderNode = getBinderNode(model);
   const field = useFields(binderNode);
@@ -315,19 +302,15 @@ export function useFormPart<M extends ProvisionalModel>(model: M): UseFormPartRe
  * Hook to access an array model part of a form. It provides the same API as `useFormPart`,
  * but adds an `items` property that allows to iterate over the items in form of an array of models.
  *
- * Works with the legacy `ArrayModel` of `@vaadin/hilla-lit-form` only. With a
- * generated array model from `@vaadin/hilla-models`, use `useFormPart` and
- * iterate the items with `m.items(model)`.
- *
  * @param model - The array model to access
  * @returns The array model part of the form
  */
-export function useFormArrayPart<M extends BinderArrayModel>(model: M): UseFormArrayPartResult<M> {
+export function useFormArrayPart<M extends ArrayModel>(model: M): UseFormArrayPartResult<M> {
   isRendering = true;
   const binderNode = getBinderNode(model);
   isRendering = false;
   return {
     ...getFormPart(binderNode),
-    items: Array.from(model, (item) => item.model as ArrayItemModel<M>),
+    items: Array.from(m.items(model) as Iterable<ArrayItemModel<M>>),
   };
 }

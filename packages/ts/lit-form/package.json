@@ -44,7 +44,7 @@
       "default": "./index.js"
     },
     "./Models.js": {
-      "default": "./Models.js"
+      "types": "./Models.d.ts"
     },
     "./types.js": {
       "types": "./types.d.ts"

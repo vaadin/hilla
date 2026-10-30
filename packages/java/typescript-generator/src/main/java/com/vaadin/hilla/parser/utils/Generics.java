@@ -15,11 +15,10 @@
  */
 package com.vaadin.hilla.parser.utils;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Optional;
 
-import com.googlecode.gentyref.GenericTypeReflector;
+import org.springframework.core.ResolvableType;
 
 /**
  * Utility class for working with generics.
@@ -34,28 +33,16 @@ public class Generics {
      *
      * @param cls
      *            the class to get the exact type of
-     * @return the exact type of the elements in the iterable class
+     * @return the class of the elements in the iterable class, or an empty
+     *         optional if it cannot be resolved, e.g. because the class is used
+     *         as a raw type
      */
     public static Optional<Type> getExactIterableType(Class<?> cls) {
-        try {
-            // We can find the exact type by looking at the iterator method
-            // return type
-            var method = cls.getMethod("iterator");
-            var exactReturnType = GenericTypeReflector
-                    .getExactReturnType(method, cls);
-
-            // We know the format of the method, so we can safely cast the type
-            if (exactReturnType instanceof ParameterizedType) {
-                return Optional.of(((ParameterizedType) exactReturnType)
-                        .getActualTypeArguments()[0]);
-            }
-
-            return Optional.empty();
-        } catch (NoSuchMethodException e) {
-            // This should really never happen if the passed class is an
-            // Iterable
+        if (!Iterable.class.isAssignableFrom(cls)) {
             throw new IllegalArgumentException(
                     "Class " + cls.getName() + " is not an Iterable");
         }
+        return Optional.ofNullable(ResolvableType.forClass(cls)
+                .as(Iterable.class).getGeneric(0).resolve());
     }
 }

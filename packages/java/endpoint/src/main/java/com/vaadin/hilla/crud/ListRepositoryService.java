@@ -17,15 +17,14 @@ package com.vaadin.hilla.crud;
 
 import jakarta.annotation.PostConstruct;
 
-import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
 
-import com.googlecode.gentyref.GenericTypeReflector;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.autoconfigure.web.DataWebProperties;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.ResolvableType;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -146,33 +145,24 @@ public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaS
 
     @SuppressWarnings("unchecked")
     private R resolveRepository() {
-        var repositoryTypeParam = ListRepositoryService.class
-                .getTypeParameters()[2];
-        Type entityType = GenericTypeReflector.getTypeParameter(getClass(),
-                repositoryTypeParam);
-        if (entityType == null) {
-            throw new IllegalStateException(String.format(
-                    "Unable to detect the type for the class '%s' in the "
-                            + "class '%s'.",
-                    repositoryTypeParam, getClass()));
-        }
-        Class<R> repositoryClass = (Class<R>) GenericTypeReflector
-                .erase(entityType);
-        return applicationContext.getBean(repositoryClass);
+        return applicationContext.getBean((Class<R>) resolveTypeArgument(2));
     }
 
     @SuppressWarnings("unchecked")
     protected Class<T> resolveEntityClass() {
-        var entityTypeParam = ListRepositoryService.class
-                .getTypeParameters()[0];
-        Type entityType = GenericTypeReflector.getTypeParameter(getClass(),
-                entityTypeParam);
-        if (entityType == null) {
+        return (Class<T>) resolveTypeArgument(0);
+    }
+
+    private Class<?> resolveTypeArgument(int index) {
+        Class<?> type = ResolvableType.forClass(getClass())
+                .as(ListRepositoryService.class).getGeneric(index).resolve();
+        if (type == null) {
             throw new IllegalStateException(String.format(
                     "Unable to detect the type for the class '%s' in the "
                             + "class '%s'.",
-                    entityTypeParam, getClass()));
+                    ListRepositoryService.class.getTypeParameters()[index],
+                    getClass()));
         }
-        return (Class<T>) GenericTypeReflector.erase(entityType);
+        return type;
     }
 }

@@ -48,12 +48,6 @@
       <groupId>com.vaadin</groupId>
       <artifactId>flow-server</artifactId>
     </dependency>
-    <!-- Reflection library from parser-jvm-utils -->
-    <dependency>
-      <groupId>com.vaadin.external</groupId>
-      <artifactId>gentyref</artifactId>
-      <version>1.2.0.vaadin1</version>
-    </dependency>
     <!-- Kotlin support from parser-jvm-plugin-nonnull-kotlin -->
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
@@ -75,6 +69,11 @@
     <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-commons</artifactId>
+    </dependency>
+    <!-- Generic type resolution in Generics -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
     </dependency>
     <!-- Test dependencies -->
     <dependency>
@@ -111,11 +110,6 @@
     <dependency>
       <groupId>jakarta.persistence</groupId>
       <artifactId>jakarta.persistence-api</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-core</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
