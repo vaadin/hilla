@@ -16,6 +16,7 @@
 package com.vaadin.hilla.parser.plugins.backbone.enumtype;
 
 import java.util.List;
+import java.util.Locale;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -76,7 +77,8 @@ public class EnumTypeEndpoint {
 
         @Override
         public String toString() {
-            return name().charAt(0) + name().substring(1).toLowerCase()
+            return name().charAt(0)
+                    + name().substring(1).toLowerCase(Locale.ROOT)
                     + " priority";
         }
     }

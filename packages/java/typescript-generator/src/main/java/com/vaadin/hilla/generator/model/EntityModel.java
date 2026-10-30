@@ -97,8 +97,8 @@ public sealed interface EntityModel {
      * @param name
      *            the name the enum declares it under
      * @param value
-     *            the string it is serialized as, which is its name unless the
-     *            enum says otherwise
+     *            the string it is serialized as, or its name when it is not
+     *            serialized as a string
      */
     record Constant(String name, String value) {
         public Constant {

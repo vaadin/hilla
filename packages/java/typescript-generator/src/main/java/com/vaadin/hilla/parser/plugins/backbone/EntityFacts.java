@@ -44,8 +44,9 @@ public final class EntityFacts {
 
     /**
      * The value each constant of an enum is serialized as, keyed by the name of
-     * the constant, in the order the enum declares them. Empty for a type which
-     * is not an enum.
+     * the constant, in the order the enum declares them. A constant which is
+     * not serialized as a string has its name as the value. Empty for a type
+     * which is not an enum.
      */
     public Map<String, String> getEnumValues() {
         return enumValues;

@@ -26,13 +26,15 @@ import tools.jackson.databind.json.JsonMapper;
  * JVM parser to extract properties from the data beans.
  * <p>
  * The values of the generated TypeScript enums come from this mapper too: each
- * constant is generated as what the mapper serializes it as. A setting that
- * changes how enums are written, such as
- * {@code EnumFeature.WRITE_ENUMS_TO_LOWERCASE}, therefore changes the generated
- * enum values, and client code comparing against the previous values has to
- * follow. The mapper should then also read those values back, for example with
- * {@code MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS}, since a form sends them
- * to the server as they are.
+ * constant the mapper writes as a string is generated as that string. A
+ * constant written as anything else, such as a number with
+ * {@code @JsonFormat(shape = NUMBER)}, keeps its name, so the generated enum
+ * does not match what the server sends for it. A setting that changes how enums
+ * are written, such as {@code EnumFeature.WRITE_ENUMS_TO_LOWERCASE}, therefore
+ * changes the generated enum values, and client code comparing against the
+ * previous values has to follow. The mapper should then also read those values
+ * back, for example with {@code MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS},
+ * since a form sends them to the server as they are.
  * <p>
  * For example, if you want to have the behavior of the old engine, you should
  * create the following factory:
