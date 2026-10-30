@@ -10,7 +10,11 @@ defaults:
 # instead, and this workflow is the only one that reports that check.
 on:
   push:
-    branches: [main, '25.2', '25.1', '24.10', '24.9', '2.5', '1.5']
+    # Every version branch rather than a list of them, which fell behind each
+    # time a branch was created and then left out its pushes. The release
+    # branches carry a copy of this file, and this way the copy is the same
+    # on all of them.
+    branches: [main, '[0-9]+.[0-9]+']
   # No `branches` filter here: it matches the pull request's base branch, so
   # listing only the long-lived branches skipped every stacked pull request -
   # one based on the branch below it in the stack instead of on main. Those
