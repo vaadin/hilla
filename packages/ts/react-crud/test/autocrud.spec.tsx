@@ -1,6 +1,6 @@
 // eslint-disable-next-line
 /// <reference types="karma-viewport" />
-import { render, screen, waitForElementToBeRemoved, within } from '@testing-library/react';
+import { render, screen, waitFor, waitForElementToBeRemoved, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TextField } from '@vaadin/react-components/TextField.js';
 import { expect, use } from 'chai';
@@ -381,7 +381,9 @@ describe('@vaadin/hilla-react-crud', () => {
         await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
 
         // grid selection is cleared
-        expect(grid.isSelected(0)).to.be.false;
+        await waitFor(() => {
+          expect(grid.isSelected(0)).to.be.false;
+        });
 
         // saves
         expect(saveSpy).to.have.been.called;
