@@ -29,15 +29,16 @@ on:
       - '.github/ISSUE_TEMPLATE/*'
       - 'packages/**/README.md'
       - 'scripts/generator/templates/**/*.md'
-  # Called by validation-label.yml for the label that asks for jobs the other
-  # events leave out - `run-windows-tests` - so that adding it starts those
-  # jobs on a pull request that is already open, without a commit to push.
-  # The `labeled` event is there rather than here because it fires for every
-  # label: a run of this workflow started by any other label skipped all of
-  # its jobs, which listed skipped copies of the real checks on the pull
-  # request. A called workflow sees the event of its caller, so a run started
-  # by the label runs only what the label asks for: what that is, the init
-  # job below works out once and the jobs after it read from its outputs.
+  # Called by validation-label.yml for the two labels that ask for a job the
+  # other events leave out - `run-windows-tests` and `run-native-build` - so
+  # that adding one starts that job on a pull request that is already open,
+  # without a commit to push. The `labeled` event is there rather than here
+  # because it fires for every label: a run of this workflow started by any
+  # other label skipped all of its jobs, which listed skipped copies of the
+  # real checks on the pull request. A called workflow sees the event of its
+  # caller, so a run started by a label runs only what the label asks for:
+  # what that is, the init job below works out once and the jobs after it
+  # read from its outputs.
   workflow_call:
   workflow_dispatch:
 permissions:
@@ -75,6 +76,9 @@ jobs:
       windows_tests: >-
         ${{ github.event.action != 'labeled'
         || github.event.label.name == 'run-windows-tests' }}
+      native_build: >-
+        ${{ github.event.action != 'labeled'
+        || github.event.label.name == 'run-native-build' }}
 
     steps:
       - name: Check secrets
@@ -197,7 +201,7 @@ jobs:
     steps:
       - name: Install Chrome
         id: setup-chrome
-        uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
+        uses: browser-actions/setup-chrome@v2
       - name: Checkout Project Code
         uses: actions/checkout@v5
         with:
