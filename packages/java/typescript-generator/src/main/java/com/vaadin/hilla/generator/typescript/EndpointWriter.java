@@ -41,12 +41,16 @@ public final class EndpointWriter {
     /**
      * What the file of an endpoint without a method the browser can call says
      * in place of the methods, naming both ways a method is left out: not being
-     * public, and being inherited from a class which is not exposed.
+     * public, and being inherited from a type which is not exposed. A block
+     * comment rather than line comments, so that the export after it cannot end
+     * up commented out whatever the line breaks.
      */
     private static final String NO_METHODS = """
-            // {{javaClass}} has no methods the browser can call. Only the public
-            // methods declared in the class itself or in a superclass annotated
-            // with @EndpointExposed are generated.""";
+            /*
+             * {{javaClass}} has no methods the browser can call. Only the public
+             * methods declared in the class itself or in a superclass or
+             * interface annotated with @EndpointExposed are generated.
+             */""";
 
     private static final String METHOD = """
             async function {{name}}({{parameters}}): Promise<{{returnType}}> {
