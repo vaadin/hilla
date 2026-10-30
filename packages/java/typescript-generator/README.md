@@ -2,6 +2,27 @@
 
 This module consolidates the Java-to-TypeScript code generation functionality for Hilla. It walks the Java classes annotated with `@BrowserCallable` and writes the type-safe TypeScript the browser calls them through.
 
+> [!IMPORTANT]
+> The Java API of this module is **not public API**. It is used internally by
+> Hilla: by the development mode server and the production build (the Maven
+> plugin, the Gradle plugin and the Flow build tasks, through
+> `TypeScriptProcessor.generate`), and by `hilla-endpoint` while it serves
+> endpoint calls. Every class, method and package in it, including
+> `com.vaadin.hilla.parser.*` and `com.vaadin.hilla.generator.*`, may change
+> or be removed in any release, minor and maintenance ones included, without
+> notice. Do not depend on it from application code or third-party libraries.
+> Its entry points (`Parser`, `Plugin`, `AbstractPlugin`, `PluginConfiguration`
+> and `TypeScriptWriter`) are marked `@Deprecated` so that such use gets a
+> compiler warning, not because they are going away.
+>
+> The exceptions are
+> `com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory`, which an
+> application implements and registers as a bean with the
+> `endpointMapperFactory` qualifier to customize how endpoint values are
+> serialized, and `com.vaadin.hilla.parser.jackson.ByteArrayModule`, which a
+> factory building its mapper from scratch registers to keep `byte[]` sent as
+> an array of numbers. They remain public API.
+
 For how the parser and the generator work, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## What's Inside

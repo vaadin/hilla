@@ -27,7 +27,14 @@ import org.jspecify.annotations.NonNull;
  * ({@link #resolve}), and tells them when the walk enters and exits it
  * ({@link #enter}, {@link #exit}). Plugins build on each other through the
  * nodes and what they say about them, not by calling each other.
+ *
+ * @deprecated Internal API, not deprecated for removal. The Java API of
+ *             {@code hilla-typescript-generator} is used only by Hilla itself,
+ *             and may change or be removed in any release without notice. Do
+ *             not use it in application code or libraries. It is marked
+ *             deprecated only to make the compiler warn about such use.
  */
+@Deprecated
 public interface Plugin {
 
     /**
