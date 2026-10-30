@@ -58,6 +58,13 @@ npm test:coverage
 npm test:react
 ```
 
+Browser tests run in Chromium through Playwright. To use an already
+installed Chromium instead of downloading Playwright's browsers, set both
+variables:
+```bash
+PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 CHROME_BIN=/usr/bin/chromium npm test
+```
+
 ### Java Development
 ```bash
 # Build and install (skip tests)
