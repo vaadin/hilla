@@ -12,6 +12,10 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.login.testbench.LoginFormElement;
@@ -23,6 +27,14 @@ import com.vaadin.testbench.TestBenchElement;
 public class SecurityIT extends ChromeBrowserTest {
 
     private static final String ROOT_PAGE_HEADER_TEXT = "Welcome to the TypeScript Bank of Vaadin";
+
+    /**
+     * What Chrome answers the lookup of an element of a document it is
+     * replacing with, which is all there is to tell that case apart from a
+     * driver which has stopped working.
+     */
+    private static final String REPLACED_DOCUMENT_ERROR = "does not belong to the document";
+
     private static final int SERVER_PORT = 9999;
     protected static final String USER_FULLNAME = "John the User";
     protected static final String ADMIN_FULLNAME = "Emma the Admin";
@@ -74,8 +86,67 @@ public class SecurityIT extends ChromeBrowserTest {
         assertRootPageShown();
     }
 
+    /**
+     * Clicks the logout button and waits until the page reload that the logout
+     * ends in has replaced the document.
+     * <p>
+     * The wait is anchored on the main view going stale, not on
+     * {@code document.readyState}, because right after the click the old
+     * document still reports {@code complete} and, when the browser already is
+     * on the root page, shows the expected URL and header too. A readiness or
+     * {@link #assertRootPageShown()} check alone is therefore satisfied by the
+     * pre-logout page and returns while the logout request is still in flight,
+     * leaving whatever the test does next - an {@link #openResource(String)}, a
+     * cookie read - to race it. The main view goes stale exactly when the new
+     * document commits.
+     */
     private void clickLogout() {
-        getMainView().$(ButtonElement.class).id("logout").click();
+        TestBenchElement mainView = getMainView();
+        mainView.$(ButtonElement.class).id("logout").click();
+        waitUntil(replaced(mainView), 25);
+        waitForDocumentReady();
+    }
+
+    /**
+     * Whether the given element belongs to a document the browser no longer
+     * has, which is what the reload the logout ends in leaves behind.
+     * <p>
+     * {@link org.openqa.selenium.support.ui.ExpectedConditions#stalenessOf} is
+     * not enough on its own: while the document is being replaced, Chrome
+     * answers the lookup of an element of the outgoing one with
+     * {@code unhandled inspector error: Node with given id does not belong to
+     * the document} rather than with the stale element error WebDriver defines,
+     * and the wait ends in that error instead of in the reload it is waiting
+     * for. Both answers mean the same thing here. Anything else the driver says
+     * is thrown on, so that a session which has stopped working ends the wait
+     * with what went wrong rather than with a timeout.
+     */
+    private static ExpectedCondition<Boolean> replaced(
+            TestBenchElement element) {
+        return new ExpectedCondition<>() {
+            @Override
+            public Boolean apply(WebDriver driver) {
+                try {
+                    element.isEnabled();
+                    return false;
+                } catch (StaleElementReferenceException e) {
+                    return true;
+                } catch (WebDriverException e) {
+                    if (e.getMessage() == null || !e.getMessage()
+                            .contains(REPLACED_DOCUMENT_ERROR)) {
+                        throw e;
+                    }
+
+                    return true;
+                }
+            }
+
+            @Override
+            public String toString() {
+                return "element " + element
+                        + " to belong to a document which has been replaced";
+            }
+        };
     }
 
     /**
