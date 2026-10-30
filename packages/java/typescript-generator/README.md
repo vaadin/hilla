@@ -119,13 +119,3 @@ mvn test
 # Format code
 mvn spotless:apply
 ```
-
-## Migration Notes
-
-This module was created by consolidating 9 separate `parser-jvm-*` modules to:
-- Simplify the build structure
-- Reduce inter-module dependencies
-- Improve maintainability
-- Speed up builds
-
-All package names remain unchanged (`com.vaadin.hilla.parser.*`). As noted above, these classes are not public API, so code outside Hilla should not use them.
