@@ -1,12 +1,24 @@
 package com.vaadin.hilla.test.reactgrid;
 
-import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
-import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.parallel.Browser;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
+
+// Some tests modify the number of items, so they need to not run in parallel.
+@RunWith(BlockJUnit4ClassRunner.class)
 public class GridUseDataProviderHookIT extends AbstractGridTest {
+
+    @Before
+    public void setup() throws Exception {
+        setDesiredCapabilities(Browser.CHROME.getDesiredCapabilities());
+        super.setup();
+    }
 
     protected String getTestPath() {
         return getRootURL() + "/grid-use-data-provider-hook";
@@ -62,10 +74,11 @@ public class GridUseDataProviderHookIT extends AbstractGridTest {
 
     @Test
     public void afterAddingNewItem_refreshingDataProvider_loadsNewItem() {
-        try {
-            assertRowCount(50);
+        assertRowCount(50);
 
-            addPerson();
+        addPerson();
+
+        try {
             refresh();
 
             setFilterLastName("Person");
@@ -78,6 +91,9 @@ public class GridUseDataProviderHookIT extends AbstractGridTest {
         } finally {
             removePerson();
         }
+
+        refresh();
+        assertRowCount(50);
     }
 
     private void setFilterLastName(String filter) {
