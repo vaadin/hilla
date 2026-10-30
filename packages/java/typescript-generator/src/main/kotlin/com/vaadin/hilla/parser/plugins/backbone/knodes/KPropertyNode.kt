@@ -15,12 +15,12 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.knodes
 
-import com.vaadin.hilla.parser.models.jackson.JacksonPropertyModel
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode
 import kotlin.reflect.KProperty
+import tools.jackson.databind.introspect.BeanPropertyDefinition
 
 class KPropertyNode(
-    source: JacksonPropertyModel,
+    source: BeanPropertyDefinition,
     target: String,
     val kProperty: KProperty<*>
 ): PropertyNode(

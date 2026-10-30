@@ -15,6 +15,9 @@
  */
 package com.vaadin.hilla.parser.plugins.nonnull;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -33,11 +36,6 @@ import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
-import com.vaadin.hilla.parser.models.AnnotatedModel;
-import com.vaadin.hilla.parser.models.AnnotationInfoModel;
-import com.vaadin.hilla.parser.models.ClassInfoModel;
-import com.vaadin.hilla.parser.models.PackageInfoModel;
-import com.vaadin.hilla.parser.models.SpecializedModel;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.AnnotatedNode;
@@ -45,6 +43,7 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
+import com.vaadin.hilla.parser.utils.Signatures;
 
 public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
     /**
@@ -74,12 +73,12 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
         if (node.getTarget() instanceof TypeFacts type) {
             var nodeSource = node.getSource();
 
-            if ((nodeSource instanceof SpecializedModel)
-                    && ((SpecializedModel) nodeSource).isOptional()) {
+            if (nodeSource instanceof AnnotatedElement signature
+                    && Signatures.isOptional(signature)) {
                 // Optional is always nullable, regardless of annotations
                 type.setOptional(true);
             } else {
-                Stream<AnnotationInfoModel> annotations = Stream.empty();
+                Stream<Annotation> annotations = Stream.empty();
 
                 // Apply from current node, if it is annotated
                 if (node instanceof AnnotatedNode) {
@@ -95,7 +94,8 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                         getPackageAnnotationsStream(nodePath),
                         annotations
                                 .filter(annotation -> !PACKAGE_ONLY_ANNOTATIONS
-                                        .contains(annotation.getName())));
+                                        .contains(annotation.annotationType()
+                                                .getName())));
 
                 computeNullabilityFromAnnotations(annotations)
                         .ifPresent(type::setOptional);
@@ -105,9 +105,10 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
     }
 
     private Optional<Boolean> computeNullabilityFromAnnotations(
-            Stream<AnnotationInfoModel> annotations) {
+            Stream<Annotation> annotations) {
         return annotations
-                .map(annotation -> annotationsMap.get(annotation.getName()))
+                .map(annotation -> annotationsMap
+                        .get(annotation.annotationType().getName()))
                 .filter(Objects::nonNull)
                 .max(Comparator.comparingInt(AnnotationMatcher::getScore))
                 .map(AnnotationMatcher::doesMakeNullable);
@@ -132,25 +133,17 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                         .process());
     }
 
-    private Optional<ClassInfoModel> findClosestClass(NodePath<?> nodePath) {
+    private Optional<Package> findClosestPackage(NodePath<?> nodePath) {
         return nodePath.stream().map(NodePath::getNode)
-                .filter(node -> node.getSource() instanceof ClassInfoModel)
-                .map(node -> (ClassInfoModel) node.getSource()).findFirst();
+                .filter(node -> node.getSource() instanceof Class<?>)
+                .map(node -> (Class<?>) node.getSource()).findFirst()
+                .map(Class::getPackage);
     }
 
-    private Optional<PackageInfoModel> findClosestPackage(
-            NodePath<?> nodePath) {
-        return nodePath.stream().map(NodePath::getNode)
-                .filter(node -> node.getSource() instanceof ClassInfoModel)
-                .map(node -> (ClassInfoModel) node.getSource()).findFirst()
-                .map(ClassInfoModel::getPackage);
-    }
-
-    private Stream<AnnotationInfoModel> getPackageAnnotationsStream(
+    private Stream<Annotation> getPackageAnnotationsStream(
             NodePath<?> nodePath) {
         return findClosestPackage(nodePath).stream()
-                .map(PackageInfoModel::getAnnotations)
-                .flatMap(Collection::stream);
+                .map(Package::getDeclaredAnnotations).flatMap(Arrays::stream);
     }
 
     /**
@@ -163,8 +156,8 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
      *            the node path
      * @return stream of all annotations to check
      */
-    private Stream<AnnotationInfoModel> considerAscendantAnnotations(
-            Stream<AnnotationInfoModel> annotations, NodePath<?> nodePath) {
+    private Stream<Annotation> considerAscendantAnnotations(
+            Stream<Annotation> annotations, NodePath<?> nodePath) {
         var current = nodePath.getNode();
         var parent = nodePath.getParentPath().getNode();
 
@@ -173,8 +166,7 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                     || parent instanceof MethodParameterNode
                     || parent instanceof PropertyNode) {
                 annotations = Stream.concat(annotations,
-                        ((AnnotatedModel) parent.getSource()).getAnnotations()
-                                .stream());
+                        ((AnnotatedNode) parent).getAnnotations().stream());
             }
         }
 

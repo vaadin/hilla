@@ -15,9 +15,13 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone;
 
+import java.lang.reflect.AnnotatedArrayType;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.AnnotatedTypeVariable;
+import java.lang.reflect.AnnotatedWildcardType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,13 +32,6 @@ import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.RootNode;
-import com.vaadin.hilla.parser.models.ArraySignatureModel;
-import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
-import com.vaadin.hilla.parser.models.ReflectionSignatureModel;
-import com.vaadin.hilla.parser.models.SignatureModel;
-import com.vaadin.hilla.parser.models.TypeArgumentModel;
-import com.vaadin.hilla.parser.models.TypeParameterModel;
-import com.vaadin.hilla.parser.models.TypeVariableModel;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.CompositeTypeSignatureNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
@@ -43,6 +40,7 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 import com.vaadin.hilla.parser.utils.Generics;
+import com.vaadin.hilla.parser.utils.Signatures;
 
 public final class TypeSignaturePlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
@@ -119,8 +117,8 @@ public final class TypeSignaturePlugin
             TypedNode parentNode) {
         var parentType = parentNode.getType();
 
-        if (parentType.isArray() || parentType.isIterable()
-                || parentType.isMap()) {
+        if (Signatures.isArray(parentType) || Signatures.isIterable(parentType)
+                || Signatures.isMap(parentType)) {
             return;
         }
 
@@ -150,61 +148,51 @@ public final class TypeSignaturePlugin
      *            the singature to consider
      * @return list of referred types
      */
-    private List<SignatureModel> getReferredTypes(SignatureModel signature) {
-        var items = List.<SignatureModel> of();
+    private List<AnnotatedElement> getReferredTypes(
+            AnnotatedElement signature) {
+        var items = List.<AnnotatedElement> of();
+        var typeArguments = Signatures.getTypeArguments(signature);
 
-        if (signature.isArray()) {
-            items = List.of(((ArraySignatureModel) signature).getNestedType());
-        } else if (signature.isIterable()) {
-            var typeArguments = ((ClassRefSignatureModel) signature)
-                    .getTypeArguments();
-
+        if (signature instanceof AnnotatedArrayType array) {
+            items = List.of(array.getAnnotatedGenericComponentType());
+        } else if (Signatures.isIterable(signature)) {
             if (!typeArguments.isEmpty()) {
                 items = List.of(typeArguments.get(0));
             } else {
                 // Let's deal with classes extending or implementing an iterator
-                var cls = (Class<?>) ((ClassRefSignatureModel) signature)
-                        .getClassInfo().get();
-                items = Generics.getExactIterableType(cls)
-                        .map(type -> List
-                                .of(SignatureModel.of((AnnotatedElement) type)))
+                var cls = Signatures.getClass(signature).orElseThrow();
+                items = Generics.getExactIterableType(cls).map(type -> List
+                        .<AnnotatedElement> of(Signatures.of((Class<?>) type)))
                         .orElse(items);
             }
-        } else if (signature.isOptional()) {
-            var typeArguments = ((ClassRefSignatureModel) signature)
-                    .getTypeArguments();
-
+        } else if (Signatures.isOptional(signature)) {
             if (!typeArguments.isEmpty()) {
                 items = List.of(typeArguments.get(0));
             }
-        } else if (signature.isMap()) {
-            var typeArguments = ((ClassRefSignatureModel) signature)
-                    .getTypeArguments();
-
+        } else if (Signatures.isMap(signature)) {
             if (!typeArguments.isEmpty()) {
                 items = List.of(typeArguments.get(1));
             }
-        } else if (signature.isTypeArgument()) {
-            var associatedTypes = ((TypeArgumentModel) signature)
-                    .getAssociatedTypes();
+        } else if (signature instanceof AnnotatedWildcardType wildcard) {
+            var bounds = Signatures.getBounds(wildcard);
 
-            if (!associatedTypes.isEmpty()) {
-                items = List.of(associatedTypes.get(0));
+            if (!bounds.isEmpty()) {
+                items = List.of(bounds.get(0));
             }
-        } else if (signature.isTypeParameter()) {
-            items = TypeParameters
-                    .getEffectiveBounds((TypeParameterModel) signature);
-        } else if (signature.isTypeVariable()) {
-            items = List.of(((TypeVariableModel) signature).resolve());
-        } else if (signature.isClassRef()) {
-            items = ((ClassRefSignatureModel) signature).getTypeArguments()
-                    .stream().map(SignatureModel.class::cast).toList();
+        } else if (signature instanceof TypeVariable<?> typeParameter) {
+            items = List
+                    .copyOf(TypeParameters.getEffectiveBounds(typeParameter));
+        } else if (signature instanceof AnnotatedTypeVariable typeVariable) {
+            items = List.of(Signatures.resolve(typeVariable));
+        } else {
+            items = List.copyOf(typeArguments);
         }
 
         return items;
     }
 
-    private List<SignatureModel> filterCompatible(List<SignatureModel> types) {
+    private List<AnnotatedElement> filterCompatible(
+            List<AnnotatedElement> types) {
         if (types.isEmpty()) {
             // Nothing to filter, return the original (empty) list.
             return types;
@@ -228,11 +216,10 @@ public final class TypeSignaturePlugin
 
     private NodeDependencies scanEntity(EntityNode node,
             NodeDependencies nodeDependencies) {
-        var cls = node.getSource();
-        if (cls.getSuperClass().isPresent()
-                && cls.getSuperClass().get().isNonJDKClass()) {
+        var superClass = node.getSource().getAnnotatedSuperclass();
+        if (superClass != null && Signatures.isNonJDKClass(superClass)) {
             return nodeDependencies.appendChildNodes(
-                    Stream.of(TypeSignatureNode.of(cls.getSuperClass().get())));
+                    Stream.of(TypeSignatureNode.of(superClass)));
         }
 
         return nodeDependencies;
@@ -240,12 +227,12 @@ public final class TypeSignaturePlugin
 
     private NodeDependencies scanMethodNode(MethodNode methodNode,
             NodeDependencies nodeDependencies) {
-        if (methodNode.getSource().getResultType().isVoid()) {
+        var resultType = methodNode.getSource().getAnnotatedReturnType();
+        if (Signatures.isVoid(resultType)) {
             return nodeDependencies;
         }
 
-        var resultTypeNode = TypeSignatureNode
-                .of(methodNode.getSource().getResultType());
+        var resultTypeNode = TypeSignatureNode.of(resultType);
         return nodeDependencies.appendChildNodes(Stream.of(resultTypeNode));
     }
 
@@ -253,17 +240,17 @@ public final class TypeSignaturePlugin
             MethodParameterNode methodParameterNode,
             NodeDependencies nodeDependencies) {
         return nodeDependencies.appendChildNodes(Stream.of(TypeSignatureNode
-                .of(methodParameterNode.getSource().getType())));
+                .of(methodParameterNode.getSource().getAnnotatedType())));
     }
 
     private NodeDependencies scanProperty(PropertyNode propertyNode,
             NodeDependencies nodeDependencies) {
-        var property = propertyNode.getSource();
-        var types = property.getAssociatedTypes();
+        var types = List
+                .<AnnotatedElement> copyOf(propertyNode.getAssociatedTypes());
         return scanTypes(types, nodeDependencies);
     }
 
-    private NodeDependencies scanTypes(List<SignatureModel> types,
+    private NodeDependencies scanTypes(List<AnnotatedElement> types,
             NodeDependencies nodeDependencies) {
         // Discard type signatures that are different from the primary one
         types = filterCompatible(types);
@@ -290,16 +277,14 @@ public final class TypeSignaturePlugin
         return nodeDependencies;
     }
 
-    private String signatureToTypeString(SignatureModel type) {
-        // Only reflection types are supported.
+    private String signatureToTypeString(AnnotatedElement type) {
         // This converts to a name without annotations.
-        var annotatedElement = ((ReflectionSignatureModel) type).get();
-        if (annotatedElement instanceof AnnotatedType) {
-            return ((AnnotatedType) annotatedElement).getType().getTypeName();
-        } else if (annotatedElement instanceof Type) {
-            return ((Type) annotatedElement).getTypeName();
+        if (type instanceof AnnotatedType annotatedType) {
+            return annotatedType.getType().getTypeName();
+        } else if (type instanceof Type plainType) {
+            return plainType.getTypeName();
         } else {
-            return annotatedElement.toString();
+            return type.toString();
         }
     }
 }

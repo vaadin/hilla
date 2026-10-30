@@ -15,18 +15,19 @@
  */
 package com.vaadin.hilla.parser.test.nodes;
 
+import java.lang.reflect.Field;
+
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
-import com.vaadin.hilla.parser.models.FieldInfoModel;
 
-public final class FieldNode extends AbstractNode<FieldInfoModel, String> {
-    private FieldNode(@NonNull FieldInfoModel source, @NonNull String target) {
+public final class FieldNode extends AbstractNode<Field, String> {
+    private FieldNode(@NonNull Field source, @NonNull String target) {
         super(source, target);
     }
 
     @NonNull
-    static public FieldNode of(@NonNull FieldInfoModel source) {
+    static public FieldNode of(@NonNull Field source) {
         return new FieldNode(source, "");
     }
 }

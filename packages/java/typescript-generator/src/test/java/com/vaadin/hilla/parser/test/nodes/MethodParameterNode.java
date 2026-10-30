@@ -15,21 +15,20 @@
  */
 package com.vaadin.hilla.parser.test.nodes;
 
+import java.lang.reflect.Parameter;
+
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
-import com.vaadin.hilla.parser.models.MethodParameterInfoModel;
 
-public final class MethodParameterNode
-        extends AbstractNode<MethodParameterInfoModel, String> {
-    private MethodParameterNode(@NonNull MethodParameterInfoModel source,
-            String target) {
+public final class MethodParameterNode extends AbstractNode<Parameter, String> {
+    private MethodParameterNode(@NonNull Parameter source, String target) {
         super(source, target);
     }
 
     @NonNull
-    static public MethodParameterNode of(
-            @NonNull MethodParameterInfoModel source, @NonNull String target) {
+    static public MethodParameterNode of(@NonNull Parameter source,
+            @NonNull String target) {
         return new MethodParameterNode(source, target);
     }
 }

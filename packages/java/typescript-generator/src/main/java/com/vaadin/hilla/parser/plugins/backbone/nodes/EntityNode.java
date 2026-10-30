@@ -18,17 +18,16 @@ package com.vaadin.hilla.parser.plugins.backbone.nodes;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
-import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.plugins.backbone.EntityFacts;
 
-public class EntityNode extends AbstractNode<ClassInfoModel, EntityFacts> {
-    protected EntityNode(@NonNull ClassInfoModel source,
+public class EntityNode extends AbstractNode<Class<?>, EntityFacts> {
+    protected EntityNode(@NonNull Class<?> source,
             @NonNull EntityFacts target) {
         super(source, target);
     }
 
     @NonNull
-    static public EntityNode of(@NonNull ClassInfoModel model) {
-        return new EntityNode(model, new EntityFacts());
+    static public EntityNode of(@NonNull Class<?> cls) {
+        return new EntityNode(cls, new EntityFacts());
     }
 }

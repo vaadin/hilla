@@ -75,10 +75,10 @@ public class BasicTests {
 
     @Test
     public void should_UpdateNodesAndCollectNames() {
-        assertEquals(String.join(", ",
-                List.of("FieldInfoModel foo", "FieldInfoModel fieldFoo",
-                        "FieldInfoModel fieldBar", "MethodInfoModel methodFoo",
-                        "MethodInfoModel methodBar")),
+        assertEquals(
+                String.join(", ",
+                        List.of("Field foo", "Field fieldFoo", "Field fieldBar",
+                                "Method methodFoo", "Method methodBar")),
                 walk().getMembers());
     }
 
