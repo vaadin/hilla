@@ -49,6 +49,8 @@ import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaMethod
 
+// The parser core is deprecated only to warn code outside Hilla.
+@Suppress("DEPRECATION")
 class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
 
     override fun getRequiredPlugins(): Collection<Class<out Plugin?>> =
