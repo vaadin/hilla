@@ -6,7 +6,11 @@ defaults:
 
 on:
   push:
-    branches: [main, '25.2', '25.1', '24.10', '24.9', '2.5', '1.5']
+    # Every version branch rather than a list of them, which fell behind each
+    # time a branch was created and then left out its pushes. The release
+    # branches carry a copy of this file, and this way the copy is the same
+    # on all of them.
+    branches: [main, '[0-9]+.[0-9]+']
     paths-ignore:
       - 'hilla-logo.svg'
       - 'README.md'
