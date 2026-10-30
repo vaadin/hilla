@@ -16,9 +16,13 @@
 package com.vaadin.hilla.parser.plugins.backbone;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -167,7 +171,7 @@ public final class PropertyPlugin
         }
 
         public Stream<JacksonPropertyModel> stream() {
-            var properties = description.findProperties().stream()
+            var properties = inStableOrder(description.findProperties())
                     .map((BeanPropertyDefinition prop) -> JacksonPropertyModel
                             .of(prop));
             properties = filterPrivateProperties(properties);
@@ -181,6 +185,46 @@ public final class PropertyPlugin
             }
 
             return filterIgnoredProperties(properties);
+        }
+
+        /**
+         * The properties in the order Jackson finds them, except for those it
+         * has nothing to order by: without a field, a constructor parameter or
+         * a place in the {@code @JsonPropertyOrder} of the class, a property
+         * comes after the others in the order the JVM lists the methods of the
+         * class in. That order is not the one they are declared in, and changes
+         * from one run to another, so such properties are put in the order of
+         * their names instead: what is generated from the same classes is then
+         * the same every time. A class ordering all of its properties by name
+         * is left as Jackson orders it.
+         */
+        private Stream<BeanPropertyDefinition> inStableOrder(
+                List<BeanPropertyDefinition> properties) {
+            var introspector = serializationConfig.getAnnotationIntrospector();
+            var annotatedClass = description.getClassInfo();
+
+            if (Boolean.TRUE
+                    .equals(introspector.findSerializationSortAlphabetically(
+                            serializationConfig, annotatedClass))) {
+                return properties.stream();
+            }
+
+            var named = Optional
+                    .ofNullable(introspector.findSerializationPropertyOrder(
+                            serializationConfig, annotatedClass))
+                    .map(names -> Set.copyOf(List.of(names)))
+                    .orElseGet(Set::of);
+            // The order may name a property by its Java name as well as by
+            // the name it is serialized under, which Jackson accepts both of
+            Predicate<BeanPropertyDefinition> ordered = property -> property
+                    .hasField() || property.hasConstructorParameter()
+                    || named.contains(property.getName())
+                    || named.contains(property.getInternalName());
+
+            return Stream.concat(properties.stream().filter(ordered),
+                    properties.stream().filter(ordered.negate())
+                            .sorted(Comparator.comparing(
+                                    BeanPropertyDefinition::getName)));
         }
 
         /**
