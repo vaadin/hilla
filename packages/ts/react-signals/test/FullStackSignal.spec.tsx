@@ -301,7 +301,7 @@ describe('@vaadin/hilla-react-signals', () => {
       // The increment cannot be applied to a non-numeric value, so it is
       // skipped, but the set that follows it is still applied
       numberSignal.incrementBy(5);
-      expect(numberSignal.value).to.equal('not-a-number');
+      expect(numberSignal.value as unknown).to.equal('not-a-number');
 
       numberSignal.set(7);
       expect(numberSignal.value).to.equal(7);

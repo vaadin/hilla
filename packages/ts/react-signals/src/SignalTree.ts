@@ -50,7 +50,7 @@ export class SignalTree {
 
   readonly #confirmed: Signal<NodeTree>;
   readonly #unconfirmed: Signal<readonly SignalCommand[]> = signal<readonly SignalCommand[]>([]);
-  readonly #error: Signal<Error | undefined> = signal<Error | undefined>(undefined);
+  readonly #error: Signal<Error | null> = signal<Error | null>(null);
   readonly #operations = new Map<Id, OperationHandlers>();
 
   constructor(id: string, config: ServerConnectionConfig, defaultValue?: unknown) {
@@ -82,7 +82,7 @@ export class SignalTree {
     );
 
     this.pending = computed(() => this.#unconfirmed.value.length > 0);
-    this.error = computed(() => this.#error.value);
+    this.error = computed(() => this.#error.value ?? undefined);
   }
 
   /**
@@ -103,7 +103,7 @@ export class SignalTree {
     promise.catch(() => {});
 
     this.#unconfirmed.value = [...this.#unconfirmed.value, command];
-    this.#error.value = undefined;
+    this.#error.value = null;
 
     // Without a subscription there is no channel for the server to report the
     // outcome back, so the command is confirmed based on the call itself

@@ -806,7 +806,7 @@ describe('@vaadin/hilla-react-signals', () => {
     it('should handle position condition commands', () => {
       subscribeToSignalViaEffect(listSignal);
       const positionCommand = createServerPositionCondition('pos-cmd', '', 'child-1', ListPosition.last());
-      expect(() => simulateReceivedChange(subscription, positionCommand as unknown as SignalCommand)).not.to.throw;
+      expect(() => simulateReceivedChange(subscription, positionCommand as unknown as SignalCommand)).not.to.throw();
     });
 
     it('should handle adopt-at commands for moving children', () => {

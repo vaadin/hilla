@@ -12,9 +12,16 @@ import {
   isSnapshotCommand,
   isTransactionCommand,
   isValueCondition,
+  type AdoptAtCommand,
   type Id,
+  type IncrementCommand,
+  type InsertCommand,
   type ListPosition,
   type Node,
+  type PositionCondition,
+  type PutCommand,
+  type RemoveByKeyCommand,
+  type RemoveCommand,
   type SignalCommand,
 } from './commands.js';
 
@@ -48,7 +55,6 @@ export type NodeData = Readonly<{
 export type NodeTree = ReadonlyMap<NodeId, NodeData>;
 
 const EMPTY_NODE: NodeData = {
-  value: undefined,
   listChildren: [],
   mapChildren: {},
   parent: null,
@@ -132,6 +138,31 @@ function jsonEquals(a: unknown, b: unknown): boolean {
   );
 }
 
+function findIndexAfter(children: readonly NodeId[], after: NodeId, before: NodeId | null | undefined): number {
+  let index: number;
+
+  if (after === EDGE) {
+    // After the edge means insert first
+    index = 0;
+  } else {
+    const indexOf = children.indexOf(after);
+    if (indexOf === -1) {
+      return -1;
+    }
+    index = indexOf + 1;
+  }
+
+  if (before != null) {
+    // Both ends are defined, so the other end has to match as well
+    const atPosition = index < children.length ? children[index] : EDGE;
+    if (atPosition !== before) {
+      return -1;
+    }
+  }
+
+  return index;
+}
+
 /**
  * Finds the index at which a child should be inserted into the given list of
  * children, or -1 if the position cannot be satisfied.
@@ -143,28 +174,7 @@ export function findInsertIndex(children: readonly NodeId[], position: ListPosit
   const { after, before } = position;
 
   if (after != null) {
-    let index: number;
-
-    if (after === EDGE) {
-      // After the edge means insert first
-      index = 0;
-    } else {
-      const indexOf = children.indexOf(after);
-      if (indexOf === -1) {
-        return -1;
-      }
-      index = indexOf + 1;
-    }
-
-    if (before != null) {
-      // Both ends are defined, so the other end has to match as well
-      const atPosition = index < children.length ? children[index] : EDGE;
-      if (atPosition !== before) {
-        return -1;
-      }
-    }
-
-    return index;
+    return findIndexAfter(children, after, before);
   }
 
   if (before == null) {
@@ -235,6 +245,177 @@ function withNode(tree: NodeTree, nodeId: NodeId, node: NodeData): NodeTree {
   return new Map(tree).set(nodeId, node);
 }
 
+function applyPositionCondition(tree: NodeTree, node: NodeData, command: PositionCondition): NodeTree | null {
+  const index = findInsertIndex(node.listChildren, command.expectedPosition);
+  return index !== -1 && node.listChildren[index] === command.childId ? tree : null;
+}
+
+function applyIncrement(tree: NodeTree, nodeId: NodeId, node: NodeData, command: IncrementCommand): NodeTree | null {
+  // An absent value is treated as zero, just like on the server
+  const current = node.value ?? 0;
+  if (typeof current !== 'number') {
+    return null;
+  }
+  return withNode(tree, nodeId, { ...node, value: current + command.delta });
+}
+
+function applyClear(tree: NodeTree, nodeId: NodeId, node: NodeData): NodeTree {
+  const children = [...node.listChildren, ...Object.values(node.mapChildren)];
+  if (children.length === 0) {
+    return tree;
+  }
+
+  const nodes = new Map(tree);
+  for (const childId of children) {
+    removeSubtree(nodes, childId);
+  }
+  // Clearing only detaches the children, the value of the node is kept
+  nodes.set(nodeId, { ...node, listChildren: [], mapChildren: {} });
+
+  return nodes;
+}
+
+function applyInsert(tree: NodeTree, nodeId: NodeId, node: NodeData, command: InsertCommand<unknown>): NodeTree | null {
+  const childId = command.commandId;
+  if (tree.has(childId)) {
+    return null;
+  }
+
+  const index = findInsertIndex(node.listChildren, command.position);
+  if (index === -1) {
+    return null;
+  }
+
+  const nodes = new Map(tree);
+  nodes.set(childId, { ...EMPTY_NODE, value: command.value, parent: nodeId });
+  nodes.set(nodeId, {
+    ...node,
+    listChildren: [...node.listChildren.slice(0, index), childId, ...node.listChildren.slice(index)],
+  });
+
+  return nodes;
+}
+
+function applyPut(tree: NodeTree, nodeId: NodeId, node: NodeData, command: PutCommand<unknown>): NodeTree | null {
+  if (command.key in node.mapChildren) {
+    // Putting to an existing key updates the value of the existing child
+    // instead of creating a new node, which keeps the child signal stable
+    const existingId = node.mapChildren[command.key];
+    const existing = tree.get(existingId);
+    return existing ? withNode(tree, existingId, { ...existing, value: command.value }) : null;
+  }
+
+  const childId = command.commandId;
+  if (tree.has(childId)) {
+    return null;
+  }
+
+  const nodes = new Map(tree);
+  nodes.set(childId, { ...EMPTY_NODE, value: command.value, parent: nodeId });
+  nodes.set(nodeId, { ...node, mapChildren: { ...node.mapChildren, [command.key]: childId } });
+
+  return nodes;
+}
+
+function applyRemoveByKey(tree: NodeTree, node: NodeData, command: RemoveByKeyCommand): NodeTree | null {
+  if (!(command.key in node.mapChildren)) {
+    return null;
+  }
+
+  const nodes = new Map(tree);
+  detach(nodes, node.mapChildren[command.key]);
+
+  return nodes;
+}
+
+function applyRemove(tree: NodeTree, nodeId: NodeId, node: NodeData, command: RemoveCommand): NodeTree | null {
+  if (node.parent === null) {
+    return null;
+  }
+  if (node.parent !== command.expectedParentId) {
+    return null;
+  }
+
+  const nodes = new Map(tree);
+  detach(nodes, nodeId);
+
+  return nodes;
+}
+
+function applyAdoptAt(tree: NodeTree, nodeId: NodeId, command: AdoptAtCommand): NodeTree | null {
+  const { childId } = command;
+  if (!tree.has(childId)) {
+    return null;
+  }
+
+  const nodes = new Map(tree);
+  // The child is moved rather than removed, so its own children are kept
+  unlink(nodes, childId);
+
+  const parent = nodes.get(nodeId);
+  const child = tree.get(childId);
+  if (!parent || !child) {
+    return null;
+  }
+
+  const index = findInsertIndex(parent.listChildren, command.position);
+  if (index === -1) {
+    return null;
+  }
+
+  nodes.set(childId, { ...child, parent: nodeId });
+  nodes.set(nodeId, {
+    ...parent,
+    listChildren: [...parent.listChildren.slice(0, index), childId, ...parent.listChildren.slice(index)],
+  });
+
+  return nodes;
+}
+
+function applyNodeCommand(tree: NodeTree, nodeId: NodeId, node: NodeData, command: SignalCommand): NodeTree | null {
+  if (isValueCondition(command)) {
+    return jsonEquals(node.value, command.expectedValue) ? tree : null;
+  }
+
+  if (isPositionCondition(command)) {
+    return applyPositionCondition(tree, node, command);
+  }
+
+  if (isSetCommand(command)) {
+    return withNode(tree, nodeId, { ...node, value: command.value });
+  }
+
+  if (isIncrementCommand(command)) {
+    return applyIncrement(tree, nodeId, node, command);
+  }
+
+  if (isClearCommand(command)) {
+    return applyClear(tree, nodeId, node);
+  }
+
+  if (isInsertCommand(command)) {
+    return applyInsert(tree, nodeId, node, command);
+  }
+
+  if (isPutCommand(command)) {
+    return applyPut(tree, nodeId, node, command);
+  }
+
+  if (isRemoveByKeyCommand(command)) {
+    return applyRemoveByKey(tree, node, command);
+  }
+
+  if (isRemoveCommand(command)) {
+    return applyRemove(tree, nodeId, node, command);
+  }
+
+  if (isAdoptAtCommand(command)) {
+    return applyAdoptAt(tree, nodeId, command);
+  }
+
+  return null;
+}
+
 /**
  * Applies a command to a tree and returns the resulting tree, or `null` if the
  * command is not applicable to the tree.
@@ -271,140 +452,5 @@ export function applyCommand(tree: NodeTree, command: SignalCommand): NodeTree |
     return null;
   }
 
-  if (isValueCondition(command)) {
-    return jsonEquals(node.value, command.expectedValue) ? tree : null;
-  }
-
-  if (isPositionCondition(command)) {
-    const index = findInsertIndex(node.listChildren, command.expectedPosition);
-    return index !== -1 && node.listChildren[index] === command.childId ? tree : null;
-  }
-
-  if (isSetCommand(command)) {
-    return withNode(tree, nodeId, { ...node, value: command.value });
-  }
-
-  if (isIncrementCommand(command)) {
-    // An absent value is treated as zero, just like on the server
-    const current = node.value ?? 0;
-    if (typeof current !== 'number') {
-      return null;
-    }
-    return withNode(tree, nodeId, { ...node, value: current + command.delta });
-  }
-
-  if (isClearCommand(command)) {
-    const children = [...node.listChildren, ...Object.values(node.mapChildren)];
-    if (children.length === 0) {
-      return tree;
-    }
-
-    const nodes = new Map(tree);
-    for (const childId of children) {
-      removeSubtree(nodes, childId);
-    }
-    // Clearing only detaches the children, the value of the node is kept
-    nodes.set(nodeId, { ...node, listChildren: [], mapChildren: {} });
-
-    return nodes;
-  }
-
-  if (isInsertCommand(command)) {
-    const childId = command.commandId;
-    if (tree.has(childId)) {
-      return null;
-    }
-
-    const index = findInsertIndex(node.listChildren, command.position);
-    if (index === -1) {
-      return null;
-    }
-
-    const nodes = new Map(tree);
-    nodes.set(childId, { ...EMPTY_NODE, value: command.value, parent: nodeId });
-    nodes.set(nodeId, {
-      ...node,
-      listChildren: [...node.listChildren.slice(0, index), childId, ...node.listChildren.slice(index)],
-    });
-
-    return nodes;
-  }
-
-  if (isPutCommand(command)) {
-    if (command.key in node.mapChildren) {
-      // Putting to an existing key updates the value of the existing child
-      // instead of creating a new node, which keeps the child signal stable
-      const existingId = node.mapChildren[command.key];
-      const existing = tree.get(existingId);
-      return existing ? withNode(tree, existingId, { ...existing, value: command.value }) : null;
-    }
-
-    const childId = command.commandId;
-    if (tree.has(childId)) {
-      return null;
-    }
-
-    const nodes = new Map(tree);
-    nodes.set(childId, { ...EMPTY_NODE, value: command.value, parent: nodeId });
-    nodes.set(nodeId, { ...node, mapChildren: { ...node.mapChildren, [command.key]: childId } });
-
-    return nodes;
-  }
-
-  if (isRemoveByKeyCommand(command)) {
-    if (!(command.key in node.mapChildren)) {
-      return null;
-    }
-
-    const nodes = new Map(tree);
-    detach(nodes, node.mapChildren[command.key]);
-
-    return nodes;
-  }
-
-  if (isRemoveCommand(command)) {
-    if (node.parent === null) {
-      return null;
-    }
-    if (node.parent !== command.expectedParentId) {
-      return null;
-    }
-
-    const nodes = new Map(tree);
-    detach(nodes, nodeId);
-
-    return nodes;
-  }
-
-  if (isAdoptAtCommand(command)) {
-    const { childId } = command;
-    if (!tree.has(childId)) {
-      return null;
-    }
-
-    const nodes = new Map(tree);
-    // The child is moved rather than removed, so its own children are kept
-    unlink(nodes, childId);
-
-    const parent = nodes.get(nodeId);
-    const child = tree.get(childId);
-    if (!parent || !child) {
-      return null;
-    }
-
-    const index = findInsertIndex(parent.listChildren, command.position);
-    if (index === -1) {
-      return null;
-    }
-
-    nodes.set(childId, { ...child, parent: nodeId });
-    nodes.set(nodeId, {
-      ...parent,
-      listChildren: [...parent.listChildren.slice(0, index), childId, ...parent.listChildren.slice(index)],
-    });
-
-    return nodes;
-  }
-
-  return null;
+  return applyNodeCommand(tree, nodeId, node, command);
 }
