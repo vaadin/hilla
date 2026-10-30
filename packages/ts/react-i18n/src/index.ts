@@ -376,7 +376,7 @@ const i18n: I18n = new I18n();
  *   translate(key`my.translation.key`)
  */
 function keyTag(strings: readonly string[], ..._values: never[]): I18nKey {
-  return Object.assign(strings[0], { [keyLiteralMarker]: undefined }) as I18nKey;
+  return Object.assign(strings[0], { [keyLiteralMarker]: undefined });
 }
 
 /**

@@ -96,7 +96,7 @@ async function doLogout(doc: Document, options?: LogoutOptions): Promise<Respons
     return new Response(null, {
       status: 500,
       statusText: 'Form submission did not navigate away.',
-    } as ResponseInit);
+    });
   }
   const headerEntries = csrfInfo.type === CsrfInfoType.SPRING ? csrfInfo.headerEntries : [];
   return await doFetchLogout(logoutUrl, headerEntries);
@@ -320,7 +320,7 @@ export class InvalidSessionMiddleware implements MiddlewareClass {
       const loginResult = await this.onInvalidSessionCallback();
       if (loginResult.token) {
         clonedContext.request.headers.set(VAADIN_CSRF_HEADER, loginResult.token);
-        return next(clonedContext) as Promise<Response>;
+        return next(clonedContext);
       }
     }
     return response;
