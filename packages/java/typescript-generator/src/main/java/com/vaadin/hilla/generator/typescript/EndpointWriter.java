@@ -38,6 +38,15 @@ public final class EndpointWriter {
     private static final String SIGNAL_OPTIONS_TYPE = "SignalMethodOptions";
     private static final String OPTIONS_PARAMETER = "options";
 
+    /**
+     * What the file of an endpoint without a method the browser can call says
+     * in place of the methods, as the usual cause is a method which is not
+     * public.
+     */
+    private static final String NO_METHODS = """
+            // {{javaClass}} has no public methods, so there is nothing to call.
+            // Only the public methods of a browser callable class are generated.""";
+
     private static final String METHOD = """
             async function {{name}}({{parameters}}): Promise<{{returnType}}> {
               return {{client}}.call('{{endpoint}}', '{{method}}', {{arguments}}, {{init}});
@@ -81,9 +90,13 @@ public final class EndpointWriter {
 
     public GeneratedFile write(EndpointModel endpoint) {
         // An endpoint without a callable method still gets a file, so that
-        // whatever imports it finds a module rather than nothing
+        // whatever imports it finds a module rather than nothing, and so that
+        // the developer looking for the methods learns why there are none
         if (endpoint.methods().isEmpty()) {
-            return new GeneratedFile(endpoint.name() + ".ts", "export {};\n");
+            return GeneratedFile.of(endpoint.name(), new ImportRegistry(),
+                    Template.of(NO_METHODS)
+                            .with("javaClass", endpoint.javaClass()).fill()
+                            + "\n" + GeneratedFile.exportList(List.of()));
         }
 
         var imports = new ImportRegistry();
