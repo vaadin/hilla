@@ -41,7 +41,9 @@ export default {
   browsers: [
     chromeLauncher({
       launchOptions: {
-        args: [],
+        // Chrome cannot create its sandbox on CI runners that restrict
+        // unprivileged user namespaces, the same as in karma.config.cjs.
+        args: isCI ? ['--no-sandbox', '--disable-setuid-sandbox'] : [],
         // eslint-disable-next-line no-undef
         executablePath: process.env.CHROME_BIN,
       },
