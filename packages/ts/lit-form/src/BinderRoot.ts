@@ -92,8 +92,8 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
     this.dispatchEvent(CHANGED);
   }
 
-  override get binder(): BinderRoot {
-    return this as BinderRoot;
+  override get binder(): this {
+    return this;
   }
 
   /**
