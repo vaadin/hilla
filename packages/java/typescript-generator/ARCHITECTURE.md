@@ -162,8 +162,7 @@ gives a typed node fresh `TypeFacts` every time it enters it.
 
 The walk runs on reflection: the endpoints are `Class` objects, and the models
 of `com.vaadin.hilla.parser.models` are built with `ClassInfoModel.of(Class)`
-and the like. Each model also has a ClassGraph variant (`*SourceModel`), but
-only the tests use it. `Parser` requires a class path, but the walk never reads
+and the like. `Parser` requires a class path, but the walk never reads
 `classPathElements`.
 
 ## Ordering

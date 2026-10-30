@@ -23,34 +23,10 @@ import java.lang.reflect.AnnotatedTypeVariable;
 import java.lang.reflect.AnnotatedWildcardType;
 import java.lang.reflect.TypeVariable;
 
-import io.github.classgraph.ArrayTypeSignature;
-import io.github.classgraph.BaseTypeSignature;
-import io.github.classgraph.ClassRefTypeSignature;
-import io.github.classgraph.HierarchicalTypeSignature;
-import io.github.classgraph.TypeArgument;
-import io.github.classgraph.TypeParameter;
-import io.github.classgraph.TypeVariableSignature;
 import org.jspecify.annotations.NonNull;
 
 public interface SignatureModel
         extends Model, SpecializedModel, AnnotatedModel {
-    @Deprecated
-    static SignatureModel of(@NonNull HierarchicalTypeSignature signature) {
-        if (signature instanceof BaseTypeSignature) {
-            return BaseSignatureModel.of((BaseTypeSignature) signature);
-        } else if (signature instanceof ArrayTypeSignature) {
-            return ArraySignatureModel.of((ArrayTypeSignature) signature);
-        } else if (signature instanceof TypeParameter) {
-            return TypeParameterModel.of((TypeParameter) signature);
-        } else if (signature instanceof TypeVariableSignature) {
-            return TypeVariableModel.of((TypeVariableSignature) signature);
-        } else if (signature instanceof TypeArgument) {
-            return TypeArgumentModel.of((TypeArgument) signature);
-        } else {
-            return ClassRefSignatureModel.of((ClassRefTypeSignature) signature);
-        }
-    }
-
     static SignatureModel of(@NonNull AnnotatedElement signature) {
         if (signature instanceof AnnotatedParameterizedType) {
             return ClassRefSignatureModel

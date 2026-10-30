@@ -21,7 +21,6 @@ import static com.vaadin.hilla.parser.test.helpers.ClassMemberUtils.getParameter
 import static com.vaadin.hilla.parser.test.helpers.SpecializationChecker.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -35,64 +34,53 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.github.classgraph.MethodParameterInfo;
-import io.github.classgraph.ScanResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import com.vaadin.hilla.parser.test.helpers.ModelKind;
-import com.vaadin.hilla.parser.test.helpers.Source;
-import com.vaadin.hilla.parser.test.helpers.SourceExtension;
 import com.vaadin.hilla.parser.test.helpers.SpecializationChecker;
 import com.vaadin.hilla.parser.test.helpers.context.AbstractCharacteristics;
 import com.vaadin.hilla.parser.test.helpers.context.AbstractContext;
-import com.vaadin.hilla.parser.utils.Streams;
 
-@ExtendWith(SourceExtension.class)
 public class MethodParameterInfoModelTests {
     private static final String defaultParameterName = "finalParameter";
     private Context.Default ctx;
 
     @BeforeEach
-    public void setUp(@Source ScanResult source) {
-        ctx = new Context.Default(source);
+    public void setUp() {
+        ctx = new Context.Default();
     }
 
-    @DisplayName("It should have the same hashCode for source and reflection models")
+    @DisplayName("It should have the same hashCode for models of the same origin")
     @Test
-    public void should_HaveSameHashCodeForSourceAndReflectionModels() {
-        var reflectionModel = MethodParameterInfoModel
+    public void should_HaveSameHashCodeForModelsOfSameOrigin() {
+        var model = MethodParameterInfoModel
                 .of(ctx.getReflectionOrigin(defaultParameterName));
-        var sourceModel = MethodParameterInfoModel
-                .of(ctx.getSourceOrigin(defaultParameterName));
+        var other = MethodParameterInfoModel
+                .of(ctx.getReflectionOrigin(defaultParameterName));
 
-        assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
+        assertEquals(model.hashCode(), other.hashCode());
     }
 
-    @DisplayName("It should have source and reflection models equal")
+    @DisplayName("It should have models of the same origin equal")
     @Test
-    public void should_HaveSourceAndReflectionModelsEqual() {
-        var reflectionModel = MethodParameterInfoModel
+    public void should_HaveModelsOfSameOriginEqual() {
+        var model = MethodParameterInfoModel
                 .of(ctx.getReflectionOrigin(defaultParameterName));
-        var sourceModel = MethodParameterInfoModel
-                .of(ctx.getSourceOrigin(defaultParameterName));
+        var other = MethodParameterInfoModel
+                .of(ctx.getReflectionOrigin(defaultParameterName));
 
-        assertEquals(reflectionModel, reflectionModel);
-        assertEquals(reflectionModel, sourceModel);
+        assertEquals(model, model);
+        assertEquals(model, other);
+        assertEquals(other, model);
 
-        assertEquals(sourceModel, sourceModel);
-        assertEquals(sourceModel, reflectionModel);
-
-        assertNotEquals(sourceModel, new Object());
-        assertNotEquals(reflectionModel, new Object());
+        assertNotEquals(model, new Object());
     }
 
     @DisplayName("It should index parameters correctly")
@@ -105,61 +93,34 @@ public class MethodParameterInfoModelTests {
     @DisplayName("It should provide correct origin")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
-    public void should_ProvideCorrectOrigin(MethodParameterInfoModel model,
-            ModelKind kind) {
-        switch (kind) {
-        case REFLECTION:
-            assertEquals(ctx.getReflectionOrigin(defaultParameterName),
-                    model.get());
-            assertTrue(model.isReflection());
-            break;
-        case SOURCE:
-            assertEquals(ctx.getSourceOrigin(defaultParameterName),
-                    model.get());
-            assertTrue(model.isSource());
-            break;
-        }
+    public void should_ProvideCorrectOrigin(MethodParameterInfoModel model) {
+        assertEquals(ctx.getReflectionOrigin(defaultParameterName),
+                model.get());
     }
 
     static final class ModelProvider implements ArgumentsProvider {
-        public static final String testNamePattern = "{1}";
+        public static final String testNamePattern = "{0}";
 
         @Override
         public Stream<Arguments> provideArguments(ExtensionContext context) {
-            var ctx = new Context.Default(context);
+            var ctx = new Context.Default();
 
-            return Stream.of(
-                    Arguments.of(
-                            MethodParameterInfoModel.of(ctx
-                                    .getReflectionOrigin(defaultParameterName)),
-                            ModelKind.REFLECTION),
-                    Arguments.of(
-                            MethodParameterInfoModel.of(
-                                    ctx.getSourceOrigin(defaultParameterName)),
-                            ModelKind.SOURCE));
+            return Stream.of(Arguments.of(MethodParameterInfoModel
+                    .of(ctx.getReflectionOrigin(defaultParameterName))));
         }
 
         static final class Characteristics implements ArgumentsProvider {
-            public static final String testNamePattern = "{2} [{3}]";
+            public static final String testNamePattern = "{2}";
 
             @Override
             public Stream<Arguments> provideArguments(
                     ExtensionContext context) {
-                var ctx = new Context.Characteristics(context);
+                var ctx = new Context.Characteristics();
 
-                return Streams.combine(
-                        ctx.getReflectionCharacteristics().entrySet().stream()
-                                .map(entry -> Arguments.of(
-                                        MethodParameterInfoModel
-                                                .of(entry.getKey()),
-                                        entry.getValue(), ModelKind.REFLECTION,
-                                        entry.getKey().getName())),
-                        ctx.getSourceCharacteristics().entrySet().stream()
-                                .map(entry -> Arguments.of(
-                                        MethodParameterInfoModel
-                                                .of(entry.getKey()),
-                                        entry.getValue(), ModelKind.SOURCE,
-                                        entry.getKey().getName())));
+                return ctx.getReflectionCharacteristics().entrySet().stream()
+                        .map(entry -> Arguments.of(
+                                MethodParameterInfoModel.of(entry.getKey()),
+                                entry.getValue(), entry.getKey().getName()));
             }
 
             public static final class Checker
@@ -185,24 +146,14 @@ public class MethodParameterInfoModelTests {
         @ParameterizedTest(name = ModelProvider.Characteristics.testNamePattern)
         @ArgumentsSource(ModelProvider.Characteristics.class)
         public void should_DetectCharacteristics(MethodParameterInfoModel model,
-                String[] characteristics, ModelKind kind, String testName) {
+                String[] characteristics, String testName) {
             checker.apply(model, characteristics);
         }
     }
 
     static class Context {
-        private final ScanResult source;
-
-        Context(ScanResult source) {
-            this.source = source;
-        }
-
-        public ScanResult getSource() {
-            return source;
-        }
-
-        static class Characteristics extends
-                AbstractCharacteristics<Parameter, MethodParameterInfo> {
+        static class Characteristics
+                extends AbstractCharacteristics<Parameter> {
             private static final Map<Parameter, String[]> reflectionCharacteristics;
 
             static {
@@ -242,23 +193,12 @@ public class MethodParameterInfoModelTests {
                         entry(getParameter(enumConstructor, 1), "isSynthetic"));
             }
 
-            Characteristics(ExtensionContext context) {
-                this(SourceExtension.getSource(context));
-            }
-
-            Characteristics(ScanResult source) {
-                super(source, reflectionCharacteristics,
-                        reflectionCharacteristics.entrySet().stream()
-                                .collect(
-                                        Collectors.toMap(
-                                                entry -> getParameter(
-                                                        entry.getKey(), source),
-                                                Map.Entry::getValue)));
+            Characteristics() {
+                super(reflectionCharacteristics);
             }
         }
 
-        static class Default
-                extends AbstractContext<Parameter, MethodParameterInfo> {
+        static class Default extends AbstractContext<Parameter> {
             private static final List<Class<?>> constructorParams = List
                     .of(Sample.class, String.class, int.class);
 
@@ -268,16 +208,8 @@ public class MethodParameterInfoModelTests {
                     .collect(Collectors.toMap(Parameter::getName,
                             Function.identity()));
 
-            Default(ExtensionContext context) {
-                this(SourceExtension.getSource(context));
-            }
-
-            Default(ScanResult source) {
-                super(source, reflectionOrigins, Arrays
-                        .stream(getDeclaredConstructor(Sample.Dyn.class,
-                                constructorParams, source).getParameterInfo())
-                        .collect(Collectors.toMap(MethodParameterInfo::getName,
-                                Function.identity())));
+            Default() {
+                super(reflectionOrigins);
             }
         }
     }

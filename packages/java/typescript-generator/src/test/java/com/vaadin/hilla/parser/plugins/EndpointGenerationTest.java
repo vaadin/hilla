@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.github.classgraph.ClassGraph;
-import io.github.classgraph.ScanResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -36,6 +34,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import com.vaadin.hilla.parser.testutils.AbstractFullStackTest;
 import com.vaadin.hilla.parser.testutils.ResourceLoader;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 /**
  * Verifies the TypeScript generated for every test case which needs nothing
@@ -60,7 +59,6 @@ import com.vaadin.hilla.parser.testutils.ResourceLoader;
 public class EndpointGenerationTest extends AbstractFullStackTest {
     private static final String ROOT_PACKAGE = EndpointGenerationTest.class
             .getPackageName();
-    private static final String ENDPOINT_ANNOTATION = "com.vaadin.hilla.parser.testutils.annotations.Endpoint";
 
     /**
      * The longest path Windows accepts from a program which has not opted into
@@ -91,16 +89,14 @@ public class EndpointGenerationTest extends AbstractFullStackTest {
     }
 
     static Stream<Arguments> should_GenerateTheExpectedTypeScript() {
-        try (var scan = scan()) {
-            var endpoints = endpoints(scan);
-            var withTestClass = packagesWithTestClass(scan);
+        var classes = findClasses();
+        var endpoints = endpoints(classes);
+        var withTestClass = packagesWithTestClass(classes);
 
-            return findTestCases(endpoints).stream()
-                    .filter(testCase -> !withTestClass.contains(testCase))
-                    .map(testCase -> Arguments.of(testCase,
-                            endpointsOf(testCase, endpoints, withTestClass)))
-                    .toList().stream();
-        }
+        return findTestCases(endpoints).stream()
+                .filter(testCase -> !withTestClass.contains(testCase))
+                .map(testCase -> Arguments.of(testCase,
+                        endpointsOf(testCase, endpoints, withTestClass)));
     }
 
     /**
@@ -111,23 +107,22 @@ public class EndpointGenerationTest extends AbstractFullStackTest {
      */
     @Test
     public void should_NotHaveStaleSnapshots() {
-        try (var scan = scan()) {
-            var endpoints = endpoints(scan);
-            var testCases = findTestCases(endpoints);
-            var withTestClass = packagesWithTestClass(scan);
+        var classes = findClasses();
+        var endpoints = endpoints(classes);
+        var testCases = findTestCases(endpoints);
+        var withTestClass = packagesWithTestClass(classes);
 
-            var stale = findSnapshotPackages().stream()
-                    .filter(pkg -> !testCases.contains(pkg))
-                    .filter(pkg -> !withTestClass.contains(pkg)
-                            || endpoints.stream()
-                                    .noneMatch(endpoint -> pkg.equals(
-                                            packageOf(endpoint.getName()))))
-                    .sorted().toList();
+        var stale = findSnapshotPackages().stream()
+                .filter(pkg -> !testCases.contains(pkg))
+                .filter(pkg -> !withTestClass.contains(pkg)
+                        || endpoints.stream()
+                                .noneMatch(endpoint -> pkg
+                                        .equals(packageOf(endpoint.getName()))))
+                .sorted().toList();
 
-            assertTrue(stale.isEmpty(),
-                    () -> "There is no browser callable class left to generate"
-                            + " the snapshots of " + stale);
-        }
+        assertTrue(stale.isEmpty(),
+                () -> "There is no browser callable class left to generate"
+                        + " the snapshots of " + stale);
     }
 
     /**
@@ -165,25 +160,52 @@ public class EndpointGenerationTest extends AbstractFullStackTest {
                                 .collect(Collectors.joining()));
     }
 
-    private static ScanResult scan() {
-        return new ClassGraph().enableAnnotationInfo().enableClassInfo()
-                .acceptPackages(ROOT_PACKAGE).scan();
+    /**
+     * Loads the compiled test classes of the root package and its subpackages.
+     */
+    private static List<Class<?>> findClasses() {
+        var classesDir = classesDir();
+        var root = classesDir.resolve(ROOT_PACKAGE.replace('.', '/'));
+
+        try (var paths = Files.walk(root)) {
+            return paths
+                    .filter(path -> path.toString().endsWith(".class")).map(
+                            path -> classesDir.relativize(path).toString())
+                    .map(path -> path
+                            .substring(0, path.length() - ".class".length())
+                            .replace(java.io.File.separatorChar, '.'))
+                    .map(EndpointGenerationTest::loadClass).toList();
+        } catch (IOException e) {
+            throw new UncheckedIOException(
+                    "Unable to look for classes in " + root, e);
+        }
     }
 
-    private static List<Class<?>> endpoints(ScanResult scan) {
-        return scan.getClassesWithAnnotation(ENDPOINT_ANNOTATION).loadClasses();
+    private static Class<?> loadClass(String name) {
+        try {
+            return Class.forName(name, false,
+                    EndpointGenerationTest.class.getClassLoader());
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException("Unable to load " + name, e);
+        }
+    }
+
+    private static List<Class<?>> endpoints(List<Class<?>> classes) {
+        return classes.stream()
+                .filter(cls -> cls.isAnnotationPresent(Endpoint.class))
+                .toList();
     }
 
     /**
      * The packages which have a test class of their own, matched exactly: a
      * test class covers its own package, never a whole subtree.
      */
-    private static List<String> packagesWithTestClass(ScanResult scan) {
-        return scan.getSubclasses(AbstractFullStackTest.class).getNames()
-                .stream()
-                .filter(name -> !name
-                        .equals(EndpointGenerationTest.class.getName()))
-                .map(EndpointGenerationTest::packageOf).distinct().toList();
+    private static List<String> packagesWithTestClass(List<Class<?>> classes) {
+        return classes.stream()
+                .filter(cls -> cls != AbstractFullStackTest.class
+                        && cls != EndpointGenerationTest.class
+                        && AbstractFullStackTest.class.isAssignableFrom(cls))
+                .map(cls -> packageOf(cls.getName())).distinct().toList();
     }
 
     /**
@@ -263,12 +285,16 @@ public class EndpointGenerationTest extends AbstractFullStackTest {
     }
 
     private static Path moduleDir() {
+        return classesDir().getParent().getParent();
+    }
+
+    private static Path classesDir() {
         try {
             return new ResourceLoader(EndpointGenerationTest.class)
-                    .findTargetDirPath().getParent();
+                    .findTargetPath();
         } catch (URISyntaxException e) {
-            throw new IllegalStateException("Unable to find the module folder",
-                    e);
+            throw new IllegalStateException(
+                    "Unable to find the compiled test classes", e);
         }
     }
 }

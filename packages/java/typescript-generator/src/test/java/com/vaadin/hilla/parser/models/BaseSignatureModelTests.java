@@ -20,7 +20,6 @@ import static com.vaadin.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredM
 import static com.vaadin.hilla.parser.test.helpers.SpecializationChecker.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -39,79 +38,67 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.github.classgraph.BaseTypeSignature;
-import io.github.classgraph.MethodInfo;
-import io.github.classgraph.ScanResult;
 import org.apache.commons.lang3.function.Failable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import com.vaadin.hilla.parser.test.helpers.Source;
-import com.vaadin.hilla.parser.test.helpers.SourceExtension;
 import com.vaadin.hilla.parser.test.helpers.SpecializationChecker;
 import com.vaadin.hilla.parser.utils.Streams;
 
-@ExtendWith(SourceExtension.class)
 public class BaseSignatureModelTests {
     private Context ctx;
 
     @BeforeEach
-    public void setUp(@Source ScanResult source) {
-        ctx = new Context(source);
+    public void setUp() {
+        ctx = new Context();
     }
 
-    @DisplayName("It should have the same hashCode for source and reflection models")
+    @DisplayName("It should have the same hashCode for models of the same origin")
     @Test
-    public void should_HaveSameHashCodeForSourceAndReflectionModels() {
+    public void should_HaveSameHashCodeForModelsOfSameOrigin() {
         var methodName = "getByte";
         var reflectionModel = BaseSignatureModel
                 .of(ctx.getCompleteReflectionOrigin(methodName));
+        var otherReflectionModel = BaseSignatureModel
+                .of(ctx.getCompleteReflectionOrigin(methodName));
         var bareReflectionModel = BaseSignatureModel
                 .of(ctx.getBareReflectionOrigin(methodName));
-        var sourceModel = BaseSignatureModel
-                .of(ctx.getSourceOrigin(methodName));
 
         assertEquals(reflectionModel.hashCode(),
+                otherReflectionModel.hashCode());
+        assertEquals(reflectionModel.hashCode(),
                 bareReflectionModel.hashCode());
-        assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
-        assertEquals(bareReflectionModel.hashCode(), sourceModel.hashCode());
     }
 
-    @DisplayName("It should have source and reflection models equal")
+    @DisplayName("It should have models of the same origin equal")
     @Test
-    public void should_HaveSourceAndReflectionModelsEqual() {
+    public void should_HaveModelsOfSameOriginEqual() {
         var methodName = "getByte";
         var reflectionModel = BaseSignatureModel
                 .of(ctx.getCompleteReflectionOrigin(methodName));
+        var otherReflectionModel = BaseSignatureModel
+                .of(ctx.getCompleteReflectionOrigin(methodName));
         var bareReflectionModel = BaseSignatureModel
                 .of(ctx.getBareReflectionOrigin(methodName));
-        var sourceModel = BaseSignatureModel
-                .of(ctx.getSourceOrigin(methodName));
 
         assertEquals(reflectionModel, reflectionModel);
-        assertEquals(reflectionModel, sourceModel);
-
-        assertEquals(sourceModel, sourceModel);
-        assertEquals(sourceModel, reflectionModel);
+        assertEquals(reflectionModel, otherReflectionModel);
+        assertEquals(otherReflectionModel, reflectionModel);
 
         assertEquals(bareReflectionModel, bareReflectionModel);
 
         // Bare reflection model doesn't have annotations which are essential
         // for equality check
         assertNotEquals(reflectionModel, bareReflectionModel);
-        assertNotEquals(sourceModel, bareReflectionModel);
         assertNotEquals(bareReflectionModel, reflectionModel);
-        assertNotEquals(bareReflectionModel, sourceModel);
 
-        assertNotEquals(sourceModel, new Object());
         assertNotEquals(reflectionModel, new Object());
         assertNotEquals(bareReflectionModel, new Object());
     }
@@ -124,22 +111,15 @@ public class BaseSignatureModelTests {
         switch (kind) {
         case REFLECTION_BARE:
             assertEquals(ctx.getBareReflectionOrigin(methodName), model.get());
-            assertTrue(model.isReflection());
             break;
         case REFLECTION_COMPLETE:
             assertEquals(ctx.getCompleteReflectionOrigin(methodName),
                     model.get());
-            assertTrue(model.isReflection());
-            break;
-        case SOURCE:
-            assertEquals(ctx.getSourceOrigin(methodName), model.get());
-            assertTrue(model.isSource());
             break;
         }
     }
 
     private enum ModelKind {
-        SOURCE("SOURCE"),
         REFLECTION_COMPLETE("REFLECTION (complete)"),
         REFLECTION_BARE("REFLECTION (bare)");
 
@@ -172,19 +152,6 @@ public class BaseSignatureModelTests {
                 Sample.class)
                 .collect(Collectors.toMap(Method::getName,
                         Method::getAnnotatedReturnType));
-        private final Map<String, BaseTypeSignature> sourceOrigins;
-
-        Context(ExtensionContext context) {
-            this(SourceExtension.getSource(context));
-        }
-
-        Context(ScanResult source) {
-            sourceOrigins = getDeclaredMethods(Sample.class, source)
-                    .collect(Collectors.toMap(MethodInfo::getName,
-                            method -> (BaseTypeSignature) method
-                                    .getTypeSignatureOrTypeDescriptor()
-                                    .getResultType()));
-        }
 
         public Annotation getAnnotation() {
             return annotation;
@@ -205,14 +172,6 @@ public class BaseSignatureModelTests {
         public Map<String, AnnotatedType> getCompleteReflectionOrigins() {
             return completeReflectionOrigins;
         }
-
-        public BaseTypeSignature getSourceOrigin(String name) {
-            return sourceOrigins.get(name);
-        }
-
-        public Map<String, BaseTypeSignature> getSourceOrigins() {
-            return sourceOrigins;
-        }
     }
 
     static final class ModelProvider implements ArgumentsProvider {
@@ -232,19 +191,12 @@ public class BaseSignatureModelTests {
                             ModelKind.REFLECTION_COMPLETE, entry.getKey()));
         }
 
-        static Stream<Arguments> getSourceArguments(Context ctx) {
-            return ctx.getSourceOrigins().entrySet().stream()
-                    .map(entry -> Arguments.of(
-                            BaseSignatureModel.of(entry.getValue()),
-                            ModelKind.SOURCE, entry.getKey()));
-        }
-
         @Override
         public Stream<Arguments> provideArguments(ExtensionContext context) {
-            var ctx = new Context(context);
+            var ctx = new Context();
 
             return Streams.combine(getCompleteReflectionArguments(ctx),
-                    getBareReflectionArguments(ctx), getSourceArguments(ctx));
+                    getBareReflectionArguments(ctx));
         }
 
         // BareSignatureModel.Bare is not supposed to be annotated, so we can
@@ -255,10 +207,9 @@ public class BaseSignatureModelTests {
             @Override
             public Stream<Arguments> provideArguments(
                     ExtensionContext context) {
-                var ctx = new Context(context);
+                var ctx = new Context();
 
-                return Streams.combine(getCompleteReflectionArguments(ctx),
-                        getSourceArguments(ctx));
+                return getCompleteReflectionArguments(ctx);
             }
         }
 
@@ -312,12 +263,11 @@ public class BaseSignatureModelTests {
             @Override
             public Stream<Arguments> provideArguments(
                     ExtensionContext context) {
-                var ctx = new Context(context);
+                var ctx = new Context();
 
                 return Streams.combine(
                         getCompleteReflectionArguments(ctx).map(failableInsert),
-                        getBareReflectionArguments(ctx).map(failableInsert),
-                        getSourceArguments(ctx).map(failableInsert));
+                        getBareReflectionArguments(ctx).map(failableInsert));
             }
         }
     }

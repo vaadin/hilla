@@ -18,18 +18,12 @@ package com.vaadin.hilla.parser.models;
 import java.lang.reflect.Field;
 import java.util.Objects;
 
-import io.github.classgraph.FieldInfo;
 import org.jspecify.annotations.NonNull;
 
 public abstract class FieldInfoModel extends AnnotatedAbstractModel
         implements ClassMemberModel {
     private ClassInfoModel owner;
     private SignatureModel type;
-
-    @Deprecated
-    public static FieldInfoModel of(@NonNull FieldInfo origin) {
-        return new FieldInfoSourceModel(Objects.requireNonNull(origin));
-    }
 
     public static FieldInfoModel of(@NonNull Field origin) {
         return new FieldInfoReflectionModel(Objects.requireNonNull(origin));

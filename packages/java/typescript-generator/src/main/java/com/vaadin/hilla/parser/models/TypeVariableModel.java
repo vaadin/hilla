@@ -18,17 +18,11 @@ package com.vaadin.hilla.parser.models;
 import java.lang.reflect.AnnotatedTypeVariable;
 import java.util.Objects;
 
-import io.github.classgraph.TypeVariableSignature;
 import org.jspecify.annotations.NonNull;
 
 public abstract class TypeVariableModel extends AnnotatedAbstractModel
         implements SignatureModel, NamedModel {
     private TypeParameterModel typeParameter;
-
-    @Deprecated
-    public static TypeVariableModel of(@NonNull TypeVariableSignature origin) {
-        return new TypeVariableSourceModel(Objects.requireNonNull(origin));
-    }
 
     public static TypeVariableModel of(@NonNull AnnotatedTypeVariable origin) {
         return new TypeVariableReflectionModel(Objects.requireNonNull(origin));

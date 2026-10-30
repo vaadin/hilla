@@ -17,18 +17,10 @@ package com.vaadin.hilla.parser.models;
 
 import java.util.Objects;
 
-import io.github.classgraph.AnnotationEnumValue;
 import org.jspecify.annotations.NonNull;
 
 public abstract class AnnotationParameterEnumValueModel implements Model {
     private ClassInfoModel classInfo;
-
-    @Deprecated
-    public static AnnotationParameterEnumValueModel of(
-            @NonNull AnnotationEnumValue origin) {
-        return new AnnotationParameterEnumValueSourceModel(
-                Objects.requireNonNull(origin));
-    }
 
     public static AnnotationParameterEnumValueModel of(
             @NonNull Enum<?> origin) {
