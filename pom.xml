@@ -178,7 +178,9 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <!-- TestBench brings an older license-checker that lacks APIs used by Flow -->
+      <!-- TestBench brings an older license-checker that lacks APIs used by Flow.
+           Keep in sync with the license-checker version of Flow 24.4, or remove
+           once TestBench depends on the same version. -->
       <dependency>
         <groupId>com.vaadin</groupId>
         <artifactId>license-checker</artifactId>
