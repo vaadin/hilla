@@ -14,7 +14,8 @@ name: Hilla PR Snapshot
 # Adopted from the workflow of the same name in vaadin/flow. The version is
 # derived from the branch name the same way the feature branch snapshot builds
 # of the other Vaadin repositories derive theirs, so a Hilla snapshot is built
-# against a Flow snapshot of the same name when there is one.
+# against a Flow snapshot, and reads its component versions from a Flow
+# Components branch, of the same name when there is one.
 on:
   pull_request:
     types: [labeled, synchronize]
@@ -159,6 +160,28 @@ jobs:
               ;;
           esac
 
+          # A Flow Components snapshot of the same branch name. Hilla does not
+          # build against Flow Components, but reads the npm versions of the
+          # components from their sources, so it is only paired with such a
+          # snapshot when it can read them from the branch the snapshot was
+          # built from: one with exactly the same name, prefix included, as
+          # the qualifier alone does not tell which branch it was. Without
+          # that branch the npm versions come from the branch of the platform,
+          # and the comment must not hand out a flow-components-bom whose
+          # components the Hilla packages were not built with.
+          candidate="$base.$qualifier-SNAPSHOT"
+          if published flow-components-bom "$candidate"; then
+            if git ls-remote --exit-code --heads https://github.com/vaadin/flow-components.git \
+              "refs/heads/$_HEAD_REF" > /dev/null; then
+              echo "flow-components-version=$candidate" >> "$GITHUB_OUTPUT"
+              echo "flow-components-branch=$_HEAD_REF" >> "$GITHUB_OUTPUT"
+              echo "Pairing with Flow Components $candidate, reading the component npm versions from vaadin/flow-components \`$_HEAD_REF\`" \
+                | tee -a "$GITHUB_STEP_SUMMARY"
+            else
+              echo "Not pairing with Flow Components $candidate: vaadin/flow-components has no branch \`$_HEAD_REF\` to read the component npm versions from" \
+                | tee -a "$GITHUB_STEP_SUMMARY"
+            fi
+          fi
       - name: Set the snapshot version
         env:
           VERSION: ${{ steps.version.outputs.version }}
@@ -179,6 +202,10 @@ jobs:
               -Dproperty=flow.version -DnewVersion="$FLOW_VERSION" -DgenerateBackupPoms=false
           fi
       - name: Build TypeScript
+        env:
+          # Empty unless there is a Flow Components branch to read from, which
+          # the build then falls back to the branch of the platform for.
+          FLOW_COMPONENTS_BRANCH: ${{ steps.version.outputs.flow-components-branch }}
         run: npm run build
       - name: Publish the npm packages
         id: npm
@@ -264,6 +291,7 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
           PLATFORM_VERSION: ${{ steps.version.outputs.platform-version }}
           FLOW_VERSION: ${{ steps.version.outputs.flow-version }}
+          FLOW_COMPONENTS_VERSION: ${{ steps.version.outputs.flow-components-version }}
           DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
         run: |
           marker='<!-- hilla-pr-snapshot -->'
@@ -285,10 +313,12 @@ jobs:
           boms=$(
             bom hilla-bom "$VERSION"
             [ -z "$FLOW_VERSION" ] || bom flow-bom "$FLOW_VERSION"
+            [ -z "$FLOW_COMPONENTS_VERSION" ] || bom flow-components-bom "$FLOW_COMPONENTS_VERSION"
             bom vaadin-bom "$PLATFORM_VERSION"
           )
           paired=""
           [ -z "$FLOW_VERSION" ] || paired="$paired Built against the Flow snapshot \`$FLOW_VERSION\` of the same branch name."
+          [ -z "$FLOW_COMPONENTS_VERSION" ] || paired="$paired Paired with the Flow Components snapshot \`$FLOW_COMPONENTS_VERSION\` of the same branch name."
           # The heredocs are written at the indentation of this block rather
           # than of the branch they sit in, because their content is the
           # comment body verbatim, delimiter included.
