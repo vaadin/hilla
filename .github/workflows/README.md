@@ -27,14 +27,25 @@ The Maven version comes from the branch name — everything up to the last slash
 is dropped, so `fix/my-thing` on a `25.4-SNAPSHOT` branch publishes
 `25.4.my-thing-SNAPSHOT`. That is the scheme the feature branch snapshot builds
 of the other Vaadin repositories use, and the workflow uses it to find their
-snapshots of the same branch name: when the Maven snapshot repository holds a
-Flow snapshot of that version (`flow-bom` `25.4.my-thing-SNAPSHOT` for a branch
-that builds against Flow `25.4-SNAPSHOT`), the snapshot is built against it
-instead of the Flow version of the branch.
+snapshots of the same branch name:
+
+- When the Maven snapshot repository holds a Flow snapshot of that version
+  (`flow-bom` `25.4.my-thing-SNAPSHOT` for a branch that builds against Flow
+  `25.4-SNAPSHOT`), the snapshot is built against it instead of the Flow
+  version of the branch.
+- When it holds a Flow Components snapshot of that version and
+  vaadin/flow-components has a branch with exactly the same name as this one,
+  prefix included, the workflow reads the npm versions of the components from
+  that branch and pairs the snapshot with it. Without such a branch it does
+  not pair at all, even if the Flow Components snapshot exists: the component
+  npm versions then come from the branch of the platform, and the comment
+  leaves the `flow-components-bom` import out rather than hand out components
+  the Hilla packages were not built with. A Flow Components branch that pins
+  npm versions nobody published fails the TypeScript build here as well.
 
 The workflow comments the version on the pull request, with a copy-pasteable
-`hilla-bom` import, the `flow-bom` import of the Flow snapshot it was built
-against, if any, and the matching `vaadin-bom` import
+`hilla-bom` import, the `flow-bom` and `flow-components-bom` imports of the
+snapshots it was paired with, and the matching `vaadin-bom` import
 (`25.4-SNAPSHOT` for the branch above) last, in the order Maven needs for the
 snapshots to win. It edits the same comment on every rebuild.
 
@@ -66,7 +77,7 @@ Configuration:
 | `SNAPSHOT_USERNAME` | organization secret | User the snapshot is deployed as, shared with the other builds that publish. |
 | `SNAPSHOT_PASSWORD` | organization secret | Its password or token. |
 | `MAVEN_SNAPSHOT_DEPLOY_URL` | variable | Address the snapshot is uploaded to, which is the deploy endpoint of the repository rather than `MAVEN_SNAPSHOT_READ_URL` below. Pointing this at the read address is refused with a 403. |
-| `MAVEN_SNAPSHOT_READ_URL` | variable (optional) | Address the pull request comment tells people to resolve from, and the one the Flow snapshot is looked up in. Defaults to `https://maven.vaadin.com/vaadin-prereleases`. |
+| `MAVEN_SNAPSHOT_READ_URL` | variable (optional) | Address the pull request comment tells people to resolve from, and the one the Flow and Flow Components snapshots are looked up in. Defaults to `https://maven.vaadin.com/vaadin-prereleases`. |
 
 The [pkg.pr.new GitHub App](https://github.com/apps/pkg-pr-new) has to be
 installed for this repository, or the npm publish fails. The `snapshot build`
