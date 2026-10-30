@@ -43,11 +43,12 @@ public final class EndpointWriter {
      * in place of the methods, naming both ways a method is left out: not being
      * public, and being inherited from a type which is not exposed. A block
      * comment rather than line comments, so that the export after it cannot end
-     * up commented out whatever the line breaks.
+     * up commented out whatever the line breaks. The Java class is not named,
+     * so that its package does not end up in the frontend bundle.
      */
     private static final String NO_METHODS = """
             /*
-             * {{javaClass}} has no methods the browser can call. Only the public
+             * This endpoint has no methods the browser can call. Only the public
              * methods declared in the class itself or in a superclass or
              * interface annotated with @EndpointExposed are generated.
              */""";
@@ -99,9 +100,7 @@ public final class EndpointWriter {
         // the developer looking for the methods learns why there are none
         if (endpoint.methods().isEmpty()) {
             return GeneratedFile.of(endpoint.name(), new ImportRegistry(),
-                    Template.of(NO_METHODS)
-                            .with("javaClass", endpoint.javaClass()).fill()
-                            + "\n" + GeneratedFile.exportList(List.of()));
+                    NO_METHODS + "\n" + GeneratedFile.exportList(List.of()));
         }
 
         var imports = new ImportRegistry();
