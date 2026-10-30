@@ -63,6 +63,7 @@
     "micromatch": "^4.0.5",
     "mocha": "^10.3.0",
     "nx": "^18.0.4",
+    "pkg-pr-new": "0.0.91",
     "postcss": "^8.4.35",
     "prettier": "3.2.5",
     "simple-git-hooks": "^2.9.0",
