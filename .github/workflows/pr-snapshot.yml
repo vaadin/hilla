@@ -1,0 +1,355 @@
+name: Hilla PR Snapshot
+
+# Builds and publishes a Hilla snapshot for a pull request, so that the change
+# can be tried out in an application before it is merged. The build is opt-in
+# per pull request: it runs once the "snapshot build" label is added and then
+# again for every commit pushed while the label is there.
+#
+# A Hilla snapshot is two things that have to match: the Java artifacts in a
+# Maven repository, and the TypeScript packages the `hilla` jar tells Flow to
+# install. The packages are published as pkg.pr.new previews, which are
+# addressed by commit, and the jar is built to pin exactly those previews, so
+# the Java and the TypeScript of the snapshot always come from the same commit.
+#
+# Adopted from the workflow of the same name in vaadin/flow. The version is
+# derived from the branch name the same way the feature branch snapshot builds
+# of the other Vaadin repositories derive theirs, so a Hilla snapshot is built
+# against a Flow snapshot of the same name when there is one.
+on:
+  pull_request:
+    types: [labeled, synchronize]
+    # Deliberately unfiltered by base branch: a snapshot is as useful for a pull
+    # request against a maintenance branch as for one against main. That branch
+    # has to carry its own copy of this file for its pull requests, like
+    # validation.yml.
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  # One snapshot per pull request, superseded by the next push: only the newest
+  # commit is worth publishing, and the version is the same for all of them.
+  group: ${{ github.workflow }}-${{ github.event.number }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  # Where the snapshot is uploaded, which is not the address below that it is
+  # read from. A variable rather than a secret: masking it would buy nothing
+  # and would only make the upload lines in the run log unreadable.
+  MAVEN_SNAPSHOT_DEPLOY_URL: ${{ vars.MAVEN_SNAPSHOT_DEPLOY_URL }}
+  # Where the snapshot is read from afterwards, which is not the same address:
+  # uploads go to the repository itself, resolving goes through the public one
+  # in front of it. This is the one the pull request comment hands out, and the
+  # one the Flow and Flow Components snapshots are looked up in.
+  MAVEN_SNAPSHOT_READ_URL: ${{ vars.MAVEN_SNAPSHOT_READ_URL || 'https://maven.vaadin.com/vaadin-prereleases' }}
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+  _HEAD_REF: ${{ github.head_ref }}
+  _HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+  _PR_NUMBER: ${{ github.event.number }}
+
+jobs:
+  snapshot:
+    name: Snapshot
+    # A deploy needs the credentials, and secrets are only handed to pull
+    # requests from a branch of this repository, never to a fork. Which is also
+    # the access check: pushing that branch takes write access to the repository
+    # and applying the label takes at least triage access, so a snapshot cannot
+    # be triggered from the outside. Fork pull requests are skipped entirely -
+    # labeling one does nothing.
+    #
+    # The label has to be present for both event types, and a `labeled` event
+    # for some other label must not start a build of its own.
+    if: >-
+      !github.event.pull_request.head.repo.fork
+      && contains(github.event.pull_request.labels.*.name, 'snapshot build')
+      && (github.event.action != 'labeled' || github.event.label.name == 'snapshot build')
+    timeout-minutes: 90
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check configuration
+        # The address is a variable and the credentials are secrets, but an
+        # unset one of either ends the same way: an upload that fails after the
+        # whole build, on something the step summary can say in a line here.
+        env:
+          SNAPSHOT_USERNAME: ${{ secrets.SNAPSHOT_USERNAME }}
+          SNAPSHOT_PASSWORD: ${{ secrets.SNAPSHOT_PASSWORD }}
+        run: |
+          [ -z "$MAVEN_SNAPSHOT_DEPLOY_URL" ] || [ -z "$SNAPSHOT_USERNAME" ] || [ -z "$SNAPSHOT_PASSWORD" ] \
+            && echo "🚫 The **MAVEN_SNAPSHOT_DEPLOY_URL** variable or the **SNAPSHOT_USERNAME** / **SNAPSHOT_PASSWORD** secrets are not defined, check the configuration of **${{ github.repository }}**" \
+            | tee -a "$GITHUB_STEP_SUMMARY" && exit 1 || exit 0
+      - name: Checkout Project Code
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ env._HEAD_SHA }}
+      - name: Setup
+        uses: ./.github/actions/setup
+      - name: Set up Maven deployment
+        # Again, on top of the JDK the setup action installed, only for the
+        # settings.xml server entry the deploy below authenticates with; the
+        # values are read from the environment at that point.
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          server-id: vaadin-snapshots
+          server-username: SNAPSHOT_USERNAME
+          server-password: SNAPSHOT_PASSWORD
+      - name: Compute the snapshot version
+        id: version
+        run: |
+          # The default shell has -e but not pipefail, and the versions below
+          # are read through a pipe: without this a failed mvn would be a silent
+          # empty string rather than a failed step.
+          set -o pipefail
+          evaluate() {
+            mvn -q -N -B -ntp org.apache.maven.plugins:maven-help-plugin:3.5.2:evaluate \
+              -Dexpression="$1" -DforceStdout | tail -1
+          }
+          # Answers whether the repository the snapshots are read from holds
+          # the given version of an artifact.
+          published() {
+            curl -sfL -o /dev/null "$MAVEN_SNAPSHOT_READ_URL/com/vaadin/$1/$2/maven-metadata.xml"
+          }
+          # Everything up to the last slash is a prefix like feature/, fix/ or
+          # issues/ and is dropped, leaving the branch name itself as the
+          # qualifier: fix/my-thing -> 25.4.my-thing-SNAPSHOT.
+          qualifier=$(printf '%s' "${_HEAD_REF##*/}" | sed -E 's/[^A-Za-z0-9.-]+/-/g; s/^[.-]+//; s/[.-]+$//')
+          if [ -z "$qualifier" ]; then
+            echo "🚫 Branch name \`$_HEAD_REF\` has no character a Maven version can carry" \
+              | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          base=$(evaluate project.version | sed 's/-SNAPSHOT$//')
+          # Anything else than a version means the lookup printed something
+          # unexpected. Publishing what that composes into would be worse than
+          # failing here: it deploys under a name nobody asked for.
+          case "$base" in
+            [0-9]*.[0-9]*) ;;
+            *)
+              echo "🚫 Read \`$base\` from the root pom instead of a version" \
+                | tee -a "$GITHUB_STEP_SUMMARY"
+              exit 1
+              ;;
+          esac
+          echo "version=$base.$qualifier-SNAPSHOT" >> "$GITHUB_OUTPUT"
+          echo "Building $base.$qualifier-SNAPSHOT" | tee -a "$GITHUB_STEP_SUMMARY"
+          # The platform shares Hilla's major and minor version, so the
+          # vaadin-bom to pair the snapshot with is the snapshot of the branch
+          # it is built on: 25.4.my-thing-SNAPSHOT goes with vaadin-bom
+          # 25.4-SNAPSHOT.
+          echo "platform-version=$base-SNAPSHOT" >> "$GITHUB_OUTPUT"
+
+          # A Flow snapshot of the same branch name, which the snapshot is then
+          # built against instead of the Flow version of the branch. Only
+          # looked for when the branch builds against a Flow snapshot itself:
+          # a released Flow version has no feature branch snapshots next to it.
+          flow=$(evaluate flow.version)
+          case "$flow" in
+            *-SNAPSHOT)
+              candidate="${flow%-SNAPSHOT}.$qualifier-SNAPSHOT"
+              if published flow-bom "$candidate"; then
+                echo "flow-version=$candidate" >> "$GITHUB_OUTPUT"
+                echo "Using Flow $candidate" | tee -a "$GITHUB_STEP_SUMMARY"
+              fi
+              ;;
+          esac
+
+      - name: Set the snapshot version
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          FLOW_VERSION: ${{ steps.version.outputs.flow-version }}
+        # processAllModules is what reaches hilla-bom: its parent is
+        # vaadin-parent rather than the root, and without the flag the plugin
+        # leaves such a module at the version it has. The version is set in
+        # the poms rather than passed on the command line because the Gradle
+        # plugin reads both from them.
+        #
+        # The backup poms are only in the way here, the checkout is thrown away
+        # at the end of the job.
+        run: |
+          mvn -q -B -ntp org.codehaus.mojo:versions-maven-plugin:2.23.0:set \
+            -DnewVersion="$VERSION" -DprocessAllModules=true -DgenerateBackupPoms=false
+          if [ -n "$FLOW_VERSION" ]; then
+            mvn -q -N -B -ntp org.codehaus.mojo:versions-maven-plugin:2.23.0:set-property \
+              -Dproperty=flow.version -DnewVersion="$FLOW_VERSION" -DgenerateBackupPoms=false
+          fi
+      - name: Build TypeScript
+        run: npm run build
+      - name: Publish the npm packages
+        id: npm
+        # A single call publishes every package, so that pkg.pr.new rewrites
+        # their dependencies on each other to the previews of the same commit.
+        #
+        # --no-compact keeps the URLs in one form, with the full commit hash,
+        # which is the form those dependencies use. The jar below has to pin
+        # that exact form, or npm installs a second copy of a package. The
+        # comment of pkg.pr.new itself is turned off: the one of this workflow
+        # below lists the packages next to the Maven coordinates.
+        #
+        # The CLI is a root devDependency, run from the node_modules the setup
+        # action installed from the lockfile with --ignore-scripts, rather than
+        # through npx, which would download whatever it resolves and run that.
+        run: |
+          node_modules/.bin/pkg-pr-new publish './packages/ts/*' --no-compact --comment=off
+      - name: Pin the npm packages in the jar
+        # The `hilla` jar lists the TypeScript packages Flow adds to an
+        # application, at the version of the packages in this repository,
+        # which for a pull request is a version nobody published. They are
+        # pointed at the previews published above instead.
+        #
+        # A listed package that is not in packages/ts was not published, and
+        # pinning it would hand applications a URL that does not resolve.
+        run: |
+          set -o pipefail
+          published=$(jq -r .name packages/ts/*/package.json | sort)
+          for file in packages/java/hilla/src/main/resources/com/vaadin/flow/server/frontend/dependencies/hilla/components/*/package.json; do
+            missing=$(jq -r '[.dependencies, .devDependencies] | map(keys? // []) | add | .[] | select(startswith("@vaadin/hilla-"))' "$file" \
+              | sort | comm -23 - <(echo "$published"))
+            if [ -n "$missing" ]; then
+              echo "🚫 $file lists $(tr "\n" " " <<< "$missing")that packages/ts does not publish" | tee -a "$GITHUB_STEP_SUMMARY"
+              exit 1
+            fi
+            jq --arg prefix "https://pkg.pr.new/${{ github.repository }}/" --arg sha "$_HEAD_SHA" '
+              def pin: with_entries(if .key | startswith("@vaadin/hilla-") then .value = "\($prefix)\(.key)@\($sha)" else . end);
+              (if has("dependencies") then .dependencies |= pin else . end)
+              | (if has("devDependencies") then .devDependencies |= pin else . end)
+            ' "$file" > "$file.pinned"
+            mv "$file.pinned" "$file"
+            cat "$file"
+          done
+      - name: Build and deploy the snapshot
+        id: deploy
+        env:
+          SNAPSHOT_USERNAME: ${{ secrets.SNAPSHOT_USERNAME }}
+          SNAPSHOT_PASSWORD: ${{ secrets.SNAPSHOT_PASSWORD }}
+        # -Drelease leaves the test applications and hilla-scripts out of the
+        # reactor: neither is ever published. The sources and javadoc jars are
+        # attached by every module anyway, so the snapshot carries what a
+        # release carries.
+        #
+        # deployAtEnd holds every upload back until the whole reactor has built.
+        # A push cancels the run in progress, and a cancel between two modules
+        # would otherwise leave the version half published: the modules already
+        # uploaded stay in the repository under the same version the next run
+        # publishes, and if that run fails, whoever resolves the version gets a
+        # mixed set of modules with nothing saying so.
+        run: |
+          if ! mvn deploy -B -ntp -e -DskipTests -Drelease \
+            -DdeployAtEnd=true \
+            -DaltDeploymentRepository="vaadin-snapshots::${MAVEN_SNAPSHOT_DEPLOY_URL}"; then
+            # A refused upload arrives as a stack trace ending in an HTTP status,
+            # a couple of hundred lines after the last thing that was built, and
+            # says nothing about which of the three settings is wrong. It is the
+            # failure to expect while a repository is being taken into use.
+            echo "🚫 The snapshot build failed. A **401** or **403** at the end of the log means the build itself was fine and the upload was refused: a 401 is usually a wrong or expired **SNAPSHOT_PASSWORD**, a 403 means **SNAPSHOT_USERNAME** is not allowed to deploy there, and either can also be **MAVEN_SNAPSHOT_DEPLOY_URL** pointing at the address the repository is read from rather than its deploy endpoint." \
+              | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+      - name: Comment the snapshot version on the pull request
+        # Runs after a failed build too. Otherwise the comment of an earlier
+        # run keeps announcing a published version while the commit that was
+        # meant to replace it never made it into the repository, with nothing
+        # on the pull request saying so. Skipped on a cancel, where the run
+        # that superseded this one is about to write the comment itself, and
+        # when there is no version yet either, where the run failed before it
+        # had anything to say about a snapshot.
+        if: ${{ !cancelled() && steps.version.outputs.version != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+          PLATFORM_VERSION: ${{ steps.version.outputs.platform-version }}
+          FLOW_VERSION: ${{ steps.version.outputs.flow-version }}
+          DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
+        run: |
+          marker='<!-- hilla-pr-snapshot -->'
+          run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          # One import per BOM, in the order Maven needs: it takes the first
+          # version it finds for an artifact, so the snapshots go before the
+          # vaadin-bom that would otherwise decide their versions.
+          bom() {
+          cat <<EOF
+              <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>$1</artifactId>
+                <version>$2</version>
+                <type>pom</type>
+                <scope>import</scope>
+              </dependency>
+          EOF
+          }
+          boms=$(
+            bom hilla-bom "$VERSION"
+            [ -z "$FLOW_VERSION" ] || bom flow-bom "$FLOW_VERSION"
+            bom vaadin-bom "$PLATFORM_VERSION"
+          )
+          paired=""
+          [ -z "$FLOW_VERSION" ] || paired="$paired Built against the Flow snapshot \`$FLOW_VERSION\` of the same branch name."
+          # The heredocs are written at the indentation of this block rather
+          # than of the branch they sit in, because their content is the
+          # comment body verbatim, delimiter included.
+          if [ "$DEPLOY_OUTCOME" = success ]; then
+          cat > comment.md <<EOF
+          $marker
+          ### 📦 Snapshot published
+
+          \`$VERSION\` — built from ${_HEAD_SHA:0:7} ([run]($run_url)).$paired
+
+          Built without running tests. Look at the checks on this pull request before relying on it.
+
+          Every new commit on this branch republishes it while the \`snapshot build\` label is there. Add \`-U\` to pick the newest Maven build up; the TypeScript packages need the step at the end of the instructions below on every rebuild.
+
+          <details><summary>How to use it</summary>
+          EOF
+          else
+          cat > comment.md <<EOF
+          $marker
+          ### 🚫 Snapshot build failed
+
+          \`$VERSION\` was not published: the build from ${_HEAD_SHA:0:7} failed ([run]($run_url)). Anything the repository already holds under that version is from an earlier commit of this branch.
+
+          <details><summary>How to use that earlier build, if there is one</summary>
+          EOF
+          fi
+          # The same coordinates either way, and worth keeping on a failure:
+          # they are what reaches the build this one did not replace.
+          cat >> comment.md <<EOF
+
+          \`\`\`xml
+          <repository>
+            <id>vaadin-snapshots</id>
+            <url>$MAVEN_SNAPSHOT_READ_URL</url>
+            <snapshots><enabled>true</enabled></snapshots>
+          </repository>
+
+          <dependencyManagement>
+            <dependencies>
+          $boms
+            </dependencies>
+          </dependencyManagement>
+          \`\`\`
+
+          Replace the application's own \`vaadin-bom\` import with these rather than adding them next to it: with two \`vaadin-bom\` imports, the first one decides the platform version. Keep the order: Maven takes the first version it finds for an artifact, so \`vaadin-bom\` has to come last. \`$PLATFORM_VERSION\` is the unreleased platform snapshot of the same minor version as this one, so this also moves the application off its released platform version.
+
+          The jar pins the TypeScript packages to the pkg.pr.new previews of the same commit, e.g. \`https://pkg.pr.new/${{ github.repository }}/@vaadin/hilla-frontend@$_HEAD_SHA\`. Flow writes them to \`package.json\` only where it has no version of its own there yet: an application that already has \`@vaadin/hilla-*\` versions, including the previews of an earlier build of this pull request, keeps them. To move to the previews of this build, remove the \`@vaadin/hilla-*\` entries from both \`dependencies\` and the \`vaadin\` section of \`package.json\` before building the application. Removing them from \`dependencies\` alone leaves them out altogether.
+          </details>
+          EOF
+          # One comment per pull request, edited in place, so a series of pushes
+          # does not bury the pull request in notifications. --jq runs once per
+          # page under --paginate, so each page yields at most one id and the
+          # first of those is the comment; two would make the PATCH a 404. The
+          # trimming is a parameter expansion rather than a pipe, so a failed
+          # listing still ends the step instead of reading as "none yet" and
+          # posting a second comment.
+          existing=$(gh api "repos/${{ github.repository }}/issues/$_PR_NUMBER/comments" --paginate \
+            --jq "[.[] | select(.body | startswith(\"$marker\")) | .id] | first // empty")
+          existing=${existing%%$'\n'*}
+          if [ -n "$existing" ]; then
+            gh api --method PATCH "repos/${{ github.repository }}/issues/comments/$existing" -F body=@comment.md
+          else
+            gh api "repos/${{ github.repository }}/issues/$_PR_NUMBER/comments" -F body=@comment.md
+          fi
