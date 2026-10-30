@@ -273,8 +273,6 @@ jobs:
           TB_LICENSE=${{secrets.TB_LICENSE}}
           mkdir -p ~/.vaadin/
           echo '{"username":"'`echo $TB_LICENSE | cut -d / -f1`'","proKey":"'`echo $TB_LICENSE | cut -d / -f2`'"}' > ~/.vaadin/proKey
-      # Unlike on main, a failing IT gets two more chances here: a maintenance
-      # branch only takes fixes, so flakiness it surfaces is not worked on.
       - name: Verify
         run: |
           (
@@ -282,7 +280,6 @@ jobs:
             mvn -B -am -ntp -fae \
               -Dfailsafe.forkCount=4 \
               -Dcom.vaadin.testbench.Parameters.testsInParallel=5 \
-              -Dfailsafe.rerunFailingTestsCount=2 \
               -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \
               -Dmaven.wagon.http.retryHandler.count=3 \
               -P\!it-modules \
@@ -437,8 +434,6 @@ jobs:
           TB_LICENSE=${{secrets.TB_LICENSE}}
           mkdir -p ~/.vaadin/
           echo '{"username":"'`echo $TB_LICENSE | cut -d / -f1`'","proKey":"'`echo $TB_LICENSE | cut -d / -f2`'"}' > ~/.vaadin/proKey
-      # Unlike on main, a failing IT gets two more chances here: a maintenance
-      # branch only takes fixes, so flakiness it surfaces is not worked on.
       - name: Verify
         run: |
           (
@@ -446,7 +441,6 @@ jobs:
             mvn -B -am -ntp -fae \
               -Dfailsafe.forkCount=4 \
               -Dcom.vaadin.testbench.Parameters.testsInParallel=5 \
-              -Dfailsafe.rerunFailingTestsCount=2 \
               -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \
               -Dmaven.wagon.http.retryHandler.count=3 \
               -P\!it-modules \
