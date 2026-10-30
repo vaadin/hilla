@@ -1,7 +1,5 @@
-import { BooleanModel, NumberModel, EnumModel, type Enum, $enum } from '@vaadin/hilla-models';
+import { BooleanModel, NumberModel, EnumModel, type Enum, $enum, type Model } from '@vaadin/hilla-models';
 import isNumeric from 'validator/es/lib/isNumeric.js';
-import { AbstractModel } from './Models.js';
-import type { ProvisionalModel } from './ProvisionalModel.js';
 import type { StringConverter } from './StringConverter.js';
 
 function toString(this: void, value: number | string | boolean | undefined): string {
@@ -32,11 +30,7 @@ const numberStringConverter: StringConverter<number> = {
 
 const enumStringConverters = new WeakMap<EnumModel<typeof Enum>, StringConverter<typeof Enum>>();
 
-export function getStringConverter<V>(model: ProvisionalModel<V>): StringConverter<V> | undefined {
-  if (model instanceof AbstractModel) {
-    return undefined;
-  }
-
+export function getStringConverter<V>(model: Model<V>): StringConverter<V> | undefined {
   if (model instanceof BooleanModel) {
     return booleanStringConverter as StringConverter<V>;
   }

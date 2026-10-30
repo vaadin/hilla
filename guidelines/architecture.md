@@ -3,6 +3,21 @@
 How the core pieces of Hilla fit together, and what to keep in mind when
 touching them.
 
+The more involved parts have their own architecture notes next to the code:
+
+| Subsystem                       | Note                                                                                            |
+| ------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Parser and TypeScript generator | [`typescript-generator/ARCHITECTURE.md`](../packages/java/typescript-generator/ARCHITECTURE.md) |
+| Running the generation          | [`engine-core/ARCHITECTURE.md`](../packages/java/engine-core/ARCHITECTURE.md)                   |
+| Form models                     | [`models/ARCHITECTURE.md`](../packages/ts/models/ARCHITECTURE.md)                               |
+| Form binder                     | [`lit-form/ARCHITECTURE.md`](../packages/ts/lit-form/ARCHITECTURE.md)                           |
+| Form binder in React            | [`react-form/ARCHITECTURE.md`](../packages/ts/react-form/ARCHITECTURE.md)                       |
+| Endpoint calls and push         | [`frontend/ARCHITECTURE.md`](../packages/ts/frontend/ARCHITECTURE.md)                           |
+| File router                     | [`file-router/ARCHITECTURE.md`](../packages/ts/file-router/ARCHITECTURE.md)                     |
+| CRUD components and services    | [`react-crud/ARCHITECTURE.md`](../packages/ts/react-crud/ARCHITECTURE.md)                       |
+| Internationalization runtime    | [`react-i18n/ARCHITECTURE.md`](../packages/ts/react-i18n/ARCHITECTURE.md)                       |
+| Authentication state in React   | [`react-auth/ARCHITECTURE.md`](../packages/ts/react-auth/ARCHITECTURE.md)                       |
+
 ## What Vaadin Flow provides
 
 Hilla applications don't use Flow's server-side UI, but many of the parts they
@@ -69,7 +84,7 @@ methods are exposed through the endpoints that extend it.
 The TypeScript of the endpoints is generated in Java, by
 `packages/java/typescript-generator`:
 
-1. The parser walks the browser callable classes with ClassGraph, and its
+1. The parser walks the browser callable classes with reflection, and its
    plugins say what they find: the endpoints, their methods and the types
    they send (`backbone`), nullability (`nonnull`), what the validation and
    persistence annotations say about a value (`model`), polymorphic types
@@ -82,8 +97,11 @@ The TypeScript of the endpoints is generated in Java, by
 Every entry point — the Maven goal, the Gradle task, the Flow build task in
 `engine-runtime` and the development server — runs the generation through
 `TypeScriptProcessor.generate`. Do not add a second path that writes generated
-files. The generator [README](../packages/java/typescript-generator/README.md)
-describes the model, the writers and the tests in detail.
+files. The [parser and generator note](../packages/java/typescript-generator/ARCHITECTURE.md)
+describes the walk, the plugins, the model and the writers; the generator
+[README](../packages/java/typescript-generator/README.md) describes the tests,
+and the [engine note](../packages/java/engine-core/ARCHITECTURE.md) how each
+entry point gets there.
 
 ## Nullability
 
@@ -125,7 +143,8 @@ Hilla does not use it.
 An endpoint method returning a `Flux` or an `EndpointSubscription` sends a
 series of values instead of returning one. These go over a WebSocket connection
 (`PushEndpoint`, `PushMessageHandler` on the server, `FluxConnection` in
-`@vaadin/hilla-frontend`), not through `EndpointController`.
+`@vaadin/hilla-frontend`), not through `EndpointController`. See
+[`frontend/ARCHITECTURE.md`](../packages/ts/frontend/ARCHITECTURE.md).
 
 ## Full-stack signals
 
@@ -135,20 +154,34 @@ and `@vaadin/hilla-react-signals` on the client. The generator maps the signal
 types an endpoint returns to their client-side counterparts through the stand-in
 types in `runtime-plugin-transfertypes`.
 
+## Forms
+
+The generator writes a model for every type an endpoint sends, built with
+`@vaadin/hilla-models`: runtime reflection data about the Java type, its
+properties and its constraints. The binder in `@vaadin/hilla-lit-form` holds a
+form's value, validation and dirty state against such a model, and
+`@vaadin/hilla-react-form` binds it to React; `@vaadin/hilla-react-crud` reads
+the same models to build grids and forms. See the notes on
+[models](../packages/ts/models/ARCHITECTURE.md), the
+[binder](../packages/ts/lit-form/ARCHITECTURE.md) and its
+[React hooks](../packages/ts/react-form/ARCHITECTURE.md).
+
 ## Routing
 
 Client-side views are routed by `@vaadin/hilla-file-router`, whose Vite plugin
 turns the files under the views folder into routes. On the server, the
 `route` package unifies those routes with server-side Flow routes, and applies
-the access control of the client views.
+the access control of the client views. See
+[`file-router/ARCHITECTURE.md`](../packages/ts/file-router/ARCHITECTURE.md).
 
 ## Hotswap in development mode
 
 When classes change while the application runs, `Hotswapper` (a
 `VaadinHotswapper`) decides whether the change affects the endpoints — a class
 used in an endpoint changed, or an endpoint annotation was added — and asks
-`EndpointCodeGenerator` to regenerate. Getting the regenerated files into the
-browser is Vite's job.
+`EndpointCodeGenerator` to regenerate (see the
+[engine note](../packages/java/engine-core/ARCHITECTURE.md)). Getting the
+regenerated files into the browser is Vite's job.
 
 The rule everything follows: hotswap re-runs the real generator, and never
 derives what a generated file contains on its own. A second implementation

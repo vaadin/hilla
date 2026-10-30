@@ -1,4 +1,4 @@
-import { _enum, type EnumModel } from '@vaadin/hilla-lit-form';
+import { $enum, type Enum, type EnumModel } from '@vaadin/hilla-models';
 import { DatePicker } from '@vaadin/react-components/DatePicker.js';
 import type { GridColumnProps } from '@vaadin/react-components/GridColumn.js';
 import { Item } from '@vaadin/react-components/Item.js';
@@ -208,7 +208,7 @@ export function NumberHeaderFilter(): ReactElement {
 export function EnumHeaderFilter(): ReactElement {
   const { filterValue, updateFilter } = useFilterState(Matcher.EQUALS);
   const context = useContext(ColumnContext)!;
-  const model = context.propertyInfo.model as EnumModel;
+  const model = context.propertyInfo.model as EnumModel<typeof Enum>;
   const options = [
     {
       value: '',
@@ -216,7 +216,7 @@ export function EnumHeaderFilter(): ReactElement {
     },
     // A filter is resolved on the server by the name of the constant, not by
     // the value the constant is sent as
-    ...Object.keys(model[_enum]).map((name) => ({
+    ...Object.keys(model[$enum]).map((name) => ({
       label: convertToTitleCase(name),
       value: name,
     })),

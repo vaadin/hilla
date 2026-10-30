@@ -2,93 +2,46 @@
 
 This module consolidates the Java-to-TypeScript code generation functionality for Hilla. It walks the Java classes annotated with `@BrowserCallable` and writes the type-safe TypeScript the browser calls them through.
 
+> [!IMPORTANT]
+> The Java API of this module is **not public API**. It is used internally by
+> Hilla: by the development mode server and the production build (the Maven
+> plugin, the Gradle plugin and the Flow build tasks, through
+> `TypeScriptProcessor.generate`), and by `hilla-endpoint` while it serves
+> endpoint calls. Every class, method and package in it, including
+> `com.vaadin.hilla.parser.*` and `com.vaadin.hilla.generator.*`, may change
+> or be removed in any release, minor and maintenance ones included, without
+> notice. Do not depend on it from application code or third-party libraries.
+> Its entry points (`Parser`, `Plugin`, `AbstractPlugin`, `PluginConfiguration`
+> and `TypeScriptWriter`) are marked `@Deprecated` so that such use gets a
+> compiler warning, not because they are going away.
+>
+> The exceptions are
+> `com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory`, which an
+> application implements and registers as a bean with the
+> `endpointMapperFactory` qualifier to customize how endpoint values are
+> serialized, and `com.vaadin.hilla.parser.jackson.ByteArrayModule`, which a
+> factory building its mapper from scratch registers to keep `byte[]` sent as
+> an array of numbers. They remain public API.
+
+For how the parser and the generator work, see [ARCHITECTURE.md](ARCHITECTURE.md).
+
 ## What's Inside
 
-The module is made of these parts:
-
-- **parser-jvm-core** - Core parsing infrastructure using ClassGraph
-- **parser-jvm-utils** - Jackson and reflection utilities
-- **parser-jvm-test-utils** - Shared testing utilities
-- **parser-jvm-plugin-backbone** - The walk over the endpoints, their methods and the types they send
-- **parser-jvm-plugin-model** - What the validation and persistence annotations say about a value
-- **parser-jvm-plugin-nonnull** - Nullability analysis for Java
-- **parser-jvm-plugin-nonnull-kotlin** - Kotlin nullability support
-- **parser-jvm-plugin-subtypes** - Polymorphic type handling
-- **parser-jvm-plugin-transfertypes** - Data transfer object processing
-
-## Generating TypeScript in Java
-
-The TypeScript of the endpoints is written here, in Java.
-`com.vaadin.hilla.generator.model` holds what the writers need as plain
-records, with the questions a Java type raises, such as whether a value can be
-absent, already answered. It is built by a plugin while the parser walks the
-browser callable classes, which is what lets it keep the Java type each value
-comes from, so that a date, an instant and a string are told apart. The model
-exists only while a generation runs; nothing writes it to a file.
-
-`com.vaadin.hilla.generator.typescript` writes the files from that model, by
-filling in text templates, as nothing needs the TypeScript to be parsed: the
-client, the endpoints, the barrel, the types they refer to, the models a form
-binds those types through, with what the annotations of the validation API say
-a value has to satisfy and what the ones of the persistence API say it is, the
-unions saying which subtype a value of a polymorphic type is, the methods
-sending a series of values rather than returning one, the types it refers to by
-name rather than declaring, such as a file or a signal, and the signals a value
-is shared through. `TypeScriptWriter` turns one whole `Generation` into those
-files, and `OutputFolder` puts them where the application reads them,
-replacing what the run before it wrote and leaving alone what it did not.
-
-A build or a development server writes it all from the classes the parser has
-just walked, in the task which walks them: that is the run which has what the
-writers need. The Maven goal, the Gradle task, the Flow task and the
-development server all do it through `TypeScriptProcessor.generate`.
-
-The TypeScript of the applications the integration tests run is compiled by
-their own frontend build, which is where the generated files are type checked
-against the packages they import from.
-
-## Architecture
-
-### Core Components
-
-- **Plugin System**: Extensible plugin architecture for the walk over the classes
-- **Model**: What the writers need, collected while the walk happens
-- **Writers**: The TypeScript files, filled in from text templates
-
-### Package Structure
-
-```
-com.vaadin.hilla.generator
-├── model/             - What the generator needs to know, as plain records,
-│                        built from the classes while the parser walks them
-└── typescript/        - Writes the TypeScript files
-
-com.vaadin.hilla.parser
-├── core/              - Core parsing infrastructure
-├── models/            - What a Java class, method or signature says about itself
-└── plugins/           - Plugin implementations
-    ├── backbone/      - The endpoints, their methods and the types they send
-    ├── model/         - What the annotations of a value say about it
-    ├── nonnull/       - Nullability analysis
-    │   └── kotlin/    - Kotlin-specific nullability (Kotlin source)
-    ├── subtypes/      - Polymorphic types
-    └── transfertypes/ - DTO processing
-```
+- **`com.vaadin.hilla.parser`** - The walk over the browser callable classes, and its plugins:
+  - `backbone` - The endpoints, their methods and the types they send
+  - `model` - What the validation and persistence annotations say about a value
+  - `nonnull` - Nullability, for Java and Kotlin
+  - `subtypes` - Polymorphic types
+  - `transfertypes` - Types mapped to their stand-ins, and the `MultipartFile` check
+- **`com.vaadin.hilla.generator`** - The model the writers need, and the writers of the TypeScript files
 
 ## Dependencies
 
-### External Dependencies
-- **ClassGraph** - Fast classpath scanning
 - **Jackson** - Reads what a class serializes as, and the annotations of it
 - **Kotlin** - Kotlin reflection and standard library for Kotlin support
+- **ClassGraph** - The source models, which only the tests use
 - **Spring Data Commons** - For transfer type handling
 - **Vaadin Flow** - Core Flow server APIs
-
-### Downstream Consumers
-- `hilla-engine-core` - Orchestrates code generation
-- `hilla-engine-runtime` - Runtime code generation
-- `hilla-maven-plugin` - Maven build integration
-- `hilla-endpoint` - Endpoint processing
 
 ## Tests
 
@@ -150,6 +103,10 @@ of what the generator produces and must always be reviewed.
 
 The tests need nothing but Java: the TypeScript is written here.
 
+The TypeScript of the applications the integration tests run is compiled by
+their own frontend build, which is where the generated files are type checked
+against the packages they import from.
+
 ## Build
 
 ```bash
@@ -162,13 +119,3 @@ mvn test
 # Format code
 mvn spotless:apply
 ```
-
-## Migration Notes
-
-This module was created by consolidating 9 separate `parser-jvm-*` modules to:
-- Simplify the build structure
-- Reduce inter-module dependencies
-- Improve maintainability
-- Speed up builds
-
-All package names remain unchanged (`com.vaadin.hilla.parser.*`), so existing code using these classes should continue to work with only a dependency update.

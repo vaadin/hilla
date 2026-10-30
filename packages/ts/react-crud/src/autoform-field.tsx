@@ -1,5 +1,5 @@
-import { _enum, type ProvisionalModel, type Validator } from '@vaadin/hilla-lit-form';
-import type { Enum, EnumModel } from '@vaadin/hilla-models';
+import type { Validator } from '@vaadin/hilla-lit-form';
+import { $enum, type Enum, type EnumModel, type Model } from '@vaadin/hilla-models';
 import type { FieldDirectiveResult, UseFormResult } from '@vaadin/hilla-react-form';
 import { useFormPart } from '@vaadin/hilla-react-form';
 import { Checkbox } from '@vaadin/react-components/Checkbox.js';
@@ -143,7 +143,7 @@ type CommonFieldProps = Pick<
 >;
 
 type FieldRendererProps = Readonly<{
-  model: ProvisionalModel;
+  model: Model;
   field: FieldDirectiveResult;
   element?: JSX.Element;
   fieldProps: CommonFieldProps;
@@ -194,7 +194,7 @@ function AutoFormEnumField(props: FieldRendererProps) {
   const enumModel = props.model as EnumModel<typeof Enum>;
   // The value is what the server sends for a constant, which is not always
   // its name
-  const items = Object.entries(enumModel[_enum]).map(([name, value]) => ({
+  const items = Object.entries(enumModel[$enum]).map(([name, value]) => ({
     label: convertToTitleCase(name),
     value: String(value),
   }));
