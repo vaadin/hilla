@@ -1,12 +1,12 @@
+import type { Model } from '@vaadin/hilla-models';
 import type { BinderNode } from './BinderNode.js';
 import { getBinderNode } from './BinderNode.js';
 import type { BinderRoot } from './BinderRoot.js';
 import type { Value } from './Models.js';
-import type { ProvisionalModel } from './ProvisionalModel.js';
 import { IsNumber, Required, ValidityStateValidator } from './Validators.js';
 
 export interface ValueError<T = unknown> {
-  property: ProvisionalModel | string;
+  property: Model | string;
   message: string;
   value: T;
   validator: Validator<T>;
@@ -14,7 +14,7 @@ export interface ValueError<T = unknown> {
 }
 
 export interface ValidationResult {
-  property: ProvisionalModel | string;
+  property: Model | string;
   message?: string;
 }
 
@@ -36,7 +36,7 @@ export class ValidationError extends Error {
   }
 }
 
-export type InterpolateMessageCallback<M extends ProvisionalModel> = (
+export type InterpolateMessageCallback<M extends Model> = (
   message: string,
   validator: Validator<Value<M>>,
   binderNode: BinderNode<M>,
@@ -76,7 +76,7 @@ function setPropertyAbsolutePath(binderNodeName: string, result: ValidationResul
   return result;
 }
 
-export async function runValidator<M extends ProvisionalModel>(
+export async function runValidator<M extends Model>(
   model: M,
   validator: Validator<Value<M>>,
   interpolateMessageCallback?: InterpolateMessageCallback<M>,

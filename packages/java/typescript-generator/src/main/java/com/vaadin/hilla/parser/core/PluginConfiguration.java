@@ -17,6 +17,14 @@ package com.vaadin.hilla.parser.core;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+/**
+ * @deprecated Internal API, not deprecated for removal. The Java API of
+ *             {@code hilla-typescript-generator} is used only by Hilla itself,
+ *             and may change or be removed in any release without notice. Do
+ *             not use it in application code or libraries. It is marked
+ *             deprecated only to make the compiler warn about such use.
+ */
+@Deprecated
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "class")
 public interface PluginConfiguration {
 }

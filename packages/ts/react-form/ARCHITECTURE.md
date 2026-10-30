@@ -67,8 +67,6 @@ called for.
 
 ## `useFormArrayPart`
 
-It gets its `items` by iterating the model, which only the legacy lit-form
-`ArrayModel` supports, and its type parameter accepts only that model. A
-generated array model from `@vaadin/hilla-models` is not iterable: forced
-through, it gets no items. With generated models, iterate with `m.items`
-instead.
+It takes an `ArrayModel` from `@vaadin/hilla-models` and gets its `items`
+with `m.items`, so the item models are the cached ones that `field` and
+`useFormPart` see for the same positions.
