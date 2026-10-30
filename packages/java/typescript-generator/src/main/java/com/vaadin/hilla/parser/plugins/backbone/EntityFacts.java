@@ -19,12 +19,15 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import tools.jackson.databind.SerializationConfig;
+
 /**
  * What the walk says about an entity beyond the class it is written from and
  * the properties the walk carries below it.
  */
 public final class EntityFacts {
     private Discriminator discriminator;
+    private SerializationConfig serializationConfig;
 
     /**
      * The property saying which subtype of a polymorphic type a value is, which
@@ -36,6 +39,21 @@ public final class EntityFacts {
 
     public void setDiscriminator(Discriminator discriminator) {
         this.discriminator = discriminator;
+    }
+
+    /**
+     * The Jackson configuration the properties of the entity are read with, the
+     * application's own when it configures an object mapper factory, so that a
+     * plugin asking about a property sees the same properties, under the same
+     * names, as the ones generated.
+     */
+    public SerializationConfig getSerializationConfig() {
+        return serializationConfig;
+    }
+
+    public void setSerializationConfig(
+            SerializationConfig serializationConfig) {
+        this.serializationConfig = serializationConfig;
     }
 
     /**
