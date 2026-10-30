@@ -20,11 +20,6 @@ import org.jspecify.annotations.NonNull;
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 
-/**
- * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
- * itself, and may change or be removed in any release without notice or
- * deprecation. Do not use it in application code or libraries.
- */
 public class EndpointExposedNode extends AbstractNode<ClassInfoModel, Void> {
     protected EndpointExposedNode(@NonNull ClassInfoModel classInfo) {
         super(classInfo, null);

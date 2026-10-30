@@ -10,8 +10,10 @@ This module consolidates the Java-to-TypeScript code generation functionality fo
 > endpoint calls. Every class, method and package in it, including
 > `com.vaadin.hilla.parser.*` and `com.vaadin.hilla.generator.*`, may change
 > or be removed in any release, minor and maintenance ones included, without
-> notice or deprecation. Do not depend on it from application code or
-> third-party libraries.
+> notice. Do not depend on it from application code or third-party libraries.
+> Its entry points (`Parser`, `Plugin`, `AbstractPlugin`, `PluginConfiguration`
+> and `TypeScriptWriter`) are marked `@Deprecated` so that such use gets a
+> compiler warning, not because they are going away.
 >
 > The exceptions are
 > `com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory`, which an

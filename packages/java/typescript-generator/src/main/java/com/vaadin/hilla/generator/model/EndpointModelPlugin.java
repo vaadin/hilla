@@ -76,10 +76,6 @@ import com.vaadin.hilla.transfertypes.annotations.FromModule;
  * <p>
  * The plugin only collects: every other plugin sees the walk as it would
  * without it.
- * <p>
- * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
- * itself, and may change or be removed in any release without notice or
- * deprecation. Do not use it in application code or libraries.
  */
 public final class EndpointModelPlugin
         extends AbstractPlugin<PluginConfiguration> {

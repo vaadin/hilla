@@ -25,11 +25,6 @@ import java.util.TreeMap;
  * says it, which a form model binds as a validator of the property holding the
  * value.
  *
- * <p>
- * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
- * itself, and may change or be removed in any release without notice or
- * deprecation. Do not use it in application code or libraries.
- *
  * @param name
  *            the simple name of the annotation, which is the name the form
  *            library knows the validator by

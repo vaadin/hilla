@@ -48,8 +48,11 @@ behavior.
 
 The Java API of `hilla-typescript-generator` (`com.vaadin.hilla.parser.*`,
 `com.vaadin.hilla.generator.*`, including the parser plugins and their
-configuration) is internal: it is run only by Hilla, and its types say so in
-their Javadoc. Do not present it as API an application writes against. The
+configuration) is internal: it is run only by Hilla. Its entry points
+(`Parser`, `Plugin`, `AbstractPlugin`, `PluginConfiguration` and
+`TypeScriptWriter`) are marked `@Deprecated` so that code using them gets a
+compiler warning; this is not a removal plan. Do not present this API as
+something an application writes against. The
 exceptions are `JacksonObjectMapperFactory` and `ByteArrayModule`, which an
 application uses to customize endpoint serialization.
 

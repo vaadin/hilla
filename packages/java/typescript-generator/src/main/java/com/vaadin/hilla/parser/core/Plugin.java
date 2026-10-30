@@ -21,17 +21,20 @@ import java.util.Collections;
 import org.jspecify.annotations.NonNull;
 
 /**
- * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
- * itself, and may change or be removed in any release without notice or
- * deprecation. Do not use it in application code or libraries.
- *
  * A part of the parser which handles one feature of the walk over the browser
  * callable classes. For every node, the parser asks the plugins what is below
  * it ({@link #scan}), lets them replace each node found there
  * ({@link #resolve}), and tells them when the walk enters and exits it
  * ({@link #enter}, {@link #exit}). Plugins build on each other through the
  * nodes and what they say about them, not by calling each other.
+ *
+ * @deprecated Internal API, not deprecated for removal. The Java API of
+ *             {@code hilla-typescript-generator} is used only by Hilla itself,
+ *             and may change or be removed in any release without notice. Do
+ *             not use it in application code or libraries. It is marked
+ *             deprecated only to make the compiler warn about such use.
  */
+@Deprecated
 public interface Plugin {
 
     /**

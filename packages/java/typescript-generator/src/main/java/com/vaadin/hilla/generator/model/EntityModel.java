@@ -27,10 +27,6 @@ import java.util.Optional;
  * The two kinds are what TypeScript has a different declaration for: a type
  * with properties, which becomes an interface, and an enum, which becomes an
  * enum of the values it is serialized as.
- * <p>
- * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
- * itself, and may change or be removed in any release without notice or
- * deprecation. Do not use it in application code or libraries.
  */
 public sealed interface EntityModel {
     /**

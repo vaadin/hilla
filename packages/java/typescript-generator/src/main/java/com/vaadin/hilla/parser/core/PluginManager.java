@@ -18,11 +18,6 @@ package com.vaadin.hilla.parser.core;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
-/**
- * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
- * itself, and may change or be removed in any release without notice or
- * deprecation. Do not use it in application code or libraries.
- */
 public final class PluginManager
         extends AbstractCompositePlugin<PluginConfiguration> {
     private static final ClassLoader loader = PluginManager.class

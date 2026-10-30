@@ -46,11 +46,6 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 
-/**
- * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
- * itself, and may change or be removed in any release without notice or
- * deprecation. Do not use it in application code or libraries.
- */
 public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
     /**
      * Annotations which can be placed on other elements too, but are only

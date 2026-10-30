@@ -21,11 +21,6 @@ import java.util.Objects;
 /**
  * A method of a browser callable class.
  *
- * <p>
- * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
- * itself, and may change or be removed in any release without notice or
- * deprecation. Do not use it in application code or libraries.
- *
  * @param returnType
  *            what a call returns, or the values a subscription sends, or the
  *            signal a value is shared through

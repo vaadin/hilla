@@ -23,11 +23,6 @@ import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.NamedModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
 
-/**
- * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
- * itself, and may change or be removed in any release without notice or
- * deprecation. Do not use it in application code or libraries.
- */
 public abstract class AbstractNode<S, T> implements Node<S, T> {
     private final S source;
 

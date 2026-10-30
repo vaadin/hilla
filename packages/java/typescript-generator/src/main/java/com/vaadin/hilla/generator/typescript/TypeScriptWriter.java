@@ -31,11 +31,14 @@ import com.vaadin.hilla.generator.model.Generation;
  * The files are what the run produces rather than what is on disk: writing them
  * out, and removing what a previous run left behind, is the work of whoever
  * asks for them.
- * <p>
- * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
- * itself, and may change or be removed in any release without notice or
- * deprecation. Do not use it in application code or libraries.
+ *
+ * @deprecated Internal API, not deprecated for removal. The Java API of
+ *             {@code hilla-typescript-generator} is used only by Hilla itself,
+ *             and may change or be removed in any release without notice. Do
+ *             not use it in application code or libraries. It is marked
+ *             deprecated only to make the compiler warn about such use.
  */
+@Deprecated
 public final class TypeScriptWriter {
     private final String clientModule;
 

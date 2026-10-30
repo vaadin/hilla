@@ -19,11 +19,6 @@ import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-/**
- * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
- * itself, and may change or be removed in any release without notice or
- * deprecation. Do not use it in application code or libraries.
- */
 public final class Streams {
     private Streams() {
     }

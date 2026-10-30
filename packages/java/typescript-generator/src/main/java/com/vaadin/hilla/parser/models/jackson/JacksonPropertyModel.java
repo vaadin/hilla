@@ -37,11 +37,6 @@ import com.vaadin.hilla.parser.models.OwnedModel;
 import com.vaadin.hilla.parser.models.ReflectionModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
 
-/**
- * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
- * itself, and may change or be removed in any release without notice or
- * deprecation. Do not use it in application code or libraries.
- */
 public final class JacksonPropertyModel
         extends JacksonModel<FieldInfoModel, MethodInfoModel, MethodInfoModel>
         implements NamedModel, OwnedModel<ClassInfoModel>, ReflectionModel {

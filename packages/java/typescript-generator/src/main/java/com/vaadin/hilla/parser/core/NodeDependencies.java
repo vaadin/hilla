@@ -21,11 +21,6 @@ import java.util.stream.Stream;
 
 import org.jspecify.annotations.NonNull;
 
-/**
- * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
- * itself, and may change or be removed in any release without notice or
- * deprecation. Do not use it in application code or libraries.
- */
 public final class NodeDependencies {
     private final Stream<Node<?, ?>> childNodes;
     private final Node<?, ?> node;

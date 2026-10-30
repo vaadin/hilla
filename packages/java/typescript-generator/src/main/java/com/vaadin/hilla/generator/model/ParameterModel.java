@@ -19,10 +19,6 @@ import java.util.Objects;
 
 /**
  * A parameter of a method of a browser callable class.
- * <p>
- * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
- * itself, and may change or be removed in any release without notice or
- * deprecation. Do not use it in application code or libraries.
  */
 public record ParameterModel(String name, TypeModel type) {
     public ParameterModel {

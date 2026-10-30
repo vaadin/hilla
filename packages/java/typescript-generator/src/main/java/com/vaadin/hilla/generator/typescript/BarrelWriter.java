@@ -23,10 +23,6 @@ import com.vaadin.hilla.generator.model.EndpointModel;
 /**
  * Writes the file re-exporting every endpoint, which is what an application
  * imports when it does not want to name the file of each of them.
- * <p>
- * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
- * itself, and may change or be removed in any release without notice or
- * deprecation. Do not use it in application code or libraries.
  */
 public final class BarrelWriter {
     /**

@@ -20,10 +20,6 @@ import org.jspecify.annotations.NonNull;
 /**
  * A reference to a JVM type, used for annotation attributes that hold a class
  * rather than a plain value.
- * <p>
- * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
- * itself, and may change or be removed in any release without notice or
- * deprecation. Do not use it in application code or libraries.
  */
 public final class JvmTypeRef {
     private final String jvmType;

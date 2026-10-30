@@ -31,10 +31,6 @@ import com.vaadin.hilla.generator.model.EntityModel;
  * goes with the constant, so that the default export can be used both as a
  * value and as a type. The property saying which subtype a value of a
  * polymorphic type is goes last, pinned to the ids the type accepts.
- * <p>
- * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
- * itself, and may change or be removed in any release without notice or
- * deprecation. Do not use it in application code or libraries.
  */
 public final class FormModelWriter {
     /**

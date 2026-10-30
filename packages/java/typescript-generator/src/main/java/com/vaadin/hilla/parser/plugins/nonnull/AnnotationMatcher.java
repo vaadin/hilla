@@ -22,10 +22,6 @@ import org.jspecify.annotations.NonNull;
 /**
  * Describes annotations that make class members and their signatures nullable
  * and non-nullable: their name, meaning, and score
- * <p>
- * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
- * itself, and may change or be removed in any release without notice or
- * deprecation. Do not use it in application code or libraries.
  */
 public final class AnnotationMatcher {
     private boolean makesNullable;

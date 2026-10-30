@@ -33,11 +33,6 @@ import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.MethodInfoModel;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointNode;
 
-/**
- * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
- * itself, and may change or be removed in any release without notice or
- * deprecation. Do not use it in application code or libraries.
- */
 public final class EndpointPlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
     private static final Logger logger = LoggerFactory.getLogger(Parser.class);

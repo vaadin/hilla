@@ -22,10 +22,6 @@ import java.util.Optional;
 /**
  * What the walk says about an entity beyond the class it is written from and
  * the properties the walk carries below it.
- * <p>
- * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
- * itself, and may change or be removed in any release without notice or
- * deprecation. Do not use it in application code or libraries.
  */
 public final class EntityFacts {
     private Discriminator discriminator;

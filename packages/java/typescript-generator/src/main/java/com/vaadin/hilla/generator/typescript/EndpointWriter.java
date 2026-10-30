@@ -29,10 +29,6 @@ import com.vaadin.hilla.generator.model.TypeModel;
 
 /**
  * Writes the file which lets the client call the methods of one endpoint.
- * <p>
- * <b>Internal API.</b> Not part of the public Hilla API: used only by Hilla
- * itself, and may change or be removed in any release without notice or
- * deprecation. Do not use it in application code or libraries.
  */
 public final class EndpointWriter {
     private static final String HILLA_FRONTEND = "@vaadin/hilla-frontend";
