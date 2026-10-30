@@ -76,12 +76,12 @@ export class I18n {
   }
 
   /**
-   * Returns a signal with the resolved language. The resolved language is the
-   * language that was actually used to load translations. It may differ from
-   * the configured language if there are no translations available for the
-   * configured language. For example, when setting the language to "de-DE" but
-   * translations are only available for "de", the resolved language will be
-   * "de".
+   * Returns a signal with the resolved language: the language tag the server
+   * reports for the loaded translations. The server reports the requested
+   * language, so this is the same as the configured language. When there are
+   * no translations for the configured language, for example "de-DE" when only
+   * "de" is available, the translations come from the fallback bundle, but the
+   * resolved language is still "de-DE".
    */
   get resolvedLanguage(): ReadonlySignal<string | undefined> {
     return this.#resolvedLanguage;
@@ -100,7 +100,7 @@ export class I18n {
    * 1. If a user opens the app for the first time, the browser language is used.
    * 2. If the language has been changed in a previous usage of the app using
    * `setLanguage`, the last used language is used. The last used language is
-   * automatically stored in local storage.
+   * automatically stored in a cookie.
    *
    * Alternatively, the initial language can be explicitly configured using the
    * `language` option. The language should be a valid IETF BCP 47 language tag,

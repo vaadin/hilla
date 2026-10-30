@@ -17,6 +17,7 @@ package com.vaadin.hilla.crud;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 
 import java.util.List;
 import java.util.Optional;
@@ -377,6 +378,10 @@ public class CrudRepositoryServiceTest {
         }
     }
 
+    @SuppressWarnings("rawtypes")
+    static class RawRepositoryService extends CrudRepositoryService {
+    }
+
     @BrowserCallable
     static class DefaultJpaRepositoryService
             extends CrudRepositoryService<TestObject, Integer, TestRepository> {
@@ -429,6 +434,11 @@ public class CrudRepositoryServiceTest {
         assertNotNull(customJpaRepositoryService.getRepository());
         assertEquals(CustomJpaRepository.class, customJpaRepositoryService
                 .getRepository().getClass().getSuperclass());
+    }
+
+    @Test
+    public void rawService_throwsWhenEntityTypeCannotBeDetected() {
+        assertThrows(IllegalStateException.class, RawRepositoryService::new);
     }
 
 }
