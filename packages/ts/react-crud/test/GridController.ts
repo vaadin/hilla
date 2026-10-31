@@ -41,8 +41,12 @@ export default class GridController {
     });
 
     // The data provider is asynchronous, so the rows only appear after the grid
-    // has finished loading.
+    // has finished loading. AutoGrid assigns the data provider in a timeout, and
+    // the grid is not loading before that either, so wait for it to be set.
     await waitFor(() => {
+      if (!grid.dataProvider) {
+        throw new Error('The <vaadin-grid> element has no data provider yet');
+      }
       if (grid.loading) {
         throw new Error('The <vaadin-grid> element is still loading items');
       }
