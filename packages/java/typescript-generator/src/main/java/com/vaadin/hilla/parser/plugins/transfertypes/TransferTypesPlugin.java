@@ -42,6 +42,7 @@ import com.vaadin.hilla.runtime.transfertypes.EndpointSubscription;
 import com.vaadin.hilla.runtime.transfertypes.File;
 import com.vaadin.hilla.runtime.transfertypes.Flux;
 import com.vaadin.hilla.runtime.transfertypes.ListSignal;
+import com.vaadin.hilla.runtime.transfertypes.MapSignal;
 import com.vaadin.hilla.runtime.transfertypes.NumberSignal;
 import com.vaadin.hilla.runtime.transfertypes.Signal;
 import com.vaadin.hilla.runtime.transfertypes.ValueSignal;
@@ -72,6 +73,8 @@ public final class TransferTypesPlugin
                 NumberSignal.class);
         classMap.put("com.vaadin.flow.signals.shared.SharedListSignal",
                 ListSignal.class);
+        classMap.put("com.vaadin.flow.signals.shared.SharedMapSignal",
+                MapSignal.class);
     }
 
     @Override

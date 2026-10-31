@@ -1,33 +1,30 @@
-import { createIncrementCommand, isIncrementCommand, type SignalCommand } from './commands.js';
-import {
-  $createOperation,
-  $processServerResponse,
-  $resolveOperation,
-  $setValueQuietly,
-  $update,
-  type Operation,
-} from './FullStackSignal.js';
+import { createIncrementCommand } from './commands.js';
+import type { Operation } from './Operation.js';
 import { ValueSignal } from './ValueSignal.js';
 
 /**
- * A signal containing a numeric value. The value is updated as a single atomic change.
+ * A signal containing a numeric value. The value is updated as a single atomic
+ * change.
  */
 export class NumberSignal extends ValueSignal<number> {
   /**
    * Atomically increments the value of this signal by the given delta amount.
    * The value is decremented if the delta is negative.
+   * <p>
+   * The increment is applied locally right away and it is reverted again if the
+   * server rejects it. Unlike {@link ValueSignal.set}, an increment is applied
+   * relative to the value on the server, so concurrent increments from several
+   * clients all take effect.
+   *
    * @param delta - The increment amount
-   * @returns An operation containing the eventual result
+   * @returns An operation that allows reacting to the outcome
    */
   incrementBy(delta: number): Operation {
     if (delta === 0) {
-      const resolvedPromise = Promise.resolve(undefined);
-      return this[$createOperation]({ id: '', promise: resolvedPromise });
+      return this.noopOperation();
     }
 
-    const command = createIncrementCommand('', delta);
-    const promise = this[$update](command);
-    return this[$createOperation]({ id: command.commandId, promise });
+    return this.submit(createIncrementCommand(this.id, delta));
   }
 
   /**
@@ -35,14 +32,5 @@ export class NumberSignal extends ValueSignal<number> {
    */
   valueAsInt(): number {
     return Math.trunc(this.value);
-  }
-
-  protected override [$processServerResponse](command: SignalCommand): void {
-    if (isIncrementCommand(command)) {
-      this[$setValueQuietly](this.value + command.delta);
-      this[$resolveOperation](command.commandId, undefined);
-    } else {
-      super[$processServerResponse](command);
-    }
   }
 }
