@@ -16,14 +16,32 @@
 package com.vaadin.hilla.parser.plugins.backbone.nodes;
 
 import org.jspecify.annotations.NonNull;
+import tools.jackson.databind.SerializationConfig;
 
 import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.parser.core.AbstractNode;
 
 public class EntityNode extends AbstractNode<Class<?>, EntityModel.Builder> {
+    private SerializationConfig serializationConfig;
+
     protected EntityNode(@NonNull Class<?> source,
             EntityModel.@NonNull Builder target) {
         super(source, target);
+    }
+
+    /**
+     * The Jackson configuration the properties of the entity are read with, the
+     * application's own when it configures an object mapper factory, so that a
+     * plugin asking about a property sees the same properties, under the same
+     * names, as the ones generated.
+     */
+    public SerializationConfig getSerializationConfig() {
+        return serializationConfig;
+    }
+
+    public void setSerializationConfig(
+            SerializationConfig serializationConfig) {
+        this.serializationConfig = serializationConfig;
     }
 
     @NonNull
