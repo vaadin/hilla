@@ -15,14 +15,14 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.knodes
 
-import com.vaadin.hilla.parser.plugins.backbone.TypeFacts
+import com.vaadin.hilla.generator.model.TypeModel
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode
 import java.lang.reflect.AnnotatedElement
 import kotlin.reflect.KType
 
 class KTypeSignatureNode(
     source: AnnotatedElement,
-    target: TypeFacts,
+    target: TypeModel.Builder,
     annotations: List<Annotation>,
     position: Int?,
     val kType: KType

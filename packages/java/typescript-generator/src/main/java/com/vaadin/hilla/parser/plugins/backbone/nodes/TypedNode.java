@@ -20,15 +20,15 @@ import java.util.function.UnaryOperator;
 
 import org.jspecify.annotations.NonNull;
 
-import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
+import com.vaadin.hilla.generator.model.TypeModel;
 
 public interface TypedNode extends AnnotatedNode {
     @NonNull
     AnnotatedElement getType();
 
-    TypeFacts getTarget();
+    TypeModel.Builder getTarget();
 
-    void setTarget(TypeFacts target);
+    void setTarget(TypeModel.Builder target);
 
     @NonNull
     TypedNode processType(

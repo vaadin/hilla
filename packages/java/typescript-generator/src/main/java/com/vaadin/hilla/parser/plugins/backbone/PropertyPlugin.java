@@ -16,9 +16,9 @@
 package com.vaadin.hilla.parser.plugins.backbone;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -33,6 +33,7 @@ import tools.jackson.databind.SerializationConfig;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.util.IgnorePropertiesUtil;
 
+import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
 import com.vaadin.hilla.parser.core.NodeDependencies;
@@ -70,7 +71,7 @@ public final class PropertyPlugin
         } else if (nodePath.getNode() instanceof EntityNode entityNode
                 && entityNode.getSource().isEnum()) {
             entityNode.getTarget()
-                    .setEnumValues(enumValues(entityNode.getSource()));
+                    .setConstants(enumConstants(entityNode.getSource()));
         }
     }
 
@@ -80,17 +81,14 @@ public final class PropertyPlugin
      * constant. A constant written as something else than a string keeps its
      * name, since the generated enum holds strings.
      */
-    private Map<String, String> enumValues(Class<?> cls) {
-        var values = new LinkedHashMap<String, String>();
-
-        for (var constant : cls.getEnumConstants()) {
+    private List<EntityModel.Constant> enumConstants(Class<?> cls) {
+        return Arrays.stream(cls.getEnumConstants()).map(constant -> {
             var name = ((Enum<?>) constant).name();
             var value = mapper.valueToTree(constant);
 
-            values.put(name, value.isString() ? value.stringValue() : name);
-        }
-
-        return values;
+            return new EntityModel.Constant(name,
+                    value.isString() ? value.stringValue() : name);
+        }).toList();
     }
 
     @NonNull

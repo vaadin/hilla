@@ -238,4 +238,128 @@ public sealed interface TypeModel {
             return new TypeVariable(name, optional, constraints, annotations);
         }
     }
+
+    /**
+     * What the walk says about a type while it is still walking it, which is
+     * the target of the node standing for the type. The plugins of the parser
+     * say whether a value of it can be absent and what its annotations say
+     * about it, and the type is built from that once the walk leaves the node,
+     * when the types it refers to are known and decide which kind of type it
+     * is.
+     *
+     * <p>
+     * A builder can be the target of more than one node: the walk hands the one
+     * of a type argument, a type variable or an optional up to the node written
+     * from it, since what is said about the one is said about the other.
+     */
+    final class Builder {
+        private final boolean collectsTypeArguments;
+        private boolean optional;
+        private List<ConstraintModel> constraints = List.of();
+        private List<AnnotationModel> annotations = List.of();
+
+        private Builder(boolean optional, boolean collectsTypeArguments) {
+            this.optional = optional;
+            this.collectsTypeArguments = collectsTypeArguments;
+        }
+
+        /**
+         * What is known about a type before any plugin has said anything.
+         *
+         * @param optional
+         *            whether a value of the type can be absent, which is what
+         *            Java says unless an annotation says otherwise
+         * @param collectsTypeArguments
+         *            whether the types it is given belong to it rather than to
+         *            the value it holds
+         */
+        public static Builder of(boolean optional,
+                boolean collectsTypeArguments) {
+            return new Builder(optional, collectsTypeArguments);
+        }
+
+        /**
+         * What is known about a type nothing has been walked for.
+         */
+        public static Builder unknown() {
+            return new Builder(false, false);
+        }
+
+        /**
+         * Whether the types this one is given are its own, which they are not
+         * for the types the browser has one of its own for: the value of an
+         * optional, the items of an iterable and the values of a map are the
+         * type the walk carries below it instead.
+         */
+        public boolean collectsTypeArguments() {
+            return collectsTypeArguments;
+        }
+
+        /**
+         * Whether a value of the type can be absent, which is what the
+         * generated TypeScript says with a union with undefined.
+         */
+        public boolean isOptional() {
+            return optional;
+        }
+
+        public void setOptional(boolean optional) {
+            this.optional = optional;
+        }
+
+        /**
+         * What the annotations of the validation API say a value of the type
+         * has to satisfy, which is nothing at all where none is written on it.
+         */
+        public List<ConstraintModel> getConstraints() {
+            return constraints;
+        }
+
+        public void setConstraints(List<ConstraintModel> constraints) {
+            this.constraints = List.copyOf(constraints);
+        }
+
+        /**
+         * The annotations of the value which a form model is told about, such
+         * as the one saying that a value is the id of an entity.
+         */
+        public List<AnnotationModel> getAnnotations() {
+            return annotations;
+        }
+
+        public void setAnnotations(List<AnnotationModel> annotations) {
+            this.annotations = List.copyOf(annotations);
+        }
+
+        public Scalar scalar(ScalarKind kind, String javaType) {
+            return new Scalar(kind, optional, javaType, constraints,
+                    annotations);
+        }
+
+        public ArrayOf arrayOf(TypeModel items, String javaType) {
+            return new ArrayOf(items, optional, javaType, constraints,
+                    annotations);
+        }
+
+        public MapOf mapOf(TypeModel values, String javaType) {
+            return new MapOf(values, optional, javaType, constraints,
+                    annotations);
+        }
+
+        public EntityRef entityRef(String javaClass,
+                List<TypeModel> typeArguments) {
+            return new EntityRef(javaClass, typeArguments, optional,
+                    constraints, annotations);
+        }
+
+        public Provided provided(String name, String module,
+                List<TypeModel> typeArguments) {
+            return new Provided(name, module, typeArguments, optional,
+                    constraints, annotations);
+        }
+
+        public TypeVariable typeVariable(String name) {
+            return new TypeVariable(name, optional, constraints, annotations);
+        }
+    }
 }

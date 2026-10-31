@@ -17,17 +17,17 @@ package com.vaadin.hilla.parser.plugins.backbone.nodes;
 
 import org.jspecify.annotations.NonNull;
 
+import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.parser.core.AbstractNode;
-import com.vaadin.hilla.parser.plugins.backbone.EntityFacts;
 
-public class EntityNode extends AbstractNode<Class<?>, EntityFacts> {
+public class EntityNode extends AbstractNode<Class<?>, EntityModel.Builder> {
     protected EntityNode(@NonNull Class<?> source,
-            @NonNull EntityFacts target) {
+            EntityModel.@NonNull Builder target) {
         super(source, target);
     }
 
     @NonNull
     static public EntityNode of(@NonNull Class<?> cls) {
-        return new EntityNode(cls, new EntityFacts());
+        return new EntityNode(cls, new EntityModel.Builder());
     }
 }
