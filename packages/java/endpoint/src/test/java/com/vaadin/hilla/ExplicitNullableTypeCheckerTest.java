@@ -538,6 +538,15 @@ public class ExplicitNullableTypeCheckerTest {
                 "Nullable setter parameter list item should allow null value",
                 checkNullMarkedProperties(properties));
 
+        properties = new NullMarkedProperties();
+        properties.setId(null);
+        Assert.assertNull("Id should allow null value",
+                checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.setVersion(null);
+        Assert.assertNull("Version should allow null value",
+                checkNullMarkedProperties(properties));
     }
 
     @Test
@@ -545,6 +554,11 @@ public class ExplicitNullableTypeCheckerTest {
         NullMarkedProperties properties = new NullMarkedProperties();
         properties.setNullableGetterNonnullSetter(null);
         Assert.assertNotNull("Nonnull should take precedence over nullable",
+                checkNullMarkedProperties(properties));
+
+        properties = new NullMarkedProperties();
+        properties.setNonnullId(null);
+        Assert.assertNotNull("Nonnull should take precedence over Id",
                 checkNullMarkedProperties(properties));
 
         properties = new NullMarkedProperties();
