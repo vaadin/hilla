@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import tools.jackson.databind.SerializationConfig;
+
 /**
  * A type which the endpoints refer to and which is generated as a TypeScript
  * declaration of its own, such as the type of a parameter or of a return value.
@@ -89,6 +91,62 @@ public sealed interface EntityModel {
         public Enumeration {
             Objects.requireNonNull(javaClass);
             constants = List.copyOf(constants);
+        }
+    }
+
+    /**
+     * What the walk says about an entity beyond the class it is written from
+     * and the properties the walk carries below it, which is the target of the
+     * node standing for the entity. The declaration is built from it once the
+     * walk leaves the node, when the properties are known.
+     */
+    final class Builder {
+        private Discriminator discriminator;
+        private SerializationConfig serializationConfig;
+
+        /**
+         * The property saying which subtype of a polymorphic type a value is,
+         * which an entity has where it belongs to such a hierarchy.
+         */
+        public Optional<Discriminator> getDiscriminator() {
+            return Optional.ofNullable(discriminator);
+        }
+
+        public void setDiscriminator(Discriminator discriminator) {
+            this.discriminator = discriminator;
+        }
+
+        /**
+         * The Jackson configuration the properties of the entity are read with,
+         * the application's own when it configures an object mapper factory, so
+         * that a plugin asking about a property sees the same properties, under
+         * the same names, as the ones generated.
+         */
+        public SerializationConfig getSerializationConfig() {
+            return serializationConfig;
+        }
+
+        public void setSerializationConfig(
+                SerializationConfig serializationConfig) {
+            this.serializationConfig = serializationConfig;
+        }
+
+        /**
+         * The declaration of a type whose values are objects with properties.
+         * The discriminator is written as the ids it accepts rather than as the
+         * type the class declares it with, so it is left out of the properties:
+         * TypeScript would have the name twice.
+         */
+        public Bean bean(String javaClass, List<String> typeParameters,
+                List<TypeModel.EntityRef> superTypes,
+                List<PropertyModel> properties) {
+            var discriminator = getDiscriminator();
+
+            return new Bean(javaClass, typeParameters, superTypes, properties
+                    .stream()
+                    .filter(property -> discriminator.map(Discriminator::name)
+                            .filter(property.name()::equals).isEmpty())
+                    .toList(), discriminator);
         }
     }
 }

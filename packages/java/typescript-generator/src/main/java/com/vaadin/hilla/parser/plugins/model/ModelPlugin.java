@@ -30,13 +30,15 @@ import java.util.stream.Stream;
 
 import org.jspecify.annotations.NonNull;
 
+import com.vaadin.hilla.generator.model.AnnotationModel;
+import com.vaadin.hilla.generator.model.ConstraintModel;
+import com.vaadin.hilla.generator.model.TypeModel;
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
-import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.AnnotatedNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
@@ -55,18 +57,17 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
         super();
     }
 
-    private static ValidationConstraint convertValidationConstraintAnnotation(
+    private static ConstraintModel convertValidationConstraintAnnotation(
             java.lang.annotation.Annotation annotation) {
         var simpleName = extractSimpleName(
                 annotation.annotationType().getName());
 
-        return new ValidationConstraint(simpleName,
-                extractAttributes(annotation));
+        return new ConstraintModel(simpleName, extractAttributes(annotation));
     }
 
-    private static Annotation convertAnnotation(
+    private static AnnotationModel convertAnnotation(
             java.lang.annotation.Annotation annotation) {
-        return new Annotation(annotation.annotationType().getName(),
+        return new AnnotationModel(annotation.annotationType().getName(),
                 extractAttributes(annotation));
     }
 
@@ -74,13 +75,11 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
             java.lang.annotation.Annotation annotation) {
         // Ordered by name: the parameters of an annotation come in the order
         // reflection lists its methods in, which is no order at all
-        var attributes = parametersOf(annotation).stream()
+        return parametersOf(annotation).stream()
                 .filter(Predicate.not(Parameter::isDefault))
                 .collect(Collectors.toMap(Parameter::name,
                         parameter -> convertAttributeValue(parameter.value()),
                         (first, second) -> first, TreeMap::new));
-
-        return !attributes.isEmpty() ? attributes : null;
     }
 
     /**
@@ -110,14 +109,15 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
 
     /**
      * Converts an annotation parameter value into something the form model
-     * writer can write as TypeScript: an enum constant becomes its name, a
-     * class becomes a reference to it, and an array of objects becomes a list
-     * of such values.
+     * writer can write as TypeScript, so that it only meets strings, numbers,
+     * booleans, lists and maps: an enum constant becomes its name, a class
+     * becomes the map naming it which the model library reads, and an array of
+     * objects becomes a list of such values.
      */
     private static Object convertAttributeValue(Object value) {
         return switch (value) {
         case Enum<?> enumValue -> enumValue.name();
-        case Class<?> cls -> new JvmTypeRef(cls.getName());
+        case Class<?> cls -> Map.of("jvmType", cls.getName());
         case Object[] array -> Arrays.stream(array)
                 .map(ModelPlugin::convertAttributeValue).toList();
         // A nested annotation has no TypeScript value to be written as, and
@@ -256,27 +256,20 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
     }
 
     private void noteConstraints(
-            List<java.lang.annotation.Annotation> annotations, TypeFacts type) {
-        var constraints = annotations.stream()
+            List<java.lang.annotation.Annotation> annotations,
+            TypeModel.Builder type) {
+        type.setConstraints(annotations.stream()
                 .filter(ModelPlugin::isValidationConstraintAnnotation)
                 .flatMap(ModelPlugin::unwrapRepeatableContainer)
                 .map(ModelPlugin::convertValidationConstraintAnnotation)
-                .collect(Collectors.toList());
-
-        if (!constraints.isEmpty()) {
-            type.note(TypeFacts.CONSTRAINTS, constraints);
-        }
+                .toList());
     }
 
-    private void noteAnnotations(AnnotatedNode annotatedNode, TypeFacts type) {
-        var annotations = annotatedNode.getAnnotations().stream()
+    private void noteAnnotations(AnnotatedNode annotatedNode,
+            TypeModel.Builder type) {
+        type.setAnnotations(annotatedNode.getAnnotations().stream()
                 .filter(ModelPlugin::isIncludedAnnotation)
-                .map(ModelPlugin::convertAnnotation)
-                .collect(Collectors.toList());
-
-        if (!annotations.isEmpty()) {
-            type.note(TypeFacts.ANNOTATIONS, annotations);
-        }
+                .map(ModelPlugin::convertAnnotation).toList());
     }
 
     private record Parameter(String name, Object value, boolean isDefault) {

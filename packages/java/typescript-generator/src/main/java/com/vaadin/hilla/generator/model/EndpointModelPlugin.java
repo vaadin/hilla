@@ -23,7 +23,6 @@ import java.lang.reflect.TypeVariable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,8 +36,6 @@ import com.vaadin.hilla.parser.core.Node;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.core.RootNode;
-import com.vaadin.hilla.parser.plugins.backbone.EntityFacts;
-import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 import com.vaadin.hilla.parser.plugins.backbone.TypeParameters;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
@@ -46,9 +43,6 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
-import com.vaadin.hilla.parser.plugins.model.Annotation;
-import com.vaadin.hilla.parser.plugins.model.JvmTypeRef;
-import com.vaadin.hilla.parser.plugins.model.ValidationConstraint;
 import com.vaadin.hilla.parser.plugins.subtypes.SubTypesPlugin;
 import com.vaadin.hilla.parser.utils.Signatures;
 import com.vaadin.hilla.transfertypes.annotations.FromModule;
@@ -342,30 +336,8 @@ public final class EndpointModelPlugin
                             .map(Field::getName).toList());
         }
 
-        var discriminator = discriminator(node.getTarget());
-
-        // The discriminator is written as the ids it accepts rather than as
-        // the type the class declares it with, so it is not among the
-        // properties as well: TypeScript would have the name twice
-        var properties = ownProperties.stream()
-                .filter(property -> discriminator
-                        .map(EntityModel.Discriminator::name)
-                        .filter(property.name()::equals).isEmpty())
-                .toList();
-
-        return new EntityModel.Bean(cls.getName(), typeParameters(cls),
-                superTypes(cls), properties, discriminator);
-    }
-
-    /**
-     * The property saying which subtype a value is, which the plugin handling
-     * the subtypes says about every type of such a hierarchy.
-     */
-    private static Optional<EntityModel.Discriminator> discriminator(
-            EntityFacts entity) {
-        return entity.getDiscriminator()
-                .map(discriminator -> new EntityModel.Discriminator(
-                        discriminator.name(), discriminator.acceptedValues()));
+        return node.getTarget().bean(cls.getName(), typeParameters(cls),
+                superTypes(cls), ownProperties);
     }
 
     /**
@@ -399,10 +371,9 @@ public final class EndpointModelPlugin
      */
     private TypeModel buildType(TypedNode node, List<TypeModel> referred) {
         var signature = node.getType();
-        var type = node.getTarget();
-        var optional = type != null && type.isOptional();
-        var constraints = constraintsOf(type);
-        var annotations = annotationsOf(type);
+        var type = Optional.ofNullable(node.getTarget())
+                .orElseGet(TypeModel.Builder::unknown);
+        var optional = type.isOptional();
 
         // A type variable or parameter of an entity is declared by it, so it
         // is written as its name, unless it is bound to something else than
@@ -411,9 +382,7 @@ public final class EndpointModelPlugin
         // declaration does not keep such a parameter
         if ((Signatures.isTypeVariable(signature)
                 || Signatures.isTypeParameter(signature)) && isInEntity()) {
-            return referred.isEmpty()
-                    ? new TypeModel.TypeVariable(name(signature), optional,
-                            constraints, annotations)
+            return referred.isEmpty() ? type.typeVariable(name(signature))
                     : optional ? only(referred).withOptional(true)
                             : only(referred);
         }
@@ -435,28 +404,25 @@ public final class EndpointModelPlugin
         }
 
         if (Signatures.isArray(signature) || Signatures.isIterable(signature)) {
-            return new TypeModel.ArrayOf(only(referred), optional,
-                    name(signature), constraints, annotations);
+            return type.arrayOf(only(referred), name(signature));
         }
 
         if (Signatures.isMap(signature)) {
-            return new TypeModel.MapOf(only(referred), optional,
-                    name(signature), constraints, annotations);
+            return type.mapOf(only(referred), name(signature));
         }
 
         if (Signatures.isClassRef(signature) && isProvided(name(signature))) {
-            return provided(name(signature), referred, optional, constraints,
-                    annotations);
+            var provided = PROVIDED_TYPES.get(name(signature));
+
+            return type.provided(provided.name(), provided.module(), referred);
         }
 
         if (Signatures.isClassRef(signature) && isEntity(signature)
                 && !isValue(signature)) {
-            return new TypeModel.EntityRef(name(signature), referred, optional,
-                    constraints, annotations);
+            return type.entityRef(name(signature), referred);
         }
 
-        return new TypeModel.Scalar(scalarKind(signature), optional,
-                name(signature), constraints, annotations);
+        return type.scalar(scalarKind(signature), name(signature));
     }
 
     /**
@@ -521,20 +487,6 @@ public final class EndpointModelPlugin
     }
 
     /**
-     * The type as it is referred to where it is used, which is what the class
-     * says of it together with the arguments it is used with.
-     */
-    private static TypeModel provided(String javaClass,
-            List<TypeModel> typeArguments, boolean optional,
-            List<ConstraintModel> constraints,
-            List<AnnotationModel> annotations) {
-        var provided = PROVIDED_TYPES.get(javaClass);
-
-        return new TypeModel.Provided(provided.name(), provided.module(),
-                typeArguments, optional, constraints, annotations);
-    }
-
-    /**
      * Whether the type comes from outside the JDK, which is what makes it a
      * declaration of its own unless it is a scalar, such as a class extending a
      * date. An enum of the application is declared too: it becomes a TypeScript
@@ -542,73 +494,6 @@ public final class EndpointModelPlugin
      */
     private static boolean isEntity(AnnotatedElement signature) {
         return Signatures.isNonJDKClass(signature);
-    }
-
-    /**
-     * What the annotations of the validation API say about a value, which the
-     * plugin reading them off the walk has already noted on the type of it.
-     */
-    private static List<ConstraintModel> constraintsOf(TypeFacts type) {
-        return notes(type, TypeFacts.CONSTRAINTS, ValidationConstraint.class)
-                .map(constraint -> new ConstraintModel(
-                        constraint.getSimpleName(),
-                        attributesOf(constraint.getAttributes())))
-                .toList();
-    }
-
-    /**
-     * The annotations of a value which a form model is told about, which the
-     * plugin picking them out of the ones the property declares has already
-     * noted on the type of it.
-     */
-    private static List<AnnotationModel> annotationsOf(TypeFacts type) {
-        return notes(type, TypeFacts.ANNOTATIONS, Annotation.class)
-                .map(annotation -> new AnnotationModel(annotation.getName(),
-                        attributesOf(annotation.getAttributes())))
-                .toList();
-    }
-
-    /**
-     * The attributes of an annotation as plain values, so that what writes them
-     * only meets strings, numbers, booleans, lists and maps: a class an
-     * attribute holds is the map naming it which the model library reads.
-     */
-    private static Map<String, Object> attributesOf(
-            Map<String, Object> attributes) {
-        if (attributes == null) {
-            return Map.of();
-        }
-
-        var plain = new LinkedHashMap<String, Object>();
-        attributes.forEach((name, value) -> plain.put(name, plain(value)));
-        return plain;
-    }
-
-    private static Object plain(Object value) {
-        if (value instanceof JvmTypeRef type) {
-            return Map.of("jvmType", type.getJvmType());
-        }
-
-        if (value instanceof Collection<?> values) {
-            return values.stream().map(EndpointModelPlugin::plain).toList();
-        }
-
-        if (value instanceof Map<?, ?> map) {
-            var plain = new LinkedHashMap<Object, Object>();
-            map.forEach((key, item) -> plain.put(key, plain(item)));
-            return plain;
-        }
-
-        return value;
-    }
-
-    /**
-     * What another plugin has said about the type of a value under the given
-     * name, which is nothing at all where the plugin had nothing to say.
-     */
-    private static <T> Stream<T> notes(TypeFacts type, String name,
-            Class<T> valueType) {
-        return type == null ? Stream.of() : type.notes(name, valueType);
     }
 
     /**
