@@ -15,8 +15,11 @@ The **generator** (`com.vaadin.hilla.generator`) writes the files. Its model
 (`generator.model`) holds what the writers need as plain records, and its
 writers (`generator.typescript`) fill in the TypeScript from that model.
 
-The two meet in `EndpointModelPlugin`. It is a parser plugin like the others,
-and builds the model while the walk happens. When the walk is over,
+The two meet in the targets of the nodes and in `EndpointModelPlugin`. The
+targets of the typed and entity nodes are builders of the model
+(`TypeModel.Builder`, `EntityModel.Builder`), which the parser plugins fill in
+during the walk. `EndpointModelPlugin` is a parser plugin like the others, and
+builds the model from them while the walk happens. When the walk is over,
 `getGeneration()` hands the whole model to the writers as one `Generation`.
 
 Every entry point (the Maven goal, the Gradle task, the Flow build task and the
@@ -365,7 +368,9 @@ plugin to another.
 
 ### The model
 
-`com.vaadin.hilla.generator.model` holds plain records: `Generation`,
+`com.vaadin.hilla.generator.model` holds plain records, plus the two
+mutable builders the parser plugins fill in (see
+[How facts reach the model](#how-facts-reach-the-model)): `Generation`,
 `EndpointModel`, `MethodModel`, `ParameterModel`, `EntityModel`,
 `PropertyModel`, `TypeModel` and `UnionModel`. The model is built from the Java
 signatures the walk carries, so it keeps the Java type of each value, and can
@@ -445,7 +450,8 @@ endpoints import it instead, and `connect-client.default.ts` is not generated
 ```
 com.vaadin.hilla.generator
 ├── model/             - What the writers need, as plain records,
-│                        built while the parser walks the classes
+│                        built while the parser walks the classes from
+│                        the builders that are the targets of its nodes
 └── typescript/        - The writers
 
 com.vaadin.hilla.parser

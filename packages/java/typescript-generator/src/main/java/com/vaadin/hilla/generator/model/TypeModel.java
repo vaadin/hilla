@@ -15,11 +15,8 @@
  */
 package com.vaadin.hilla.generator.model;
 
-import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 import java.util.Objects;
-
-import com.vaadin.hilla.parser.utils.Signatures;
 
 /**
  * A type as the TypeScript generator needs it: what to write, with the
@@ -267,22 +264,18 @@ public sealed interface TypeModel {
         }
 
         /**
-         * What is known about a type before any plugin has said anything:
-         * whether a value of it can be absent, which is what Java says unless
-         * an annotation says otherwise, and whether the types it is given
-         * belong to it rather than to the value it holds.
+         * What is known about a type before any plugin has said anything.
          *
-         * @param type
-         *            the type a value is of
-         * @param handleGenerics
-         *            whether a type variable stands for itself, which it does
-         *            in an entity and does not in the signature of an endpoint
-         *            method
+         * @param optional
+         *            whether a value of the type can be absent, which is what
+         *            Java says unless an annotation says otherwise
+         * @param collectsTypeArguments
+         *            whether the types it is given belong to it rather than to
+         *            the value it holds
          */
-        public static Builder of(AnnotatedElement type,
-                boolean handleGenerics) {
-            return new Builder(canBeAbsent(type, handleGenerics),
-                    collectsTypeArguments(type));
+        public static Builder of(boolean optional,
+                boolean collectsTypeArguments) {
+            return new Builder(optional, collectsTypeArguments);
         }
 
         /**
@@ -367,39 +360,6 @@ public sealed interface TypeModel {
 
         public TypeVariable typeVariable(String name) {
             return new TypeVariable(name, optional, constraints, annotations);
-        }
-
-        private static boolean canBeAbsent(AnnotatedElement type,
-                boolean handleGenerics) {
-            if (Signatures.isCharacter(type) || Signatures.isString(type)
-                    || Signatures.isBoolean(type)
-                    || Signatures.hasIntegerType(type)
-                    || Signatures.isBigInteger(type)
-                    || Signatures.hasFloatType(type)
-                    || Signatures.isBigDecimal(type)) {
-                return !Signatures.isPrimitive(type);
-            }
-
-            if (Signatures.isArray(type) || Signatures.isIterable(type)
-                    || Signatures.isMap(type) || Signatures.isDate(type)
-                    || Signatures.isDateTime(type)) {
-                return true;
-            }
-
-            if (Signatures.isClassRef(type)) {
-                // A class of the JDK is a value of a type the browser has one
-                // of its own for, which the walk carries below it
-                return Signatures.isNonJDKClass(type);
-            }
-
-            return handleGenerics && (Signatures.isTypeVariable(type)
-                    || Signatures.isTypeParameter(type));
-        }
-
-        private static boolean collectsTypeArguments(AnnotatedElement type) {
-            return Signatures.isClassRef(type) && !(Signatures.isIterable(type)
-                    || Signatures.isMap(type) || Signatures.isOptional(type)
-                    || Signatures.getTypeArguments(type).isEmpty());
         }
     }
 }
