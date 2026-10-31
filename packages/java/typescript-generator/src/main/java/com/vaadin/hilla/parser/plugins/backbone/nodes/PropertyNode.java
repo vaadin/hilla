@@ -29,12 +29,12 @@ import java.util.stream.Stream;
 import org.jspecify.annotations.NonNull;
 import tools.jackson.databind.introspect.BeanPropertyDefinition;
 
+import com.vaadin.hilla.generator.model.TypeModel;
 import com.vaadin.hilla.parser.core.AbstractNode;
-import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 
 public class PropertyNode extends AbstractNode<BeanPropertyDefinition, String>
         implements AnnotatedNode {
-    private TypeFacts valueType = TypeFacts.unknown();
+    private TypeModel.Builder valueType = TypeModel.Builder.unknown();
 
     protected PropertyNode(@NonNull BeanPropertyDefinition source,
             @NonNull String target) {
@@ -46,11 +46,11 @@ public class PropertyNode extends AbstractNode<BeanPropertyDefinition, String>
      * the walk carries as a node below this one. Until that node is left, it is
      * what is known about a type nothing has been walked for.
      */
-    public TypeFacts getValueType() {
+    public TypeModel.Builder getValueType() {
         return valueType;
     }
 
-    public void setValueType(TypeFacts valueType) {
+    public void setValueType(TypeModel.Builder valueType) {
         this.valueType = valueType;
     }
 

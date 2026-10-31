@@ -19,18 +19,18 @@ import java.lang.reflect.AnnotatedElement;
 
 import org.jspecify.annotations.NonNull;
 
+import com.vaadin.hilla.generator.model.TypeModel;
 import com.vaadin.hilla.parser.core.AbstractNode;
-import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 
 public final class TypeSignatureNode
-        extends AbstractNode<AnnotatedElement, TypeFacts> {
+        extends AbstractNode<AnnotatedElement, TypeModel.Builder> {
     private TypeSignatureNode(@NonNull AnnotatedElement source,
-            @NonNull TypeFacts target) {
+            TypeModel.@NonNull Builder target) {
         super(source, target);
     }
 
     @NonNull
     static public TypeSignatureNode of(@NonNull AnnotatedElement source) {
-        return new TypeSignatureNode(source, TypeFacts.unknown());
+        return new TypeSignatureNode(source, TypeModel.Builder.unknown());
     }
 }

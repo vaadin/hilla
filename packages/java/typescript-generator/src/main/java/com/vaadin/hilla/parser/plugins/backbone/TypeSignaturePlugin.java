@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 
 import org.jspecify.annotations.NonNull;
 
+import com.vaadin.hilla.generator.model.TypeModel;
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
@@ -47,7 +48,7 @@ public final class TypeSignaturePlugin
     @Override
     public void enter(NodePath<?> nodePath) {
         if (nodePath.getNode() instanceof TypedNode typedNode) {
-            typedNode.setTarget(TypeFacts.of(typedNode.getType(),
+            typedNode.setTarget(TypeModel.Builder.of(typedNode.getType(),
                     // Only deal with generics in entities: endpoint methods are
                     // not allowed to emit generic type parameters and arguments
                     isInEntity(nodePath)));
@@ -113,7 +114,7 @@ public final class TypeSignaturePlugin
      * types a class is given belong to it, and a type argument, a type variable
      * or an optional is written as the type it stands for.
      */
-    private void attachToNestingParentSignature(TypeFacts type,
+    private void attachToNestingParentSignature(TypeModel.Builder type,
             TypedNode parentNode) {
         var parentType = parentNode.getType();
 

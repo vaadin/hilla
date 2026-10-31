@@ -24,30 +24,32 @@ import java.util.stream.Collectors;
 
 import org.jspecify.annotations.NonNull;
 
+import com.vaadin.hilla.generator.model.TypeModel;
 import com.vaadin.hilla.parser.core.AbstractNode;
-import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 import com.vaadin.hilla.parser.utils.Signatures;
 
-public final class CompositeTypeSignatureNode extends
-        AbstractNode<List<AnnotatedElement>, TypeFacts> implements TypedNode {
+public final class CompositeTypeSignatureNode
+        extends AbstractNode<List<AnnotatedElement>, TypeModel.Builder>
+        implements TypedNode {
 
     private final List<Annotation> annotations;
 
     private CompositeTypeSignatureNode(@NonNull List<AnnotatedElement> source,
-            @NonNull TypeFacts target, List<Annotation> annotations) {
+            TypeModel.@NonNull Builder target, List<Annotation> annotations) {
         super(source, target);
         this.annotations = annotations;
     }
 
     private CompositeTypeSignatureNode(@NonNull List<AnnotatedElement> source,
-            @NonNull TypeFacts target) {
+            TypeModel.@NonNull Builder target) {
         this(source, target, extractAnnotations(source));
     }
 
     @NonNull
     static public CompositeTypeSignatureNode of(
             @NonNull List<AnnotatedElement> source) {
-        return new CompositeTypeSignatureNode(source, TypeFacts.unknown());
+        return new CompositeTypeSignatureNode(source,
+                TypeModel.Builder.unknown());
     }
 
     @Override

@@ -32,13 +32,13 @@ import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.generator.model.AnnotationModel;
 import com.vaadin.hilla.generator.model.ConstraintModel;
+import com.vaadin.hilla.generator.model.TypeModel;
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
-import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.AnnotatedNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
@@ -256,7 +256,8 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
     }
 
     private void noteConstraints(
-            List<java.lang.annotation.Annotation> annotations, TypeFacts type) {
+            List<java.lang.annotation.Annotation> annotations,
+            TypeModel.Builder type) {
         type.setConstraints(annotations.stream()
                 .filter(ModelPlugin::isValidationConstraintAnnotation)
                 .flatMap(ModelPlugin::unwrapRepeatableContainer)
@@ -264,7 +265,8 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
                 .toList());
     }
 
-    private void noteAnnotations(AnnotatedNode annotatedNode, TypeFacts type) {
+    private void noteAnnotations(AnnotatedNode annotatedNode,
+            TypeModel.Builder type) {
         type.setAnnotations(annotatedNode.getAnnotations().stream()
                 .filter(ModelPlugin::isIncludedAnnotation)
                 .map(ModelPlugin::convertAnnotation).toList());

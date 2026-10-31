@@ -91,4 +91,44 @@ public sealed interface EntityModel {
             constants = List.copyOf(constants);
         }
     }
+
+    /**
+     * What the walk says about an entity beyond the class it is written from
+     * and the properties the walk carries below it, which is the target of the
+     * node standing for the entity. The declaration is built from it once the
+     * walk leaves the node, when the properties are known.
+     */
+    final class Builder {
+        private Discriminator discriminator;
+
+        /**
+         * The property saying which subtype of a polymorphic type a value is,
+         * which an entity has where it belongs to such a hierarchy.
+         */
+        public Optional<Discriminator> getDiscriminator() {
+            return Optional.ofNullable(discriminator);
+        }
+
+        public void setDiscriminator(Discriminator discriminator) {
+            this.discriminator = discriminator;
+        }
+
+        /**
+         * The declaration of a type whose values are objects with properties.
+         * The discriminator is written as the ids it accepts rather than as the
+         * type the class declares it with, so it is left out of the properties:
+         * TypeScript would have the name twice.
+         */
+        public Bean bean(String javaClass, List<String> typeParameters,
+                List<TypeModel.EntityRef> superTypes,
+                List<PropertyModel> properties) {
+            var discriminator = getDiscriminator();
+
+            return new Bean(javaClass, typeParameters, superTypes, properties
+                    .stream()
+                    .filter(property -> discriminator.map(Discriminator::name)
+                            .filter(property.name()::equals).isEmpty())
+                    .toList(), discriminator);
+        }
+    }
 }

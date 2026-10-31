@@ -31,13 +31,13 @@ import java.util.stream.Stream;
 
 import org.jspecify.annotations.NonNull;
 
+import com.vaadin.hilla.generator.model.TypeModel;
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
-import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.AnnotatedNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
@@ -70,7 +70,7 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
     public void exit(NodePath<?> nodePath) {
         var node = nodePath.getNode();
 
-        if (node.getTarget() instanceof TypeFacts type) {
+        if (node.getTarget() instanceof TypeModel.Builder type) {
             var nodeSource = node.getSource();
 
             if (nodeSource instanceof AnnotatedElement signature
