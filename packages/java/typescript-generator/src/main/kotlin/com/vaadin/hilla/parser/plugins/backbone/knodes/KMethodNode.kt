@@ -15,12 +15,12 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.knodes
 
-import com.vaadin.hilla.parser.models.MethodInfoModel
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode
+import java.lang.reflect.Method
 import kotlin.reflect.KFunction
 
 class KMethodNode(
-    source: MethodInfoModel,
+    source: Method,
     val kFunction: KFunction<*>
 ): MethodNode(
     source

@@ -21,11 +21,6 @@ import com.vaadin.hilla.parser.core.NodeDependencies
 import com.vaadin.hilla.parser.core.NodePath
 import com.vaadin.hilla.parser.core.Plugin
 import com.vaadin.hilla.parser.core.PluginConfiguration
-import com.vaadin.hilla.parser.models.BaseSignatureModel
-import com.vaadin.hilla.parser.models.ClassInfoModel
-import com.vaadin.hilla.parser.models.ClassRefSignatureModel
-import com.vaadin.hilla.parser.models.TypeArgumentModel
-import com.vaadin.hilla.parser.models.TypeVariableModel
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin
 import com.vaadin.hilla.parser.plugins.backbone.knodes.KEndpointExposedNode
 import com.vaadin.hilla.parser.plugins.backbone.knodes.KEndpointNode
@@ -43,6 +38,7 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode
+import com.vaadin.hilla.parser.utils.Signatures
 import java.lang.reflect.Method
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.memberFunctions
@@ -68,7 +64,7 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
         if (nodeDependencies.node !is EntityNode) return nodeDependencies
 
         val entityNode = nodeDependencies.node as EntityNode
-        val clazz = entityNode.source.get() as Class<*>
+        val clazz = entityNode.source
         if (!isKotlinClass(clazz)) return nodeDependencies
 
         val propertyNames = getKotlinPropertyNames(clazz)
@@ -100,23 +96,23 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
 
         // Check that the parent class is Kotlin. If not, return unchanged.
         val parentClass = when (node) {
-            is EndpointNode, is EntityNode -> (node.source as? ClassInfoModel)?.get() as? Class<*>
-            is MethodNode, is PropertyNode -> (parentPath.node.source as? ClassInfoModel)?.get() as? Class<*>
+            is EndpointNode, is EntityNode -> node.source as? Class<*>
+            is MethodNode, is PropertyNode -> parentPath.node.source as? Class<*>
             else -> null
         }
         if (parentClass != null && !isKotlinClass(parentClass)) return node
         if (parentPath != parentPath.rootPath && !isKotlinClass(findClosestClass(parentPath))) return node
 
         return when (node) {
-            is EndpointNode -> KEndpointNode(node.source, node.target, (node.source.get() as Class<*>).kotlin)
-            is EndpointExposedNode -> KEndpointExposedNode(node.source, (node.source.get() as Class<*>).kotlin)
+            is EndpointNode -> KEndpointNode(node.source, node.target, node.source.kotlin)
+            is EndpointExposedNode -> KEndpointExposedNode(node.source, node.source.kotlin)
             is MethodNode -> createKMethodNode(node, parentPath)
             is MethodParameterNode -> KMethodParameterNode(node.source, node.target,
                     (parentPath.node as KMethodNode).kFunction.parameters
                         .first { it.kind == KParameter.Kind.VALUE && it.name == node.source.name })
             is TypedNode -> resolveTypedNode(node, parentPath)
             is EntityNode ->
-                KEntityNode(node.source, node.target, (node.source.get() as Class<*>).kotlin)
+                KEntityNode(node.source, node.target, node.source.kotlin)
             is PropertyNode -> {
                 val kProperty = (parentPath.node as? KEntityNode)?.kClass?.memberProperties
                     ?.firstOrNull { it.name == node.source.name }
@@ -128,12 +124,25 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
         }
     }
 
-    private fun resolveTypedNode(node: TypedNode, parentPath: NodePath<*>): Node<*, *> =
-        when (node.type) {
-            is TypeArgumentModel -> resolveTypeArgumentModel(node as TypeSignatureNode, parentPath)
-            is ClassRefSignatureModel, is BaseSignatureModel, is TypeVariableModel -> resolveTypeSignature(node, parentPath)
+    private fun resolveTypedNode(node: TypedNode, parentPath: NodePath<*>): Node<*, *> {
+        val type = node.type
+        return when {
+            isTypeArgument(node, parentPath) -> resolveTypeArgument(node as TypeSignatureNode, parentPath)
+            Signatures.isClassRef(type) || Signatures.isBase(type) || Signatures.isTypeVariable(type) ->
+                resolveTypeSignature(node, parentPath)
             else -> node as Node<*, *>
         }
+    }
+
+    /**
+     * Whether a typed node stands for a type argument of the type above it, which is what
+     * picks the Kotlin type of the argument out of the Kotlin type of its parent.
+     */
+    private fun isTypeArgument(node: TypedNode, parentPath: NodePath<*>): Boolean {
+        val parent = parentPath.node as? TypedNode ?: return false
+        return node is TypeSignatureNode && node.position != null &&
+            Signatures.getTypeArguments(parent.type).isNotEmpty()
+    }
 
     /**
      * This handles these cases:
@@ -144,7 +153,7 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
      * - generic arguments in class definition, e.g. as 'Long' in:
      *      class Person: AbstractEntity<Long>()
      */
-    private fun resolveTypeArgumentModel(node: TypeSignatureNode, parentPath: NodePath<*>): Node<*, *> =
+    private fun resolveTypeArgument(node: TypeSignatureNode, parentPath: NodePath<*>): Node<*, *> =
         when (val parentNode = parentPath.node) {
             is KTypeSignatureNode -> {
                 val parentType = parentNode.kType
@@ -178,7 +187,7 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
                 parentNode.kProperty.returnType
             )
             // Other cases: return unchanged as it doesn't make any change in the nullability
-            // TypeSignature with ClassRefSignatureModel, e.g. an Entity parent class, or
+            // TypeSignature of a class reference, e.g. an Entity parent class, or
             // CompositeTypeSignature for properties defined using getter/setter methods
             else -> node as Node<*, *>
         }
@@ -194,15 +203,15 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
             is PropertyNode -> {
                 if (nodePath.parentPath.node is KEntityNode) {
                     val entityNode = nodePath.parentPath.node as KEntityNode
-                    val member = node.source.primaryMember.get()
+                    val member = node.primaryMember
                     if (member is Method) {
                         val kMember = entityNode.kClass.memberFunctions.firstOrNull { it.javaMethod == member }
                         if (kMember != null) {
                             // Check if the member is a getter or setter
                             when (member) {
-                                node.source.get().getter.member ->
+                                node.source.getter.member ->
                                     node.valueType?.isOptional = kMember.returnType.isMarkedNullable
-                                node.source.get().setter.member ->
+                                node.source.setter.member ->
                                     node.valueType?.isOptional =
                                         kMember.parameters.first().type.isMarkedNullable
                             }
@@ -244,8 +253,8 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
 
     private fun findClosestClass(nodePath: NodePath<*>): Class<*> {
         return nodePath.stream().map{ it.node }
-            .filter{ it.source is ClassInfoModel }
-            .map{ it.source as ClassInfoModel }
-            .findFirst().get().get() as Class<*>
+            .filter{ it.source is Class<*> }
+            .map{ it.source as Class<*> }
+            .findFirst().get()
     }
 }

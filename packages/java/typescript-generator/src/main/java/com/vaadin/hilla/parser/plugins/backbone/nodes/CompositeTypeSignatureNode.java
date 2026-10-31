@@ -15,6 +15,8 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.nodes;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.UnaryOperator;
@@ -23,46 +25,44 @@ import java.util.stream.Collectors;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
-import com.vaadin.hilla.parser.models.AnnotatedModel;
-import com.vaadin.hilla.parser.models.AnnotationInfoModel;
-import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
+import com.vaadin.hilla.parser.utils.Signatures;
 
 public final class CompositeTypeSignatureNode extends
-        AbstractNode<List<SignatureModel>, TypeFacts> implements TypedNode {
+        AbstractNode<List<AnnotatedElement>, TypeFacts> implements TypedNode {
 
-    private final List<AnnotationInfoModel> annotations;
+    private final List<Annotation> annotations;
 
-    private CompositeTypeSignatureNode(@NonNull List<SignatureModel> source,
-            @NonNull TypeFacts target, List<AnnotationInfoModel> annotations) {
+    private CompositeTypeSignatureNode(@NonNull List<AnnotatedElement> source,
+            @NonNull TypeFacts target, List<Annotation> annotations) {
         super(source, target);
         this.annotations = annotations;
     }
 
-    private CompositeTypeSignatureNode(@NonNull List<SignatureModel> source,
+    private CompositeTypeSignatureNode(@NonNull List<AnnotatedElement> source,
             @NonNull TypeFacts target) {
         this(source, target, extractAnnotations(source));
     }
 
     @NonNull
     static public CompositeTypeSignatureNode of(
-            @NonNull List<SignatureModel> source) {
+            @NonNull List<AnnotatedElement> source) {
         return new CompositeTypeSignatureNode(source, TypeFacts.unknown());
     }
 
     @Override
-    public List<AnnotationInfoModel> getAnnotations() {
+    public List<Annotation> getAnnotations() {
         return annotations;
     }
 
     @Override
-    public SignatureModel getType() {
+    public AnnotatedElement getType() {
         return getSource().get(0);
     }
 
     @Override
     public TypedNode processType(
-            @NonNull UnaryOperator<SignatureModel> typeProcessor) {
+            @NonNull UnaryOperator<AnnotatedElement> typeProcessor) {
         var processedTypes = getSource().stream().map(typeProcessor)
                 .collect(Collectors.toList());
         if (processedTypes.equals(getSource())) {
@@ -73,9 +73,9 @@ public final class CompositeTypeSignatureNode extends
                 annotations);
     }
 
-    private static List<AnnotationInfoModel> extractAnnotations(
-            List<SignatureModel> source) {
-        return source.stream().map(AnnotatedModel::getAnnotations)
+    private static List<Annotation> extractAnnotations(
+            List<AnnotatedElement> source) {
+        return source.stream().map(Signatures::getAnnotations)
                 .flatMap(Collection::stream).distinct()
                 .collect(Collectors.toList());
     }

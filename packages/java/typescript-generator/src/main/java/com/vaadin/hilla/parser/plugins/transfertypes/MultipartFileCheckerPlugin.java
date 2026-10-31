@@ -15,18 +15,20 @@
  */
 package com.vaadin.hilla.parser.plugins.transfertypes;
 
+import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Optional;
+
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
-import com.vaadin.hilla.parser.models.ClassInfoModel;
-import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
-import com.vaadin.hilla.parser.models.FieldInfoModel;
-import com.vaadin.hilla.parser.models.MethodInfoModel;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
+import com.vaadin.hilla.parser.utils.Signatures;
 
 public class MultipartFileCheckerPlugin
         extends AbstractPlugin<PluginConfiguration> {
@@ -38,32 +40,23 @@ public class MultipartFileCheckerPlugin
         if (nodePath.getNode() instanceof PropertyNode propertyNode) {
             // Get the primary member (field, getter, or setter) to check its
             // type
-            var primaryMember = propertyNode.getSource().getPrimaryMember();
-            ClassInfoModel nodeType = null;
+            var primaryMember = propertyNode.getPrimaryMember();
+            AnnotatedType memberType = null;
 
-            if (primaryMember instanceof MethodInfoModel method) {
-                // If it's a getter method, get the return type
-                if (method.getParameters().isEmpty()) {
-                    var resultType = method.getResultType();
-                    if (resultType instanceof ClassRefSignatureModel classRef) {
-                        nodeType = classRef.getClassInfo();
-                    }
-                } else if (!method.getParameters().isEmpty()) {
-                    // If it's a setter, get the parameter type
-                    var paramType = method.getParameters().get(0).getType();
-                    if (paramType instanceof ClassRefSignatureModel classRef) {
-                        nodeType = classRef.getClassInfo();
-                    }
-                }
-            } else if (primaryMember instanceof FieldInfoModel field) {
-                // If it's a field, get the field type
-                var fieldType = field.getType();
-                if (fieldType instanceof ClassRefSignatureModel classRef) {
-                    nodeType = classRef.getClassInfo();
-                }
+            if (primaryMember instanceof Method method) {
+                // A getter returns the value, a setter takes it
+                memberType = method.getParameterCount() == 0
+                        ? method.getAnnotatedReturnType()
+                        : method.getParameters()[0].getAnnotatedType();
+            } else if (primaryMember instanceof Field field) {
+                memberType = field.getAnnotatedType();
             }
 
-            if (nodeType != null && ClassInfoModel
+            var nodeType = Optional.ofNullable(memberType)
+                    .filter(Signatures::isClassRef)
+                    .flatMap(Signatures::getClass).orElse(null);
+
+            if (nodeType != null && Signatures
                     .isAssignableFrom(MULTIPART_CLASS_NAME, nodeType)) {
                 throw new MultipartFileUsageException(
                         "MultipartFile is not allowed in entity classes: "
@@ -72,10 +65,10 @@ public class MultipartFileCheckerPlugin
         }
 
         if (nodePath.getNode() instanceof MethodNode methodNode) {
-            var nodeType = methodNode.getSource().getResultType();
-            if (nodeType instanceof ClassRefSignatureModel classRefSignatureModel
-                    && ClassInfoModel.isAssignableFrom(MULTIPART_CLASS_NAME,
-                            classRefSignatureModel.getClassInfo())) {
+            var nodeType = methodNode.getSource().getAnnotatedReturnType();
+            if (Signatures.isClassRef(nodeType)
+                    && Signatures.isAssignableFrom(MULTIPART_CLASS_NAME,
+                            Signatures.getClass(nodeType).orElseThrow())) {
                 throw new MultipartFileUsageException(
                         "MultipartFile is not allowed as return type: "
                                 + methodNode.getSource());

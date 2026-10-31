@@ -16,6 +16,7 @@
 package com.vaadin.hilla.parser.plugins.backbone;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -42,8 +43,7 @@ public final class MethodParameterPlugin
     }
 
     private Stream<Node<?, ?>> getParametersStream(MethodNode methodNode) {
-        var parameters = new ArrayList<>(
-                methodNode.getSource().getParameters());
+        var parameters = List.of(methodNode.getSource().getParameters());
         var parameterNodes = new ArrayList<Node<?, ?>>(parameters.size());
         for (var i = 0; i < parameters.size(); i++) {
             var parameter = parameters.get(i);
