@@ -16,7 +16,9 @@
 package com.vaadin.hilla.parser.plugins.backbone;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -31,6 +33,7 @@ import tools.jackson.databind.SerializationConfig;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.util.IgnorePropertiesUtil;
 
+import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
 import com.vaadin.hilla.parser.core.NodeDependencies;
@@ -53,6 +56,10 @@ public final class PropertyPlugin
                             JsonAutoDetect.Visibility.PUBLIC_ONLY))
             .disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY).build();
 
+    // Writes the enum constants. Without a factory of the application's own,
+    // it is the mapper the endpoints serialize with by default, so a generated
+    // enum holds what the server sends without two mappers having to agree.
+    private ObjectMapper mapper = new JacksonObjectMapperFactory.Json().build();
     private SerializationConfig serializationConfig = MAPPER
             .serializationConfig();
 
@@ -61,7 +68,27 @@ public final class PropertyPlugin
         if (nodePath.getNode() instanceof PropertyNode) {
             var propertyNode = (PropertyNode) nodePath.getNode();
             propertyNode.setTarget(propertyNode.getSource().getName());
+        } else if (nodePath.getNode() instanceof EntityNode entityNode
+                && entityNode.getSource().isEnum()) {
+            entityNode.getTarget()
+                    .setConstants(enumConstants(entityNode.getSource()));
         }
+    }
+
+    /**
+     * What each constant of an enum is serialized as, which is its name unless
+     * the enum says otherwise, such as with {@code @JsonProperty} on the
+     * constant. A constant written as something else than a string keeps its
+     * name, since the generated enum holds strings.
+     */
+    private List<EntityModel.Constant> enumConstants(Class<?> cls) {
+        return Arrays.stream(cls.getEnumConstants()).map(constant -> {
+            var name = ((Enum<?>) constant).name();
+            var value = mapper.valueToTree(constant);
+
+            return new EntityModel.Constant(name,
+                    value.isString() ? value.stringValue() : name);
+        }).toList();
     }
 
     @NonNull
@@ -96,6 +123,7 @@ public final class PropertyPlugin
             ObjectMapper jsonMapper = mapper.rebuild()
                     .disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
                     .build();
+            this.mapper = jsonMapper;
             this.serializationConfig = jsonMapper.serializationConfig();
         }
     }

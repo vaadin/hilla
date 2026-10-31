@@ -81,14 +81,29 @@ public sealed interface EntityModel {
      * A type whose values are one of a set of constants.
      *
      * @param constants
-     *            the names of the constants, which are also the values they are
-     *            serialized as
+     *            the constants, in the order the enum declares them
      */
     record Enumeration(String javaClass,
-            List<String> constants) implements EntityModel {
+            List<Constant> constants) implements EntityModel {
         public Enumeration {
             Objects.requireNonNull(javaClass);
             constants = List.copyOf(constants);
+        }
+    }
+
+    /**
+     * A constant of an enum.
+     *
+     * @param name
+     *            the name the enum declares it under
+     * @param value
+     *            the string it is serialized as, or its name when it is not
+     *            serialized as a string
+     */
+    record Constant(String name, String value) {
+        public Constant {
+            Objects.requireNonNull(name);
+            Objects.requireNonNull(value);
         }
     }
 
@@ -100,6 +115,7 @@ public sealed interface EntityModel {
      */
     final class Builder {
         private Discriminator discriminator;
+        private List<Constant> constants = List.of();
 
         /**
          * The property saying which subtype of a polymorphic type a value is,
@@ -111,6 +127,21 @@ public sealed interface EntityModel {
 
         public void setDiscriminator(Discriminator discriminator) {
             this.discriminator = discriminator;
+        }
+
+        /**
+         * Sets the constants of an enum, with the value each is serialized as,
+         * in the order the enum declares them.
+         */
+        public void setConstants(List<Constant> constants) {
+            this.constants = List.copyOf(constants);
+        }
+
+        /**
+         * The declaration of an enum, made of its constants.
+         */
+        public Enumeration enumeration(String javaClass) {
+            return new Enumeration(javaClass, constants);
         }
 
         /**

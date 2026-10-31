@@ -241,7 +241,9 @@ others require it:
   serialized properties, using the application's object mapper when
   `BackbonePluginConfiguration` names a factory for it. It keeps only the
   properties that the class itself declares; inherited ones come from the
-  superclass entity.
+  superclass entity. For an enum it records, on the `EntityModel.Builder`, the string each
+  constant is serialized as, falling back to the constant's name when the
+  mapper writes something other than a string.
 - `JsonValuePlugin` resolves a type whose class has a `@JsonValue` method to
   the type that method returns.
 
@@ -338,7 +340,8 @@ nodes:
 - `TypeModel.Builder`, on typed nodes, says whether a value can be absent, and
   whether the type arguments of a type belong to the type itself. It also
   carries the constraints and annotations from `ModelPlugin`.
-- `EntityModel.Builder`, on entity nodes, carries the discriminator.
+- `EntityModel.Builder`, on entity nodes, carries the discriminator and, for an
+  enum, the value each constant is serialized as.
 - `UnionNode`'s target lists the subtypes of a polymorphic type.
 
 The targets are builders of the generator model itself, so there is no

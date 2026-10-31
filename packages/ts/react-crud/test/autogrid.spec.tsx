@@ -38,6 +38,8 @@ import {
   PersonModel,
   personService,
   PersonWithSimpleIdPropertyModel,
+  Priority,
+  TaskModel,
 } from './test-models-and-services.js';
 import { nextFrame } from './test-utils.js';
 import TextFieldController from './TextFieldController.js';
@@ -658,6 +660,28 @@ describe('@vaadin/hilla-react-crud', () => {
 
           const expectedFilter2: AndFilter = { '@type': 'and', children: [expectedPropertyFilter2] };
           expect(service.lastFilter).to.deep.equal(expectedFilter2);
+        });
+
+        it('filters an enum column by the names of its constants', async () => {
+          // The server resolves the filter by the name of the constant, which
+          // here differs from the value the constant is sent as
+          const service = createService([{ id: 1, version: 1, priority: Priority.VERY_LOW }]);
+          const grid = await GridController.init(render(<AutoGrid service={service} model={TaskModel} />), user);
+          const columnIndex = await grid.findColumnIndexByHeaderText('Priority');
+          const controller = await SelectController.init(grid.getHeaderCellContent(1, columnIndex), user);
+
+          expect(controller.instance.items).to.deep.include({ label: 'Very Low', value: 'VERY_LOW' });
+
+          await controller.select('VERY_LOW');
+
+          const expectedPropertyFilter: FilterUnion = {
+            '@type': 'propertyString',
+            filterValue: 'VERY_LOW',
+            propertyId: 'priority',
+            matcher: Matcher.EQUALS,
+            key: 'priority',
+          };
+          expect(service.lastFilter).to.deep.equal({ '@type': 'and', children: [expectedPropertyFilter] });
         });
 
         it('filters for a boolean column', async () => {

@@ -17,8 +17,6 @@ package com.vaadin.hilla.generator.model;
 
 import java.lang.reflect.AnnotatedArrayType;
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -330,10 +328,7 @@ public final class EndpointModelPlugin
         var cls = node.getSource();
 
         if (cls.isEnum()) {
-            return new EntityModel.Enumeration(cls.getName(),
-                    Arrays.stream(cls.getDeclaredFields()).filter(
-                            field -> Modifier.isPublic(field.getModifiers()))
-                            .map(Field::getName).toList());
+            return node.getTarget().enumeration(cls.getName());
         }
 
         return node.getTarget().bean(cls.getName(), typeParameters(cls),
