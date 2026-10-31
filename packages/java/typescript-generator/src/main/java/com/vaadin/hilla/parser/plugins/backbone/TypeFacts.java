@@ -16,36 +16,21 @@
 package com.vaadin.hilla.parser.plugins.backbone;
 
 import java.lang.reflect.AnnotatedElement;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
 
+import com.vaadin.hilla.generator.model.AnnotationModel;
+import com.vaadin.hilla.generator.model.ConstraintModel;
 import com.vaadin.hilla.parser.utils.Signatures;
 
 /**
  * What the walk says about the type of a value: whether a value of it can be
- * absent, the types it is given where it takes parameters, and whatever else a
- * plugin has to say about it, which the plugin reading it back knows the shape
- * of.
+ * absent, the types it is given where it takes parameters, and what its
+ * annotations say about it, in the shape the generator model keeps it in.
  */
 public final class TypeFacts {
-    /**
-     * The name the plugin reading the annotations of the validation API says
-     * what they mean for a value under. The notes are
-     * {@link com.vaadin.hilla.parser.plugins.model.ValidationConstraint}s.
-     */
-    public static final String CONSTRAINTS = "constraints";
-
-    /**
-     * The name the annotations of a value which a form model is told about are
-     * said under. The notes are
-     * {@link com.vaadin.hilla.parser.plugins.model.Annotation}s.
-     */
-    public static final String ANNOTATIONS = "annotations";
-
-    private final Map<String, List<?>> notes = new LinkedHashMap<>();
     private final boolean collectsTypeArguments;
+    private List<ConstraintModel> constraints = List.of();
+    private List<AnnotationModel> annotations = List.of();
     private boolean optional;
 
     private TypeFacts(boolean optional, boolean collectsTypeArguments) {
@@ -100,21 +85,27 @@ public final class TypeFacts {
     }
 
     /**
-     * Says something about the type under the given name, which the plugin
-     * reading it back knows the shape of the values of. Saying it again
-     * replaces what was said before.
+     * What the annotations of the validation API say a value of the type has to
+     * satisfy, which is nothing at all where none is written on it.
      */
-    public void note(String name, List<?> values) {
-        notes.put(name, values);
+    public List<ConstraintModel> getConstraints() {
+        return constraints;
+    }
+
+    public void setConstraints(List<ConstraintModel> constraints) {
+        this.constraints = List.copyOf(constraints);
     }
 
     /**
-     * What a plugin has said about the type under the given name as values of
-     * the given type, which is nothing at all where nothing was said.
+     * The annotations of the value which a form model is told about, such as
+     * the one saying that a value is the id of an entity.
      */
-    public <T> Stream<T> notes(String name, Class<T> type) {
-        return notes.getOrDefault(name, List.of()).stream()
-                .filter(type::isInstance).map(type::cast);
+    public List<AnnotationModel> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(List<AnnotationModel> annotations) {
+        this.annotations = List.copyOf(annotations);
     }
 
     private static boolean canBeAbsent(AnnotatedElement type,
