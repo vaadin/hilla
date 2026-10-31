@@ -12,7 +12,7 @@
 
   <artifactId>hilla-typescript-generator</artifactId>
   <name>Hilla TypeScript Generator</name>
-  <description>Generates TypeScript from Java endpoints</description>
+  <description>Generates TypeScript from Java endpoints. Internal to Hilla, not public API, except for JacksonObjectMapperFactory and ByteArrayModule.</description>
   <url>https://vaadin.com/hilla</url>
   <packaging>jar</packaging>
 
@@ -22,10 +22,6 @@
 
   <dependencies>
     <!-- Core dependencies from parser-jvm-core and parser-jvm-utils -->
-    <dependency>
-      <groupId>io.github.classgraph</groupId>
-      <artifactId>classgraph</artifactId>
-    </dependency>
     <dependency>
       <groupId>jakarta.annotation</groupId>
       <artifactId>jakarta.annotation-api</artifactId>
@@ -48,12 +44,6 @@
       <groupId>com.vaadin</groupId>
       <artifactId>flow-server</artifactId>
     </dependency>
-    <!-- Reflection library from parser-jvm-utils -->
-    <dependency>
-      <groupId>com.vaadin.external</groupId>
-      <artifactId>gentyref</artifactId>
-      <version>1.2.0.vaadin1</version>
-    </dependency>
     <!-- Kotlin support from parser-jvm-plugin-nonnull-kotlin -->
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
@@ -75,6 +65,11 @@
     <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-commons</artifactId>
+    </dependency>
+    <!-- Generic type resolution in Generics -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
     </dependency>
     <!-- Test dependencies -->
     <dependency>
@@ -111,11 +106,6 @@
     <dependency>
       <groupId>jakarta.persistence</groupId>
       <artifactId>jakarta.persistence-api</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-core</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

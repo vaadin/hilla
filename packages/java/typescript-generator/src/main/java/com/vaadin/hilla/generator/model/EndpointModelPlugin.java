@@ -15,8 +15,14 @@
  */
 package com.vaadin.hilla.generator.model;
 
+import java.lang.reflect.AnnotatedArrayType;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.TypeVariable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedHashMap;
@@ -31,14 +37,6 @@ import com.vaadin.hilla.parser.core.Node;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.core.RootNode;
-import com.vaadin.hilla.parser.models.ArraySignatureModel;
-import com.vaadin.hilla.parser.models.BaseSignatureModel;
-import com.vaadin.hilla.parser.models.ClassInfoModel;
-import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
-import com.vaadin.hilla.parser.models.FieldInfoModel;
-import com.vaadin.hilla.parser.models.SignatureModel;
-import com.vaadin.hilla.parser.models.TypeParameterModel;
-import com.vaadin.hilla.parser.models.jackson.JacksonPropertyModel;
 import com.vaadin.hilla.parser.plugins.backbone.EntityFacts;
 import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 import com.vaadin.hilla.parser.plugins.backbone.TypeParameters;
@@ -52,6 +50,7 @@ import com.vaadin.hilla.parser.plugins.model.Annotation;
 import com.vaadin.hilla.parser.plugins.model.JvmTypeRef;
 import com.vaadin.hilla.parser.plugins.model.ValidationConstraint;
 import com.vaadin.hilla.parser.plugins.subtypes.SubTypesPlugin;
+import com.vaadin.hilla.parser.utils.Signatures;
 import com.vaadin.hilla.transfertypes.annotations.FromModule;
 
 /**
@@ -311,8 +310,7 @@ public final class EndpointModelPlugin
         // out. A value of a type variable is left as absent as the type it
         // stands for says, since a declaration extending this one gives that
         // type and is free to say that the value is always there
-        var absent = isOptional(node.getSource())
-                || node.getValueType().isOptional();
+        var absent = isOptional(node) || node.getValueType().isOptional();
 
         return new PropertyModel(node.getTarget(),
                 type instanceof TypeModel.TypeVariable && !absent ? type
@@ -323,9 +321,9 @@ public final class EndpointModelPlugin
      * Whether the value a property holds is an optional, which the type of the
      * member it is written as says.
      */
-    private static boolean isOptional(JacksonPropertyModel property) {
+    private static boolean isOptional(PropertyNode property) {
         return property.getAssociatedTypes().stream().findFirst()
-                .filter(SignatureModel::isOptional).isPresent();
+                .filter(Signatures::isOptional).isPresent();
     }
 
     /**
@@ -339,8 +337,9 @@ public final class EndpointModelPlugin
 
         if (cls.isEnum()) {
             return new EntityModel.Enumeration(cls.getName(),
-                    cls.getFields().stream().filter(FieldInfoModel::isPublic)
-                            .map(FieldInfoModel::getName).toList());
+                    Arrays.stream(cls.getDeclaredFields()).filter(
+                            field -> Modifier.isPublic(field.getModifiers()))
+                            .map(Field::getName).toList());
         }
 
         var discriminator = discriminator(node.getTarget());
@@ -375,10 +374,10 @@ public final class EndpointModelPlugin
      * object stands for that bound instead, unless the bound only leads back to
      * the parameter itself, as in {@code <E extends Enum<E>>}.
      */
-    private static List<String> typeParameters(ClassInfoModel cls) {
-        return cls.getTypeParameters().stream()
-                .filter(TypeParameters::isUnbounded)
-                .map(TypeParameterModel::getName).toList();
+    private static List<String> typeParameters(Class<?> cls) {
+        return Arrays.stream(cls.getTypeParameters())
+                .filter(TypeParameters::isUnbounded).map(TypeVariable::getName)
+                .toList();
     }
 
     /**
@@ -386,10 +385,11 @@ public final class EndpointModelPlugin
      * declarations themselves: the properties of a JDK superclass are the
      * properties of the type itself as far as the generator is concerned.
      */
-    private static List<TypeModel.EntityRef> superTypes(ClassInfoModel cls) {
-        return cls.getSuperClass().filter(ClassRefSignatureModel::isNonJDKClass)
+    private static List<TypeModel.EntityRef> superTypes(Class<?> cls) {
+        return Optional.ofNullable(cls.getAnnotatedSuperclass())
+                .filter(Signatures::isNonJDKClass)
                 .map(ref -> TypeModel.EntityRef
-                        .of(ref.getClassInfo().getName()))
+                        .of(Signatures.getClass(ref).orElseThrow().getName()))
                 .map(List::of).orElseGet(List::of);
     }
 
@@ -409,8 +409,8 @@ public final class EndpointModelPlugin
         // an object and not only to itself, as in <E extends Enum<E>>: it then
         // stands for that bound, which the walk visits below it, since the
         // declaration does not keep such a parameter
-        if ((signature.isTypeVariable() || signature.isTypeParameter())
-                && isInEntity()) {
+        if ((Signatures.isTypeVariable(signature)
+                || Signatures.isTypeParameter(signature)) && isInEntity()) {
             return referred.isEmpty()
                     ? new TypeModel.TypeVariable(name(signature), optional,
                             constraints, annotations)
@@ -422,33 +422,34 @@ public final class EndpointModelPlugin
         // the type it is bound to as well. What the walk says of it is what it
         // says of that type, which the parser hands up in place of its own, so
         // whether the value can be absent is read after the plugins said it
-        if (signature.isTypeArgument() || signature.isTypeVariable()
-                || signature.isTypeParameter()) {
+        if (Signatures.isTypeArgument(signature)
+                || Signatures.isTypeVariable(signature)
+                || Signatures.isTypeParameter(signature)) {
             return only(referred).withOptional(optional);
         }
 
         // An Optional is written as the type it holds, which can be absent:
         // TypeScript has nothing of its own for it
-        if (signature.isOptional()) {
+        if (Signatures.isOptional(signature)) {
             return only(referred).withOptional(true);
         }
 
-        if (signature.isArray() || signature.isIterable()) {
+        if (Signatures.isArray(signature) || Signatures.isIterable(signature)) {
             return new TypeModel.ArrayOf(only(referred), optional,
                     name(signature), constraints, annotations);
         }
 
-        if (signature.isMap()) {
+        if (Signatures.isMap(signature)) {
             return new TypeModel.MapOf(only(referred), optional,
                     name(signature), constraints, annotations);
         }
 
-        if (signature.isClassRef() && isProvided(name(signature))) {
+        if (Signatures.isClassRef(signature) && isProvided(name(signature))) {
             return provided(name(signature), referred, optional, constraints,
                     annotations);
         }
 
-        if (signature.isClassRef() && isEntity(signature)
+        if (Signatures.isClassRef(signature) && isEntity(signature)
                 && !isValue(signature)) {
             return new TypeModel.EntityRef(name(signature), referred, optional,
                     constraints, annotations);
@@ -467,22 +468,25 @@ public final class EndpointModelPlugin
                 .anyMatch(frame -> frame.node() instanceof EntityNode);
     }
 
-    private static TypeModel.ScalarKind scalarKind(SignatureModel signature) {
-        if (signature.isBoolean()) {
+    private static TypeModel.ScalarKind scalarKind(AnnotatedElement signature) {
+        if (Signatures.isBoolean(signature)) {
             return TypeModel.ScalarKind.BOOLEAN;
         }
 
-        if (signature.isInteger() || signature.isFloat() || signature.isLong()
-                || signature.isShort() || signature.isByte()
-                || signature.isDouble() || signature.isBigDecimal()
-                || signature.isBigInteger()) {
+        if (Signatures.isInteger(signature) || Signatures.isFloat(signature)
+                || Signatures.isLong(signature) || Signatures.isShort(signature)
+                || Signatures.isByte(signature)
+                || Signatures.isDouble(signature)
+                || Signatures.isBigDecimal(signature)
+                || Signatures.isBigInteger(signature)) {
             return TypeModel.ScalarKind.NUMBER;
         }
 
-        if (signature.isString() || signature.isCharacter()
-                || signature.isDate() || signature.isDateTime()
+        if (Signatures.isString(signature) || Signatures.isCharacter(signature)
+                || Signatures.isDate(signature)
+                || Signatures.isDateTime(signature)
                 // An enum of the application is declared on its own instead
-                || (signature.isEnum() && !isEntity(signature))) {
+                || (Signatures.isEnum(signature) && !isEntity(signature))) {
             return TypeModel.ScalarKind.STRING;
         }
 
@@ -536,8 +540,8 @@ public final class EndpointModelPlugin
      * date. An enum of the application is declared too: it becomes a TypeScript
      * enum of its own, not the string it is serialized as.
      */
-    private static boolean isEntity(SignatureModel signature) {
-        return signature.isNonJDKClass();
+    private static boolean isEntity(AnnotatedElement signature) {
+        return Signatures.isNonJDKClass(signature);
     }
 
     /**
@@ -614,32 +618,36 @@ public final class EndpointModelPlugin
      * is the one the walk decides whether a value can be absent in, so that
      * both say the same about a type.
      */
-    private static boolean isValue(SignatureModel signature) {
-        return signature.isString() || signature.isCharacter()
-                || signature.isBoolean() || signature.hasIntegerType()
-                || signature.isBigInteger() || signature.hasFloatType()
-                || signature.isBigDecimal() || signature.isDate()
-                || signature.isDateTime();
+    private static boolean isValue(AnnotatedElement signature) {
+        return Signatures.isString(signature)
+                || Signatures.isCharacter(signature)
+                || Signatures.isBoolean(signature)
+                || Signatures.hasIntegerType(signature)
+                || Signatures.isBigInteger(signature)
+                || Signatures.hasFloatType(signature)
+                || Signatures.isBigDecimal(signature)
+                || Signatures.isDate(signature)
+                || Signatures.isDateTime(signature);
     }
 
-    private static String name(SignatureModel signature) {
-        if (signature instanceof ClassRefSignatureModel classRef) {
-            return classRef.getClassInfo().getName();
+    private static String name(AnnotatedElement signature) {
+        var cls = Signatures.getClass(signature);
+        if (cls.isPresent()) {
+            return cls.get().getName();
         }
 
-        // A primitive and an array say their own name, which is all of it:
-        // what they are annotated with belongs to the value rather than to the
-        // type, and reads as part of the name otherwise
-        if (signature instanceof BaseSignatureModel base) {
-            return base.getType().getName();
+        // An array says its own name, which is all of it: what it is annotated
+        // with belongs to the value rather than to the type, and reads as
+        // part of the name otherwise
+        if (signature instanceof AnnotatedArrayType array) {
+            return name(array.getAnnotatedGenericComponentType()) + "[]";
         }
 
-        if (signature instanceof ArraySignatureModel array) {
-            return name(array.getNestedType()) + "[]";
+        if (signature instanceof TypeVariable<?> typeParameter) {
+            return typeParameter.getName();
         }
 
-        return signature.get() == null ? Object.class.getName()
-                : String.valueOf(signature.get());
+        return String.valueOf(signature);
     }
 
     private static TypeModel only(List<TypeModel> types) {

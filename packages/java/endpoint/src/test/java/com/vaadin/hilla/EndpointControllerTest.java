@@ -151,6 +151,10 @@ public class EndpointControllerTest {
             // no op
         }
 
+        public void testArrayMethod(int[] numbers) {
+            // no op
+        }
+
         @AnonymousAllowed
         public String testAnonymousMethod() {
             return "Hello, anonymous user!";
@@ -1091,6 +1095,26 @@ public class EndpointControllerTest {
                 validationErrorData.get("parameterName").asText());
         assertTrue(
                 validationErrorData.get("message").asText().contains("'int'"));
+    }
+
+    @Test
+    public void should_ReturnReadableArrayTypeName_When_DeserializationFails()
+            throws IOException {
+        ResponseEntity<String> response = createVaadinController(TEST_ENDPOINT)
+                .serveEndpoint(TEST_ENDPOINT_NAME, "testArrayMethod",
+                        createRequestParameters(
+                                "{\"numbers\": [\"NotANumber\"]}"),
+                        requestMock);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        ObjectNode jsonNodes = new ObjectMapper().readValue(response.getBody(),
+                ObjectNode.class);
+        JsonNode validationErrorData = jsonNodes.get("validationErrorData")
+                .get(0);
+        assertEquals("numbers",
+                validationErrorData.get("parameterName").asText());
+        assertTrue(validationErrorData.get("message").asText()
+                .contains("'int[]'"));
     }
 
     @Test

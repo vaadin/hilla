@@ -30,6 +30,10 @@ import tools.jackson.databind.module.SimpleModule;
  * string. In contrast, Hilla promises to send and receive byte[] as an array of
  * numbers on the client-side. The custom serializer and deserializer of this
  * class ensures that Java byte[] are indeed treated as array of numbers.
+ * <p>
+ * A {@link JacksonObjectMapperFactory} which builds its mapper from scratch,
+ * rather than extending {@link JacksonObjectMapperFactory.Json}, must register
+ * this module to keep that promise.
  */
 public class ByteArrayModule extends SimpleModule {
 

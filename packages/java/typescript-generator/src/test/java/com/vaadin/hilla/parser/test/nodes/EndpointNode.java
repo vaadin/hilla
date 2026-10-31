@@ -18,15 +18,14 @@ package com.vaadin.hilla.parser.test.nodes;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
-import com.vaadin.hilla.parser.models.ClassInfoModel;
 
-public final class EndpointNode extends AbstractNode<ClassInfoModel, String> {
-    private EndpointNode(@NonNull ClassInfoModel value, String name) {
+public final class EndpointNode extends AbstractNode<Class<?>, String> {
+    private EndpointNode(@NonNull Class<?> value, String name) {
         super(value, name);
     }
 
     @NonNull
-    public static EndpointNode of(@NonNull ClassInfoModel cls) {
+    public static EndpointNode of(@NonNull Class<?> cls) {
         return new EndpointNode(cls, null);
     }
 }

@@ -16,7 +16,6 @@
   state. See [Architecture](architecture.md#what-vaadin-flow-provides).
 - **Jackson 3** (`tools.jackson.*`) for endpoint serialization and for reading
   what a class serializes as.
-- **ClassGraph** for walking the browser callable classes at build time.
 - **TypeScript**, **React** and **Lit** for the frontend packages, built and
   tested with **Vite** and **Vitest**, orchestrated by **Nx** over npm
   workspaces.

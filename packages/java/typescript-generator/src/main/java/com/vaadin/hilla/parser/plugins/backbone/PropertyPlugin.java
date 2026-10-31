@@ -28,7 +28,6 @@ import tools.jackson.databind.BeanDescription;
 import tools.jackson.databind.MapperFeature;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationConfig;
-import tools.jackson.databind.introspect.BeanPropertyDefinition;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.util.IgnorePropertiesUtil;
 
@@ -38,8 +37,6 @@ import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
-import com.vaadin.hilla.parser.models.ClassInfoModel;
-import com.vaadin.hilla.parser.models.jackson.JacksonPropertyModel;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 
@@ -77,13 +74,14 @@ public final class PropertyPlugin
         var node = (EntityNode) nodeDependencies.getNode();
         node.getTarget().setSerializationConfig(serializationConfig);
 
-        var model = node.getSource();
-        if (model.isEnum()) {
+        var cls = node.getSource();
+
+        if (cls.isEnum()) {
             return nodeDependencies;
         }
 
-        var properties = collectProperties(model)
-                .<Node<?, ?>> map(PropertyNode::of);
+        var properties = collectProperties(cls)
+                .<Node<?, ?>> map(property -> property);
 
         return nodeDependencies.appendChildNodes(properties);
     }
@@ -104,17 +102,10 @@ public final class PropertyPlugin
         }
     }
 
-    private Stream<JacksonPropertyModel> collectProperties(
-            @NonNull ClassInfoModel model) {
-        var cls = Objects.requireNonNull(model).get();
-
-        if (!(cls instanceof Class<?>)) {
-            throw new BackbonePluginException(
-                    "Jackson: Only reflection models are supported");
-        }
-
+    private Stream<PropertyNode> collectProperties(@NonNull Class<?> cls) {
         // In Jackson 3, use classIntrospectorInstance to get introspector
-        var javaType = serializationConfig.constructType((Class<?>) cls);
+        var javaType = serializationConfig
+                .constructType(Objects.requireNonNull(cls));
         var introspector = serializationConfig.classIntrospectorInstance();
         var annotatedClass = introspector.introspectClassAnnotations(javaType);
         var description = introspector.introspectForSerialization(javaType,
@@ -168,10 +159,9 @@ public final class PropertyPlugin
             this.description = description;
         }
 
-        public Stream<JacksonPropertyModel> stream() {
+        public Stream<PropertyNode> stream() {
             var properties = description.findProperties().stream()
-                    .map((BeanPropertyDefinition prop) -> JacksonPropertyModel
-                            .of(prop));
+                    .map(PropertyNode::of);
             properties = filterPrivateProperties(properties);
             properties = filterSuperClassProperties(properties);
             properties = filterPropertiesWithIgnoredTypes(properties);
@@ -189,14 +179,15 @@ public final class PropertyPlugin
          * @see <a href=
          *      "https://github.com/FasterXML/jackson-databind/blob/2.15/src/main/java/com/fasterxml/jackson/databind/ser/BeanSerializerFactory.java#L652">BeanSerializerFactory#filterBeanProperties</a>
          */
-        private Stream<JacksonPropertyModel> filterIgnoredProperties(
-                Stream<JacksonPropertyModel> properties) {
+        private Stream<PropertyNode> filterIgnoredProperties(
+                Stream<PropertyNode> properties) {
             var ignored = findIgnored();
             var included = findIncluded();
 
             if (included != null || (ignored != null && !ignored.isEmpty())) {
                 properties = properties.filter(property -> !IgnorePropertiesUtil
-                        .shouldIgnore(property.getName(), ignored, included));
+                        .shouldIgnore(property.getSource().getName(), ignored,
+                                included));
             }
 
             return properties;
@@ -206,13 +197,13 @@ public final class PropertyPlugin
          * @see <a href=
          *      "https://github.com/FasterXML/jackson-databind/blob/2.15/src/main/java/com/fasterxml/jackson/databind/ser/BeanSerializerFactory.java#L759">BeanSerializerFactory#removeIgnorableTypes</a>
          */
-        private Stream<JacksonPropertyModel> filterPropertiesWithIgnoredTypes(
-                Stream<JacksonPropertyModel> properties) {
+        private Stream<PropertyNode> filterPropertiesWithIgnoredTypes(
+                Stream<PropertyNode> properties) {
             var ignores = new HashMap<Class<?>, Boolean>();
             var introspector = serializationConfig.getAnnotationIntrospector();
 
             return properties.filter(property -> {
-                var type = property.get().getPrimaryType().getRawClass();
+                var type = property.getSource().getPrimaryType().getRawClass();
                 var result = ignores.get(type);
 
                 if (result == null) {
@@ -249,24 +240,25 @@ public final class PropertyPlugin
          * @see <a href=
          *      "https://github.com/FasterXML/jackson-databind/blob/2.15/src/main/java/com/fasterxml/jackson/databind/ser/BeanSerializerFactory.java#L802">BeanSerializerFactory#removeSetterlessGetters</a>
          */
-        private Stream<JacksonPropertyModel> filterSetterlessGetters(
-                Stream<JacksonPropertyModel> properties) {
+        private Stream<PropertyNode> filterSetterlessGetters(
+                Stream<PropertyNode> properties) {
             // one caveat: only remove implicit properties;
             // explicitly annotated ones should remain
-            return properties.filter(property -> property.couldDeserialize()
-                    || property.isExplicitlyIncluded());
+            return properties
+                    .filter(property -> property.getSource().couldDeserialize()
+                            || property.getSource().isExplicitlyIncluded());
         }
 
-        private Stream<JacksonPropertyModel> filterPrivateProperties(
-                Stream<JacksonPropertyModel> properties) {
+        private Stream<PropertyNode> filterPrivateProperties(
+                Stream<PropertyNode> properties) {
             return properties.filter(
                     property -> !property.getAssociatedTypes().isEmpty());
         }
 
-        private Stream<JacksonPropertyModel> filterSuperClassProperties(
-                Stream<JacksonPropertyModel> properties) {
-            return properties.filter(property -> property.getOwner()
-                    .is(description.getBeanClass()));
+        private Stream<PropertyNode> filterSuperClassProperties(
+                Stream<PropertyNode> properties) {
+            return properties.filter(property -> property.getPrimaryMember()
+                    .getDeclaringClass().equals(description.getBeanClass()));
         }
 
         private Set<String> findIgnored() {
