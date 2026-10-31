@@ -20,6 +20,9 @@ import static com.vaadin.hilla.ExplicitNullableTypeChecker.isRequired;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.AnnotatedArrayType;
+import java.lang.reflect.AnnotatedParameterizedType;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -30,13 +33,16 @@ import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNullApi;
@@ -92,6 +98,40 @@ class ExplicitNullableTypeCheckerHelper {
      *         not explicitly allow null, or null meaning the value is OK.
      */
     String checkValueForType(Object value, Type expectedType) {
+        return checkValueForType(value, expectedType, null, true);
+    }
+
+    /**
+     * Validates the given value for the given expected annotated type. The
+     * value itself is required, while the nullability of nested values, such as
+     * collection items, array elements and map values, follows their type-use
+     * annotations and the given context, the same way as in the generated
+     * TypeScript.
+     *
+     * @param value
+     *            the value to validate
+     * @param expectedType
+     *            the declared annotated type expected for the value
+     * @param requiredByContext
+     *            {@code true} if the context defines that the nested values are
+     *            required
+     * @return error message when the value is null while the expected type does
+     *         not explicitly allow null, or null meaning the value is OK.
+     */
+    String checkValueForAnnotatedType(Object value, AnnotatedType expectedType,
+            boolean requiredByContext) {
+        return checkValueForType(value, expectedType.getType(),
+                List.of(expectedType), requiredByContext);
+    }
+
+    /**
+     * Validates the given value for the given expected type, declared by the
+     * given annotated types. When the annotated types are unknown, nested
+     * values are always required.
+     */
+    String checkValueForType(Object value, Type expectedType,
+            @Nullable List<AnnotatedType> annotatedTypes,
+            boolean requiredByContext) {
         Class<?> clazz;
         if (expectedType instanceof TypeVariable) {
             return null;
@@ -103,12 +143,14 @@ class ExplicitNullableTypeCheckerHelper {
 
         if (value != null) {
             if (Iterable.class.isAssignableFrom(clazz)) {
-                return checkIterable((Iterable<?>) value, expectedType);
+                return checkIterable((Iterable<?>) value, expectedType,
+                        annotatedTypes, requiredByContext);
             } else if (clazz.isArray() && value instanceof Object[]) {
                 return checkIterable(Arrays.asList((Object[]) value),
-                        expectedType);
+                        expectedType, annotatedTypes, requiredByContext);
             } else if (Map.class.isAssignableFrom(clazz)) {
-                return checkMapValues((Map<?, ?>) value, expectedType);
+                return checkMapValues((Map<?, ?>) value, expectedType,
+                        annotatedTypes, requiredByContext);
             } else if (expectedType instanceof Class<?>
                     && !clazz.getName().startsWith("java.")) {
                 return checkBeanFields(value, expectedType);
@@ -139,12 +181,16 @@ class ExplicitNullableTypeCheckerHelper {
                 expectedType.getTypeName());
     }
 
-    private String checkIterable(Iterable<?> value, Type expectedType) {
+    private String checkIterable(Iterable<?> value, Type expectedType,
+            @Nullable List<AnnotatedType> annotatedTypes,
+            boolean requiredByContext) {
         Type itemType = Object.class;
+        List<AnnotatedType> annotatedItemTypes = List.of();
         String iterableDescription = "iterable";
         if (expectedType instanceof ParameterizedType) {
             itemType = ((ParameterizedType) expectedType)
                     .getActualTypeArguments()[0];
+            annotatedItemTypes = getAnnotatedTypeArguments(annotatedTypes, 0);
             iterableDescription = "collection";
         } else if (expectedType instanceof Class<?>) {
             var expectedClass = ((Class<?>) expectedType);
@@ -156,12 +202,18 @@ class ExplicitNullableTypeCheckerHelper {
                 iterableDescription = "collection";
             } else {
                 itemType = expectedClass.getComponentType();
+                annotatedItemTypes = getAnnotatedComponentTypes(annotatedTypes);
                 iterableDescription = "array";
             }
         }
 
         for (Object item : value) {
-            String error = checkValueForType(item, itemType);
+            if (item == null && !isNestedValueRequired(annotatedTypes,
+                    annotatedItemTypes, requiredByContext)) {
+                continue;
+            }
+            String error = checkValueForType(item, itemType, annotatedItemTypes,
+                    requiredByContext);
             if (error != null) {
                 return String.format("Unexpected null item in %s type '%s'. %s",
                         iterableDescription, expectedType, error);
@@ -171,16 +223,25 @@ class ExplicitNullableTypeCheckerHelper {
         return null;
     }
 
-    private String checkMapValues(Map<?, ?> value, Type expectedType) {
+    private String checkMapValues(Map<?, ?> value, Type expectedType,
+            @Nullable List<AnnotatedType> annotatedTypes,
+            boolean requiredByContext) {
         Type valueType = Object.class;
+        List<AnnotatedType> annotatedValueTypes = List.of();
 
         if (expectedType instanceof ParameterizedType) {
             valueType = ((ParameterizedType) expectedType)
                     .getActualTypeArguments()[1];
+            annotatedValueTypes = getAnnotatedTypeArguments(annotatedTypes, 1);
         }
 
         for (Map.Entry<?, ?> e : value.entrySet()) {
-            String error = checkValueForType(e.getValue(), valueType);
+            if (e.getValue() == null && !isNestedValueRequired(annotatedTypes,
+                    annotatedValueTypes, requiredByContext)) {
+                continue;
+            }
+            String error = checkValueForType(e.getValue(), valueType,
+                    annotatedValueTypes, requiredByContext);
             if (error != null) {
                 return String.format(
                         "Unexpected null value for key '%s' of "
@@ -190,6 +251,47 @@ class ExplicitNullableTypeCheckerHelper {
         }
 
         return null;
+    }
+
+    private static List<AnnotatedType> getAnnotatedTypeArguments(
+            @Nullable List<AnnotatedType> annotatedTypes, int index) {
+        if (annotatedTypes == null) {
+            return List.of();
+        }
+        return annotatedTypes.stream()
+                .filter(AnnotatedParameterizedType.class::isInstance)
+                .map(type -> ((AnnotatedParameterizedType) type)
+                        .getAnnotatedActualTypeArguments()[index])
+                .toList();
+    }
+
+    private static List<AnnotatedType> getAnnotatedComponentTypes(
+            @Nullable List<AnnotatedType> annotatedTypes) {
+        if (annotatedTypes == null) {
+            return List.of();
+        }
+        return annotatedTypes.stream()
+                .filter(AnnotatedArrayType.class::isInstance)
+                .map(type -> ((AnnotatedArrayType) type)
+                        .getAnnotatedGenericComponentType())
+                .toList();
+    }
+
+    /**
+     * Checks if a nested value, such as a collection item, is required. Without
+     * the annotated types of the container, nested values are always required.
+     */
+    private static boolean isNestedValueRequired(
+            @Nullable List<AnnotatedType> annotatedTypes,
+            List<AnnotatedType> annotatedNestedTypes,
+            boolean requiredByContext) {
+        if (annotatedTypes == null) {
+            return true;
+        }
+        return isRequired(
+                annotatedNestedTypes.stream()
+                        .flatMap(type -> Stream.of(type.getAnnotations())),
+                requiredByContext);
     }
 
     private String checkBeanFields(Object value, Type expectedType) {
@@ -214,7 +316,9 @@ class ExplicitNullableTypeCheckerHelper {
                 Type propertyType = readMethod.getGenericReturnType();
                 Object propertyValue = readMethod.invoke(value);
 
-                String error = checkValueForType(propertyValue, propertyType);
+                String error = checkValueForType(propertyValue, propertyType,
+                        getAnnotatedPropertyTypes(propertyDescriptor),
+                        requiredByContext);
                 if (error != null) {
                     return String.format(
                             "Unexpected null value in Java "
@@ -260,6 +364,27 @@ class ExplicitNullableTypeCheckerHelper {
                     e);
             return false;
         }
+    }
+
+    /**
+     * Gets the annotated types which declare the nested values of a property:
+     * the field type when it is the same type as the getter return type.
+     * Otherwise, the annotated types are unknown.
+     */
+    private @Nullable List<AnnotatedType> getAnnotatedPropertyTypes(
+            PropertyDescriptor propertyDescriptor) {
+        Method readMethod = propertyDescriptor.getReadMethod();
+        try {
+            Field field = readMethod.getDeclaringClass()
+                    .getDeclaredField(propertyDescriptor.getName());
+            if (field.getGenericType()
+                    .equals(readMethod.getGenericReturnType())) {
+                return List.of(field.getAnnotatedType());
+            }
+        } catch (NoSuchFieldException e) {
+            // a property without a field has no field annotations
+        }
+        return null;
     }
 
 }
