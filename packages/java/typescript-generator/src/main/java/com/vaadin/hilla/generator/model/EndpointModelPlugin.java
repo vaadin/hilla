@@ -336,19 +336,8 @@ public final class EndpointModelPlugin
                             .map(Field::getName).toList());
         }
 
-        var discriminator = node.getTarget().getDiscriminator();
-
-        // The discriminator is written as the ids it accepts rather than as
-        // the type the class declares it with, so it is not among the
-        // properties as well: TypeScript would have the name twice
-        var properties = ownProperties.stream()
-                .filter(property -> discriminator
-                        .map(EntityModel.Discriminator::name)
-                        .filter(property.name()::equals).isEmpty())
-                .toList();
-
-        return new EntityModel.Bean(cls.getName(), typeParameters(cls),
-                superTypes(cls), properties, discriminator);
+        return node.getTarget().bean(cls.getName(), typeParameters(cls),
+                superTypes(cls), ownProperties);
     }
 
     /**
@@ -382,12 +371,9 @@ public final class EndpointModelPlugin
      */
     private TypeModel buildType(TypedNode node, List<TypeModel> referred) {
         var signature = node.getType();
-        var type = node.getTarget();
-        var optional = type != null && type.isOptional();
-        var constraints = type != null ? type.getConstraints()
-                : List.<ConstraintModel> of();
-        var annotations = type != null ? type.getAnnotations()
-                : List.<AnnotationModel> of();
+        var type = Optional.ofNullable(node.getTarget())
+                .orElseGet(TypeModel.Builder::unknown);
+        var optional = type.isOptional();
 
         // A type variable or parameter of an entity is declared by it, so it
         // is written as its name, unless it is bound to something else than
@@ -396,9 +382,7 @@ public final class EndpointModelPlugin
         // declaration does not keep such a parameter
         if ((Signatures.isTypeVariable(signature)
                 || Signatures.isTypeParameter(signature)) && isInEntity()) {
-            return referred.isEmpty()
-                    ? new TypeModel.TypeVariable(name(signature), optional,
-                            constraints, annotations)
+            return referred.isEmpty() ? type.typeVariable(name(signature))
                     : optional ? only(referred).withOptional(true)
                             : only(referred);
         }
@@ -420,28 +404,25 @@ public final class EndpointModelPlugin
         }
 
         if (Signatures.isArray(signature) || Signatures.isIterable(signature)) {
-            return new TypeModel.ArrayOf(only(referred), optional,
-                    name(signature), constraints, annotations);
+            return type.arrayOf(only(referred), name(signature));
         }
 
         if (Signatures.isMap(signature)) {
-            return new TypeModel.MapOf(only(referred), optional,
-                    name(signature), constraints, annotations);
+            return type.mapOf(only(referred), name(signature));
         }
 
         if (Signatures.isClassRef(signature) && isProvided(name(signature))) {
-            return provided(name(signature), referred, optional, constraints,
-                    annotations);
+            var provided = PROVIDED_TYPES.get(name(signature));
+
+            return type.provided(provided.name(), provided.module(), referred);
         }
 
         if (Signatures.isClassRef(signature) && isEntity(signature)
                 && !isValue(signature)) {
-            return new TypeModel.EntityRef(name(signature), referred, optional,
-                    constraints, annotations);
+            return type.entityRef(name(signature), referred);
         }
 
-        return new TypeModel.Scalar(scalarKind(signature), optional,
-                name(signature), constraints, annotations);
+        return type.scalar(scalarKind(signature), name(signature));
     }
 
     /**
@@ -503,20 +484,6 @@ public final class EndpointModelPlugin
 
         return new TypeModel.Provided(fromModule.namedSpecifier(),
                 fromModule.module(), List.of(), false);
-    }
-
-    /**
-     * The type as it is referred to where it is used, which is what the class
-     * says of it together with the arguments it is used with.
-     */
-    private static TypeModel provided(String javaClass,
-            List<TypeModel> typeArguments, boolean optional,
-            List<ConstraintModel> constraints,
-            List<AnnotationModel> annotations) {
-        var provided = PROVIDED_TYPES.get(javaClass);
-
-        return new TypeModel.Provided(provided.name(), provided.module(),
-                typeArguments, optional, constraints, annotations);
     }
 
     /**

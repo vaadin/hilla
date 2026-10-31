@@ -15,8 +15,11 @@ The **generator** (`com.vaadin.hilla.generator`) writes the files. Its model
 (`generator.model`) holds what the writers need as plain records, and its
 writers (`generator.typescript`) fill in the TypeScript from that model.
 
-The two meet in `EndpointModelPlugin`. It is a parser plugin like the others,
-and builds the model while the walk happens. When the walk is over,
+The two meet in the targets of the nodes and in `EndpointModelPlugin`. The
+targets of the typed and entity nodes are builders of the model
+(`TypeModel.Builder`, `EntityModel.Builder`), which the parser plugins fill in
+during the walk. `EndpointModelPlugin` is a parser plugin like the others, and
+builds the model from them while the walk happens. When the walk is over,
 `getGeneration()` hands the whole model to the writers as one `Generation`.
 
 Every entry point (the Maven goal, the Gradle task, the Flow build task and the
@@ -99,9 +102,9 @@ takes no part in it.
 | `EndpointExposedNode`, `EndpointNonExposedNode` | a class in an endpoint's hierarchy, with or without `@EndpointExposed` | none                                                     |
 | `MethodNode`                                    | a public method of an endpoint or of an exposed class                  | none                                                     |
 | `MethodParameterNode`                           | a method parameter                                                     | its name (`_param_N` when the bytecode has none)         |
-| `TypeSignatureNode`                             | a type signature                                                       | `TypeFacts`                                              |
-| `CompositeTypeSignatureNode`                    | the matching signatures of a property's field, getter and setter       | `TypeFacts`                                              |
-| `EntityNode`                                    | a class the endpoints send                                             | `EntityFacts`                                            |
+| `TypeSignatureNode`                             | a type signature                                                       | `TypeModel.Builder`                                      |
+| `CompositeTypeSignatureNode`                    | the matching signatures of a property's field, getter and setter       | `TypeModel.Builder`                                      |
+| `EntityNode`                                    | a class the endpoints send                                             | `EntityModel.Builder`                                    |
 | `PropertyNode`                                  | a Jackson property of such a class                                     | its name, and `getValueType()` for the type of its value |
 | `SubTypesPlugin.UnionNode`                      | a class annotated with `@JsonTypeInfo`                                 | the names of its subtypes                                |
 
@@ -159,7 +162,7 @@ So the walk is depth-first, and a node is left only after everything below it
 has been walked. A node instance can be reached on more than one path, because
 the scan result is shared between equal nodes. This relies on the walk being
 depth-first, and on the target being set again on enter: `TypeSignaturePlugin`
-gives a typed node fresh `TypeFacts` every time it enters it.
+gives a typed node a fresh `TypeModel.Builder` every time it enters it.
 
 ## Reflection only
 
@@ -228,7 +231,7 @@ others require it:
   the types a signature refers to. The types a signature refers to are the
   items of an array, an iterable or a map, the value of an optional, the
   argument of a type variable, and the bounds of a type parameter. On enter, it
-  sets the type's starting `TypeFacts`. On exit, it hands them to the node above:
+  sets the type's starting `TypeModel.Builder`. On exit, it hands it to the node above:
   to the property, or to the parent type when that type is written as its
   argument.
 - `EntityPlugin` adds an `EntityNode`, as a related node, for every non-JDK
@@ -245,7 +248,7 @@ others require it:
 ### Nullability
 
 `NonnullPlugin` decides on exit whether a value can be absent, and sets
-`TypeFacts.setOptional`. It looks at the annotations on the type, on the method,
+`TypeModel.Builder.setOptional`. It looks at the annotations on the type, on the method,
 parameter or property the type belongs to, and on the package of the closest
 class. Each known annotation has a score in `NonnullPluginConfig`, and the
 highest score wins:
@@ -279,11 +282,11 @@ Its source is in `src/main/java/.../nonnull/kotlin` (the plugin) and
 form models:
 
 - Bean Validation constraints from `jakarta.validation.constraints` become
-  the `ConstraintModel`s of the type's `TypeFacts`. Repeated constraints are
+  the `ConstraintModel`s of the type's `TypeModel.Builder`. Repeated constraints are
   unwrapped from their container.
 - A property's JPA annotations from a fixed list (`@Id`, `@Version` and the
   four relationship annotations) become the `AnnotationModel`s of the type's
-  `TypeFacts`.
+  `TypeModel.Builder`.
 
 Both are records of the generator model, so the model takes them over as they
 are. The attributes are already plain values: a class an attribute holds is
@@ -300,7 +303,7 @@ items.
   and an `EntityNode` for each class that `@JsonSubTypes` names, all as related
   nodes.
 - On exit, it sets the union's subtypes, and the discriminator of each subtype
-  (an `EntityModel.Discriminator`) on its `EntityFacts`.
+  (an `EntityModel.Discriminator`) on its `EntityModel.Builder`.
 
 A discriminator property is declared only when the type id is included as a
 property (`As.PROPERTY` or `As.EXISTING_PROPERTY`) and is a name (`Id.NAME` or
@@ -332,16 +335,24 @@ a method parameter.
 The plugins talk to `EndpointModelPlugin` only through the targets of the
 nodes:
 
-- `TypeFacts`, on typed nodes, says whether a value can be absent, and whether
-  the type arguments of a type belong to the type itself. It also carries the
-  constraints and annotations from `ModelPlugin`.
-- `EntityFacts`, on entity nodes, carries the discriminator.
+- `TypeModel.Builder`, on typed nodes, says whether a value can be absent, and
+  whether the type arguments of a type belong to the type itself. It also
+  carries the constraints and annotations from `ModelPlugin`.
+- `EntityModel.Builder`, on entity nodes, carries the discriminator.
 - `UnionNode`'s target lists the subtypes of a polymorphic type.
 
-What the facts carry beyond nullability is held in the records of the
-generator model already, so `EndpointModelPlugin` takes it over without
-converting it. A new kind of fact goes in the same way: as a field on one of
-these classes. It does not go through a call from one plugin to another.
+The targets are builders of the generator model itself, so there is no
+parser-side copy of what they carry. They are mutable, because the plugins
+fill them in one after another while the walk is in the node, and the kind of
+a type is only known once the types it refers to are built. On exit,
+`EndpointModelPlugin` picks the kind of the type from its signature and the
+types built below it, and the builder makes the record (`scalar`, `arrayOf`,
+`entityRef`, …) with what the plugins said; an entity's builder makes its
+`Bean`, without the discriminator among the properties.
+
+A new kind of fact goes in the same way: as a field on one of these builders,
+and from there on the record it builds. It does not go through a call from one
+plugin to another.
 
 ## Generator
 
@@ -357,7 +368,9 @@ these classes. It does not go through a call from one plugin to another.
 
 ### The model
 
-`com.vaadin.hilla.generator.model` holds plain records: `Generation`,
+`com.vaadin.hilla.generator.model` holds plain records, plus the two
+mutable builders the parser plugins fill in (see
+[How facts reach the model](#how-facts-reach-the-model)): `Generation`,
 `EndpointModel`, `MethodModel`, `ParameterModel`, `EntityModel`,
 `PropertyModel`, `TypeModel` and `UnionModel`. The model is built from the Java
 signatures the walk carries, so it keeps the Java type of each value, and can
@@ -437,7 +450,8 @@ endpoints import it instead, and `connect-client.default.ts` is not generated
 ```
 com.vaadin.hilla.generator
 ├── model/             - What the writers need, as plain records,
-│                        built while the parser walks the classes
+│                        built while the parser walks the classes from
+│                        the builders that are the targets of its nodes
 └── typescript/        - The writers
 
 com.vaadin.hilla.parser

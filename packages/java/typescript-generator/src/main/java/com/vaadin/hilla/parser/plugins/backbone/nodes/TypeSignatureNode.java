@@ -23,24 +23,25 @@ import java.util.function.UnaryOperator;
 
 import org.jspecify.annotations.NonNull;
 
+import com.vaadin.hilla.generator.model.TypeModel;
 import com.vaadin.hilla.parser.core.AbstractNode;
-import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 import com.vaadin.hilla.parser.utils.Signatures;
 
-public class TypeSignatureNode extends AbstractNode<AnnotatedElement, TypeFacts>
-        implements TypedNode {
+public class TypeSignatureNode extends
+        AbstractNode<AnnotatedElement, TypeModel.Builder> implements TypedNode {
     private final List<Annotation> annotations;
     private final Integer position;
 
-    protected TypeSignatureNode(AnnotatedElement source, TypeFacts target,
-            List<Annotation> annotations, Integer position) {
+    protected TypeSignatureNode(AnnotatedElement source,
+            TypeModel.Builder target, List<Annotation> annotations,
+            Integer position) {
         super(source, target);
         this.annotations = annotations;
         this.position = position;
     }
 
-    protected TypeSignatureNode(AnnotatedElement source, TypeFacts target,
-            Integer position) {
+    protected TypeSignatureNode(AnnotatedElement source,
+            TypeModel.Builder target, Integer position) {
         this(source, target, Signatures.getAnnotations(source), position);
     }
 
@@ -70,13 +71,14 @@ public class TypeSignatureNode extends AbstractNode<AnnotatedElement, TypeFacts>
 
     @NonNull
     static public TypeSignatureNode of(@NonNull AnnotatedElement source) {
-        return new TypeSignatureNode(source, TypeFacts.unknown(), null);
+        return new TypeSignatureNode(source, TypeModel.Builder.unknown(), null);
     }
 
     @NonNull
     static public TypeSignatureNode of(@NonNull AnnotatedElement source,
             int position) {
-        return new TypeSignatureNode(source, TypeFacts.unknown(), position);
+        return new TypeSignatureNode(source, TypeModel.Builder.unknown(),
+                position);
     }
 
     @Override

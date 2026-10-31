@@ -15,13 +15,13 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.knodes
 
-import com.vaadin.hilla.parser.plugins.backbone.EntityFacts
+import com.vaadin.hilla.generator.model.EntityModel
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode
 import kotlin.reflect.KClass
 
 class KEntityNode(
     source: Class<*>,
-    target: EntityFacts,
+    target: EntityModel.Builder,
     val kClass: KClass<*>
 ): EntityNode(
     source,

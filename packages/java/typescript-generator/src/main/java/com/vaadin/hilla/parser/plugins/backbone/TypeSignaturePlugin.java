@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 
 import org.jspecify.annotations.NonNull;
 
+import com.vaadin.hilla.generator.model.TypeModel;
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
@@ -47,11 +48,59 @@ public final class TypeSignaturePlugin
     @Override
     public void enter(NodePath<?> nodePath) {
         if (nodePath.getNode() instanceof TypedNode typedNode) {
-            typedNode.setTarget(TypeFacts.of(typedNode.getType(),
+            var type = typedNode.getType();
+
+            typedNode.setTarget(TypeModel.Builder.of(canBeAbsent(type,
                     // Only deal with generics in entities: endpoint methods are
                     // not allowed to emit generic type parameters and arguments
-                    isInEntity(nodePath)));
+                    isInEntity(nodePath)), collectsTypeArguments(type)));
         }
+    }
+
+    /**
+     * Whether a value of the type can be absent, which is what Java says unless
+     * an annotation says otherwise.
+     *
+     * @param handleGenerics
+     *            whether a type variable stands for itself, which it does in an
+     *            entity and does not in the signature of an endpoint method
+     */
+    private static boolean canBeAbsent(AnnotatedElement type,
+            boolean handleGenerics) {
+        if (Signatures.isCharacter(type) || Signatures.isString(type)
+                || Signatures.isBoolean(type) || Signatures.hasIntegerType(type)
+                || Signatures.isBigInteger(type)
+                || Signatures.hasFloatType(type)
+                || Signatures.isBigDecimal(type)) {
+            return !Signatures.isPrimitive(type);
+        }
+
+        if (Signatures.isArray(type) || Signatures.isIterable(type)
+                || Signatures.isMap(type) || Signatures.isDate(type)
+                || Signatures.isDateTime(type)) {
+            return true;
+        }
+
+        if (Signatures.isClassRef(type)) {
+            // A class of the JDK is a value of a type the browser has one
+            // of its own for, which the walk carries below it
+            return Signatures.isNonJDKClass(type);
+        }
+
+        return handleGenerics && (Signatures.isTypeVariable(type)
+                || Signatures.isTypeParameter(type));
+    }
+
+    /**
+     * Whether the types a type is given belong to it rather than to the value
+     * it holds, which they do not for the types the browser has one of its own
+     * for: the value of an optional, the items of an iterable and the values of
+     * a map.
+     */
+    private static boolean collectsTypeArguments(AnnotatedElement type) {
+        return Signatures.isClassRef(type) && !(Signatures.isIterable(type)
+                || Signatures.isMap(type) || Signatures.isOptional(type)
+                || Signatures.getTypeArguments(type).isEmpty());
     }
 
     // Checks if the current node is inside an entity
@@ -113,7 +162,7 @@ public final class TypeSignaturePlugin
      * types a class is given belong to it, and a type argument, a type variable
      * or an optional is written as the type it stands for.
      */
-    private void attachToNestingParentSignature(TypeFacts type,
+    private void attachToNestingParentSignature(TypeModel.Builder type,
             TypedNode parentNode) {
         var parentType = parentNode.getType();
 
