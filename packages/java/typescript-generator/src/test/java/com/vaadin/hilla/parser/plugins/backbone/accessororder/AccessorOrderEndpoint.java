@@ -31,6 +31,10 @@ public class AccessorOrderEndpoint {
         return new PartlyOrdered();
     }
 
+    public Indexed getIndexed() {
+        return new Indexed();
+    }
+
     public Range getRange() {
         return new Range(2, 1);
     }
@@ -81,6 +85,26 @@ public class AccessorOrderEndpoint {
 
         @JsonProperty("omega")
         public String getBeta() {
+            return "";
+        }
+    }
+
+    /**
+     * Properties without a field which an index puts out of the order of their
+     * names keep that order, and one without an index comes after them.
+     */
+    public static class Indexed {
+        public String getAlpha() {
+            return "";
+        }
+
+        @JsonProperty(index = 1)
+        public String getMiddle() {
+            return "";
+        }
+
+        @JsonProperty(index = 0)
+        public String getZeta() {
             return "";
         }
     }

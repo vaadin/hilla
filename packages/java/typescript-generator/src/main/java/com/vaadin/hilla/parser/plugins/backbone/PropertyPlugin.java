@@ -180,14 +180,14 @@ public final class PropertyPlugin
 
         /**
          * The properties in the order Jackson finds them, except for those it
-         * has nothing to order by: without a field, a constructor parameter or
-         * a place in the {@code @JsonPropertyOrder} of the class, a property
-         * comes after the others in the order the JVM lists the methods of the
-         * class in. That order is not the one they are declared in, and changes
-         * from one run to another, so such properties are put in the order of
-         * their names instead: what is generated from the same classes is then
-         * the same every time. A class ordering all of its properties by name
-         * is left as Jackson orders it.
+         * has nothing to order by: without a field, a constructor parameter, an
+         * index or a place in the {@code @JsonPropertyOrder} of the class, a
+         * property comes after the others in the order the JVM lists the
+         * methods of the class in. That order is not the one they are declared
+         * in, and changes from one run to another, so such properties are put
+         * in the order of their names instead: what is generated from the same
+         * classes is then the same every time. A class ordering all of its
+         * properties by name is left as Jackson orders it.
          */
         private Stream<BeanPropertyDefinition> inStableOrder(
                 List<BeanPropertyDefinition> properties) {
@@ -209,6 +209,7 @@ public final class PropertyPlugin
             // the name it is serialized under, which Jackson accepts both of
             Predicate<BeanPropertyDefinition> ordered = property -> property
                     .hasField() || property.hasConstructorParameter()
+                    || property.getMetadata().hasIndex()
                     || named.contains(property.getName())
                     || named.contains(property.getInternalName());
 
