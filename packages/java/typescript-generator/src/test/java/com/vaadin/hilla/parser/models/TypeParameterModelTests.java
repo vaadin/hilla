@@ -18,7 +18,6 @@ package com.vaadin.hilla.parser.models;
 import static com.vaadin.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -32,40 +31,31 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.github.classgraph.ScanResult;
-import io.github.classgraph.TypeParameter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import com.vaadin.hilla.parser.test.helpers.ModelKind;
-import com.vaadin.hilla.parser.test.helpers.Source;
-import com.vaadin.hilla.parser.test.helpers.SourceExtension;
 import com.vaadin.hilla.parser.test.helpers.SpecializationChecker;
 import com.vaadin.hilla.parser.test.helpers.context.AbstractContext;
-import com.vaadin.hilla.parser.utils.Streams;
 
-@ExtendWith(SourceExtension.class)
 public class TypeParameterModelTests {
     private Context ctx;
 
     @BeforeEach
-    public void setUp(@Source ScanResult source) {
-        this.ctx = new Context(source);
+    public void setUp() {
+        this.ctx = new Context();
     }
 
     @DisplayName("It should get annotations")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
-    public void should_GetAnnotations(TypeParameterModel model, ModelKind kind,
-            String name) {
+    public void should_GetAnnotations(TypeParameterModel model, String name) {
         assertEquals(List.of(Sample.Foo.class.getName()),
                 model.getAnnotations().stream()
                         .map(AnnotationInfoModel::getName)
@@ -75,8 +65,7 @@ public class TypeParameterModelTests {
     @DisplayName("It should get bounds")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
-    public void should_GetBounds(TypeParameterModel model, ModelKind kind,
-            String name) {
+    public void should_GetBounds(TypeParameterModel model, String name) {
         switch (name) {
         case "RegularTypeParameter":
             assertEquals(List.of(Object.class.getName()),
@@ -129,84 +118,55 @@ public class TypeParameterModelTests {
                 TypeParameterModel.of(origin));
     }
 
-    @DisplayName("It should have the same hashCode for source and reflection models")
+    @DisplayName("It should have the same hashCode for models of the same origin")
     @ParameterizedTest(name = ModelProvider.Equality.testNamePattern)
     @ArgumentsSource(ModelProvider.Equality.class)
-    public void should_HaveSameHashCodeForSourceAndReflectionModels(
-            TypeParameterModel reflectionModel, TypeParameterModel sourceModel,
-            String name) {
-        assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
+    public void should_HaveSameHashCodeForModelsOfSameOrigin(
+            TypeParameterModel model, TypeParameterModel other, String name) {
+        assertEquals(model.hashCode(), other.hashCode());
     }
 
-    @DisplayName("It should have source and reflection models equal")
+    @DisplayName("It should have models of the same origin equal")
     @ParameterizedTest(name = ModelProvider.Equality.testNamePattern)
     @ArgumentsSource(ModelProvider.Equality.class)
-    public void should_HaveSourceAndReflectionModelsEqual(
-            TypeParameterModel reflectionModel, TypeParameterModel sourceModel,
-            String name) {
-        assertEquals(reflectionModel, reflectionModel);
-        assertEquals(reflectionModel, sourceModel);
+    public void should_HaveModelsOfSameOriginEqual(TypeParameterModel model,
+            TypeParameterModel other, String name) {
+        assertEquals(model, model);
+        assertEquals(model, other);
+        assertEquals(other, model);
 
-        assertEquals(sourceModel, sourceModel);
-        assertEquals(sourceModel, reflectionModel);
-
-        assertNotEquals(sourceModel, new Object());
-        assertNotEquals(reflectionModel, new Object());
+        assertNotEquals(model, new Object());
     }
 
     @DisplayName("It should provide correct origin")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideCorrectOrigin(TypeParameterModel model,
-            ModelKind kind, String name) {
-        switch (kind) {
-        case REFLECTION:
-            assertEquals(ctx.getReflectionOrigin(name), model.get());
-            assertTrue(model.isReflection());
-            break;
-        case SOURCE:
-            assertEquals(ctx.getSourceOrigin(name), model.get());
-            assertTrue(model.isSource());
-            break;
-        }
+            String name) {
+        assertEquals(ctx.getReflectionOrigin(name), model.get());
     }
 
-    static final class Context
-            extends AbstractContext<TypeVariable<?>, TypeParameter> {
+    static final class Context extends AbstractContext<TypeVariable<?>> {
         private static final Map<String, TypeVariable<?>> reflectionOrigins = Arrays
                 .stream(Sample.class.getTypeParameters()).collect(Collectors
                         .toMap(TypeVariable::getName, Function.identity()));
 
-        Context(ScanResult source) {
-            super(source, reflectionOrigins,
-                    source.getClassInfo(Sample.class.getName())
-                            .getTypeSignatureOrTypeDescriptor()
-                            .getTypeParameters().stream()
-                            .collect(Collectors.toMap(TypeParameter::getName,
-                                    Function.identity())));
-        }
-
-        Context(ExtensionContext context) {
-            this(SourceExtension.getSource(context));
+        Context() {
+            super(reflectionOrigins);
         }
     }
 
     static final class ModelProvider implements ArgumentsProvider {
-        public static final String testNamePattern = "{1} [{2}]";
+        public static final String testNamePattern = "{1}";
 
         @Override
         public Stream<Arguments> provideArguments(ExtensionContext context) {
-            var ctx = new Context(context);
+            var ctx = new Context();
 
-            return Streams.combine(
-                    ctx.getReflectionOrigins().entrySet().stream()
-                            .map(entry -> Arguments.of(
-                                    TypeParameterModel.of(entry.getValue()),
-                                    ModelKind.REFLECTION, entry.getKey())),
-                    ctx.getSourceOrigins().entrySet().stream()
-                            .map(entry -> Arguments.of(
-                                    TypeParameterModel.of(entry.getValue()),
-                                    ModelKind.SOURCE, entry.getKey())));
+            return ctx.getReflectionOrigins().entrySet().stream()
+                    .map(entry -> Arguments.of(
+                            TypeParameterModel.of(entry.getValue()),
+                            entry.getKey()));
         }
 
         static final class Checker
@@ -223,13 +183,12 @@ public class TypeParameterModelTests {
             @Override
             public Stream<Arguments> provideArguments(
                     ExtensionContext context) {
-                var ctx = new Context(context);
+                var ctx = new Context();
 
                 return ctx.getReflectionOrigins().entrySet().stream()
                         .map(entry -> Arguments.of(
                                 TypeParameterModel.of(entry.getValue()),
-                                TypeParameterModel.of(
-                                        ctx.getSourceOrigin(entry.getKey())),
+                                TypeParameterModel.of(entry.getValue()),
                                 entry.getKey()));
             }
         }
@@ -283,7 +242,7 @@ public class TypeParameterModelTests {
         @ParameterizedTest(name = ModelProvider.testNamePattern)
         @ArgumentsSource(ModelProvider.class)
         public void should_HaveSpecialization(TypeParameterModel model,
-                ModelKind kind, String name) {
+                String name) {
             checker.apply(model, "isTypeParameter", "isNonJDKClass");
         }
     }

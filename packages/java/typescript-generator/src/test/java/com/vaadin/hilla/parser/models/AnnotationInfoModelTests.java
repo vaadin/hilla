@@ -19,7 +19,6 @@ import static com.vaadin.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredF
 import static com.vaadin.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -36,41 +35,29 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.github.classgraph.AnnotationClassRef;
-import io.github.classgraph.AnnotationEnumValue;
-import io.github.classgraph.AnnotationInfo;
-import io.github.classgraph.AnnotationParameterValue;
-import io.github.classgraph.ScanResult;
 import org.apache.commons.lang3.function.Failable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import com.vaadin.hilla.parser.test.helpers.ModelKind;
-import com.vaadin.hilla.parser.test.helpers.Source;
-import com.vaadin.hilla.parser.test.helpers.SourceExtension;
-import com.vaadin.hilla.parser.utils.Streams;
-
-@ExtendWith(SourceExtension.class)
 public class AnnotationInfoModelTests {
     private Context ctx;
 
     @BeforeEach
-    public void setUp(@Source ScanResult source) {
-        ctx = new Context(source);
+    public void setUp() {
+        ctx = new Context();
     }
 
     @DisplayName("It should get class info")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
-    public void should_GetClassInfo(AnnotationInfoModel model, ModelKind kind) {
+    public void should_GetClassInfo(AnnotationInfoModel model) {
         assertEquals(Optional.of(ClassInfoModel.of(Sample.Foo.class)),
                 model.getClassInfo());
     }
@@ -78,8 +65,7 @@ public class AnnotationInfoModelTests {
     @DisplayName("It should get annotations parameters")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
-    public void should_GetParameters(AnnotationInfoModel model,
-            ModelKind kind) {
+    public void should_GetParameters(AnnotationInfoModel model) {
         var expected = Set.of(
                 AnnotationParameterModel.of("stringParameter", "foo1", false),
                 AnnotationParameterModel.of("intParameter", 10, false),
@@ -103,8 +89,7 @@ public class AnnotationInfoModelTests {
     @DisplayName("It should unwrap array and nested annotation parameters")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
-    public void should_UnwrapCompoundParameters(AnnotationInfoModel model,
-            ModelKind kind) {
+    public void should_UnwrapCompoundParameters(AnnotationInfoModel model) {
         var parameters = model.getParameters().stream().collect(Collectors
                 .toMap(AnnotationParameterModel::getName, Function.identity()));
 
@@ -126,46 +111,33 @@ public class AnnotationInfoModelTests {
                 nested.getParameters());
     }
 
-    @DisplayName("It should have the same hashCode for source and reflection models")
+    @DisplayName("It should have the same hashCode for models of the same origin")
     @Test
-    public void should_HaveSameHashCodeForSourceAndReflectionModels() {
-        var reflectionModel = AnnotationInfoModel.of(ctx.getReflectionOrigin());
-        var sourceModel = AnnotationInfoModel.of(ctx.getSourceOrigin());
+    public void should_HaveSameHashCodeForModelsOfSameOrigin() {
+        var model = AnnotationInfoModel.of(ctx.getReflectionOrigin());
+        var other = AnnotationInfoModel.of(ctx.getReflectionOrigin());
 
-        assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
+        assertEquals(model.hashCode(), other.hashCode());
     }
 
-    @DisplayName("It should have source and reflection models equal")
+    @DisplayName("It should have models of the same origin equal")
     @Test
-    public void should_HaveSourceAndReflectionModelsEqual() {
-        var reflectionModel = AnnotationInfoModel.of(ctx.getReflectionOrigin());
-        var sourceModel = AnnotationInfoModel.of(ctx.getSourceOrigin());
+    public void should_HaveModelsOfSameOriginEqual() {
+        var model = AnnotationInfoModel.of(ctx.getReflectionOrigin());
+        var other = AnnotationInfoModel.of(ctx.getReflectionOrigin());
 
-        assertEquals(reflectionModel, reflectionModel);
-        assertEquals(reflectionModel, sourceModel);
+        assertEquals(model, model);
+        assertEquals(model, other);
+        assertEquals(other, model);
 
-        assertEquals(sourceModel, sourceModel);
-        assertEquals(sourceModel, reflectionModel);
-
-        assertNotEquals(sourceModel, new Object());
-        assertNotEquals(reflectionModel, new Object());
+        assertNotEquals(model, new Object());
     }
 
     @DisplayName("It should provide correct origin")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
-    public void should_ProvideCorrectOrigin(AnnotationInfoModel model,
-            ModelKind kind) {
-        switch (kind) {
-        case REFLECTION:
-            assertEquals(ctx.getReflectionOrigin(), model.get());
-            assertTrue(model.isReflection());
-            break;
-        case SOURCE:
-            assertEquals(ctx.getSourceOrigin(), model.get());
-            assertTrue(model.isSource());
-            break;
-        }
+    public void should_ProvideCorrectOrigin(AnnotationInfoModel model) {
+        assertEquals(ctx.getReflectionOrigin(), model.get());
     }
 
     static final class Context {
@@ -187,24 +159,6 @@ public class AnnotationInfoModelTests {
                     .get("enumParameter").getValue();
         }
 
-        private final AnnotationEnumValue sourceEnumValue;
-        private final AnnotationInfo sourceOrigin;
-        private final Map<String, AnnotationParameterValue> sourceParameterOrigins;
-
-        Context(ExtensionContext context) {
-            this(SourceExtension.getSource(context));
-        }
-
-        Context(ScanResult source) {
-            sourceOrigin = getDeclaredField(Sample.class, fieldName, source)
-                    .getAnnotationInfo(Sample.Foo.class);
-            sourceParameterOrigins = sourceOrigin.getParameterValues().stream()
-                    .collect(Collectors.toMap(AnnotationParameterValue::getName,
-                            Function.identity()));
-            sourceEnumValue = (AnnotationEnumValue) sourceParameterOrigins
-                    .get("enumParameter").getValue();
-        }
-
         public Enum<?> getReflectionEnumValue() {
             return reflectionEnumValue;
         }
@@ -216,33 +170,17 @@ public class AnnotationInfoModelTests {
         public Map<String, AnnotationParameterModel.ReflectionOrigin<?>> getReflectionParameterOrigins() {
             return reflectionParameterOrigins;
         }
-
-        public AnnotationEnumValue getSourceEnumValue() {
-            return sourceEnumValue;
-        }
-
-        public AnnotationInfo getSourceOrigin() {
-            return sourceOrigin;
-        }
-
-        public Map<String, AnnotationParameterValue> getSourceParameterOrigins() {
-            return sourceParameterOrigins;
-        }
     }
 
     static final class ModelProvider implements ArgumentsProvider {
-        public static final String testNamePattern = "{1}";
+        public static final String testNamePattern = "{0}";
 
         @Override
         public Stream<Arguments> provideArguments(ExtensionContext context) {
-            var ctx = new Context(context);
+            var ctx = new Context();
 
-            return Stream.of(
-                    Arguments.of(
-                            AnnotationInfoModel.of(ctx.getReflectionOrigin()),
-                            ModelKind.REFLECTION),
-                    Arguments.of(AnnotationInfoModel.of(ctx.getSourceOrigin()),
-                            ModelKind.SOURCE));
+            return Stream.of(Arguments
+                    .of(AnnotationInfoModel.of(ctx.getReflectionOrigin())));
         }
     }
 
@@ -286,7 +224,7 @@ public class AnnotationInfoModelTests {
         @DisplayName("It should have name")
         @ParameterizedTest(name = ModelProvider.testNamePattern)
         @ArgumentsSource(ModelProvider.class)
-        public void should_HaveName(AnnotationInfoModel model, ModelKind kind) {
+        public void should_HaveName(AnnotationInfoModel model) {
             assertEquals(Sample.Foo.class.getName(), model.getName());
         }
     }
@@ -297,40 +235,37 @@ public class AnnotationInfoModelTests {
         @DisplayName("It should provide all information about value")
         @ParameterizedTest(name = EnumValueProvider.testNamePattern)
         @ArgumentsSource(EnumValueProvider.class)
-        public void should_GetClassInfo(AnnotationParameterEnumValueModel model,
-                ModelKind kind) {
+        public void should_GetClassInfo(
+                AnnotationParameterEnumValueModel model) {
             assertEquals(ClassInfoModel.of(Sample.Enum.class),
                     model.getClassInfo());
             assertEquals("VALUE", model.getValueName());
         }
 
-        @DisplayName("It should have the same hashCode for source and reflection models")
+        @DisplayName("It should have the same hashCode for models of the same origin")
         @Test
-        public void should_HaveSameHashCodeForSourceAndReflectionModels() {
-            var reflectionModel = AnnotationParameterEnumValueModel
+        public void should_HaveSameHashCodeForModelsOfSameOrigin() {
+            var model = AnnotationParameterEnumValueModel
                     .of(ctx.getReflectionEnumValue());
-            var sourceModel = AnnotationParameterEnumValueModel
-                    .of(ctx.getSourceEnumValue());
+            var other = AnnotationParameterEnumValueModel
+                    .of(ctx.getReflectionEnumValue());
 
-            assertEquals(reflectionModel, reflectionModel);
-            assertEquals(reflectionModel, sourceModel);
-
-            assertEquals(sourceModel, sourceModel);
-            assertEquals(sourceModel, reflectionModel);
-
-            assertNotEquals(reflectionModel, new Object());
-            assertNotEquals(sourceModel, new Object());
+            assertEquals(model.hashCode(), other.hashCode());
         }
 
-        @DisplayName("It should have source and reflection models equal")
+        @DisplayName("It should have models of the same origin equal")
         @Test
-        public void should_HaveSourceAndReflectionModelsEqual() {
-            var reflectionModel = AnnotationParameterEnumValueModel
+        public void should_HaveModelsOfSameOriginEqual() {
+            var model = AnnotationParameterEnumValueModel
                     .of(ctx.getReflectionEnumValue());
-            var sourceModel = AnnotationParameterEnumValueModel
-                    .of(ctx.getSourceEnumValue());
+            var other = AnnotationParameterEnumValueModel
+                    .of(ctx.getReflectionEnumValue());
 
-            assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
+            assertEquals(model, model);
+            assertEquals(model, other);
+            assertEquals(other, model);
+
+            assertNotEquals(model, new Object());
         }
     }
 
@@ -341,51 +276,40 @@ public class AnnotationInfoModelTests {
         @ParameterizedTest(name = ParameterProvider.testNamePattern)
         @ArgumentsSource(ParameterProvider.class)
         public void should_GetNameAndValue(AnnotationParameterModel model,
-                ModelKind kind, String name) {
+                String name) {
             assertEquals(name, model.getName());
             assertEquals(process(
                     ctx.getReflectionParameterOrigins().get(name).getValue()),
                     model.getValue());
         }
 
-        @DisplayName("It should have the same hashCode for source and reflection models")
+        @DisplayName("It should have the same hashCode for models of the same origin")
         @ParameterizedTest(name = EqualityParameterProvider.testNamePattern)
         @ArgumentsSource(EqualityParameterProvider.class)
-        public void should_HaveSameHashCodeForSourceAndReflectionModels(
-                AnnotationParameterModel reflectionModel,
-                AnnotationParameterModel sourceModel, String name) {
-            assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
+        public void should_HaveSameHashCodeForModelsOfSameOrigin(
+                AnnotationParameterModel model, AnnotationParameterModel other,
+                String name) {
+            assertEquals(model.hashCode(), other.hashCode());
         }
 
-        @DisplayName("It should have source and reflection models equal")
+        @DisplayName("It should have models of the same origin equal")
         @ParameterizedTest(name = EqualityParameterProvider.testNamePattern)
         @ArgumentsSource(EqualityParameterProvider.class)
-        public void should_HaveSourceAndReflectionModelsEqual(
-                AnnotationParameterModel reflectionModel,
-                AnnotationParameterModel sourceModel, String name) {
-            assertEquals(reflectionModel, reflectionModel);
-            assertEquals(reflectionModel, sourceModel);
+        public void should_HaveModelsOfSameOriginEqual(
+                AnnotationParameterModel model, AnnotationParameterModel other,
+                String name) {
+            assertEquals(model, model);
+            assertEquals(model, other);
+            assertEquals(other, model);
 
-            assertEquals(sourceModel, sourceModel);
-            assertEquals(sourceModel, reflectionModel);
-
-            assertNotEquals(reflectionModel, new Object());
-            assertNotEquals(sourceModel, new Object());
+            assertNotEquals(model, new Object());
         }
 
         private Object process(Object value) {
-            if (value instanceof AnnotationClassRef) {
-                return ClassInfoModel
-                        .of(((AnnotationClassRef) value).getClassInfo());
-            } else if (value instanceof Class<?>) {
+            if (value instanceof Class<?>) {
                 return ClassInfoModel.of((Class<?>) value);
-            } else if (value instanceof AnnotationEnumValue) {
-                return AnnotationParameterEnumValueModel
-                        .of((AnnotationEnumValue) value);
             } else if (value instanceof Enum<?>) {
                 return AnnotationParameterEnumValueModel.of((Enum<?>) value);
-            } else if (value instanceof AnnotationInfo) {
-                return AnnotationInfoModel.of((AnnotationInfo) value);
             } else if (value instanceof Annotation) {
                 return AnnotationInfoModel.of((Annotation) value);
             } else if (value instanceof Object[]) {
@@ -398,21 +322,14 @@ public class AnnotationInfoModelTests {
     }
 
     static class EnumValueProvider implements ArgumentsProvider {
-        private static final String testNamePattern = "{1}";
+        private static final String testNamePattern = "{0}";
 
         @Override
         public Stream<Arguments> provideArguments(ExtensionContext context) {
-            var ctx = new Context(context);
+            var ctx = new Context();
 
-            return Stream.of(
-                    Arguments.of(
-                            AnnotationParameterEnumValueModel
-                                    .of(ctx.getReflectionEnumValue()),
-                            ModelKind.REFLECTION),
-                    Arguments.of(
-                            AnnotationParameterEnumValueModel
-                                    .of(ctx.getSourceEnumValue()),
-                            ModelKind.SOURCE));
+            return Stream.of(Arguments.of(AnnotationParameterEnumValueModel
+                    .of(ctx.getReflectionEnumValue())));
         }
     }
 
@@ -421,37 +338,27 @@ public class AnnotationInfoModelTests {
 
         @Override
         public Stream<Arguments> provideArguments(ExtensionContext context) {
-            var ctx = new Context(context);
+            var ctx = new Context();
 
-            var reflectionOrigins = ctx.getReflectionParameterOrigins();
-            var sourceOrigins = ctx.getSourceParameterOrigins();
-
-            return reflectionOrigins.values().stream()
+            return ctx.getReflectionParameterOrigins().values().stream()
                     .map(origin -> Arguments.of(
                             AnnotationParameterModel.of(origin),
-                            AnnotationParameterModel
-                                    .of(sourceOrigins.get(origin.getName())),
+                            AnnotationParameterModel.of(origin),
                             origin.getName()));
         }
     }
 
     static class ParameterProvider implements ArgumentsProvider {
-        private static final String testNamePattern = "{1} [{2}]";
+        private static final String testNamePattern = "{1}";
 
         @Override
         public Stream<Arguments> provideArguments(ExtensionContext context) {
-            var ctx = new Context(context);
+            var ctx = new Context();
 
-            return Streams.combine(
-                    ctx.getReflectionParameterOrigins().values().stream()
-                            .map(origin -> Arguments.of(
-                                    AnnotationParameterModel.of(origin),
-                                    ModelKind.REFLECTION, origin.getName())),
-                    ctx.getSourceParameterOrigins().entrySet().stream()
-                            .map(entry -> Arguments.of(
-                                    AnnotationParameterModel
-                                            .of(entry.getValue()),
-                                    ModelKind.SOURCE, entry.getKey())));
+            return ctx.getReflectionParameterOrigins().values().stream()
+                    .map(origin -> Arguments.of(
+                            AnnotationParameterModel.of(origin),
+                            origin.getName()));
         }
     }
 }

@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import io.github.classgraph.ClassInfo;
-import io.github.classgraph.ClassRefTypeSignature;
 import org.jspecify.annotations.NonNull;
 
 public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
@@ -38,23 +36,12 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
         return is(actor, target.getName());
     }
 
-    @Deprecated
-    public static boolean is(AnnotatedParameterizedType actor,
-            ClassInfo target) {
-        return is(actor, target.getName());
-    }
-
     public static boolean is(AnnotatedParameterizedType actor, String target) {
         return ((Class<?>) ((ParameterizedType) actor.getType()).getRawType())
                 .getName().equals(target);
     }
 
     public static boolean is(AnnotatedType actor, Class<?> target) {
-        return is(actor, target.getName());
-    }
-
-    @Deprecated
-    public static boolean is(AnnotatedType actor, ClassInfo target) {
         return is(actor, target.getName());
     }
 
@@ -68,36 +55,8 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
         return actor.equals(target);
     }
 
-    @Deprecated
-    public static boolean is(Class<?> actor, ClassInfo target) {
-        return is(actor, target.getName());
-    }
-
     public static boolean is(Class<?> actor, String target) {
         return actor.getName().equals(target);
-    }
-
-    @Deprecated
-    public static boolean is(ClassRefTypeSignature actor, Class<?> target) {
-        return is(actor, target.getName());
-    }
-
-    @Deprecated
-    public static boolean is(ClassRefTypeSignature actor, ClassInfo target) {
-        return is(actor, target.getName());
-    }
-
-    @Deprecated
-    public static boolean is(ClassRefTypeSignature actor, String target) {
-        return actor.getFullyQualifiedClassName().equals(target);
-    }
-
-    @Deprecated
-    public static ClassRefSignatureModel of(
-            @NonNull ClassRefTypeSignature origin) {
-        return Objects.requireNonNull(origin).getSuffixes().size() > 0
-                ? new ClassRefSignatureSourceModel.Suffixed(origin)
-                : new ClassRefSignatureSourceModel.Regular(origin);
     }
 
     public static ClassRefSignatureModel of(@NonNull Class<?> origin) {

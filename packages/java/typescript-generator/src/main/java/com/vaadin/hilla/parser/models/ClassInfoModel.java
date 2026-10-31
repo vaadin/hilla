@@ -32,7 +32,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 
-import io.github.classgraph.ClassInfo;
 import org.jspecify.annotations.NonNull;
 
 public abstract class ClassInfoModel extends AnnotatedAbstractModel
@@ -58,11 +57,6 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return Objects.equals(actor.getName(), target);
     }
 
-    @Deprecated
-    public static boolean is(ClassInfo actor, String target) {
-        return Objects.equals(actor.getName(), target);
-    }
-
     public static boolean is(Class<?> actor, Class<?> target) {
         return Objects.equals(actor, target);
     }
@@ -79,21 +73,6 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return Objects.equals(actor.getTypeName(), target);
     }
 
-    @Deprecated
-    public static boolean is(ClassInfo actor, Class<?> target) {
-        return Objects.equals(actor.getName(), target.getName());
-    }
-
-    @Deprecated
-    public static boolean is(Class<?> actor, ClassInfo target) {
-        return Objects.equals(actor.getName(), target.getName());
-    }
-
-    @Deprecated
-    public static boolean is(ClassInfo actor, ClassInfo target) {
-        return Objects.equals(actor, target);
-    }
-
     public static boolean isAssignableFrom(String target, Class<?> actor) {
         while (actor != null) {
             if (Objects.equals(target, actor.getName())) {
@@ -106,29 +85,8 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return false;
     }
 
-    @Deprecated
-    public static boolean isAssignableFrom(String target, ClassInfo actor) {
-        return is(actor, target) || actor.implementsInterface(target)
-                || actor.extendsSuperclass(target);
-    }
-
     public static boolean isAssignableFrom(Class<?> target, Class<?> actor) {
         return target.isAssignableFrom(actor);
-    }
-
-    @Deprecated
-    public static boolean isAssignableFrom(Class<?> target, ClassInfo actor) {
-        return isAssignableFrom(target.getName(), actor);
-    }
-
-    @Deprecated
-    public static boolean isAssignableFrom(ClassInfo target, Class<?> actor) {
-        return isAssignableFrom(target.getName(), actor);
-    }
-
-    @Deprecated
-    public static boolean isAssignableFrom(ClassInfo target, ClassInfo actor) {
-        return isAssignableFrom(target.getName(), actor);
     }
 
     public static boolean isAssignableFrom(Type target, Type actor) {
@@ -154,28 +112,14 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
             ClassInfoModel actor) {
         var _actor = actor.get();
 
-        return _actor instanceof ClassInfo
-                ? isAssignableFrom(target, (ClassInfo) _actor)
-                : isAssignableFrom(target, (Class<?>) _actor);
+        return isAssignableFrom(target, (Class<?>) _actor);
     }
 
     public static boolean isAssignableFrom(Class<?> target,
             ClassInfoModel actor) {
         var _actor = actor.get();
 
-        return _actor instanceof ClassInfo
-                ? isAssignableFrom(target, (ClassInfo) _actor)
-                : isAssignableFrom(target, (Class<?>) _actor);
-    }
-
-    @Deprecated
-    public static boolean isAssignableFrom(ClassInfo target,
-            ClassInfoModel actor) {
-        var _actor = actor.get();
-
-        return _actor instanceof ClassInfo
-                ? isAssignableFrom(target, (ClassInfo) _actor)
-                : isAssignableFrom(target, (Class<?>) _actor);
+        return isAssignableFrom(target, (Class<?>) _actor);
     }
 
     public static boolean isJDKClass(AnnotatedType cls) {
@@ -184,11 +128,6 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
 
     public static boolean isJDKClass(Type cls) {
         return isJDKClass(cls.getTypeName());
-    }
-
-    @Deprecated
-    public static boolean isJDKClass(ClassInfo cls) {
-        return isJDKClass(cls.getName());
     }
 
     public static boolean isJDKClass(String name) {
@@ -205,11 +144,6 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return !isJDKClass(name);
     }
 
-    @Deprecated
-    public static boolean isNonJDKClass(ClassInfo cls) {
-        return !isJDKClass(cls);
-    }
-
     public static boolean isNonJDKClass(Class<?> cls) {
         return !isJDKClass(cls);
     }
@@ -220,11 +154,6 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
 
     public static boolean isNonJDKClass(AnnotatedType cls) {
         return !isJDKClass(cls);
-    }
-
-    @Deprecated
-    public static ClassInfoModel of(@NonNull ClassInfo origin) {
-        return new ClassInfoSourceModel(Objects.requireNonNull(origin));
     }
 
     public static ClassInfoModel of(@NonNull Class<?> origin) {
@@ -344,15 +273,13 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     public boolean is(String name) {
         var origin = get();
 
-        return origin instanceof ClassInfo ? is((ClassInfo) origin, name)
-                : is((Class<?>) origin, name);
+        return is((Class<?>) origin, name);
     }
 
     public boolean is(Class<?> cls) {
         var origin = get();
 
-        return origin instanceof ClassInfo ? is((ClassInfo) origin, cls)
-                : is((Class<?>) origin, cls);
+        return is((Class<?>) origin, cls);
     }
 
     public boolean is(Type cls) {
@@ -363,19 +290,10 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return is(cls.getType());
     }
 
-    @Deprecated
-    public boolean is(ClassInfo cls) {
-        var origin = get();
-
-        return origin instanceof ClassInfo ? is((ClassInfo) origin, cls)
-                : is((Class<?>) origin, cls);
-    }
-
     public boolean is(ClassInfoModel model) {
         var cls = model.get();
 
-        return cls instanceof ClassInfo ? is((ClassInfo) cls)
-                : is((Class<?>) cls);
+        return is((Class<?>) cls);
     }
 
     public abstract boolean isAbstract();
@@ -387,26 +305,13 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     public boolean isAssignableFrom(ClassInfoModel model) {
         var _model = model.get();
 
-        return _model instanceof ClassInfo
-                ? isAssignableFrom((ClassInfo) _model)
-                : isAssignableFrom((Class<?>) _model);
-    }
-
-    @Deprecated
-    public boolean isAssignableFrom(ClassInfo cls) {
-        var origin = get();
-
-        return origin instanceof ClassInfo
-                ? isAssignableFrom((ClassInfo) origin, cls)
-                : isAssignableFrom((Class<?>) origin, cls);
+        return isAssignableFrom((Class<?>) _model);
     }
 
     public boolean isAssignableFrom(Class<?> cls) {
         var origin = get();
 
-        return origin instanceof ClassInfo
-                ? isAssignableFrom((ClassInfo) origin, cls)
-                : isAssignableFrom((Class<?>) origin, cls);
+        return isAssignableFrom((Class<?>) origin, cls);
     }
 
     public boolean isAssignableFrom(AnnotatedType cls) {

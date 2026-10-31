@@ -15,17 +15,10 @@
  */
 package com.vaadin.hilla.parser.models;
 
-import io.github.classgraph.PackageInfo;
-
 public abstract class PackageInfoModel extends AnnotatedAbstractModel
         implements Model, NamedModel {
     public static PackageInfoModel of(Package origin) {
         return new PackageInfoReflectionModel(origin);
-    }
-
-    @Deprecated
-    public static PackageInfoModel of(PackageInfo origin) {
-        return new PackageInfoSourceModel(origin);
     }
 
     @Override

@@ -20,17 +20,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import io.github.classgraph.AnnotationInfo;
 import org.jspecify.annotations.NonNull;
 
 public abstract class AnnotationInfoModel implements Model, NamedModel {
     private Optional<ClassInfoModel> classInfo;
     private Set<AnnotationParameterModel> parameters;
-
-    @Deprecated
-    public static AnnotationInfoModel of(@NonNull AnnotationInfo origin) {
-        return new AnnotationInfoSourceModel(Objects.requireNonNull(origin));
-    }
 
     public static AnnotationInfoModel of(@NonNull Annotation origin) {
         return new AnnotationInfoReflectionModel(

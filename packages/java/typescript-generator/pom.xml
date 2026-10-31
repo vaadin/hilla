@@ -23,10 +23,6 @@
   <dependencies>
     <!-- Core dependencies from parser-jvm-core and parser-jvm-utils -->
     <dependency>
-      <groupId>io.github.classgraph</groupId>
-      <artifactId>classgraph</artifactId>
-    </dependency>
-    <dependency>
       <groupId>jakarta.annotation</groupId>
       <artifactId>jakarta.annotation-api</artifactId>
     </dependency>

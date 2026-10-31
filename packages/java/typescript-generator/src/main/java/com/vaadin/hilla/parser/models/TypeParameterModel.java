@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import io.github.classgraph.TypeParameter;
 import org.jspecify.annotations.NonNull;
 
 public abstract class TypeParameterModel extends AnnotatedAbstractModel
@@ -38,11 +37,6 @@ public abstract class TypeParameterModel extends AnnotatedAbstractModel
             .withInitial(HashSet::new);
 
     private List<SignatureModel> bounds;
-
-    @Deprecated
-    public static TypeParameterModel of(@NonNull TypeParameter origin) {
-        return new TypeParameterSourceModel(Objects.requireNonNull(origin));
-    }
 
     public static TypeParameterModel of(@NonNull TypeVariable<?> origin) {
         return new TypeParameterReflectionModel(Objects.requireNonNull(origin));

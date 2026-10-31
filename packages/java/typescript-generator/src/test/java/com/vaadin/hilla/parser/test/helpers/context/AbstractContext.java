@@ -18,19 +18,11 @@ package com.vaadin.hilla.parser.test.helpers.context;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Map;
 
-import io.github.classgraph.ScanResult;
-
-public abstract class AbstractContext<ReflectionOrigin extends AnnotatedElement, SourceOrigin>
-        extends BaseContext {
+public abstract class AbstractContext<ReflectionOrigin extends AnnotatedElement> {
     private final Map<String, ReflectionOrigin> reflectionOrigins;
-    private final Map<String, SourceOrigin> sourceOrigins;
 
-    protected AbstractContext(ScanResult source,
-            Map<String, ReflectionOrigin> reflectionOrigins,
-            Map<String, SourceOrigin> sourceOrigins) {
-        super(source);
+    protected AbstractContext(Map<String, ReflectionOrigin> reflectionOrigins) {
         this.reflectionOrigins = reflectionOrigins;
-        this.sourceOrigins = sourceOrigins;
     }
 
     public ReflectionOrigin getReflectionOrigin(String name) {
@@ -39,13 +31,5 @@ public abstract class AbstractContext<ReflectionOrigin extends AnnotatedElement,
 
     public Map<String, ReflectionOrigin> getReflectionOrigins() {
         return reflectionOrigins;
-    }
-
-    public SourceOrigin getSourceOrigin(String name) {
-        return sourceOrigins.get(name);
-    }
-
-    public Map<String, SourceOrigin> getSourceOrigins() {
-        return sourceOrigins;
     }
 }
