@@ -279,11 +279,15 @@ Its source is in `src/main/java/.../nonnull/kotlin` (the plugin) and
 form models:
 
 - Bean Validation constraints from `jakarta.validation.constraints` become
-  `ValidationConstraint`s, under the `TypeFacts.CONSTRAINTS` note. Repeated
-  constraints are unwrapped from their container.
+  the `ConstraintModel`s of the type's `TypeFacts`. Repeated constraints are
+  unwrapped from their container.
 - A property's JPA annotations from a fixed list (`@Id`, `@Version` and the
-  four relationship annotations) become `Annotation`s, under
-  `TypeFacts.ANNOTATIONS`.
+  four relationship annotations) become the `AnnotationModel`s of the type's
+  `TypeFacts`.
+
+Both are records of the generator model, so the model takes them over as they
+are. The attributes are already plain values: a class an attribute holds is
+the map naming it that the model library reads.
 
 The constraints on an array property belong to the array itself, not to its
 items.
@@ -295,8 +299,8 @@ items.
 - In `scan`, it adds a `UnionNode` for a class annotated with `@JsonTypeInfo`,
   and an `EntityNode` for each class that `@JsonSubTypes` names, all as related
   nodes.
-- On exit, it sets the union's subtypes, and the `EntityFacts.Discriminator` of
-  each subtype.
+- On exit, it sets the union's subtypes, and the discriminator of each subtype
+  (an `EntityModel.Discriminator`) on its `EntityFacts`.
 
 A discriminator property is declared only when the type id is included as a
 property (`As.PROPERTY` or `As.EXISTING_PROPERTY`) and is a name (`Id.NAME` or
@@ -329,13 +333,14 @@ The plugins talk to `EndpointModelPlugin` only through the targets of the
 nodes:
 
 - `TypeFacts`, on typed nodes, says whether a value can be absent, and whether
-  the type arguments of a type belong to the type itself. It also carries named
-  _notes_ that a plugin writes and the model reads back, such as the
+  the type arguments of a type belong to the type itself. It also carries the
   constraints and annotations from `ModelPlugin`.
 - `EntityFacts`, on entity nodes, carries the discriminator.
 - `UnionNode`'s target lists the subtypes of a polymorphic type.
 
-A new kind of fact goes in the same way: as a note, or as a field on one of
+What the facts carry beyond nullability is held in the records of the
+generator model already, so `EndpointModelPlugin` takes it over without
+converting it. A new kind of fact goes in the same way: as a field on one of
 these classes. It does not go through a call from one plugin to another.
 
 ## Generator
