@@ -72,7 +72,7 @@ public final class PropertyPlugin
         }
 
         var node = (EntityNode) nodeDependencies.getNode();
-        node.getTarget().setSerializationConfig(serializationConfig);
+        node.setSerializationConfig(serializationConfig);
 
         var cls = node.getSource();
 

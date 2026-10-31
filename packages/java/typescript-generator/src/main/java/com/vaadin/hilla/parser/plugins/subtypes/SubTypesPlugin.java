@@ -77,7 +77,7 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
 
             var info = findSubTypesInfo(cls);
             var property = info.flatMap(i -> i.discriminatorProperty(cls,
-                    entityNode.getTarget().getSerializationConfig()));
+                    entityNode.getSerializationConfig()));
             var values = info.map(i -> i.discriminatorValues(cls))
                     .orElseGet(List::of);
 
@@ -288,6 +288,10 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                 String property, SerializationConfig config) {
             return propertiesOf(cls, config)
                     .filter(definition -> definition.getName().equals(property))
+                    // A property only a constructor takes is not one the
+                    // class declares a type for
+                    .filter(definition -> definition.hasGetter()
+                            || definition.hasSetter() || definition.hasField())
                     .filter(definition -> cls.equals(PropertyNode.of(definition)
                             .getPrimaryMember().getDeclaringClass()))
                     .<Class<?>> map(BeanPropertyDefinition::getRawPrimaryType)
