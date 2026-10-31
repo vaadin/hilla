@@ -15,12 +15,11 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.knodes
 
-import com.vaadin.hilla.parser.models.ClassInfoModel
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointNode
 import kotlin.reflect.KClass
 
 class KEndpointNode(
-    source: ClassInfoModel,
+    source: Class<*>,
     target: String?,
     val kClass: KClass<*>
 ): EndpointNode(

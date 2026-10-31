@@ -13,8 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.hilla.parser.models;
+package com.vaadin.hilla.parser.plugins.backbone.nopublicmethods;
 
-public interface OwnedModel<O> {
-    O getOwner();
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+
+/**
+ * Has a method the browser cannot call, as it is not public.
+ */
+@Endpoint
+public class NoPublicMethodsEndpoint {
+    String getName() {
+        return "name";
+    }
 }

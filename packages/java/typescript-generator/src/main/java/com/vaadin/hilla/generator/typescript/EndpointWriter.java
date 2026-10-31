@@ -38,6 +38,21 @@ public final class EndpointWriter {
     private static final String SIGNAL_OPTIONS_TYPE = "SignalMethodOptions";
     private static final String OPTIONS_PARAMETER = "options";
 
+    /**
+     * What the file of an endpoint without a method the browser can call says
+     * in place of the methods, naming both ways a method is left out: not being
+     * public, and being inherited from a type which is not exposed. A block
+     * comment rather than line comments, so that the export after it cannot end
+     * up commented out whatever the line breaks. The Java class is not named,
+     * so that its package does not end up in the frontend bundle.
+     */
+    private static final String NO_METHODS = """
+            /*
+             * This endpoint has no methods the browser can call. Only the public
+             * methods declared in the class itself or in a superclass or
+             * interface annotated with @EndpointExposed are generated.
+             */""";
+
     private static final String METHOD = """
             async function {{name}}({{parameters}}): Promise<{{returnType}}> {
               return {{client}}.call('{{endpoint}}', '{{method}}', {{arguments}}, {{init}});
@@ -81,9 +96,11 @@ public final class EndpointWriter {
 
     public GeneratedFile write(EndpointModel endpoint) {
         // An endpoint without a callable method still gets a file, so that
-        // whatever imports it finds a module rather than nothing
+        // whatever imports it finds a module rather than nothing, and so that
+        // the developer looking for the methods learns why there are none
         if (endpoint.methods().isEmpty()) {
-            return new GeneratedFile(endpoint.name() + ".ts", "export {};\n");
+            return GeneratedFile.of(endpoint.name(), new ImportRegistry(),
+                    NO_METHODS + "\n" + GeneratedFile.exportList(List.of()));
         }
 
         var imports = new ImportRegistry();

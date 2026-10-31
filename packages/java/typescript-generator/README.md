@@ -39,7 +39,6 @@ For how the parser and the generator work, see [ARCHITECTURE.md](ARCHITECTURE.md
 
 - **Jackson** - Reads what a class serializes as, and the annotations of it
 - **Kotlin** - Kotlin reflection and standard library for Kotlin support
-- **ClassGraph** - The source models, which only the tests use
 - **Spring Data Commons** - For transfer type handling
 - **Vaadin Flow** - Core Flow server APIs
 

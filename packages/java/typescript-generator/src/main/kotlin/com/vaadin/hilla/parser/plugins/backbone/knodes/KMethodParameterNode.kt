@@ -15,12 +15,12 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.knodes
 
-import com.vaadin.hilla.parser.models.MethodParameterInfoModel
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode
+import java.lang.reflect.Parameter
 import kotlin.reflect.KParameter
 
 class KMethodParameterNode(
-    source: MethodParameterInfoModel,
+    source: Parameter,
     target: String,
     val kParameter: KParameter
 ): MethodParameterNode(

@@ -15,9 +15,11 @@
  */
 package com.vaadin.hilla.parser.core.dependency;
 
-import static com.vaadin.hilla.parser.test.helpers.ClassMemberUtils.cleanup;
+import static com.vaadin.hilla.parser.test.helpers.ClassMemberUtils.getMethods;
 
+import java.lang.reflect.Member;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -29,15 +31,13 @@ import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.core.RootNode;
-import com.vaadin.hilla.parser.models.ClassInfoModel;
-import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
-import com.vaadin.hilla.parser.models.NamedModel;
 import com.vaadin.hilla.parser.test.nodes.EndpointNode;
 import com.vaadin.hilla.parser.test.nodes.EntityNode;
 import com.vaadin.hilla.parser.test.nodes.FieldNode;
 import com.vaadin.hilla.parser.test.nodes.MethodNode;
 import com.vaadin.hilla.parser.test.nodes.MethodParameterNode;
 import com.vaadin.hilla.parser.test.nodes.TypeSignatureNode;
+import com.vaadin.hilla.parser.utils.Signatures;
 
 final class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
     private final List<String> dependencyMembers = new ArrayList<>();
@@ -51,20 +51,17 @@ final class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
 
     @Override
     public void exit(NodePath<?> nodePath) {
-        if (nodePath.getNode().getSource() instanceof NamedModel
+        if (nodePath.getNode().getSource() instanceof Member member
                 && (nodePath.getParentPath().getNode() instanceof EntityNode)) {
-            var model = (NamedModel) nodePath.getNode().getSource();
-            dependencyMembers.add(model.getName());
+            dependencyMembers.add(member.getName());
         }
         if ((nodePath.getNode() instanceof EntityNode)
-                && (nodePath.getNode().getSource() instanceof ClassInfoModel)) {
-            var model = (ClassInfoModel) nodePath.getNode().getSource();
-            entityDependencies.add(model.getName());
+                && (nodePath.getNode().getSource() instanceof Class<?> cls)) {
+            entityDependencies.add(cls.getName());
         }
-        if (nodePath.getNode().getSource() instanceof NamedModel && (nodePath
+        if (nodePath.getNode().getSource() instanceof Member member && (nodePath
                 .getParentPath().getNode() instanceof EndpointNode)) {
-            var model = (NamedModel) nodePath.getNode().getSource();
-            endpointDependencies.add(model.getName());
+            endpointDependencies.add(member.getName());
         }
     }
 
@@ -97,36 +94,35 @@ final class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
         var node = nodeDependencies.getNode();
         if (node instanceof RootNode) {
             var rootNode = (RootNode) node;
-            return nodeDependencies.appendChildNodes(rootNode.getSource()
-                    .stream().map(ClassInfoModel::of).map(EndpointNode::of));
-        } else if ((node instanceof EndpointNode)) {
-            var cls = (ClassInfoModel) node.getSource();
             return nodeDependencies.appendChildNodes(
-                    cleanup(cls.getMethods().stream()).map(MethodNode::of));
+                    rootNode.getSource().stream().map(EndpointNode::of));
+        } else if ((node instanceof EndpointNode)) {
+            var cls = (Class<?>) node.getSource();
+            return nodeDependencies
+                    .appendChildNodes(getMethods(cls).map(MethodNode::of));
         } else if (node instanceof MethodNode) {
             var methodNode = (MethodNode) node;
             var resultTypeNode = TypeSignatureNode
-                    .of(methodNode.getSource().getResultType());
+                    .of(methodNode.getSource().getAnnotatedReturnType());
             return nodeDependencies.prependChildNodes(Stream.of(resultTypeNode))
-                    .appendChildNodes(
-                            methodNode.getSource().getParameters().stream()
-                                    .map(param -> MethodParameterNode.of(param,
-                                            Optional.ofNullable(param.getName())
-                                                    .orElse("_unnamed"))));
+                    .appendChildNodes(Arrays
+                            .stream(methodNode.getSource().getParameters())
+                            .map(param -> MethodParameterNode.of(param,
+                                    Optional.ofNullable(param.getName())
+                                            .orElse("_unnamed"))));
         } else if ((node instanceof EntityNode)) {
-            var cls = (ClassInfoModel) node.getSource();
+            var cls = (Class<?>) node.getSource();
             return nodeDependencies.appendChildNodes(
-                    cls.getFields().stream().map(FieldNode::of));
+                    Arrays.stream(cls.getDeclaredFields()).map(FieldNode::of));
         } else if (node instanceof FieldNode) {
             var fieldNode = (FieldNode) node;
-            return nodeDependencies.appendChildNodes(Stream
-                    .of(TypeSignatureNode.of(fieldNode.getSource().getType())));
-        } else if ((node instanceof TypeSignatureNode)
-                && (node.getSource() instanceof ClassRefSignatureModel)
-                && !(((ClassRefSignatureModel) node.getSource())
-                        .isJDKClass())) {
-            var entityCls = ((ClassRefSignatureModel) node.getSource())
-                    .getClassInfo();
+            return nodeDependencies.appendChildNodes(Stream.of(TypeSignatureNode
+                    .of(fieldNode.getSource().getAnnotatedType())));
+        } else if ((node instanceof TypeSignatureNode signatureNode)
+                && Signatures.isClassRef(signatureNode.getSource())
+                && !Signatures.isJDKClass(signatureNode.getSource())) {
+            var entityCls = Signatures.getClass(signatureNode.getSource())
+                    .orElseThrow();
             return nodeDependencies
                     .appendRelatedNodes(Stream.of(EntityNode.of(entityCls)));
         }

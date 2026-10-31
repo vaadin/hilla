@@ -15,6 +15,8 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.nodes;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
@@ -22,28 +24,27 @@ import java.util.function.UnaryOperator;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
-import com.vaadin.hilla.parser.models.AnnotationInfoModel;
-import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
+import com.vaadin.hilla.parser.utils.Signatures;
 
-public class TypeSignatureNode extends AbstractNode<SignatureModel, TypeFacts>
+public class TypeSignatureNode extends AbstractNode<AnnotatedElement, TypeFacts>
         implements TypedNode {
-    private final List<AnnotationInfoModel> annotations;
+    private final List<Annotation> annotations;
     private final Integer position;
 
-    protected TypeSignatureNode(SignatureModel source, TypeFacts target,
-            List<AnnotationInfoModel> annotations, Integer position) {
+    protected TypeSignatureNode(AnnotatedElement source, TypeFacts target,
+            List<Annotation> annotations, Integer position) {
         super(source, target);
         this.annotations = annotations;
         this.position = position;
     }
 
-    protected TypeSignatureNode(SignatureModel source, TypeFacts target,
+    protected TypeSignatureNode(AnnotatedElement source, TypeFacts target,
             Integer position) {
-        this(source, target, source.getAnnotations(), position);
+        this(source, target, Signatures.getAnnotations(source), position);
     }
 
-    public List<AnnotationInfoModel> getAnnotations() {
+    public List<Annotation> getAnnotations() {
         return annotations;
     }
 
@@ -51,12 +52,13 @@ public class TypeSignatureNode extends AbstractNode<SignatureModel, TypeFacts>
         return position;
     }
 
-    public SignatureModel getType() {
+    public AnnotatedElement getType() {
         return getSource();
     }
 
     @Override
-    public TypedNode processType(UnaryOperator<SignatureModel> typeProcessor) {
+    public TypedNode processType(
+            UnaryOperator<AnnotatedElement> typeProcessor) {
         var processedType = typeProcessor.apply(getSource());
         if (processedType.equals(getSource())) {
             return this;
@@ -67,12 +69,12 @@ public class TypeSignatureNode extends AbstractNode<SignatureModel, TypeFacts>
     }
 
     @NonNull
-    static public TypeSignatureNode of(@NonNull SignatureModel source) {
+    static public TypeSignatureNode of(@NonNull AnnotatedElement source) {
         return new TypeSignatureNode(source, TypeFacts.unknown(), null);
     }
 
     @NonNull
-    static public TypeSignatureNode of(@NonNull SignatureModel source,
+    static public TypeSignatureNode of(@NonNull AnnotatedElement source,
             int position) {
         return new TypeSignatureNode(source, TypeFacts.unknown(), position);
     }

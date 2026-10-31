@@ -15,18 +15,27 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.nodes;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.List;
+
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
-import com.vaadin.hilla.parser.models.MethodInfoModel;
 
-public class MethodNode extends AbstractNode<MethodInfoModel, Void> {
-    protected MethodNode(@NonNull MethodInfoModel source) {
+public class MethodNode extends AbstractNode<Method, Void>
+        implements AnnotatedNode {
+    protected MethodNode(@NonNull Method source) {
         super(source, null);
     }
 
     @NonNull
-    static public MethodNode of(@NonNull MethodInfoModel model) {
-        return new MethodNode(model);
+    static public MethodNode of(@NonNull Method method) {
+        return new MethodNode(method);
+    }
+
+    @Override
+    public List<Annotation> getAnnotations() {
+        return List.of(getSource().getAnnotations());
     }
 }

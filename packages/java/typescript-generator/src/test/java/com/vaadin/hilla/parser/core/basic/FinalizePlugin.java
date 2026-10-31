@@ -15,6 +15,7 @@
  */
 package com.vaadin.hilla.parser.core.basic;
 
+import java.lang.reflect.Member;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,9 +25,6 @@ import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
-import com.vaadin.hilla.parser.models.ClassInfoModel;
-import com.vaadin.hilla.parser.models.Model;
-import com.vaadin.hilla.parser.models.NamedModel;
 
 final class FinalizePlugin extends AbstractPlugin<PluginConfiguration> {
     private final List<String> footsteps = new ArrayList<>();
@@ -34,14 +32,10 @@ final class FinalizePlugin extends AbstractPlugin<PluginConfiguration> {
 
     @Override
     public void enter(NodePath<?> nodePath) {
-        if (nodePath.getNode().getSource() instanceof Model
-                && nodePath.getNode().getSource() instanceof NamedModel
-                && nodePath.getParentPath().getNode()
-                        .getSource() instanceof ClassInfoModel) {
-            var model = nodePath.getNode().getSource();
+        if (nodePath.getNode().getSource() instanceof Member member && nodePath
+                .getParentPath().getNode().getSource() instanceof Class<?>) {
             members.add(String.format("%s %s",
-                    ((Model) model).getCommonModelClass().getSimpleName(),
-                    ((NamedModel) model).getName()));
+                    member.getClass().getSimpleName(), member.getName()));
         }
         footsteps.add(String.format("-> %s", nodePath.toString()));
     }

@@ -15,6 +15,7 @@
  */
 package com.vaadin.hilla.parser.plugins.transfertypes;
 
+import java.lang.reflect.AnnotatedType;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -34,10 +35,9 @@ import com.vaadin.hilla.parser.core.Node;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
-import com.vaadin.hilla.parser.models.ClassInfoModel;
-import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
+import com.vaadin.hilla.parser.utils.Signatures;
 import com.vaadin.hilla.runtime.transfertypes.EndpointSubscription;
 import com.vaadin.hilla.runtime.transfertypes.File;
 import com.vaadin.hilla.runtime.transfertypes.Flux;
@@ -88,19 +88,18 @@ public final class TransferTypesPlugin
         }
 
         return (Node<?, ?>) typedNode.processType((signature) -> {
-            if (!(signature instanceof ClassRefSignatureModel classRef)) {
+            if (!Signatures.isClassRef(signature)) {
                 return signature;
             }
 
-            var className = classRef.getClassInfo().getName();
+            var className = Signatures.getClass(signature).orElseThrow()
+                    .getName();
             if (!classMap.containsKey(className)) {
                 return signature;
             }
 
-            var mappedClassInfo = ClassInfoModel.of(classMap.get(className));
-
-            return ClassRefSignatureModel.of(mappedClassInfo,
-                    classRef.getTypeArguments(), classRef.getAnnotations());
+            return Signatures.withClass((AnnotatedType) signature,
+                    classMap.get(className));
         });
     }
 }

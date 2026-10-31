@@ -15,21 +15,22 @@
  */
 package com.vaadin.hilla.parser.test.nodes;
 
+import java.lang.reflect.AnnotatedElement;
+
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
-import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 
 public final class TypeSignatureNode
-        extends AbstractNode<SignatureModel, TypeFacts> {
-    private TypeSignatureNode(@NonNull SignatureModel source,
+        extends AbstractNode<AnnotatedElement, TypeFacts> {
+    private TypeSignatureNode(@NonNull AnnotatedElement source,
             @NonNull TypeFacts target) {
         super(source, target);
     }
 
     @NonNull
-    static public TypeSignatureNode of(@NonNull SignatureModel source) {
+    static public TypeSignatureNode of(@NonNull AnnotatedElement source) {
         return new TypeSignatureNode(source, TypeFacts.unknown());
     }
 }
