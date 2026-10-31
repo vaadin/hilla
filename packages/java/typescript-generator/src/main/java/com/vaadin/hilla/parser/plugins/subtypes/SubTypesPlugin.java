@@ -30,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.jspecify.annotations.NonNull;
 
+import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
@@ -38,7 +39,6 @@ import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
-import com.vaadin.hilla.parser.plugins.backbone.EntityFacts;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 import com.vaadin.hilla.parser.utils.Signatures;
@@ -79,7 +79,7 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
 
             if (property.isPresent() && !values.isEmpty()) {
                 entityNode.getTarget().setDiscriminator(
-                        new EntityFacts.Discriminator(property.get(), values));
+                        new EntityModel.Discriminator(property.get(), values));
             }
         }
     }

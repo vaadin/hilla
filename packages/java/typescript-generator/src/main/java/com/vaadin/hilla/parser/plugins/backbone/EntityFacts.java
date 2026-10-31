@@ -17,10 +17,10 @@ package com.vaadin.hilla.parser.plugins.backbone;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
+
+import com.vaadin.hilla.generator.model.EntityModel.Discriminator;
 
 /**
  * What the walk says about an entity beyond the class it is written from and
@@ -55,19 +55,5 @@ public final class EntityFacts {
     public void setEnumValues(Map<String, String> enumValues) {
         this.enumValues = Collections
                 .unmodifiableMap(new LinkedHashMap<>(enumValues));
-    }
-
-    /**
-     * The property saying which subtype a value is.
-     *
-     * @param acceptedValues
-     *            the values the property can hold, which are the id of the type
-     *            itself followed by the ids of the subtypes below it
-     */
-    public record Discriminator(String name, List<String> acceptedValues) {
-        public Discriminator {
-            Objects.requireNonNull(name);
-            acceptedValues = List.copyOf(acceptedValues);
-        }
     }
 }
