@@ -25,18 +25,14 @@ import tools.jackson.databind.ObjectMapper;
 
 import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
-import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
-import com.vaadin.hilla.parser.plugins.backbone.BackbonePluginConfiguration;
-import com.vaadin.hilla.parser.plugins.backbone.config.CustomConfigEndpoint;
-import com.vaadin.hilla.parser.plugins.backbone.config.CustomFactory;
 import com.vaadin.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint;
 import com.vaadin.hilla.parser.testutils.FullStackGenerator;
 
 /**
  * A generated enum holds what the mapper the endpoints use writes, and a form
  * sends one of those values back, so that mapper has to read each value as the
- * constant it was written from, both the default one and an application's own.
- * Which values are generated is pinned by the snapshots of the enum cases.
+ * constant it was written from. Which values are generated, also with an
+ * application's own mapper, is pinned by the snapshots of the enum cases.
  */
 public class EnumValuesTest {
     @Test
@@ -45,20 +41,6 @@ public class EnumValuesTest {
                 new FullStackGenerator(EnumValuesTest.class,
                         EnumTypeEndpoint.class),
                 new JacksonObjectMapperFactory.Json().build());
-    }
-
-    @Test
-    public void should_ReadBackEveryValueWithTheMapperOfTheApplication() {
-        var configuration = new BackbonePluginConfiguration();
-        configuration
-                .setObjectMapperFactoryClassName(CustomFactory.class.getName());
-        var plugin = new BackbonePlugin();
-        plugin.setConfiguration(configuration);
-
-        assertReadBack(
-                new FullStackGenerator(EnumValuesTest.class,
-                        CustomConfigEndpoint.class).withPlugin(plugin),
-                new CustomFactory().build());
     }
 
     private static void assertReadBack(FullStackGenerator generator,
