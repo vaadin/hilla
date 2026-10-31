@@ -17,7 +17,6 @@ package com.vaadin.hilla.parser.models;
 
 import java.util.Objects;
 
-import io.github.classgraph.AnnotationParameterValue;
 import org.jspecify.annotations.NonNull;
 
 public abstract class AnnotationParameterModel implements Model, NamedModel {
@@ -32,13 +31,6 @@ public abstract class AnnotationParameterModel implements Model, NamedModel {
     public static <T> AnnotationParameterModel of(
             @NonNull ReflectionOrigin<T> origin) {
         return new AnnotationParameterReflectionModel<>(
-                Objects.requireNonNull(origin));
-    }
-
-    @Deprecated
-    public static AnnotationParameterModel of(
-            @NonNull AnnotationParameterValue origin) {
-        return new AnnotationParameterSourceModel(
                 Objects.requireNonNull(origin));
     }
 

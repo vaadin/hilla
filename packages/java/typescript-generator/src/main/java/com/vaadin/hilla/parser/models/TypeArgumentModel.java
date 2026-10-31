@@ -19,17 +19,11 @@ import java.lang.reflect.AnnotatedType;
 import java.util.List;
 import java.util.Objects;
 
-import io.github.classgraph.TypeArgument;
 import org.jspecify.annotations.NonNull;
 
 public abstract class TypeArgumentModel extends AnnotatedAbstractModel
         implements SignatureModel {
     private List<SignatureModel> associatedTypes;
-
-    @Deprecated
-    public static TypeArgumentModel of(@NonNull TypeArgument origin) {
-        return new TypeArgumentSourceModel(Objects.requireNonNull(origin));
-    }
 
     public static TypeArgumentModel of(@NonNull AnnotatedType origin) {
         return new TypeArgumentReflectionModel(Objects.requireNonNull(origin));

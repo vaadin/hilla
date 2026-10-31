@@ -15,7 +15,6 @@
  */
 package com.vaadin.hilla.parser.models;
 
-import static com.vaadin.hilla.parser.test.helpers.ClassMemberUtils.getClassInfo;
 import static com.vaadin.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredField;
 import static com.vaadin.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredFields;
 import static com.vaadin.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
@@ -46,33 +45,26 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.github.classgraph.ClassRefTypeSignature;
-import io.github.classgraph.FieldInfo;
-import io.github.classgraph.ScanResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import com.vaadin.hilla.parser.test.helpers.Source;
-import com.vaadin.hilla.parser.test.helpers.SourceExtension;
 import com.vaadin.hilla.parser.test.helpers.SpecializationChecker;
 import com.vaadin.hilla.parser.utils.Streams;
 
-@ExtendWith(SourceExtension.class)
 public class ClassRefSignatureModelTests {
     private Context.Default ctx;
     private Context.Matches matches;
 
     @BeforeEach
-    public void setUp(@Source ScanResult source) {
-        ctx = new Context.Default(source);
+    public void setUp() {
+        ctx = new Context.Default();
         matches = new Context.Matches();
     }
 
@@ -87,11 +79,7 @@ public class ClassRefSignatureModelTests {
                 .getCompleteReflectionOrigin(fieldName);
         var completeParametrized = (AnnotatedParameterizedType) completeParametrizedHidden;
 
-        var sourceParametrized = ctx.getSourceOrigin(fieldName);
-
         var classParametrized = Sample.StaticParametrizedDependency.Sub.class;
-        var classInfoParametrized = getClassInfo(classParametrized,
-                ctx.getSource());
 
         assertTrue(
                 ClassRefSignatureModel.is(bareParametrized, classParametrized));
@@ -99,17 +87,6 @@ public class ClassRefSignatureModelTests {
                 classParametrized));
         assertTrue(ClassRefSignatureModel.is(completeParametrizedHidden,
                 classParametrized));
-        assertTrue(ClassRefSignatureModel.is(sourceParametrized,
-                classParametrized));
-
-        assertTrue(ClassRefSignatureModel.is(bareParametrized,
-                classInfoParametrized));
-        assertTrue(ClassRefSignatureModel.is(completeParametrized,
-                classInfoParametrized));
-        assertTrue(ClassRefSignatureModel.is(completeParametrizedHidden,
-                classInfoParametrized));
-        assertTrue(ClassRefSignatureModel.is(sourceParametrized,
-                classInfoParametrized));
     }
 
     @DisplayName("It should compare simple class reference signature with its class info")
@@ -119,19 +96,11 @@ public class ClassRefSignatureModelTests {
 
         var bareSimple = ctx.getBareReflectionOrigin(fieldName);
         var completeSimple = ctx.getCompleteReflectionOrigin(fieldName);
-        var sourceSimple = ctx.getSourceOrigin(fieldName);
 
         var classSimple = Sample.StaticDependency.Sub.class;
-        var classInfoSimple = ctx.getSource()
-                .getClassInfo(classSimple.getName());
 
         assertTrue(ClassRefSignatureModel.is(bareSimple, classSimple));
         assertTrue(ClassRefSignatureModel.is(completeSimple, classSimple));
-        assertTrue(ClassRefSignatureModel.is(sourceSimple, classSimple));
-
-        assertTrue(ClassRefSignatureModel.is(bareSimple, classInfoSimple));
-        assertTrue(ClassRefSignatureModel.is(completeSimple, classInfoSimple));
-        assertTrue(ClassRefSignatureModel.is(sourceSimple, classInfoSimple));
     }
 
     @DisplayName("It should get class info")
@@ -145,8 +114,7 @@ public class ClassRefSignatureModelTests {
         assertEquals(cls, model.getClassInfo());
 
         switch (kind) {
-        case REFLECTION_COMPLETE:
-        case SOURCE: {
+        case REFLECTION_COMPLETE: {
             var owner = ClassInfoModel
                     .of(Sample.DynamicParametrizedDependency.class);
             var grandOwner = ClassInfoModel.of(Sample.class);
@@ -174,9 +142,7 @@ public class ClassRefSignatureModelTests {
 
     @DisplayName("It should get type arguments as a stream")
     @Test
-    public void should_GetTypeArgumentsAsStream(@Source ScanResult source)
-            throws NoSuchFieldException {
-        var ctx = new Context.Default(source);
+    public void should_GetTypeArgumentsAsStream() throws NoSuchFieldException {
         var model = ClassRefSignatureModel
                 .of(ctx.getCompleteReflectionOrigin(ModelProvider.fieldName));
         var expected = List.of(TypeArgumentModel
@@ -192,8 +158,7 @@ public class ClassRefSignatureModelTests {
     public void should_GetTypeOwner(ClassRefSignatureModel model,
             ModelKind kind) {
         switch (kind) {
-        case REFLECTION_COMPLETE:
-        case SOURCE: {
+        case REFLECTION_COMPLETE: {
             assertEquals(Sample.DynamicParametrizedDependency.class.getName(),
                     model.getOwner().map(ClassRefSignatureModel::getName)
                             .orElse(null));
@@ -219,35 +184,30 @@ public class ClassRefSignatureModelTests {
         }
     }
 
-    @DisplayName("It should have the same hashCode for source and reflection models")
+    @DisplayName("It should have the same hashCode for models of the same origin")
     @ParameterizedTest(name = ModelProvider.Equality.testNamePattern)
     @ArgumentsSource(ModelProvider.Equality.class)
-    public void should_HaveSameHashCodeForSourceAndReflectionModels(
-            AnnotatedType reflectionOrigin, ClassRefTypeSignature sourceOrigin,
-            String testName) {
-        var reflectionModel = ClassRefSignatureModel.of(reflectionOrigin);
-        var sourceModel = ClassRefSignatureModel.of(sourceOrigin);
+    public void should_HaveSameHashCodeForModelsOfSameOrigin(
+            AnnotatedType origin, String testName) {
+        var model = ClassRefSignatureModel.of(origin);
+        var otherModel = ClassRefSignatureModel.of(origin);
 
-        assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
+        assertEquals(model.hashCode(), otherModel.hashCode());
     }
 
-    @DisplayName("It should have source and reflection models equal")
+    @DisplayName("It should have models of the same origin equal")
     @ParameterizedTest(name = ModelProvider.Equality.testNamePattern)
     @ArgumentsSource(ModelProvider.Equality.class)
-    public void should_HaveSourceAndReflectionModelsEqual(
-            AnnotatedType reflectionOrigin, ClassRefTypeSignature sourceOrigin,
+    public void should_HaveModelsOfSameOriginEqual(AnnotatedType origin,
             String testName) {
-        var reflectionModel = ClassRefSignatureModel.of(reflectionOrigin);
-        var sourceModel = ClassRefSignatureModel.of(sourceOrigin);
+        var model = ClassRefSignatureModel.of(origin);
+        var otherModel = ClassRefSignatureModel.of(origin);
 
-        assertEquals(reflectionModel, reflectionModel);
-        assertEquals(reflectionModel, sourceModel);
+        assertEquals(model, model);
+        assertEquals(model, otherModel);
+        assertEquals(otherModel, model);
 
-        assertEquals(sourceModel, sourceModel);
-        assertEquals(sourceModel, reflectionModel);
-
-        assertNotEquals(sourceModel, new Object());
-        assertNotEquals(reflectionModel, new Object());
+        assertNotEquals(model, new Object());
     }
 
     @DisplayName("It should provide correct origin")
@@ -260,17 +220,10 @@ public class ClassRefSignatureModelTests {
             assertEquals(
                     ctx.getCompleteReflectionOrigin(ModelProvider.fieldName),
                     model.get());
-            assertTrue(model.isReflection());
             break;
         case REFLECTION_BARE:
             assertEquals(ctx.getBareReflectionOrigin(ModelProvider.fieldName),
                     model.get());
-            assertTrue(model.isReflection());
-            break;
-        case SOURCE:
-            assertEquals(ctx.getSourceOrigin(ModelProvider.fieldName),
-                    model.get());
-            assertTrue(model.isSource());
             break;
         }
     }
@@ -291,8 +244,7 @@ public class ClassRefSignatureModelTests {
             ClassRefSignatureModel model, ModelKind kind)
             throws NoSuchFieldException {
         switch (kind) {
-        case REFLECTION_COMPLETE:
-        case SOURCE: {
+        case REFLECTION_COMPLETE: {
             var intTypeArgument = TypeArgumentModel
                     .of(matches.getTypeArgument("intTypeArgument"));
             var stringTypeArgument = TypeArgumentModel
@@ -313,7 +265,6 @@ public class ClassRefSignatureModelTests {
     }
 
     enum ModelKind {
-        SOURCE("SOURCE"),
         REFLECTION_COMPLETE("REFLECTION (complete)"),
         REFLECTION_BARE("REFLECTION (bare)");
 
@@ -335,19 +286,16 @@ public class ClassRefSignatureModelTests {
 
         @Override
         public Stream<Arguments> provideArguments(ExtensionContext context) {
-            var ctx = new Context.Default(context);
+            var ctx = new Context.Default();
 
             var complete = ctx.getCompleteReflectionOrigin(fieldName);
             var bare = ctx.getBareReflectionOrigin(fieldName);
-            var source = ctx.getSourceOrigin(fieldName);
 
             return Stream.of(
                     Arguments.of(ClassRefSignatureModel.of(complete),
                             ModelKind.REFLECTION_COMPLETE),
                     Arguments.of(ClassRefSignatureModel.of(bare),
-                            ModelKind.REFLECTION_BARE),
-                    Arguments.of(ClassRefSignatureModel.of(source),
-                            ModelKind.SOURCE));
+                            ModelKind.REFLECTION_BARE));
         }
 
         static final class Checker
@@ -359,19 +307,15 @@ public class ClassRefSignatureModelTests {
         }
 
         static final class Equality implements ArgumentsProvider {
-            public static final String testNamePattern = "BOTH [{2}]";
+            public static final String testNamePattern = "{1}";
 
             @Override
             public Stream<Arguments> provideArguments(
                     ExtensionContext context) {
-                var ctx = new Context.Default(context);
+                var ctx = new Context.Default();
 
-                return ctx.getNames().stream().map(name -> {
-                    var complete = ctx.getCompleteReflectionOrigin(name);
-                    var source = ctx.getSourceOrigin(name);
-
-                    return Arguments.of(complete, source, name);
-                });
+                return ctx.getNames().stream().map(name -> Arguments
+                        .of(ctx.getCompleteReflectionOrigin(name), name));
             }
         }
 
@@ -424,7 +368,7 @@ public class ClassRefSignatureModelTests {
             @Override
             public Stream<Arguments> provideArguments(
                     ExtensionContext context) {
-                var ctx = new Context.Characteristics(context);
+                var ctx = new Context.Characteristics();
 
                 var complete = ctx.getCompleteReflectionOrigins().entrySet()
                         .stream().map(entry -> {
@@ -445,14 +389,7 @@ public class ClassRefSignatureModelTests {
                                 specializations.get(entry.getValue().getName()),
                                 ModelKind.REFLECTION_BARE, entry.getKey()));
 
-                var source = ctx.getSourceOrigins().entrySet().stream()
-                        .map(entry -> Arguments.of(
-                                SignatureModel.of(entry.getValue()),
-                                specializations.get(entry.getValue()
-                                        .getFullyQualifiedClassName()),
-                                ModelKind.SOURCE, entry.getKey()));
-
-                return Streams.combine(complete, bare, source);
+                return Streams.combine(complete, bare);
             }
 
         }
@@ -467,8 +404,7 @@ public class ClassRefSignatureModelTests {
         public void should_GetTypeAnnotation(ClassRefSignatureModel model,
                 ModelKind kind) throws NoSuchFieldException {
             switch (kind) {
-            case REFLECTION_COMPLETE:
-            case SOURCE: {
+            case REFLECTION_COMPLETE: {
                 var fooAnnotation = AnnotationInfoModel
                         .of(matches.getAnnotation("fooAnnotation"));
                 var barAnnotation = AnnotationInfoModel
@@ -506,15 +442,8 @@ public class ClassRefSignatureModelTests {
     abstract static class Context {
         private final Map<String, Class<?>> bareReflectionOrigins;
         private final Map<String, AnnotatedType> completeReflectionOrigins;
-        private final ScanResult source;
-        private final Map<String, ClassRefTypeSignature> sourceOrigins;
 
-        Context(ScanResult source, ReflectionData data) {
-            this.source = source;
-            this.sourceOrigins = getDeclaredFields(data.getTarget(), source)
-                    .collect(Collectors.toMap(FieldInfo::getName,
-                            field -> (ClassRefTypeSignature) field
-                                    .getTypeSignatureOrTypeDescriptor()));
+        Context(ReflectionData data) {
             this.bareReflectionOrigins = data.getBareReflectionOrigins();
             this.completeReflectionOrigins = data
                     .getCompleteReflectionOrigins();
@@ -538,18 +467,6 @@ public class ClassRefSignatureModelTests {
 
         public Set<String> getNames() {
             return bareReflectionOrigins.keySet();
-        }
-
-        public ScanResult getSource() {
-            return source;
-        }
-
-        public ClassRefTypeSignature getSourceOrigin(String name) {
-            return sourceOrigins.get(name);
-        }
-
-        public Map<String, ClassRefTypeSignature> getSourceOrigins() {
-            return sourceOrigins;
         }
 
         static final class Matches {
@@ -585,10 +502,8 @@ public class ClassRefSignatureModelTests {
         static final class ReflectionData {
             private final Map<String, Class<?>> bareReflectionOrigins;
             private final Map<String, AnnotatedType> completeReflectionOrigins;
-            private final Class<?> target;
 
             ReflectionData(Class<?> target) {
-                this.target = target;
                 this.bareReflectionOrigins = getDeclaredFields(target).collect(
                         Collectors.toMap(Field::getName, Field::getType));
                 this.completeReflectionOrigins = getDeclaredFields(target)
@@ -603,22 +518,14 @@ public class ClassRefSignatureModelTests {
             public Map<String, AnnotatedType> getCompleteReflectionOrigins() {
                 return completeReflectionOrigins;
             }
-
-            public Class<?> getTarget() {
-                return target;
-            }
         }
 
         static class Characteristics extends Context {
             private static final ReflectionData data = new ReflectionData(
                     Sample.Characteristics.class);
 
-            Characteristics(ScanResult source) {
-                super(source, data);
-            }
-
-            Characteristics(ExtensionContext context) {
-                this(SourceExtension.getSource(context));
+            Characteristics() {
+                super(data);
             }
         }
 
@@ -626,12 +533,8 @@ public class ClassRefSignatureModelTests {
             private static final ReflectionData data = new ReflectionData(
                     Sample.class);
 
-            Default(ScanResult source) {
-                super(source, data);
-            }
-
-            Default(ExtensionContext context) {
-                this(SourceExtension.getSource(context));
+            Default() {
+                super(data);
             }
         }
     }

@@ -149,7 +149,6 @@ public class JacksonPropertyModelTests {
     public void should_ProvideCorrectOrigin(JacksonPropertyModel model,
             String name) {
         assertEquals(ctx.getReflectionOrigin(name), model.get());
-        assertTrue(model.isReflection());
     }
 
     @DisplayName("It should provide correct property info")
