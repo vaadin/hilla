@@ -30,7 +30,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.jspecify.annotations.NonNull;
 import tools.jackson.databind.SerializationConfig;
-import tools.jackson.databind.introspect.AnnotatedMember;
 import tools.jackson.databind.introspect.BeanPropertyDefinition;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
@@ -43,6 +42,7 @@ import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.EntityFacts;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
+import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 import com.vaadin.hilla.parser.utils.Signatures;
 
@@ -288,23 +288,10 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                 String property, SerializationConfig config) {
             return propertiesOf(cls, config)
                     .filter(definition -> definition.getName().equals(property))
-                    .filter(definition -> cls
-                            .equals(declaringClass(definition)))
+                    .filter(definition -> cls.equals(PropertyNode.of(definition)
+                            .getPrimaryMember().getDeclaringClass()))
                     .<Class<?>> map(BeanPropertyDefinition::getRawPrimaryType)
                     .findFirst();
-        }
-
-        /**
-         * The class declaring the member Jackson reads the property through:
-         * its getter, then its setter, then its field.
-         */
-        private static Class<?> declaringClass(
-                BeanPropertyDefinition definition) {
-            AnnotatedMember member = definition.hasGetter()
-                    ? definition.getGetter()
-                    : definition.hasSetter() ? definition.getSetter()
-                            : definition.getField();
-            return member == null ? null : member.getDeclaringClass();
         }
 
         private static Stream<BeanPropertyDefinition> propertiesOf(Class<?> cls,
