@@ -36,6 +36,11 @@ import tools.jackson.databind.json.JsonMapper;
  * back, for example with {@code MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS},
  * since a form sends them to the server as they are.
  * <p>
+ * The generator only uses a factory it is given by class name, through
+ * {@code BackbonePluginConfiguration.setObjectMapperFactoryClassName}. A
+ * factory supplied only as the {@code endpointMapperFactory} bean changes what
+ * the server sends but not what is generated, so the two can then disagree.
+ * <p>
  * For example, if you want to have the behavior of the old engine, you should
  * create the following factory:
  *
