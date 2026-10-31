@@ -1,14 +1,14 @@
-import {
-  _getPropertyModel,
-  ArrayModel,
+import m, {
+  type ArrayModel,
   BooleanModel,
-  makeObjectEmptyValueCreator,
+  type Model,
+  NotEmpty,
   NumberModel,
-  ObjectModel,
-  Required,
+  type ObjectModel,
+  type OptionalModel,
   Size,
   StringModel,
-} from '@vaadin/hilla-lit-form';
+} from '@vaadin/hilla-models';
 
 export interface FormUser {
   name: string;
@@ -16,83 +16,48 @@ export interface FormUser {
   passwordHint?: string;
 }
 
-export interface User extends FormUser {
-  id: number;
-}
-
-export class FormUserModel<T extends FormUser = FormUser> extends ObjectModel<T> {
-  static override createEmptyValue: () => FormUser = makeObjectEmptyValueCreator(FormUserModel);
-
-  get name(): StringModel {
-    return this[_getPropertyModel](
-      'name',
-      (parent, key) => new StringModel(parent, key, false, { validators: [new Required(), new Size({ max: 10 })] }),
-    );
+export const FormUserModel: ObjectModel<
+  FormUser,
+  {
+    readonly name: Model<string>;
+    readonly password: Model<string>;
+    readonly passwordHint: OptionalModel<Model<string>>;
   }
-
-  get password(): StringModel {
-    return this[_getPropertyModel](
-      'password',
-      (parent, key) => new StringModel(parent, key, false, { validators: [new Required(), new Size({ min: 6 })] }),
-    );
-  }
-
-  get passwordHint(): StringModel {
-    return this[_getPropertyModel](
-      'passwordHint',
-      (parent, key) =>
-        new StringModel(parent, key, true /* should be optional */, { validators: [new Size({ max: 10 })] }),
-    );
-  }
-}
-
-export class UserModel<T extends User = User> extends FormUserModel<T> {
-  static override createEmptyValue: () => User = makeObjectEmptyValueCreator(UserModel);
-
-  get id(): NumberModel {
-    return this[_getPropertyModel]('id', (parent, key) => new NumberModel(parent, key, false));
-  }
-}
+> = m
+  .object<FormUser>('FormUser')
+  .property('name', m.constrained(StringModel, NotEmpty(), Size({ max: 10 })))
+  .property('password', m.constrained(StringModel, NotEmpty(), Size({ min: 6 })))
+  .property('passwordHint', m.constrained(m.optional(StringModel), Size({ max: 10 })))
+  .build();
+export type FormUserModel = typeof FormUserModel;
 
 export interface Login {
-  user: User;
-  rememberMe: boolean;
+  user: FormUser;
+  rememberMe?: boolean;
 }
 
-export class LoginModel<T extends Login = Login> extends ObjectModel<T> {
-  static override createEmptyValue: () => Login = makeObjectEmptyValueCreator(LoginModel);
-
-  get user(): FormUserModel {
-    return this[_getPropertyModel]('user', (parent, key) => new FormUserModel(parent, key, false));
-  }
-
-  get rememberMe(): BooleanModel {
-    return this[_getPropertyModel]('rememberMe', (parent, key) => new BooleanModel(parent, key, true));
-  }
-}
+export const LoginModel: ObjectModel<
+  Login,
+  { readonly user: FormUserModel; readonly rememberMe: OptionalModel<BooleanModel> }
+> = m.object<Login>('Login').property('user', FormUserModel).property('rememberMe', m.optional(BooleanModel)).build();
+export type LoginModel = typeof LoginModel;
 
 export interface Entity {
   projectId?: number;
   contractId?: number;
 }
 
-export class EntityModel<T extends Entity> extends ObjectModel<T> {
-  static override createEmptyValue: () => Entity = makeObjectEmptyValueCreator(EntityModel);
+const longModel: NumberModel = m.meta(NumberModel, { jvmType: 'java.lang.Long' });
 
-  get projectId(): NumberModel {
-    return this[_getPropertyModel](
-      'projectId',
-      (parent, key) => new NumberModel(parent, key, true, { meta: { javaType: 'java.lang.Long' } }),
-    );
-  }
-
-  get contractId(): NumberModel {
-    return this[_getPropertyModel](
-      'contractId',
-      (parent, key) => new NumberModel(parent, key, true, { meta: { javaType: 'java.lang.Long' } }),
-    );
-  }
-}
+export const EntityModel: ObjectModel<
+  Entity,
+  { readonly projectId: OptionalModel<NumberModel>; readonly contractId: OptionalModel<NumberModel> }
+> = m
+  .object<Entity>('Entity')
+  .property('projectId', m.optional(longModel))
+  .property('contractId', m.optional(longModel))
+  .build();
+export type EntityModel = typeof EntityModel;
 
 export interface Project {
   id: number;
@@ -118,93 +83,58 @@ export interface Team {
   players: Player[];
 }
 
-export class PlayerModel<T extends Player = Player> extends ObjectModel<T> {
-  static override createEmptyValue: () => Player = makeObjectEmptyValueCreator(PlayerModel);
+const intModel: NumberModel = m.meta(NumberModel, { jvmType: 'int' });
+const stringModel: StringModel = m.meta(StringModel, { jvmType: 'java.lang.String' });
 
-  get id(): NumberModel {
-    return this[_getPropertyModel](
-      'id',
-      (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: 'int' } }),
-    );
+export const PlayerModel: ObjectModel<
+  Player,
+  {
+    readonly id: NumberModel;
+    readonly firstName: StringModel;
+    readonly lastName: StringModel;
+    readonly age: NumberModel;
   }
+> = m
+  .object<Player>('Player')
+  .property('id', intModel)
+  .property('firstName', stringModel)
+  .property('lastName', stringModel)
+  .property('age', intModel)
+  .build();
+export type PlayerModel = typeof PlayerModel;
 
-  get firstName(): StringModel {
-    return this[_getPropertyModel](
-      'firstName',
-      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.lang.String' } }),
-    );
-  }
-
-  get lastName(): StringModel {
-    return this[_getPropertyModel](
-      'lastName',
-      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.lang.String' } }),
-    );
-  }
-
-  get age(): NumberModel {
-    return this[_getPropertyModel](
-      'age',
-      (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: 'int' } }),
-    );
-  }
-}
-
-export class TeamModel<T extends Team = Team> extends ObjectModel<T> {
-  static override createEmptyValue: () => Team = makeObjectEmptyValueCreator(TeamModel);
-
-  get id(): NumberModel {
-    return this[_getPropertyModel](
-      'id',
-      (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: 'int' } }),
-    );
-  }
-
-  get name(): StringModel {
-    return this[_getPropertyModel](
-      'name',
-      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.lang.String' } }),
-    );
-  }
-
-  get players(): ArrayModel<PlayerModel> {
-    return this[_getPropertyModel](
-      'players',
-      (parent, key) =>
-        new ArrayModel(parent, key, false, (p, k) => new PlayerModel(p, k, false), {
-          meta: { javaType: 'java.util.List' },
-        }),
-    );
-  }
-}
+export const TeamModel: ObjectModel<
+  Team,
+  { readonly id: NumberModel; readonly name: StringModel; readonly players: ArrayModel<PlayerModel> }
+> = m
+  .object<Team>('Team')
+  .property('id', intModel)
+  .property('name', stringModel)
+  .property('players', m.meta(m.array(PlayerModel), { jvmType: 'java.util.List' }))
+  .build();
+export type TeamModel = typeof TeamModel;
 
 export interface StreetAddress {
   number?: string;
   name?: string;
 }
+
 export interface PostalAddress {
   streetAddress?: StreetAddress;
 }
-export class StreetAddressModel<T extends StreetAddress = StreetAddress> extends ObjectModel<T> {
-  static override createEmptyValue: () => StreetAddress = makeObjectEmptyValueCreator(StreetAddressModel);
 
-  get number(): StringModel {
-    return this[_getPropertyModel](
-      'number',
-      (parent, key) => new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }),
-    );
-  }
+export const StreetAddressModel: ObjectModel<
+  StreetAddress,
+  { readonly number: OptionalModel<StringModel>; readonly name: OptionalModel<StringModel> }
+> = m
+  .object<StreetAddress>('StreetAddress')
+  .property('number', m.optional(stringModel))
+  .property('name', m.optional(stringModel))
+  .build();
+export type StreetAddressModel = typeof StreetAddressModel;
 
-  get name(): StringModel {
-    return this[_getPropertyModel](
-      'name',
-      (parent, key) => new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }),
-    );
-  }
-}
-export class PostalAddressModel<T extends PostalAddress = PostalAddress> extends ObjectModel<T> {
-  static override createEmptyValue: () => PostalAddress = makeObjectEmptyValueCreator(PostalAddressModel);
-  get streetAddress(): StreetAddressModel {
-    return this[_getPropertyModel]('streetAddress', (parent, key) => new StreetAddressModel(parent, key, true));
-  }
-}
+export const PostalAddressModel: ObjectModel<
+  PostalAddress,
+  { readonly streetAddress: OptionalModel<StreetAddressModel> }
+> = m.object<PostalAddress>('PostalAddress').property('streetAddress', m.optional(StreetAddressModel)).build();
+export type PostalAddressModel = typeof PostalAddressModel;

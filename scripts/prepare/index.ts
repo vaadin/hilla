@@ -106,7 +106,7 @@ await Promise.all(
 // The root aliases "typescript" to "@typescript/typescript6" for the tooling
 // that asks for that name, so that the native TypeScript 7, installed as
 // "@typescript/native", owns the "tsc" binary. The test projects model real
-// applications and follow Flow's plain "typescript" instead, which is safe
+// applications and follow Flow's "typescript", whatever it is, which is safe
 // because the packages depend on "@typescript/typescript6" by name.
 const NOT_PROPAGATED = new Set(['typescript']);
 

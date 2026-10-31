@@ -157,9 +157,6 @@
                             <vaadin.devmode.vite.options>
                                 ${vaadin.devmode.vite.options}
                             </vaadin.devmode.vite.options>
-                            <vaadin.experimental.react19>
-                                ${vaadin.experimental.react19}
-                            </vaadin.experimental.react19>
                             <vaadin.reuseDevServer>
                                 ${vaadin.reuseDevServer}
                             </vaadin.reuseDevServer>
@@ -174,9 +171,6 @@
                             <vaadin.devmode.vite.options>
                                 ${vaadin.devmode.vite.options}
                             </vaadin.devmode.vite.options>
-                            <vaadin.experimental.react19>
-                                ${vaadin.experimental.react19}
-                            </vaadin.experimental.react19>
                         </systemPropertyVariables>
                     </configuration>
                 </plugin>
@@ -203,11 +197,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.3.1</version>
-            </plugin>
-
-            <plugin>
-                <groupId>org.eclipse.jetty.ee10</groupId>
-                <artifactId>jetty-ee10-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
@@ -294,19 +283,6 @@ TODO: Re-enable when postinstall script to copy Vite isn't needed
                 <module>react-signals</module>
                 <module>react-i18n</module>
                 <module>security-urlmapping</module>
-            </modules>
-        </profile>
-
-        <profile>
-            <id>react-18</id>
-            <modules>
-<!--
-TODO: Re-enable when postinstall script to copy Vite isn't needed
-                <module>no-endpoints</module>
--->
-                <module>react-grid-test</module>
-                <module>react-i18n</module>
-                <module>react-signals</module>
             </modules>
         </profile>
 

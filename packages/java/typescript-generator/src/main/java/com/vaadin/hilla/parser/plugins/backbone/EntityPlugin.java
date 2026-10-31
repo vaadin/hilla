@@ -21,9 +21,9 @@ import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodeDependencies;
-import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
+import com.vaadin.hilla.parser.utils.Signatures;
 
 public final class EntityPlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
@@ -35,17 +35,22 @@ public final class EntityPlugin
         }
 
         var typedNode = (TypedNode) nodeDependencies.getNode();
-        if (!(typedNode.getType() instanceof ClassRefSignatureModel)) {
+        var ref = typedNode.getType();
+        if (!Signatures.isClassRef(ref)) {
             return nodeDependencies;
         }
 
-        var ref = (ClassRefSignatureModel) typedNode.getType();
-        if (ref.isJDKClass() || ref.isDate() || ref.isIterable()) {
+        // A class extending a value the browser has, such as a Date or a
+        // BigDecimal, is sent as that value and so has no declaration of its
+        // own
+        if (Signatures.isJDKClass(ref) || Signatures.isDate(ref)
+                || Signatures.isIterable(ref) || Signatures.isBigDecimal(ref)
+                || Signatures.isBigInteger(ref)) {
             return nodeDependencies;
         }
 
-        return nodeDependencies.appendRelatedNodes(
-                Stream.of(EntityNode.of(ref.getClassInfo())));
+        return nodeDependencies.appendRelatedNodes(Stream
+                .of(EntityNode.of(Signatures.getClass(ref).orElseThrow())));
     }
 
 }

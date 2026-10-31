@@ -53,17 +53,7 @@ import m, {
 } from '@vaadin/hilla-models';
 import type { Constructor, EmptyObject } from 'type-fest';
 import type { BinderRoot } from './BinderRoot.js';
-import {
-  _createEmptyItemValue,
-  _validators,
-  AbstractModel,
-  type ArrayItemModel,
-  ArrayModel as BinderArrayModel,
-  getObjectModelOwnAndParentGetters,
-  ObjectModel as BinderObjectModel,
-  type Value,
-} from './Models.js';
-import type { ProvisionalModel } from './ProvisionalModel.js';
+import type { ArrayItemModel, Value } from './Models.js';
 import type { ClassStaticProperties } from './types.js';
 import type { Validator, ValueError } from './Validation.js';
 import * as Validators from './Validators.js';
@@ -74,7 +64,7 @@ export const _update = Symbol('update');
 export const _setErrorsWithDescendants = Symbol('setErrorsWithDescendants');
 export const _clearValidation = Symbol('clearValidation');
 
-const nodes = new WeakMap<ProvisionalModel, BinderNode>();
+const nodes = new WeakMap<Model, BinderNode>();
 
 /**
  * Given the model instance attached to the BinderNode, returns the corresponding BinderNode.
@@ -82,7 +72,7 @@ const nodes = new WeakMap<ProvisionalModel, BinderNode>();
  * @param model - The model instance
  * @returns The corresponding BinderNode
  */
-export function getBinderNode<M extends ProvisionalModel>(model: M): BinderNode<M> {
+export function getBinderNode<M extends Model>(model: M): BinderNode<M> {
   let node = nodes.get(model);
 
   if (!node) {
@@ -95,6 +85,9 @@ export function getBinderNode<M extends ProvisionalModel>(model: M): BinderNode<
 
 /**
  * Returns the corresponding validator for the given constraint.
+ *
+ * The validator is looked up by name: the constraint's name must match the
+ * name of a validator class exported from `Validators.ts`.
  *
  * @param constraint - The constraint to get the validator for
  * @returns The corresponding validator
@@ -145,12 +138,7 @@ function getConstraintValidator<T>(constraint: Constraint<T>): Validator<T> {
  * @param model - The model to get the validators for
  * @returns The array of validators
  */
-function getModelValidators<M extends ProvisionalModel>(model: M): ReadonlyArray<Validator<Value<M>>> {
-  if (model instanceof AbstractModel) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return model[_validators];
-  }
-
+function getModelValidators<M extends Model>(model: M): ReadonlyArray<Validator<Value<M>>> {
   const validators: Array<Validator<Value<M>>> =
     model instanceof NumberModel ? [new Validators.IsNumber(model[$optional]) as Validator<Value<M>>] : [];
 
@@ -162,31 +150,25 @@ function getModelValidators<M extends ProvisionalModel>(model: M): ReadonlyArray
   return validators;
 }
 
-function createEmptyValue<M extends ProvisionalModel>(model: M) {
-  if (model instanceof AbstractModel) {
-    return model.constructor.createEmptyValue();
-  }
-
-  return model[$defaultValue];
+function createEmptyValue<M extends Model>(model: M): Value<M> {
+  return model[$defaultValue] as Value<M>;
 }
 
-function createEmptyArrayItemValue<M extends ArrayModel | BinderArrayModel>(model: M): ArrayItemModel<M> {
-  return (
-    model instanceof BinderArrayModel ? model[_createEmptyItemValue]() : model[$itemModel][$defaultValue]
-  ) as ArrayItemModel<M>;
+function createEmptyArrayItemValue<M extends ArrayModel>(model: M): Value<ArrayItemModel<M>> {
+  return model[$itemModel][$defaultValue] as Value<ArrayItemModel<M>>;
 }
 
 function getErrorPropertyName(valueError: ValueError): string {
   return typeof valueError.property === 'string' ? valueError.property : getBinderNode(valueError.property).name;
 }
 
-function updateObjectOrArrayKey<M extends ProvisionalModel>(
+function updateObjectOrArrayKey<M extends Model>(
   model: M,
   value: Value<M>,
   key: keyof any,
   keyValue: unknown,
 ): Value<M> {
-  if (model instanceof BinderObjectModel || model instanceof ObjectModel) {
+  if (model instanceof ObjectModel) {
     // Value contained in object - replace object in parent
     return {
       ...(value as Record<never, never> & Value<M>),
@@ -198,7 +180,7 @@ function updateObjectOrArrayKey<M extends ProvisionalModel>(
     throw new TypeError('Unexpected undefined value');
   }
 
-  if (model instanceof BinderArrayModel || model instanceof ArrayModel) {
+  if (model instanceof ArrayModel) {
     // Value contained in array - replace array in parent
     const array = (value as unknown[]).slice();
     array[key as number] = keyValue;
@@ -222,9 +204,9 @@ class NotArrayItemModelError extends Error {
   }
 }
 
-declare class ArrayItemBinderNode<M extends ProvisionalModel> extends BinderNode<M> {
+declare class ArrayItemBinderNode<M extends Model> extends BinderNode<M> {
   // @ts-expect-error: re-defining the parent getter.
-  declare readonly parent: BinderNode<BinderArrayModel<M>>;
+  declare readonly parent: BinderNode<ArrayModel<M>>;
 }
 
 const defaultArrayItemCache = new WeakMap<BinderNode, unknown>();
@@ -237,7 +219,7 @@ const defaultArrayItemCache = new WeakMap<BinderNode, unknown>();
  * and array models have child nodes of field and array item model
  * instances.
  */
-export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends EventTarget {
+export class BinderNode<M extends Model = Model> extends EventTarget {
   declare readonly ['constructor']: ClassStaticProperties<typeof BinderNode<M>>;
   readonly model: M;
   /**
@@ -293,7 +275,7 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
 
       const value = createEmptyValue(this.model);
       defaultArrayItemCache.set(this.parent, value);
-      return value as Value<M>;
+      return value;
     }
 
     return parentDefaultValue[key];
@@ -326,10 +308,10 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
    * attribute on the field components.
    */
   get name(): string {
-    let { model }: { model: ProvisionalModel } = this;
+    let { model }: { model: Model } = this;
     let name = '';
 
-    while (model[$owner] instanceof AbstractModel || model[$owner] instanceof Model) {
+    while (model[$owner] instanceof Model) {
       name = `${String(model[$key])}${name ? `.${name}` : ''}`;
       model = model[$owner];
     }
@@ -350,9 +332,7 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
    */
   get parent(): BinderNode | undefined {
     const modelParent = this.model[$owner];
-    return modelParent instanceof AbstractModel || modelParent instanceof Model
-      ? getBinderNode(modelParent)
-      : undefined;
+    return modelParent instanceof Model ? getBinderNode(modelParent) : undefined;
   }
 
   /**
@@ -450,7 +430,7 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
    *
    * @param model - The nested model instance
    */
-  for<N extends ProvisionalModel>(model: N): BinderNode<N> {
+  for<N extends Model>(model: N): BinderNode<N> {
     const binderNode = getBinderNode(model);
     if (binderNode.binder !== this.binder) {
       throw new Error('Unknown binder');
@@ -549,25 +529,7 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
       return;
     }
 
-    if (this.model instanceof BinderObjectModel) {
-      for (const [, getter] of getObjectModelOwnAndParentGetters(this.model)) {
-        const childModel = getter.call(this.model);
-        // We need to skip all non-initialised optional fields here in order
-        // to prevent infinite recursion for circular references in the model.
-        // Here we rely on presence of keys in `defaultValue` to detect all
-        // initialised fields. The keys in `defaultValue` are defined for all
-        // non-optional fields plus those optional fields whose values were
-        // set from initial `binder.read()` or `binder.clear()` or by using a
-        // binder node (e.g., form binding) for a nested field.
-        if (childModel[$key] in (this.defaultValue as Record<never, never>)) {
-          yield getBinderNode(childModel);
-        }
-      }
-    } else if (this.model instanceof BinderArrayModel) {
-      for (const childBinderNode of this.model) {
-        yield childBinderNode;
-      }
-    } else if (this.model instanceof ObjectModel) {
+    if (this.model instanceof ObjectModel) {
       // eslint-disable-next-line @typescript-eslint/no-for-in-array,no-restricted-syntax
       for (const propName in this.model) {
         // We need to skip all non-initialised optional fields here in order
@@ -588,12 +550,12 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
     }
   }
 
-  #isArray(): this is BinderNode<ArrayModel | BinderArrayModel> {
-    return this.model instanceof ArrayModel || this.model instanceof BinderArrayModel;
+  #isArray(): this is BinderNode<ArrayModel> {
+    return this.model instanceof ArrayModel;
   }
 
   #isArrayItem(): this is ArrayItemBinderNode<M> {
-    return this.model[$owner] instanceof BinderArrayModel || this.model[$owner] instanceof ArrayModel;
+    return this.model[$owner] instanceof ArrayModel;
   }
 
   *#requestValidationOfDescendants(): Generator<Promise<readonly ValueError[]>, void, void> {
@@ -637,22 +599,18 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
     }
 
     const key = this.model[$key];
-    let value: Value<M> | undefined = this.parent
-      ? (this.parent.value as Record<typeof key, Value<M>>)[this.model[$key]]
+    const value: Value<M> | undefined = this.parent
+      ? (this.parent.value as Record<typeof key, Value<M>>)[key]
       : undefined;
 
     const defaultValue: Value<M> | undefined = this.parent
-      ? (this.parent.defaultValue as Readonly<Record<typeof key, Value<M>>>)[this.model[$key]]
+      ? (this.parent.defaultValue as Readonly<Record<typeof key, Value<M>>>)[key]
       : undefined;
 
-    if (value === undefined) {
-      // Initialize value if this is the root level node, or it is enforced
-      if (forceInitialize || !this.parent) {
-        value = createEmptyValue(this.model) as Value<M>;
-        this.#setValueState(value, defaultValue === undefined ? value : defaultValue);
-      } else if (this.parent.model instanceof BinderObjectModel && !(key in Object(this.parent.value ?? {}))) {
-        this.#setValueState(undefined, defaultValue === undefined ? value : defaultValue);
-      }
+    // Initialize value if this is the root level node, or it is enforced
+    if (value === undefined && (forceInitialize || !this.parent)) {
+      const emptyValue = createEmptyValue(this.model);
+      this.#setValueState(emptyValue, defaultValue === undefined ? emptyValue : defaultValue);
     }
   }
 

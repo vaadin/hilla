@@ -14,6 +14,7 @@ import {
   field,
   type InterpolateMessageCallback,
   NotBlank,
+  NotEmpty,
   Required,
   Size,
   ValidationError,
@@ -1016,6 +1017,21 @@ describe('@vaadin/hilla-lit-form', () => {
         binder.for(binder.model.notes).addValidator(new BrokenValidator());
         await binder.validate();
         expect(errorSpy).to.be.calledOnceWith('notes - Validator BrokenValidator threw an error:');
+      });
+    });
+
+    describe('empty values', () => {
+      it('should report the violated constraint when a required field is undefined', async () => {
+        const testBinder = new Binder(view, TestModel);
+        const optionalString = testBinder.for(testBinder.model.fieldOptionalString);
+        // `NotEmpty` makes the node required, so every validator of the node is
+        // run even though the value is empty.
+        optionalString.addValidator(new NotEmpty());
+        optionalString.addValidator(new Size({ max: 255 }));
+        assert.isUndefined(optionalString.value);
+
+        const errors = await optionalString.validate();
+        expect(errors.map((e) => e.validator.constructor.name)).to.eql(['NotEmpty']);
       });
     });
   });

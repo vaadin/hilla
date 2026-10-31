@@ -12,7 +12,16 @@ Hilla is a web framework that integrates a Spring Boot Java backend with a react
 - Support for both React and Lit frontends
 - Plugin-based code generation architecture
 
+## Guidelines
+
+Design and implementation guidelines live in `guidelines/`. Read the chapters
+mapped in `guidelines/overview.md` selectively for the topics your work
+touches.
+
 ## Build Commands
+
+How the build keeps the npm versions in step with Flow and the platform, and
+which script does what: `scripts/README.md`.
 
 ### Initial Setup
 ```bash
@@ -85,6 +94,9 @@ mvn test -Dtest=ClassName#methodName
 
 ## Architecture
 
+Deeper notes on each subsystem live in `ARCHITECTURE.md` files next to the
+code, listed at the top of `guidelines/architecture.md`.
+
 ### Monorepo Structure
 
 This is an Nx-based monorepo with:
@@ -107,7 +119,7 @@ This is an Nx-based monorepo with:
 - Integrates with Maven/Gradle plugins
 
 #### Parser and generator (`packages/java/typescript-generator`)
-- **parser core**: Walks the browser callable classes with ClassGraph
+- **parser core**: Walks the browser callable classes with reflection
 - **plugins**: Say what the walk finds:
   - `backbone`: The endpoints, their methods and the types they send
   - `model`: What the validation and persistence annotations say about a value

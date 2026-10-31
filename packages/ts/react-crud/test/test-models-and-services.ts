@@ -54,6 +54,17 @@ export const NamedModel = m
   .build();
 export type NamedModel = typeof NamedModel;
 
+export interface Nicknamed extends Named {
+  nickname: string;
+}
+// reads its base through a function, as a model in an import cycle has to
+export const NicknamedModel = m
+  .extend(() => NamedModel)
+  .object<Nicknamed>('Nicknamed')
+  .property('nickname', StringModel)
+  .build();
+export type NicknamedModel = typeof NicknamedModel;
+
 export interface Address {
   street: string;
   city: string;

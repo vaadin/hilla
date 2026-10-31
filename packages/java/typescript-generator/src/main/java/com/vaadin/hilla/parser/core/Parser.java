@@ -34,7 +34,14 @@ import org.slf4j.LoggerFactory;
  * The entrypoint class. It walks the browser callable classes of the
  * application, letting the plugins build what the TypeScript of them is written
  * from.
+ *
+ * @deprecated Internal API, not deprecated for removal. The Java API of
+ *             {@code hilla-typescript-generator} is used only by Hilla itself,
+ *             and may change or be removed in any release without notice. Do
+ *             not use it in application code or libraries. It is marked
+ *             deprecated only to make the compiler warn about such use.
  */
+@Deprecated
 public final class Parser {
     private static final Logger logger = LoggerFactory.getLogger(Parser.class);
     private final Config config;

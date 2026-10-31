@@ -16,6 +16,13 @@
 package com.vaadin.hilla.parser.plugins.backbone;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.AnnotatedTypeVariable;
+import java.lang.reflect.AnnotatedWildcardType;
+import java.lang.reflect.TypeVariable;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.NonNull;
@@ -24,18 +31,13 @@ import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
 import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
-import com.vaadin.hilla.parser.models.ClassInfoModel;
-import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
-import com.vaadin.hilla.parser.models.SignatureModel;
-import com.vaadin.hilla.parser.models.TypeArgumentModel;
-import com.vaadin.hilla.parser.models.TypeParameterModel;
-import com.vaadin.hilla.parser.models.TypeVariableModel;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointExposedNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointNonExposedNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointSignatureNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
+import com.vaadin.hilla.parser.utils.Signatures;
 
 public final class EndpointExposedPlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
@@ -51,13 +53,12 @@ public final class EndpointExposedPlugin
             return node;
         }
 
-        var signature = (SignatureModel) node.getSource();
-        if (!(signature instanceof TypeParameterModel)) {
+        if (!(node.getSource() instanceof TypeVariable<?> typeParameter)) {
             return node;
         }
 
-        return TypeSignatureNode.of(resolveTypeParameter(
-                (TypeParameterModel) signature, parentPath));
+        return TypeSignatureNode
+                .of(resolveTypeParameter(typeParameter, parentPath));
     }
 
     @NonNull
@@ -69,7 +70,7 @@ public final class EndpointExposedPlugin
                 || node instanceof EndpointNonExposedNode) {
             // Attach type signature nodes for hierarchy parent superclass and
             // implemented interfaces, if any
-            var cls = (ClassInfoModel) node.getSource();
+            var cls = (Class<?>) node.getSource();
             return nodeDependencies
                     .appendChildNodes(scanEndpointClassSignature(cls));
         }
@@ -77,10 +78,10 @@ public final class EndpointExposedPlugin
         if (node instanceof EndpointSignatureNode) {
             // Attach the referenced class from the endpoint hierarchy type
             // signature
-            var classRef = ((ClassRefSignatureModel) node.getSource());
-            var classInfo = classRef.getClassInfo();
+            var classRef = ((EndpointSignatureNode) node).getSource();
+            var cls = Signatures.getClass(classRef).orElseThrow();
             return nodeDependencies.appendChildNodes(
-                    Stream.of(createEndpointHierarchyClassNode(classInfo)));
+                    Stream.of(createEndpointHierarchyClassNode(cls)));
         }
 
         return nodeDependencies;
@@ -96,15 +97,13 @@ public final class EndpointExposedPlugin
      *            The class from the endpoint hierarchy.
      * @return The node for the class.
      */
-    private Node<?, ?> createEndpointHierarchyClassNode(
-            ClassInfoModel classInfo) {
+    private Node<?, ?> createEndpointHierarchyClassNode(Class<?> classInfo) {
         // annotations are compared by name as Gradle can proxy them
         var endpointExposedAnnotations = getParserConfig()
                 .getEndpointExposedAnnotations().stream().map(Class::getName)
                 .toList();
-        var exposed = classInfo.getAnnotations().stream()
-                .map(annInfo -> ((Annotation) annInfo.get()).annotationType())
-                .map(Class::getName)
+        var exposed = Arrays.stream(classInfo.getAnnotations())
+                .map(Annotation::annotationType).map(Class::getName)
                 .anyMatch(endpointExposedAnnotations::contains);
         var classInfoNode = exposed ? EndpointExposedNode.of(classInfo)
                 : EndpointNonExposedNode.of(classInfo);
@@ -120,8 +119,8 @@ public final class EndpointExposedPlugin
      * @param path
      * @return
      */
-    private SignatureModel resolveTypeParameter(
-            TypeParameterModel typeParameter, NodePath<?> path) {
+    private AnnotatedElement resolveTypeParameter(TypeVariable<?> typeParameter,
+            NodePath<?> path) {
         var closestEndpointSignaturePath = path.stream()
                 .filter(p -> p.getNode() instanceof EndpointSignatureNode)
                 .findFirst();
@@ -130,27 +129,30 @@ public final class EndpointExposedPlugin
         }
 
         var endpointSignaturePath = closestEndpointSignaturePath.get();
-        var classRef = (ClassRefSignatureModel) endpointSignaturePath.getNode()
+        var classRef = ((EndpointSignatureNode) endpointSignaturePath.getNode())
                 .getSource();
 
-        var paramIndex = classRef.getClassInfo().getTypeParameters()
+        var paramIndex = List.of(
+                Signatures.getClass(classRef).orElseThrow().getTypeParameters())
                 .indexOf(typeParameter);
-        var typeArg = classRef.getTypeArguments().get(paramIndex);
-        if (!typeArg.getWildcard().equals(TypeArgumentModel.Wildcard.NONE)) {
+        if (paramIndex < 0) {
+            // A type parameter declared elsewhere, such as by a method
+            return typeParameter;
+        }
+
+        var typeArg = Signatures.getTypeArguments(classRef).get(paramIndex);
+        if (typeArg instanceof AnnotatedWildcardType) {
             // TODO: add resolving for wildcard type arguments
             return typeParameter;
         }
 
-        var signature = typeArg.getAssociatedTypes().get(0);
         // Recursively resolve type variables
-        if (signature instanceof TypeVariableModel) {
-            var endpointTypeParameter = ((TypeVariableModel) signature)
-                    .resolve();
-            return resolveTypeParameter(endpointTypeParameter,
+        if (typeArg instanceof AnnotatedTypeVariable typeVariable) {
+            return resolveTypeParameter(Signatures.resolve(typeVariable),
                     endpointSignaturePath.getParentPath());
         }
 
-        return signature;
+        return typeArg;
     }
 
     /**
@@ -168,10 +170,13 @@ public final class EndpointExposedPlugin
      * @return The stream of nodes.
      */
     private Stream<Node<?, ?>> scanEndpointClassSignature(
-            ClassInfoModel endpointClass) {
+            Class<?> endpointClass) {
+        var superClass = Optional
+                .ofNullable(endpointClass.getAnnotatedSuperclass())
+                .filter(Signatures::isNonJDKClass);
         return Stream
-                .concat(endpointClass.getSuperClass().stream(),
-                        endpointClass.getInterfaces().stream())
+                .concat(superClass.stream(),
+                        Arrays.stream(endpointClass.getAnnotatedInterfaces()))
                 .map(EndpointSignatureNode::of);
     }
 }

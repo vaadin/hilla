@@ -37,12 +37,11 @@ import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
-import com.vaadin.hilla.parser.models.ClassInfoModel;
-import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.EntityFacts;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
+import com.vaadin.hilla.parser.utils.Signatures;
 
 /**
  * This plugin adds support for {@code @JsonTypeInfo} and {@code @JsonSubTypes}.
@@ -54,7 +53,7 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
         // class, but express the union of all the @JsonSubTypes
         if (nodePath.getNode() instanceof UnionNode) {
             var unionNode = (UnionNode) nodePath.getNode();
-            var cls = (Class<?>) unionNode.getSource().get();
+            var cls = unionNode.getSource();
 
             // verify that the class has a @JsonTypeInfo annotation, and then
             // say that a value is of one of the classes the @JsonSubTypes
@@ -71,7 +70,7 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
         // values come from the annotation
         if (nodePath.getNode() instanceof EntityNode) {
             var entityNode = (EntityNode) nodePath.getNode();
-            var cls = (Class<?>) entityNode.getSource().get();
+            var cls = entityNode.getSource();
 
             var info = findSubTypesInfo(cls);
             var property = info.flatMap(SubTypesInfo::discriminatorProperty);
@@ -98,24 +97,25 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
         }
 
         var typedNode = (TypedNode) nodeDependencies.getNode();
-        if (!(typedNode.getType() instanceof ClassRefSignatureModel)) {
+        var ref = typedNode.getType();
+        if (!Signatures.isClassRef(ref)) {
             return nodeDependencies;
         }
 
-        var ref = (ClassRefSignatureModel) typedNode.getType();
-        if (ref.isJDKClass() || ref.isDate() || ref.isIterable()) {
+        if (Signatures.isJDKClass(ref) || Signatures.isDate(ref)
+                || Signatures.isIterable(ref)) {
             return nodeDependencies;
         }
 
         // all types mentioned in @JsonSubTypes must be parsed, even if they are
         // not used directly
-        Class<?> refClass = (Class<?>) ref.getClassInfo().get();
+        Class<?> refClass = Signatures.getClass(ref).orElseThrow();
         var subTypes = getJsonSubTypes(refClass).map(JsonSubTypes.Type::value)
-                .map(ClassInfoModel::of).<Node<?, ?>> map(EntityNode::of);
+                .<Node<?, ?>> map(EntityNode::of);
 
         // create a union node for classes annotated with @JsonTypeInfo
         if (refClass.getAnnotationsByType(JsonTypeInfo.class).length > 0) {
-            var unionType = UnionNode.of(ref.getClassInfo());
+            var unionType = UnionNode.of(refClass);
             subTypes = Stream.concat(Stream.of(unionType), subTypes);
         }
 
@@ -281,16 +281,15 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
      * A type whose values are of one of the types it declares, which carries
      * the names of those classes.
      */
-    public static class UnionNode
-            extends AbstractNode<ClassInfoModel, List<String>> {
-        private UnionNode(@NonNull ClassInfoModel source,
+    public static class UnionNode extends AbstractNode<Class<?>, List<String>> {
+        private UnionNode(@NonNull Class<?> source,
                 @NonNull List<String> target) {
             super(source, target);
         }
 
         @NonNull
-        static public UnionNode of(@NonNull ClassInfoModel model) {
-            return new UnionNode(model, List.of());
+        static public UnionNode of(@NonNull Class<?> cls) {
+            return new UnionNode(cls, List.of());
         }
     }
 }

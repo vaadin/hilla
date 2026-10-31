@@ -1,8 +1,7 @@
-import { _getPropertyModel, BooleanModel, NumberModel, ObjectModel, StringModel } from '@vaadin/hilla-lit-form';
-import m, { StringModel as ModelsStringModel } from '@vaadin/hilla-models';
+import m, { BooleanModel, type Model, NumberModel, StringModel } from '@vaadin/hilla-models';
 import { describe, expect, it } from 'vitest';
 import { getDefaultProperties, ModelInfo } from '../src/model-info.js';
-import { PersonModel } from './test-models-and-services.js';
+import { NicknamedModel, PersonModel } from './test-models-and-services.js';
 
 describe('@vaadin/hilla-react-crud', () => {
   describe('ModelInfo', () => {
@@ -10,14 +9,11 @@ describe('@vaadin/hilla-react-crud', () => {
       property: any;
     }
 
-    function getPropertyType(modelType: any, javaType?: string) {
-      class TestModel extends ObjectModel<TestItem> {
-        get property(): any {
-          const options = javaType ? { meta: { javaType } } : undefined;
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-          return this[_getPropertyModel]('property', (parent, key) => new modelType(parent, key, false, options));
-        }
-      }
+    function getPropertyType(modelType: Model, jvmType?: string) {
+      const TestModel = m
+        .object<TestItem>('TestItem')
+        .property('property', jvmType ? m.meta(modelType, { jvmType }) : modelType)
+        .build();
 
       const property = new ModelInfo(TestModel).getProperty('property');
       expect(property).to.exist;
@@ -102,6 +98,30 @@ describe('@vaadin/hilla-react-crud', () => {
         ]);
       });
 
+      it('returns property information for a model with a deferred base', () => {
+        const modelInfo = new ModelInfo(NicknamedModel);
+
+        const propertyNames = modelInfo.getRootProperties().map((prop) => prop.name);
+
+        // the base is kept out of the prototype chain, so its properties have to
+        // arrive exactly once and still ahead of the ones declared here
+        expect(propertyNames).to.eql(['firstName', 'lastName', 'nickname']);
+      });
+
+      it('returns property information in order for a deferred base that inherits properties', () => {
+        const modelInfo = new ModelInfo(
+          m
+            .extend(() => NicknamedModel)
+            .object('Pseudonymous')
+            .build(),
+        );
+
+        const propertyNames = modelInfo.getRootProperties().map((prop) => prop.name);
+
+        // the properties the base inherits come ahead of its own
+        expect(propertyNames).to.eql(['firstName', 'lastName', 'nickname']);
+      });
+
       it('returns property information for nested model', () => {
         const modelInfo = new ModelInfo(PersonModel);
 
@@ -143,7 +163,7 @@ describe('@vaadin/hilla-react-crud', () => {
         const EventModel = m
           .object<Event>('Event')
           .property('@type', m.literal('add'))
-          .property('name', ModelsStringModel)
+          .property('name', StringModel)
           .build();
 
         const names = getDefaultProperties(new ModelInfo(EventModel)).map((prop) => prop.name);

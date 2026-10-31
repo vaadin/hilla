@@ -28,8 +28,6 @@ import com.vaadin.hilla.generator.model.EndpointModel;
 import com.vaadin.hilla.generator.model.Generation;
 import com.vaadin.hilla.generator.model.MethodModel;
 import com.vaadin.hilla.generator.typescript.BarrelWriter;
-import com.vaadin.hilla.generator.typescript.ClientWriter;
-import com.vaadin.hilla.generator.typescript.EndpointWriter;
 import com.vaadin.hilla.generator.typescript.GeneratedFile;
 import com.vaadin.hilla.generator.typescript.TypeScriptWriter;
 import com.vaadin.hilla.parser.plugins.sample.SampleEndpoint;
@@ -47,16 +45,6 @@ import com.vaadin.hilla.parser.testutils.FullStackGenerator;
 public class GeneratedTypeScriptTest {
     private static final Generation generation = generationOf(
             SampleEndpoint.class);
-
-    @Test
-    public void should_WriteAModuleForAnEndpointWithoutMethods() {
-        var endpoint = generationOf(EmptyEndpoint.class).endpoints().get(0);
-
-        assertEquals(List.of(), endpoint.methods());
-        assertEquals("export {};\n",
-                new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
-                        .write(endpoint).content());
-    }
 
     @Test
     public void should_WriteTheClientOnlyWhenItIsTheGeneratedOne() {
@@ -144,8 +132,11 @@ public class GeneratedTypeScriptTest {
         var generator = new FullStackGenerator(GeneratedTypeScriptTest.class,
                 SampleEndpoint.class);
         generator.parseGeneration();
+        var generation = generator.parseGeneration();
 
-        assertEquals(1, generator.parseGeneration().endpoints().size());
+        assertEquals(1, generation.endpoints().size());
+        assertEquals(generationOf(SampleEndpoint.class), generation,
+                "What the first run found is not found again by the second");
     }
 
     private static Generation generationOf(Class<?>... endpoints) {

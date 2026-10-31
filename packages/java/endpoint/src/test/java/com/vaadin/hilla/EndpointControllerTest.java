@@ -53,6 +53,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jspecify.annotations.NonNull;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -88,6 +89,9 @@ import com.vaadin.hilla.endpoints.IterableEndpoint;
 import com.vaadin.hilla.endpoints.PersonEndpoint;
 import com.vaadin.hilla.exception.EndpointException;
 import com.vaadin.hilla.exception.EndpointValidationException;
+import com.vaadin.hilla.nonnullapi.NonNullApiEndpoint;
+import com.vaadin.hilla.nullmarked.NullMarkedEndpoint;
+import com.vaadin.hilla.nullmarked.NullMarkedEntity;
 import com.vaadin.hilla.packages.application.ApplicationComponent;
 import com.vaadin.hilla.packages.application.ApplicationEndpoint;
 import com.vaadin.hilla.packages.library.LibraryEndpoint;
@@ -144,6 +148,10 @@ public class EndpointControllerTest {
 
         public void testMethodWithMultipleParameter(int number, String text,
                 Date date) {
+            // no op
+        }
+
+        public void testArrayMethod(int[] numbers) {
             // no op
         }
 
@@ -272,6 +280,17 @@ public class EndpointControllerTest {
 
         public String testNullMethod() {
             return null;
+        }
+    }
+
+    public static class UnmarkedEndpoint {
+        public NullMarkedEntity nullMarkedEntity() {
+            return new NullMarkedEntity();
+        }
+
+        @NonNull
+        public NullMarkedEntity nonNullMarkedEntity() {
+            return new NullMarkedEntity();
         }
     }
 
@@ -1079,6 +1098,26 @@ public class EndpointControllerTest {
     }
 
     @Test
+    public void should_ReturnReadableArrayTypeName_When_DeserializationFails()
+            throws IOException {
+        ResponseEntity<String> response = createVaadinController(TEST_ENDPOINT)
+                .serveEndpoint(TEST_ENDPOINT_NAME, "testArrayMethod",
+                        createRequestParameters(
+                                "{\"numbers\": [\"NotANumber\"]}"),
+                        requestMock);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        ObjectNode jsonNodes = new ObjectMapper().readValue(response.getBody(),
+                ObjectNode.class);
+        JsonNode validationErrorData = jsonNodes.get("validationErrorData")
+                .get(0);
+        assertEquals("numbers",
+                validationErrorData.get("parameterName").asText());
+        assertTrue(validationErrorData.get("message").asText()
+                .contains("'int[]'"));
+    }
+
+    @Test
     public void should_ReturnAllValidationErrors_When_DeserializationFailsForMultipleParameters()
             throws IOException {
         String inputValue = String.format(
@@ -1248,6 +1287,71 @@ public class EndpointControllerTest {
                 message.contains(NullCheckerTestClass.class.getSimpleName()));
         assertTrue(message.contains(testNullMethodName));
         assertTrue(message.contains(errorMessage));
+    }
+
+    @Test
+    public void should_RequireNonNullReturnValue_When_PackageIsNullMarked()
+            throws IOException {
+        EndpointController controller = createVaadinController(
+                new NullMarkedEndpoint(), null, null, null,
+                new ExplicitNullableTypeChecker(), null);
+        assertNullOnlyFromNullableMethod(controller,
+                NullMarkedEndpoint.class.getSimpleName());
+    }
+
+    @Test
+    public void should_RequireNonNullReturnValue_When_PackageIsNonNullApi()
+            throws IOException {
+        EndpointController controller = createVaadinController(
+                new NonNullApiEndpoint(), null, null, null,
+                new ExplicitNullableTypeChecker(), null);
+        assertNullOnlyFromNullableMethod(controller,
+                NonNullApiEndpoint.class.getSimpleName());
+    }
+
+    private void assertNullOnlyFromNullableMethod(EndpointController controller,
+            String endpointName) throws IOException {
+        ResponseEntity<String> response = controller.serveEndpoint(endpointName,
+                "nonNullMethod", createRequestParameters("{}"), requestMock);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
+                response.getStatusCode());
+        assertTrue(new ObjectMapper()
+                .readValue(response.getBody(), ObjectNode.class).get("message")
+                .asText().contains("Unexpected return value"));
+
+        response = controller.serveEndpoint(endpointName, "nullableMethod",
+                createRequestParameters("{}"), requestMock);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    public void should_AllowNullBeanProperty_When_NullMarkedEndpointReturnsUnmarkedBean() {
+        ResponseEntity<String> response = createVaadinController(
+                new NullMarkedEndpoint(), null, null, null,
+                new ExplicitNullableTypeChecker(), null)
+                .serveEndpoint(NullMarkedEndpoint.class.getSimpleName(),
+                        "unmarkedEntity", createRequestParameters("{}"),
+                        requestMock);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    public void should_RejectNullBeanProperty_When_UnmarkedEndpointRequiresNullMarkedBean() {
+        EndpointController controller = createVaadinController(
+                new UnmarkedEndpoint(), null, null, null,
+                new ExplicitNullableTypeChecker(), null);
+        String endpointName = UnmarkedEndpoint.class.getSimpleName();
+
+        ResponseEntity<String> response = controller.serveEndpoint(endpointName,
+                "nonNullMarkedEntity", createRequestParameters("{}"),
+                requestMock);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
+                response.getStatusCode());
+
+        // Return values are only checked when the endpoint requires them
+        response = controller.serveEndpoint(endpointName, "nullMarkedEntity",
+                createRequestParameters("{}"), requestMock);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
     @Test

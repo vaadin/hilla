@@ -23,7 +23,6 @@ import jakarta.validation.Validator;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +39,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.googlecode.gentyref.GenericTypeReflector;
+import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -54,9 +53,12 @@ import org.springframework.security.authorization.AuthorizationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.ClassUtils;
 import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JavaType;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.type.TypeBindings;
+import tools.jackson.databind.type.TypeFactory;
 
 import com.vaadin.flow.server.VaadinServletContext;
 import com.vaadin.hilla.EndpointInvocationException.EndpointBadRequestException;
@@ -292,10 +294,19 @@ public class EndpointInvoker {
         return new EndpointValidationException(message, validationErrorData);
     }
 
-    private Type[] getJavaParameters(Method methodToInvoke, Type classType) {
-        return Stream.of(GenericTypeReflector
-                .getExactParameterTypes(methodToInvoke, classType))
-                .toArray(Type[]::new);
+    private JavaType[] getJavaParameters(Method methodToInvoke,
+            Class<?> classType) {
+        TypeFactory typeFactory = endpointObjectMapper.getTypeFactory();
+        // Bindings of the type variables of the declaring class, e.g. T of a
+        // generic super class of the endpoint. The endpoint methods are
+        // looked up from the endpoint class, so it is always a subtype of the
+        // declaring class.
+        TypeBindings bindings = typeFactory.constructType(classType)
+                .findSuperType(methodToInvoke.getDeclaringClass())
+                .getBindings();
+        return Stream.of(methodToInvoke.getGenericParameterTypes())
+                .map(type -> typeFactory.resolveMemberType(type, bindings))
+                .toArray(JavaType[]::new);
     }
 
     private Method getMethod(String endpointName, String methodName) {
@@ -340,7 +351,7 @@ public class EndpointInvoker {
     }
 
     private Object[] getVaadinEndpointParameters(
-            Map<String, JsonNode> requestParameters, Type[] javaParameters,
+            Map<String, JsonNode> requestParameters, JavaType[] javaParameters,
             String methodName, String endpointName) {
         Object[] endpointParameters = new Object[javaParameters.length];
         String[] parameterNames = new String[requestParameters.size()];
@@ -349,12 +360,9 @@ public class EndpointInvoker {
         Set<ConstraintViolation<Object>> constraintViolations = new LinkedHashSet<>();
 
         for (int i = 0; i < javaParameters.length; i++) {
-            Type parameterType = javaParameters[i];
-            Type incomingType = parameterType;
+            JavaType parameterType = javaParameters[i];
             try {
-                Object parameter = endpointObjectMapper
-                        .readerFor(endpointObjectMapper.getTypeFactory()
-                                .constructType(incomingType))
+                Object parameter = endpointObjectMapper.readerFor(parameterType)
                         .readValue(requestParameters.get(parameterNames[i]));
                 endpointParameters[i] = parameter;
 
@@ -362,7 +370,7 @@ public class EndpointInvoker {
                     constraintViolations.addAll(validator.validate(parameter));
                 }
             } catch (JacksonException e) {
-                String typeName = parameterType.getTypeName();
+                String typeName = getTypeName(parameterType);
                 getLogger().error(
                         "Unable to deserialize an endpoint '{}' method '{}' "
                                 + "parameter '{}' with type '{}'",
@@ -525,7 +533,7 @@ public class EndpointInvoker {
                 .map(Parameter::getName).toList();
         Map<String, JsonNode> requestParameters = getRequestParameters(body,
                 parameterNames);
-        Type[] javaParameters = getJavaParameters(methodToInvoke, ClassUtils
+        JavaType[] javaParameters = getJavaParameters(methodToInvoke, ClassUtils
                 .getUserClass(vaadinEndpointData.getEndpointObject()));
         if (javaParameters.length != requestParameters.size()) {
             throw new EndpointBadRequestException(String.format(
@@ -602,13 +610,21 @@ public class EndpointInvoker {
 
     private boolean isNonNullApi(Package pkg) {
         return Stream.of(pkg.getAnnotations())
-                .anyMatch(ann -> ann.annotationType().getSimpleName()
-                        .equals(NonNullApi.class.getSimpleName()));
+                .map(ann -> ann.annotationType().getSimpleName())
+                .anyMatch(name -> name.equals(NonNullApi.class.getSimpleName())
+                        || name.equals(NullMarked.class.getSimpleName()));
     }
 
-    private String listMethodParameterTypes(Type[] javaParameters) {
-        return Stream.of(javaParameters).map(Type::getTypeName)
+    private String listMethodParameterTypes(JavaType[] javaParameters) {
+        return Stream.of(javaParameters).map(EndpointInvoker::getTypeName)
                 .collect(Collectors.joining(", "));
+    }
+
+    private static String getTypeName(JavaType type) {
+        // The canonical name of an array type is its binary name, e.g.
+        // [Ljava.lang.String;
+        return type.isArrayType() ? getTypeName(type.getContentType()) + "[]"
+                : type.toCanonical();
     }
 
     private static class VaadinConnectAccessCheckerWrapper {
