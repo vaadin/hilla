@@ -21,6 +21,8 @@ import jakarta.persistence.Version;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -35,6 +37,13 @@ public class NullMarkedProperties {
     private Long version = 0L;
     @Id
     private String nonnullId = "";
+    private String ignoredOnGetter = "";
+    private String ignoredOnSetter = "";
+    private String ignoredOnSetterIncludedOnGetter = "";
+    @JsonProperty
+    private String ignoredOnGetterIncludedOnField = "";
+    private String ignoredOnGetterIncludedOnSetter = "";
+    private String notIgnoredOnGetter = "";
     private String nullableGetter = "";
     private String nullableSetter = "";
     private String nullableGetterNonnullSetter = "";
@@ -64,6 +73,65 @@ public class NullMarkedProperties {
 
     public void setNonnullId(String nonnullId) {
         this.nonnullId = nonnullId;
+    }
+
+    public String getIgnoredOnSetter() {
+        return ignoredOnSetter;
+    }
+
+    @JsonIgnore
+    public void setIgnoredOnSetter(String ignoredOnSetter) {
+        this.ignoredOnSetter = ignoredOnSetter;
+    }
+
+    @JsonProperty
+    public String getIgnoredOnSetterIncludedOnGetter() {
+        return ignoredOnSetterIncludedOnGetter;
+    }
+
+    @JsonIgnore
+    public void setIgnoredOnSetterIncludedOnGetter(
+            String ignoredOnSetterIncludedOnGetter) {
+        this.ignoredOnSetterIncludedOnGetter = ignoredOnSetterIncludedOnGetter;
+    }
+
+    @JsonIgnore
+    public String getIgnoredOnGetterIncludedOnField() {
+        return ignoredOnGetterIncludedOnField;
+    }
+
+    public void setIgnoredOnGetterIncludedOnField(
+            String ignoredOnGetterIncludedOnField) {
+        this.ignoredOnGetterIncludedOnField = ignoredOnGetterIncludedOnField;
+    }
+
+    @JsonIgnore
+    public String getIgnoredOnGetterIncludedOnSetter() {
+        return ignoredOnGetterIncludedOnSetter;
+    }
+
+    @JsonProperty
+    public void setIgnoredOnGetterIncludedOnSetter(
+            String ignoredOnGetterIncludedOnSetter) {
+        this.ignoredOnGetterIncludedOnSetter = ignoredOnGetterIncludedOnSetter;
+    }
+
+    @JsonIgnore(false)
+    public String getNotIgnoredOnGetter() {
+        return notIgnoredOnGetter;
+    }
+
+    public void setNotIgnoredOnGetter(String notIgnoredOnGetter) {
+        this.notIgnoredOnGetter = notIgnoredOnGetter;
+    }
+
+    @JsonIgnore
+    public String getIgnoredOnGetter() {
+        return ignoredOnGetter;
+    }
+
+    public void setIgnoredOnGetter(String ignoredOnGetter) {
+        this.ignoredOnGetter = ignoredOnGetter;
     }
 
     public @Nullable String getNullableGetter() {
