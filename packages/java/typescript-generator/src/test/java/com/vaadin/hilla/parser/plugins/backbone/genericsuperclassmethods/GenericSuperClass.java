@@ -24,4 +24,9 @@ public class GenericSuperClass<T> {
         return null;
     }
 
+    // Declares a type parameter of its own, which the class cannot resolve
+    public <R> R methodTypeParameter(T param) {
+        return null;
+    }
+
 }

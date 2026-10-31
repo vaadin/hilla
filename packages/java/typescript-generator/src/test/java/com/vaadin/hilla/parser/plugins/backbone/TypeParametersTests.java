@@ -23,8 +23,6 @@ import java.util.function.Supplier;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import com.vaadin.hilla.parser.models.TypeParameterModel;
-
 public class TypeParametersTests {
     @ParameterizedTest(name = "{0}.{1} unbounded: {2}")
     @CsvSource({ "Plain, T, true", "Bounded, T, false", "FBounded, E, true",
@@ -38,7 +36,7 @@ public class TypeParametersTests {
                         TypeParametersTests.class.getName() + '$' + sample)
                         .getTypeParameters())
                 .filter(origin -> origin.getName().equals(typeParameterName))
-                .findFirst().map(TypeParameterModel::of).orElseThrow();
+                .findFirst().orElseThrow();
 
         assertEquals(expected, TypeParameters.isUnbounded(typeParameter));
     }

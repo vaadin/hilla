@@ -16,8 +16,12 @@
 package com.vaadin.hilla.parser.plugins.backbone;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
@@ -28,21 +32,18 @@ import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.core.RootNode;
-import com.vaadin.hilla.parser.models.AnnotationInfoModel;
-import com.vaadin.hilla.parser.models.ClassInfoModel;
-import com.vaadin.hilla.parser.models.MethodInfoModel;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointNode;
+import com.vaadin.hilla.parser.utils.Signatures;
 
 public final class EndpointPlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
     private static final Logger logger = LoggerFactory.getLogger(Parser.class);
 
     private static void checkIfJavaCompilerParametersFlagIsEnabled(
-            Collection<ClassInfoModel> endpoints) {
-        endpoints.stream().map(ClassInfoModel::getMethods)
-                .flatMap(Collection::stream).map(MethodInfoModel::getParameters)
-                .flatMap(Collection::stream).findFirst()
-                .ifPresent((parameter) -> {
+            Collection<Class<?>> endpoints) {
+        endpoints.stream().map(Class::getDeclaredMethods)
+                .flatMap(Arrays::stream).map(Method::getParameters)
+                .flatMap(Arrays::stream).findFirst().ifPresent((parameter) -> {
                     if (parameter.getName() == null) {
                         logger.info("Missing endpoint method parameter names"
                                 + " in JVM bytecode, probably because they were not enabled"
@@ -65,21 +66,20 @@ public final class EndpointPlugin
     public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         if (nodeDependencies.getNode() instanceof RootNode) {
             var rootNode = (RootNode) nodeDependencies.getNode();
-            var endpoints = rootNode.getSource().stream()
-                    .map(ClassInfoModel::of).toList();
+            var endpoints = rootNode.getSource();
             checkIfJavaCompilerParametersFlagIsEnabled(endpoints);
-            return nodeDependencies.appendChildNodes(
-                    endpoints.stream().filter(ClassInfoModel::isNonJDKClass)
-                            .map(EndpointNode::of));
+            return nodeDependencies.appendChildNodes(endpoints.stream()
+                    .filter(Predicate.not(Signatures::isJDKClass))
+                    .map(EndpointNode::of));
         }
         return nodeDependencies;
     }
 
-    private String getEndpointName(ClassInfoModel endpointCls) {
+    private String getEndpointName(Class<?> endpointCls) {
         var endpointAnnotations = getParserConfig().getEndpointAnnotations();
-        var endpointAnnotation = endpointCls.getAnnotations().stream()
-                .filter(annotation -> endpointAnnotations.contains(
-                        ((Annotation) annotation.get()).annotationType()))
+        var endpointAnnotation = Arrays.stream(endpointCls.getAnnotations())
+                .filter(annotation -> endpointAnnotations
+                        .contains(annotation.annotationType()))
                 .findFirst();
         return endpointAnnotation.flatMap(this::getEndpointAnnotationValue)
                 .filter(name -> !name.isEmpty())
@@ -87,9 +87,15 @@ public final class EndpointPlugin
     }
 
     private Optional<String> getEndpointAnnotationValue(
-            AnnotationInfoModel endpointAnnotation) {
-        return endpointAnnotation.getParameters().stream()
-                .filter(param -> param.getName().equals("value")).findFirst()
-                .map(param -> (String) param.getValue());
+            Annotation endpointAnnotation) {
+        try {
+            var value = endpointAnnotation.annotationType().getMethod("value");
+            return Optional.of((String) value.invoke(endpointAnnotation));
+        } catch (NoSuchMethodException e) {
+            return Optional.empty();
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new BackbonePluginException(
+                    "Unable to read the name of the endpoint", e);
+        }
     }
 }

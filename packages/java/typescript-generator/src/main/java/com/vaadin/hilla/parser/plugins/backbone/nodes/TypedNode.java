@@ -15,21 +15,22 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.nodes;
 
+import java.lang.reflect.AnnotatedElement;
 import java.util.function.UnaryOperator;
 
 import org.jspecify.annotations.NonNull;
 
-import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.plugins.backbone.TypeFacts;
 
 public interface TypedNode extends AnnotatedNode {
     @NonNull
-    SignatureModel getType();
+    AnnotatedElement getType();
 
     TypeFacts getTarget();
 
     void setTarget(TypeFacts target);
 
     @NonNull
-    TypedNode processType(@NonNull UnaryOperator<SignatureModel> typeProcessor);
+    TypedNode processType(
+            @NonNull UnaryOperator<AnnotatedElement> typeProcessor);
 }

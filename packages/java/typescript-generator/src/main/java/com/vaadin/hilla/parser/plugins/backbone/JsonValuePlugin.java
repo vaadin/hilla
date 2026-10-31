@@ -26,10 +26,9 @@ import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
 import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
-import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
-import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
+import com.vaadin.hilla.parser.utils.Signatures;
 
 /**
  * Adds support for Jackson's {@code JsonValue} annotation.
@@ -48,18 +47,21 @@ public class JsonValuePlugin
     @Override
     public Node<?, ?> resolve(@NonNull Node<?, ?> node,
             @NonNull NodePath<?> parentPath) {
-        if (node instanceof TypedNode typedNode) {
-            if (typedNode
-                    .getType() instanceof ClassRefSignatureModel classRefSignatureModel) {
-                var cls = (Class<?>) classRefSignatureModel.getClassInfo()
-                        .get();
-                // Check if the class has the annotations which qualify for a
-                // value type. If so, replace the type with the corresponding
-                // value type.
-                Optional<Node<?, ?>> valueNode = getValueType(cls)
-                        .map(SignatureModel::of).map(TypeSignatureNode::of);
-                return valueNode.orElse(node);
-            }
+        if (node instanceof TypedNode typedNode
+                && Signatures.isClassRef(typedNode.getType())) {
+            var cls = Signatures.getClass(typedNode.getType()).orElseThrow();
+            // Check if the class has the annotations which qualify for a
+            // value type. If so, replace the type with the corresponding
+            // value type, in the same place among the types of its parent.
+            var position = node instanceof TypeSignatureNode signatureNode
+                    ? signatureNode.getPosition()
+                    : null;
+            Optional<Node<?, ?>> valueNode = getValueType(cls)
+                    .map(Signatures::of)
+                    .map(type -> position != null
+                            ? TypeSignatureNode.of(type, position)
+                            : TypeSignatureNode.of(type));
+            return valueNode.orElse(node);
         }
 
         return node;
