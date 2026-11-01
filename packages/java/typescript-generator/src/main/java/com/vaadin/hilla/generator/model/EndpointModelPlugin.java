@@ -123,7 +123,9 @@ public final class EndpointModelPlugin
 
     /**
      * Everything the last run of the parser found, which is what one generation
-     * of TypeScript is written from.
+     * of TypeScript is written from. The files the plugins rendered during the
+     * run are not part of it: they are what the parser returns, and are added
+     * with {@link Generation#withFiles}.
      */
     public Generation getGeneration() {
         return new Generation(getEndpoints(), getEntities(), getUnions());

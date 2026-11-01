@@ -15,9 +15,7 @@
  */
 package com.vaadin.hilla.generator.typescript;
 
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,11 +26,6 @@ import com.vaadin.hilla.parser.core.Output;
 /**
  * The file declaring one of the types the endpoints refer to, as it is rendered
  * while the walk runs, and printed once it is over.
- *
- * <p>
- * The declaration writes every property as one which is always there. Whether a
- * property can be absent is the work of the plugin deciding it, which marks the
- * property {@link #markOptional optional} as it contributes to the file.
  */
 public final class EntityDeclaration implements Output.Document {
     private static final String BEAN = """
@@ -50,7 +43,6 @@ public final class EntityDeclaration implements Output.Document {
             export default {{name}};""";
 
     private final EntityModel entity;
-    private final Set<String> optionalProperties = new HashSet<>();
 
     public EntityDeclaration(EntityModel entity) {
         this.entity = Objects.requireNonNull(entity);
@@ -68,18 +60,6 @@ public final class EntityDeclaration implements Output.Document {
      */
     public EntityModel entity() {
         return entity;
-    }
-
-    /**
-     * Writes a property as one which can be absent, with the {@code ?} marker
-     * rather than as a union with {@code undefined}, which is what an object
-     * type says it with.
-     *
-     * @param name
-     *            the name of the property, as the model has it
-     */
-    public void markOptional(String name) {
-        optionalProperties.add(Objects.requireNonNull(name));
     }
 
     @Override
@@ -143,10 +123,15 @@ public final class EntityDeclaration implements Output.Document {
                         .fill());
     }
 
-    private String writeProperty(PropertyModel property, TypeWriter types) {
+    /**
+     * Writes a property as optional with the {@code ?} marker rather than as a
+     * union with {@code undefined}, which is what an object type says it with.
+     */
+    private static String writeProperty(PropertyModel property,
+            TypeWriter types) {
         return Names.property(property.name())
-                + (optionalProperties.contains(property.name()) ? "?" : "")
-                + ": " + types.writeRequired(property.type()) + ";";
+                + (property.type().optional() ? "?" : "") + ": "
+                + types.writeRequired(property.type()) + ";";
     }
 
     /**

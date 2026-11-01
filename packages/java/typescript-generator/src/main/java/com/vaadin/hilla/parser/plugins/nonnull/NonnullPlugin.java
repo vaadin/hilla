@@ -31,18 +31,14 @@ import java.util.stream.Stream;
 
 import org.jspecify.annotations.NonNull;
 
-import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.generator.model.TypeModel;
-import com.vaadin.hilla.generator.typescript.EntityDeclaration;
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
-import com.vaadin.hilla.parser.core.Output;
 import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.AnnotatedNode;
-import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
@@ -105,28 +101,6 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                         .ifPresent(type::setOptional);
 
             }
-        }
-    }
-
-    /**
-     * Marks the properties of a declaration which can be absent, which is how
-     * the nullability settled on the way out of the nodes reaches the file the
-     * entity is declared in.
-     */
-    @Override
-    public void contribute(NodePath<?> nodePath, Output output) {
-        if (nodePath.getNode() instanceof EntityNode entity) {
-            output.of(entity, EntityDeclaration.class)
-                    .forEach(NonnullPlugin::markOptionalProperties);
-        }
-    }
-
-    private static void markOptionalProperties(EntityDeclaration declaration) {
-        if (declaration.entity() instanceof EntityModel.Bean bean) {
-            bean.properties().stream()
-                    .filter(property -> property.type().optional())
-                    .forEach(property -> declaration
-                            .markOptional(property.name()));
         }
     }
 

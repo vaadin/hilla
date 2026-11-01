@@ -27,12 +27,17 @@ import com.vaadin.hilla.parser.core.PluginConfiguration;
 
 /**
  * A plugin chain rendering a file for every member of a class: one plugin owns
- * the files, and another one, which comes before it in the chain, contributes
- * to them.
+ * the files, and another one, which comes after it in the chain and so exits a
+ * node before it, contributes to them.
  */
 final class RenderPlugins extends AbstractCompositePlugin<PluginConfiguration> {
     RenderPlugins() {
-        super(new BasicPlugin(), new ContributorPlugin(), new EmitterPlugin());
+        this(new ExitRecorder());
+    }
+
+    private RenderPlugins(ExitRecorder recorder) {
+        super(recorder, new BasicPlugin(), new EmitterPlugin(),
+                new ContributorPlugin(recorder));
     }
 
     /**
@@ -56,23 +61,35 @@ final class RenderPlugins extends AbstractCompositePlugin<PluginConfiguration> {
         }
     }
 
-    private static final class ContributorPlugin
+    /**
+     * Records the members it exits, which is the last thing to happen to a node
+     * before it is rendered, as it comes first in the chain.
+     */
+    private static final class ExitRecorder
             extends AbstractPlugin<PluginConfiguration> {
-        private final List<Member> exited = new ArrayList<>();
+        private final List<Object> exited = new ArrayList<>();
 
         @Override
         public void exit(NodePath<?> nodePath) {
-            if (nodePath.getNode().getSource() instanceof Member member) {
-                exited.add(member);
-            }
+            exited.add(nodePath.getNode().getSource());
+        }
+    }
+
+    private static final class ContributorPlugin
+            extends AbstractPlugin<PluginConfiguration> {
+        private final ExitRecorder recorder;
+
+        ContributorPlugin(ExitRecorder recorder) {
+            this.recorder = recorder;
         }
 
         @Override
         public void contribute(NodePath<?> nodePath, Output output) {
+            var source = nodePath.getNode().getSource();
             output.of(nodePath.getNode(), Steps.class)
-                    .forEach(steps -> steps.add("contributed"
-                            + (exited.contains(nodePath.getNode().getSource())
-                                    ? " after exit"
+                    .forEach(steps -> steps.add(
+                            "contributed" + (recorder.exited.contains(source)
+                                    ? " after every exit"
                                     : "")));
         }
     }

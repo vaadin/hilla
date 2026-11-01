@@ -15,6 +15,7 @@
  */
 package com.vaadin.hilla.generator.typescript;
 
+import com.vaadin.hilla.generator.model.EndpointModelPlugin;
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.Output;
@@ -26,9 +27,8 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
  * walk has left the node of the type and its declaration is built.
  *
  * <p>
- * The plugin owns the file, and others contribute to it: whether a property can
- * be absent is written by the plugin deciding it (see
- * {@link EntityDeclaration#markOptional}).
+ * It reads the declaration {@link EndpointModelPlugin} leaves on the node, so
+ * it goes in every chain that plugin is in.
  */
 public final class EntityDeclarationPlugin
         extends AbstractPlugin<PluginConfiguration> {

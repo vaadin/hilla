@@ -90,12 +90,16 @@ public class BasicTests {
                 .endpointExposedAnnotations(List.of(EndpointExposed.class))
                 .addPlugin(new RenderPlugins()).execute(endpoints);
 
-        // The contributor comes before the emitter in the chain, and still
-        // finds the files of a node emitted. A later file of the same path
-        // replaces an earlier one, in the place the path was first written
-        assertEquals(Map.of("foo.txt",
-                "emitted for methodFoo, contributed after exit", "bar.txt",
-                "emitted for methodBar, contributed after exit"),
+        // The contributor comes after the emitter in the chain, so it exits a
+        // node first, and still finds the files of the node emitted, once
+        // the first plugin of the chain has exited it too. A later file of
+        // the same path replaces an earlier one, in the place the path was
+        // first written
+        assertEquals(
+                Map.of("foo.txt",
+                        "emitted for methodFoo, contributed after every exit",
+                        "bar.txt",
+                        "emitted for methodBar, contributed after every exit"),
                 output.print());
         assertEquals(List.of("foo.txt", "bar.txt"),
                 List.copyOf(output.print().keySet()));
