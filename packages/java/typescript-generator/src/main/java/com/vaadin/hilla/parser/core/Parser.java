@@ -243,9 +243,12 @@ public final class Parser {
 
     /**
      * Scans the classpath, blocking until the scan is complete. What the walk
-     * finds is left to the plugins: the parser itself keeps nothing of it.
+     * finds is left to the plugins: the parser itself keeps nothing of it but
+     * the files they render.
+     *
+     * @return the files the plugins rendered while the walk ran
      */
-    public void execute(List<Class<?>> browserCallables) {
+    public Output execute(List<Class<?>> browserCallables) {
         Objects.requireNonNull(config.classPathElements,
                 "[JVM Parser] classPath is not provided.");
         if (config.endpointAnnotations == null
@@ -265,9 +268,11 @@ public final class Parser {
         var pluginManager = new PluginManager(config.getPlugins());
         pluginManager.setParserConfig(config);
         var pluginExecutor = new PluginExecutor(pluginManager, rootNode);
-        pluginExecutor.execute();
+        var output = pluginExecutor.execute();
 
         logger.debug("JVM Parser finished successfully");
+
+        return output;
     }
 
     private void validateEndpointExposedClassesForAclAnnotations(

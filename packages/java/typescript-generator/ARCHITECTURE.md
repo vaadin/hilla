@@ -19,8 +19,12 @@ The two meet in the targets of the nodes and in `EndpointModelPlugin`. The
 targets of the typed and entity nodes are builders of the model
 (`TypeModel.Builder`, `EntityModel.Builder`), which the parser plugins fill in
 during the walk. `EndpointModelPlugin` is a parser plugin like the others, and
-builds the model from them while the walk happens. When the walk is over,
-`getGeneration()` hands the whole model to the writers as one `Generation`.
+builds the model from them while the walk happens. Some files are already
+rendered during the walk, by plugins of the generator (see
+[Rendering during the walk](#rendering-during-the-walk)), and `Parser.execute`
+returns them. When the walk is over, `getGeneration()` hands the whole model
+to the writers as one `Generation`, along with those files
+(`Generation.withFiles`).
 
 Every entry point (the Maven goal, the Gradle task, the Flow build task and the
 development server) runs both halves through `TypeScriptProcessor.generate` in
@@ -139,7 +143,7 @@ has the same context, and type variables in it are kept as type variables.
 
 ## The plugin lifecycle
 
-A plugin (`Plugin`) can implement four hooks:
+A plugin (`Plugin`) can implement six hooks:
 
 - `scan` says what is below a node, as `NodeDependencies`.
 - `resolve` replaces a node before it is walked. This is how one node replaces
@@ -147,6 +151,10 @@ A plugin (`Plugin`) can implement four hooks:
   `KotlinNullabilityPlugin` puts a `K*Node` in place of a node.
 - `enter` runs on the way into a node, before anything below it is walked.
 - `exit` runs on the way out of a node, after everything below it.
+- `emit` runs once every plugin has exited a node, and adds the files the
+  plugin owns that are written from the node to the `Output`.
+- `contribute` runs once every plugin has emitted for a node, and changes
+  files of the node that other plugins own.
 
 `PluginExecutor` keeps a deque of enter and exit tasks. To enter a node, it:
 
@@ -157,6 +165,10 @@ A plugin (`Plugin`) can implement four hooks:
    tasks in front of the exit task, in order,
 5. resolves each related node against the root path, and queues it just
    before the root's exit task.
+
+To leave a node, it calls `exit`, then `emit`, then `contribute`, each for all
+the plugins, so what is said about the node is final before any file is
+written from it, whatever the order of the plugins.
 
 So the walk is depth-first, and a node is left only after everything below it
 has been walked. A node instance can be reached on more than one path, because
@@ -338,7 +350,10 @@ nodes:
 - `TypeModel.Builder`, on typed nodes, says whether a value can be absent, and
   whether the type arguments of a type belong to the type itself. It also
   carries the constraints and annotations from `ModelPlugin`.
-- `EntityModel.Builder`, on entity nodes, carries the discriminator.
+- `EntityModel.Builder`, on entity nodes, carries the discriminator. Once
+  the walk has left the node, `EndpointModelPlugin` also leaves the built
+  declaration on it (`getDeclaration`), which is how the plugins rendering
+  the files of the entity reach the model.
 - `UnionNode`'s target lists the subtypes of a polymorphic type.
 
 The targets are builders of the generator model itself, so there is no
@@ -353,6 +368,30 @@ types built below it, and the builder makes the record (`scalar`, `arrayOf`,
 A new kind of fact goes in the same way: as a field on one of these builders,
 and from there on the record it builds. It does not go through a call from one
 plugin to another.
+
+## Rendering during the walk
+
+The files of the entity declarations are rendered while the walk runs, rather
+than by a writer once it is over. `Output` keeps them in memory, by their path,
+until the walk is over:
+
+- A plugin _emits_ the files it owns for a node. `EntityDeclarationPlugin`
+  emits an `EntityDeclaration` for each `EntityNode`, from the declaration
+  `EndpointModelPlugin` leaves on the node's `EntityModel.Builder`.
+- A plugin _contributes_ to files other plugins own, finding them through the
+  node (`Output.of`). No plugin contributes to the declarations yet: whether a
+  property can be absent is a fact several plugins decide (nullability
+  annotations, `Optional`, Kotlin) and several files use, so it stays on the
+  `TypeModel` rather than being written into one file by `NonnullPlugin`.
+- A file stays a structured document (`Output.Document`) until the walk is
+  over, so contributors can still change it. Only then is it printed.
+- A path holds one file: a file emitted at a path which already holds one
+  replaces it.
+
+`Parser.execute` returns the `Output`, and the printed files reach the writers
+as `Generation.files`. `EntityDeclarationPlugin` goes in every chain that
+`EndpointModelPlugin` is in. `TypeScriptWriter` still prints the declaration
+of an entity a generation has no file for, such as one built without a walk.
 
 ## Generator
 
@@ -410,8 +449,9 @@ the union, and those values are known only once every subtype has been walked.
 
 `TypeScriptWriter.write` turns one `Generation` into a list of `GeneratedFile`s:
 
-- for each entity, a declaration (`EntityWriter`) and a form model
-  (`FormModelWriter`, `<Name>Model`),
+- the files rendered during the walk (`Generation.files`): for each entity,
+  its declaration (see [Rendering during the walk](#rendering-during-the-walk)),
+- for each entity, a form model (`FormModelWriter`, `<Name>Model`),
 - for each polymorphic type, a union (`UnionWriter`, `<Name>Union`),
 - a file for each endpoint (`EndpointWriter`),
 - the barrel `endpoints.ts` (`BarrelWriter`),

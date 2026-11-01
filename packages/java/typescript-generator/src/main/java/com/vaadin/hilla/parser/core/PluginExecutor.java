@@ -34,6 +34,7 @@ public final class PluginExecutor {
     private static final Logger logger = LoggerFactory
             .getLogger(PluginExecutor.class);
     private final Set<NodePath<?>> enqueued = new HashSet<>();
+    private final Output output = new Output();
     private final Plugin plugin;
     private final Deque<Task> queue = new LinkedList<>();
     private final RootNode rootNode;
@@ -44,12 +45,18 @@ public final class PluginExecutor {
         this.rootNode = Objects.requireNonNull(rootNode);
     }
 
-    public void execute() {
+    /**
+     * Walks the nodes from the root.
+     *
+     * @return the files the plugins rendered on the way
+     */
+    public Output execute() {
         var rootPath = NodePath.forRoot(rootNode);
         enqueueEnterFirst(rootPath);
         while (!queue.isEmpty()) {
             queue.removeFirst().execute();
         }
+        return output;
     }
 
     private void enqueueEnterFirst(NodePath<?> path) {
@@ -116,6 +123,11 @@ public final class PluginExecutor {
 
         void execute() {
             plugin.exit(getPath());
+            // A composite plugin emits through all of its plugins before any
+            // of them contributes, so the files of a node are all there by
+            // the time the first contributor looks for them
+            plugin.emit(getPath(), output);
+            plugin.contribute(getPath(), output);
         }
     }
 

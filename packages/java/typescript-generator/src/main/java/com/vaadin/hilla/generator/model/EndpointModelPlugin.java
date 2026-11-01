@@ -123,7 +123,9 @@ public final class EndpointModelPlugin
 
     /**
      * Everything the last run of the parser found, which is what one generation
-     * of TypeScript is written from.
+     * of TypeScript is written from. The files the plugins rendered during the
+     * run are not part of it: they are what the parser returns, and are added
+     * with {@link Generation#withFiles}.
      */
     public Generation getGeneration() {
         return new Generation(getEndpoints(), getEntities(), getUnions());
@@ -229,7 +231,11 @@ public final class EndpointModelPlugin
             parent.properties().add(buildProperty(property, own.types()));
         } else if (own.node() instanceof EntityNode entity
                 && !isProvided(entity.getSource().getName())) {
-            entities.add(buildEntity(entity, List.copyOf(own.properties())));
+            var declaration = buildEntity(entity,
+                    List.copyOf(own.properties()));
+
+            entities.add(declaration);
+            entity.getTarget().setDeclaration(declaration);
         } else if (own.node() instanceof SubTypesPlugin.UnionNode union) {
             unions.put(union.getSource().getName(), union.getTarget());
         } else if (own.node() instanceof EndpointNode endpoint) {

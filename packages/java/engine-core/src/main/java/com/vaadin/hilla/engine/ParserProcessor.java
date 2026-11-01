@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.hilla.generator.model.EndpointModelPlugin;
 import com.vaadin.hilla.generator.model.Generation;
+import com.vaadin.hilla.generator.typescript.EntityDeclarationPlugin;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.core.PluginManager;
 
@@ -73,9 +74,9 @@ public final class ParserProcessor {
 
         logger.debug("Starting JVM Parser");
 
-        parser.execute(endpoints);
+        var output = parser.execute(endpoints);
 
-        return modelPlugin.getGeneration();
+        return modelPlugin.getGeneration().withFiles(output.print());
     }
 
     private void applyConfiguration(ParserConfiguration parserConfiguration) {
@@ -111,9 +112,13 @@ public final class ParserProcessor {
 
         // The plugin building the model belongs first: a composite plugin
         // exits its plugins in the opposite order, so the first one is the
-        // last to see a node, once the others have said everything about it
+        // last to see a node, once the others have said everything about it.
+        // The plugins rendering files need no such place: they render a node
+        // once every plugin has exited it
         var loadedPlugins = Stream
-                .concat(Stream.of(modelPlugin), configuredPlugins).toList();
+                .concat(Stream.of(modelPlugin, new EntityDeclarationPlugin()),
+                        configuredPlugins)
+                .toList();
 
         parser.plugins(loadedPlugins);
     }
