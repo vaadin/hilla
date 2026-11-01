@@ -229,7 +229,11 @@ public final class EndpointModelPlugin
             parent.properties().add(buildProperty(property, own.types()));
         } else if (own.node() instanceof EntityNode entity
                 && !isProvided(entity.getSource().getName())) {
-            entities.add(buildEntity(entity, List.copyOf(own.properties())));
+            var declaration = buildEntity(entity,
+                    List.copyOf(own.properties()));
+
+            entities.add(declaration);
+            entity.getTarget().setDeclaration(declaration);
         } else if (own.node() instanceof SubTypesPlugin.UnionNode union) {
             unions.put(union.getSource().getName(), union.getTarget());
         } else if (own.node() instanceof EndpointNode endpoint) {

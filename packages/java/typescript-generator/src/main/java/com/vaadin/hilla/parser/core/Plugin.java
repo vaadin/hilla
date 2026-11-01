@@ -28,6 +28,12 @@ import org.jspecify.annotations.NonNull;
  * ({@link #enter}, {@link #exit}). Plugins build on each other through the
  * nodes and what they say about them, not by calling each other.
  *
+ * <p>
+ * Once every plugin has exited a node, what is said about it is final, and the
+ * files written from it are rendered: the plugins owning a file emit it
+ * ({@link #emit}), and then the plugins changing files owned by others
+ * contribute to them ({@link #contribute}).
+ *
  * @deprecated Internal API, not deprecated for removal. The Java API of
  *             {@code hilla-typescript-generator} is used only by Hilla itself,
  *             and may change or be removed in any release without notice. Do
@@ -53,6 +59,32 @@ public interface Plugin {
      * in.
      */
     default void exit(NodePath<?> nodePath) {
+    }
+
+    /**
+     * Called once every plugin has exited a node, which is where a plugin adds
+     * the files it owns that are written from the node. Everything the plugins
+     * say about the node is final by then, whatever their order in the chain.
+     *
+     * @param nodePath
+     *            the path of the node the walk has exited
+     * @param output
+     *            the files rendered so far
+     */
+    default void emit(NodePath<?> nodePath, Output output) {
+    }
+
+    /**
+     * Called once every plugin has emitted the files of a node, which is where
+     * a plugin changes the files of the node it does not own, finding them
+     * through {@link Output#of}. Plugins contribute in the order of the chain.
+     *
+     * @param nodePath
+     *            the path of the node the walk has exited
+     * @param output
+     *            the files rendered so far
+     */
+    default void contribute(NodePath<?> nodePath, Output output) {
     }
 
     PluginConfiguration getConfiguration();

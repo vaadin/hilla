@@ -139,7 +139,7 @@ has the same context, and type variables in it are kept as type variables.
 
 ## The plugin lifecycle
 
-A plugin (`Plugin`) can implement four hooks:
+A plugin (`Plugin`) can implement six hooks:
 
 - `scan` says what is below a node, as `NodeDependencies`.
 - `resolve` replaces a node before it is walked. This is how one node replaces
@@ -147,6 +147,10 @@ A plugin (`Plugin`) can implement four hooks:
   `KotlinNullabilityPlugin` puts a `K*Node` in place of a node.
 - `enter` runs on the way into a node, before anything below it is walked.
 - `exit` runs on the way out of a node, after everything below it.
+- `emit` runs once every plugin has exited a node, and adds the files the
+  plugin owns that are written from the node to the `Output`.
+- `contribute` runs once every plugin has emitted for a node, and changes
+  files of the node that other plugins own.
 
 `PluginExecutor` keeps a deque of enter and exit tasks. To enter a node, it:
 
@@ -157,6 +161,10 @@ A plugin (`Plugin`) can implement four hooks:
    tasks in front of the exit task, in order,
 5. resolves each related node against the root path, and queues it just
    before the root's exit task.
+
+To leave a node, it calls `exit`, then `emit`, then `contribute`, each for all
+the plugins, so what is said about the node is final before any file is
+written from it, whatever the order of the plugins.
 
 So the walk is depth-first, and a node is left only after everything below it
 has been walked. A node instance can be reached on more than one path, because
@@ -354,6 +362,26 @@ A new kind of fact goes in the same way: as a field on one of these builders,
 and from there on the record it builds. It does not go through a call from one
 plugin to another.
 
+## Rendering during the walk
+
+The files of the entity declarations are rendered while the walk runs, rather
+than by a writer once it is over. `Output` keeps them in memory, by their path,
+until the walk is over:
+
+- A plugin _emits_ the files it owns for a node. `EntityDeclarationPlugin`
+  emits an `EntityDeclaration` for each `EntityNode`, from the declaration
+  `EndpointModelPlugin` leaves on the node's `EntityModel.Builder`.
+- A plugin _contributes_ to files other plugins own, finding them through the
+  node (`Output.of`). `NonnullPlugin` marks the properties of a declaration
+  which can be absent.
+- A file stays a structured document (`Output.Document`) until the walk is
+  over, so contributors can still change it. Only then is it printed.
+- A path holds one file: a file emitted at a path which already holds one
+  replaces it.
+
+`Parser.execute` returns the `Output`, and the printed files reach the writers
+as `Generation.files`.
+
 ## Generator
 
 ### Design goals
@@ -410,8 +438,9 @@ the union, and those values are known only once every subtype has been walked.
 
 `TypeScriptWriter.write` turns one `Generation` into a list of `GeneratedFile`s:
 
-- for each entity, a declaration (`EntityWriter`) and a form model
-  (`FormModelWriter`, `<Name>Model`),
+- the files rendered during the walk (`Generation.files`): for each entity,
+  its declaration (see [Rendering during the walk](#rendering-during-the-walk)),
+- for each entity, a form model (`FormModelWriter`, `<Name>Model`),
 - for each polymorphic type, a union (`UnionWriter`, `<Name>Union`),
 - a file for each endpoint (`EndpointWriter`),
 - the barrel `endpoints.ts` (`BarrelWriter`),

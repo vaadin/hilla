@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -80,6 +81,24 @@ public class BasicTests {
                         List.of("Field foo", "Field fieldFoo", "Field fieldBar",
                                 "Method methodFoo", "Method methodBar")),
                 walk().getMembers());
+    }
+
+    @Test
+    public void should_RenderEachNodeOnceEveryPluginHasExitedIt() {
+        var output = new Parser().classPath(classPath)
+                .endpointAnnotations(List.of(Endpoint.class))
+                .endpointExposedAnnotations(List.of(EndpointExposed.class))
+                .addPlugin(new RenderPlugins()).execute(endpoints);
+
+        // The contributor comes before the emitter in the chain, and still
+        // finds the files of a node emitted. A later file of the same path
+        // replaces an earlier one, in the place the path was first written
+        assertEquals(Map.of("foo.txt",
+                "emitted for methodFoo, contributed after exit", "bar.txt",
+                "emitted for methodBar, contributed after exit"),
+                output.print());
+        assertEquals(List.of("foo.txt", "bar.txt"),
+                List.copyOf(output.print().keySet()));
     }
 
     private BasicPlugin walk() {

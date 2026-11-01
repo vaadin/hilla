@@ -15,16 +15,26 @@
  */
 package com.vaadin.hilla.generator.typescript;
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.generator.model.PropertyModel;
+import com.vaadin.hilla.parser.core.Output;
 
 /**
- * Writes the file declaring one of the types the endpoints refer to.
+ * The file declaring one of the types the endpoints refer to, as it is rendered
+ * while the walk runs, and printed once it is over.
+ *
+ * <p>
+ * The declaration writes every property as one which is always there. Whether a
+ * property can be absent is the work of the plugin deciding it, which marks the
+ * property {@link #markOptional optional} as it contributes to the file.
  */
-public final class EntityWriter {
+public final class EntityDeclaration implements Output.Document {
     private static final String BEAN = """
             interface {{declaration}} {
               {{properties}}
@@ -39,16 +49,52 @@ public final class EntityWriter {
 
             export default {{name}};""";
 
-    public GeneratedFile write(EntityModel entity) {
-        var module = ModulePaths.moduleOf(entity.javaClass());
+    private final EntityModel entity;
+    private final Set<String> optionalProperties = new HashSet<>();
 
-        return switch (entity) {
-        case EntityModel.Bean bean -> write(module, bean);
-        case EntityModel.Enumeration enumeration -> write(module, enumeration);
-        };
+    public EntityDeclaration(EntityModel entity) {
+        this.entity = Objects.requireNonNull(entity);
     }
 
-    private static GeneratedFile write(String module, EntityModel.Bean bean) {
+    /**
+     * The path of the file, relative to the output folder.
+     */
+    public String path() {
+        return ModulePaths.moduleOf(entity.javaClass()) + ".ts";
+    }
+
+    /**
+     * The entity declared.
+     */
+    public EntityModel entity() {
+        return entity;
+    }
+
+    /**
+     * Writes a property as one which can be absent, with the {@code ?} marker
+     * rather than as a union with {@code undefined}, which is what an object
+     * type says it with.
+     *
+     * @param name
+     *            the name of the property, as the model has it
+     */
+    public void markOptional(String name) {
+        optionalProperties.add(Objects.requireNonNull(name));
+    }
+
+    @Override
+    public String print() {
+        var module = ModulePaths.moduleOf(entity.javaClass());
+
+        var file = switch (entity) {
+        case EntityModel.Bean bean -> print(module, bean);
+        case EntityModel.Enumeration enumeration -> print(module, enumeration);
+        };
+
+        return file.content();
+    }
+
+    private GeneratedFile print(String module, EntityModel.Bean bean) {
         var name = ModulePaths.entityName(bean.javaClass());
         var imports = new ImportRegistry();
 
@@ -70,7 +116,7 @@ public final class EntityWriter {
                 .concat(bean.properties().stream()
                         .map(property -> writeProperty(property, types)),
                         bean.discriminator().stream()
-                                .map(EntityWriter::writeDiscriminator))
+                                .map(EntityDeclaration::writeDiscriminator))
                 .collect(Collectors.joining("\n"));
 
         var body = Template.of(BEAN) //
@@ -82,7 +128,7 @@ public final class EntityWriter {
         return GeneratedFile.of(module, imports, body);
     }
 
-    private static GeneratedFile write(String module,
+    private static GeneratedFile print(String module,
             EntityModel.Enumeration enumeration) {
         var name = ModulePaths.entityName(enumeration.javaClass());
 
@@ -97,15 +143,10 @@ public final class EntityWriter {
                         .fill());
     }
 
-    /**
-     * Writes a property as optional with the {@code ?} marker rather than as a
-     * union with {@code undefined}, which is what an object type says it with.
-     */
-    private static String writeProperty(PropertyModel property,
-            TypeWriter types) {
+    private String writeProperty(PropertyModel property, TypeWriter types) {
         return Names.property(property.name())
-                + (property.type().optional() ? "?" : "") + ": "
-                + types.writeRequired(property.type()) + ";";
+                + (optionalProperties.contains(property.name()) ? "?" : "")
+                + ": " + types.writeRequired(property.type()) + ";";
     }
 
     /**

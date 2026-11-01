@@ -28,7 +28,8 @@ import com.vaadin.hilla.parser.utils.PluginException;
  * A plugin made of other plugins, run in the order they are given in: each one
  * scans, resolves and enters a node after the ones before it, and exits it in
  * the reverse order, so that the first plugin is the first to enter a node and
- * the last to exit it.
+ * the last to exit it. They emit and contribute to the files of a node in the
+ * order they are given in.
  *
  * <p>
  * Creating it checks that every plugin comes after the plugins it requires
@@ -53,6 +54,16 @@ public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
     public void exit(NodePath<?> nodePath) {
         plugins.descendingIterator()
                 .forEachRemaining((plugin) -> plugin.exit(nodePath));
+    }
+
+    @Override
+    public void emit(NodePath<?> nodePath, Output output) {
+        plugins.forEach(plugin -> plugin.emit(nodePath, output));
+    }
+
+    @Override
+    public void contribute(NodePath<?> nodePath, Output output) {
+        plugins.forEach(plugin -> plugin.contribute(nodePath, output));
     }
 
     @Override
