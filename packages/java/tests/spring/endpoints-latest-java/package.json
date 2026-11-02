@@ -93,7 +93,7 @@
       "vite": "8.3.5",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "e65f629f3c5e0c276afa1f353a709c453c5f66a6565166889d5bb3d6daa3029c"
+    "hash": "312e57de38e316dfb65db55f60f65c26370fed440d12f031d3761d8e6b053762"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
