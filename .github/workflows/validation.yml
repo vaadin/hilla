@@ -62,7 +62,7 @@ jobs:
   # branch, or more than the 300 files it returns).
   changes:
     name: Detect changes
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     permissions:
       contents: read
@@ -104,7 +104,7 @@ jobs:
     needs: changes
     name: Build Java and TypeScript for other tasks
     if: ${{ needs.changes.outputs.code != 'false' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     env:
       NX_SKIP_NX_CACHE: true
@@ -167,7 +167,7 @@ jobs:
     needs: init
     name: Check style
     if: ${{ needs.init.outputs.everything != 'false' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 25
 
     steps:
@@ -195,7 +195,7 @@ jobs:
     needs: init
     name: Test Java
     if: ${{ needs.init.outputs.everything != 'false' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 25
 
     steps:
@@ -238,7 +238,7 @@ jobs:
     needs: init
     name: Test TypeScript
     if: ${{ needs.init.outputs.everything != 'false' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 25
 
     steps:
@@ -291,11 +291,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             it-modules: group-1
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             it-modules: group-2
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             it-modules: some
     runs-on: ${{ matrix.os }}
 
@@ -367,8 +367,8 @@ jobs:
           && '["windows-latest"]'
           || (github.event_name == 'pull_request'
           && !contains(github.event.pull_request.labels.*.name, 'run-windows-tests')
-          && '["ubuntu-latest"]')
-          || '["ubuntu-latest", "windows-latest"]') }}
+          && '["ubuntu-26.04"]')
+          || '["ubuntu-26.04", "windows-latest"]') }}
         # The plugin leg (the gradle-plugin functional tests) and the IT leg
         # (kotlin-gradle-test) are independent once the plugin is in the local
         # Maven repository, and running them one after the other made this the
@@ -448,7 +448,7 @@ jobs:
       ${{ !github.event.pull_request.head.repo.fork
       && needs.init.outputs.everything != 'false' }}
     name: React 18 Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 25
     steps:
       - name: Install Chrome
@@ -509,7 +509,7 @@ jobs:
     # listed as `Requested by label / Tests Summary` and does not replace the
     # one of the run that validated the commit.
     name: Tests Summary
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     if: ${{ always() }}
     needs:
       - changes
