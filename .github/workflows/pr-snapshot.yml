@@ -70,7 +70,7 @@ jobs:
       && contains(github.event.pull_request.labels.*.name, 'snapshot build')
       && (github.event.action != 'labeled' || github.event.label.name == 'snapshot build')
     timeout-minutes: 90
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Check configuration
         # The address is a variable and the credentials are secrets, but an
