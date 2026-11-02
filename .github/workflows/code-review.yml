@@ -44,7 +44,7 @@ jobs:
        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association) &&
        !startsWith(github.event.pull_request.title, 'chore:') &&
        !startsWith(github.event.pull_request.title, 'chore('))
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     outputs:
@@ -76,7 +76,7 @@ jobs:
     concurrency:
       group: code-review-${{ github.event.issue.number || github.event.pull_request.number }}
       cancel-in-progress: false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       # Required by actions/checkout
       contents: read
