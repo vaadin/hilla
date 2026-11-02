@@ -14,7 +14,7 @@
     "@vaadin/hilla-react-i18n": "file:../../../../ts/react-i18n",
     "@vaadin/hilla-react-signals": "file:../../../../ts/react-signals",
     "@vaadin/icon": "25.4.0-alpha5",
-    "@vaadin/icons": "25.4.0-alpha4",
+    "@vaadin/icons": "25.4.0-alpha5",
     "@vaadin/tooltip": "25.4.0-alpha5",
     "@vaadin/vaadin-lumo-styles": "25.4.0-alpha5",
     "@vaadin/vaadin-themable-mixin": "25.4.0-alpha5",

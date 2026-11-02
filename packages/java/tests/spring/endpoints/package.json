@@ -11,7 +11,7 @@
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
     "@vaadin/hilla-models": "file:../../../../ts/models",
     "@vaadin/icon": "25.4.0-alpha5",
-    "@vaadin/icons": "25.4.0-alpha4",
+    "@vaadin/icons": "25.4.0-alpha5",
     "@vaadin/input-container": "25.4.0-alpha5",
     "@vaadin/lit-renderer": "25.4.0-alpha5",
     "@vaadin/overlay": "25.4.0-alpha5",
@@ -56,7 +56,7 @@
       "@vaadin/hilla-lit-form": "25.4.0-alpha4",
       "@vaadin/hilla-models": "25.4.0-alpha4",
       "@vaadin/icon": "25.4.0-alpha5",
-      "@vaadin/icons": "25.4.0-alpha4",
+      "@vaadin/icons": "25.4.0-alpha5",
       "@vaadin/input-container": "25.4.0-alpha5",
       "@vaadin/lit-renderer": "25.4.0-alpha5",
       "@vaadin/overlay": "25.4.0-alpha5",
@@ -91,7 +91,7 @@
       "workbox-routing": "7.4.1",
       "workbox-strategies": "7.4.1"
     },
-    "hash": "0146e614b48a29b206983910518c8694c894ff38c07f0a882348ac119e5d37ee"
+    "hash": "3d23eaa161e103c513f36d613eb807219e2a582893cc7d8069514589e754ee9c"
   },
   "overrides": {
     "@vaadin/a11y-base": "$@vaadin/a11y-base",
