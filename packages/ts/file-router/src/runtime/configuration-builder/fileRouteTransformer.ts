@@ -41,7 +41,9 @@ export default function fileRouteTransformer({
     flowLayout: config?.flowLayout ?? flowLayout,
   };
 
-  if (path === '' && !children) {
+  // An index file (`@index.tsx`) is rendered as an index route unless its
+  // config overrides the route path, the same as for any other view.
+  if (path === '' && !children && !config?.route) {
     return {
       ...(original as IndexRouteObject),
       element,

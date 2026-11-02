@@ -344,6 +344,41 @@ describe('RouterBuilder', () => {
       ]);
     });
 
+    it('should apply the route override of an index file route', () => {
+      const { routes } = builder
+        .withFileRoutes([
+          {
+            path: '',
+            children: [
+              {
+                path: '',
+                module: {
+                  default: Index,
+                  config: {
+                    route: 'landing',
+                  },
+                },
+              },
+            ],
+          },
+        ])
+        .build();
+
+      const children = routes[0]?.children ?? [];
+      const landing = children.find((route) => route.path === 'landing');
+
+      expect(landing).to.be.like({
+        path: 'landing',
+        element: <Index />,
+        handle: {
+          title: 'Index',
+          route: 'landing',
+        },
+      });
+      expect(landing?.index).to.not.be.true;
+      expect(children.some((route) => route.index)).to.be.false;
+    });
+
     it('should accept a file route module with a config only', () => {
       expect(() =>
         builder.withFileRoutes([{ path: 'test', module: { config: { flowLayout: true } } }]).build(),
