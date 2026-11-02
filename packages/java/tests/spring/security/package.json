@@ -30,11 +30,11 @@
     "@preact/signals-react": "3.12.0",
     "@preact/signals-react-transform": "0.8.3",
     "@rolldown/plugin-babel": "0.2.4",
-    "@types/node": "26.6.5",
+    "@types/node": "26.6.6",
     "@typescript/native": "npm:typescript@7.0.2",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
     "@vitejs/plugin-react": "6.1.2",
-    "magic-string": "1.4.3",
+    "magic-string": "1.4.5",
     "rollup-plugin-brotli": "3.1.0",
     "rollup-plugin-visualizer": "7.1.1",
     "strip-css-comments": "5.0.0",
@@ -72,11 +72,11 @@
       "@preact/signals-react": "3.12.0",
       "@preact/signals-react-transform": "0.8.3",
       "@rolldown/plugin-babel": "0.2.4",
-      "@types/node": "26.6.5",
+      "@types/node": "26.6.6",
       "@typescript/native": "npm:typescript@7.0.2",
       "@vaadin/hilla-generator-utils": "25.4.0-alpha4",
       "@vitejs/plugin-react": "6.1.2",
-      "magic-string": "1.4.3",
+      "magic-string": "1.4.5",
       "rollup-plugin-brotli": "3.1.0",
       "rollup-plugin-visualizer": "7.1.1",
       "strip-css-comments": "5.0.0",
@@ -85,7 +85,7 @@
       "vite": "8.3.5",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "1a56cfa1624b0a2bbcb3a532285d371db9a32d6eafcf08463d7fd1de18354937"
+    "hash": "2b95b911069c8967addb94882f3dc23eca64c023239ab18e4b8c7b587464873b"
   },
   "overrides": {
     "@adobe/lit-mobx": "$@adobe/lit-mobx",
