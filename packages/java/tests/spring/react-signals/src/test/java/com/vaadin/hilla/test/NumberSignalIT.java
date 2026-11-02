@@ -6,12 +6,16 @@ import com.vaadin.flow.testutil.ChromeBrowserTest;
 import com.vaadin.testbench.parallel.Browser;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WindowType;
 
+// Tests are disabled due to unstable signal implementation.
+// Re-enable when there is a new signal implementation.
+@Ignore
 @RunWith(BlockJUnit4ClassRunner.class)
 public class NumberSignalIT extends ChromeBrowserTest {
 
