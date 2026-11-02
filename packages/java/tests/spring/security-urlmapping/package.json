@@ -17,7 +17,7 @@
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
     "@vaadin/hilla-models": "file:../../../../ts/models",
     "@vaadin/icon": "25.4.0-alpha5",
-    "@vaadin/icons": "25.4.0-alpha4",
+    "@vaadin/icons": "25.4.0-alpha5",
     "@vaadin/input-container": "25.4.0-alpha5",
     "@vaadin/lit-renderer": "25.4.0-alpha5",
     "@vaadin/overlay": "25.4.0-alpha5",
@@ -59,7 +59,7 @@
       "@vaadin/hilla-lit-form": "25.4.0-alpha4",
       "@vaadin/hilla-models": "25.4.0-alpha4",
       "@vaadin/icon": "25.4.0-alpha5",
-      "@vaadin/icons": "25.4.0-alpha4",
+      "@vaadin/icons": "25.4.0-alpha5",
       "@vaadin/input-container": "25.4.0-alpha5",
       "@vaadin/lit-renderer": "25.4.0-alpha5",
       "@vaadin/overlay": "25.4.0-alpha5",
@@ -90,7 +90,7 @@
       "vite": "8.3.5",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "1739e85abe0d7f8c8301c7e8dd4130f97f53e609ab8659d43c9f49e7b67585d2"
+    "hash": "6c9f3801ee26dfa6ed84df10816bdcb7cafa228dbff6b7367a37c307c28881d3"
   },
   "overrides": {
     "@adobe/lit-mobx": "$@adobe/lit-mobx",

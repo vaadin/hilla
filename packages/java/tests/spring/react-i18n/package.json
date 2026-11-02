@@ -91,7 +91,7 @@
       "vite": "8.3.5",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "06f8db773705c25c5d02bfd80b7f59436994f4db2029467699a39ff3d7884095"
+    "hash": "d73089d2e3a74f2f8652e638dd6d3dde1833625cb6ad067d0d1d220aea09e213"
   },
   "overrides": {
     "@vaadin/a11y-base": "$@vaadin/a11y-base",
@@ -129,7 +129,7 @@
     "@vaadin/grid-pro": "25.3.0-beta1",
     "@vaadin/horizontal-layout": "25.3.0-beta1",
     "@vaadin/icon": "25.4.0-alpha5",
-    "@vaadin/icons": "25.4.0-alpha4",
+    "@vaadin/icons": "25.4.0-alpha5",
     "@vaadin/input-container": "25.4.0-alpha5",
     "@vaadin/integer-field": "25.3.0-beta1",
     "@vaadin/item": "25.3.0-beta1",
