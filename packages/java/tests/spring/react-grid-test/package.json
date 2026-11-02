@@ -20,7 +20,7 @@
     "lit": "3.3.3",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "react-router": "8.5.0"
+    "react-router": "8.5.1"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
@@ -32,7 +32,7 @@
     "@rolldown/plugin-babel": "0.2.4",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.5.1",
-    "@types/node": "26.6.5",
+    "@types/node": "26.6.6",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@typescript/native": "npm:typescript@7.0.2",
@@ -48,7 +48,7 @@
     "@vaadin/hilla-generator-plugin-transfertypes": "file:../../../../ts/generator-plugin-transfertypes",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
     "@vitejs/plugin-react": "6.1.2",
-    "magic-string": "1.4.3",
+    "magic-string": "1.4.5",
     "rollup-plugin-brotli": "3.1.0",
     "rollup-plugin-visualizer": "7.1.1",
     "strip-css-comments": "5.0.0",
@@ -76,7 +76,7 @@
       "lit": "3.3.3",
       "react": "19.3.1",
       "react-dom": "19.3.1",
-      "react-router": "8.5.0"
+      "react-router": "8.5.1"
     },
     "devDependencies": {
       "@babel/core": "7.29.7",
@@ -88,7 +88,7 @@
       "@rolldown/plugin-babel": "0.2.4",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.5.1",
-      "@types/node": "26.6.5",
+      "@types/node": "26.6.6",
       "@types/react": "19.3.0",
       "@types/react-dom": "19.3.0",
       "@typescript/native": "npm:typescript@7.0.2",
@@ -104,7 +104,7 @@
       "@vaadin/hilla-generator-plugin-transfertypes": "25.3.4",
       "@vaadin/hilla-generator-utils": "25.3.4",
       "@vitejs/plugin-react": "6.1.2",
-      "magic-string": "1.4.3",
+      "magic-string": "1.4.5",
       "rollup-plugin-brotli": "3.1.0",
       "rollup-plugin-visualizer": "7.1.1",
       "strip-css-comments": "5.0.0",
