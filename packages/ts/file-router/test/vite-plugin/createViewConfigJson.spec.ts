@@ -76,5 +76,19 @@ describe('@vaadin/hilla-file-router', () => {
         await rm(indexFile);
       }
     });
+
+    it('should accept an empty route in an "@index" view', async () => {
+      const indexFile = new URL('@index.tsx', layoutOnlyDir);
+      await appendFile(
+        indexFile,
+        "export const config = { route: '' };\nexport default function LayoutOnlyIndex() {};",
+      );
+
+      try {
+        expect(await createViewConfigJson([{ path: '', file: indexFile }])).to.be.like([{ route: '' }]);
+      } finally {
+        await rm(indexFile);
+      }
+    });
   });
 });
