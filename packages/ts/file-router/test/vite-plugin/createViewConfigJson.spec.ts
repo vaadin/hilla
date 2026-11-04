@@ -47,7 +47,21 @@ describe('@vaadin/hilla-file-router', () => {
       await expect(config).toMatchFileSnapshot('fixtures/createViewConfigJson/view-config.snap.json');
     });
 
-    it('should throw if an "@index" view overrides its route', async () => {
+    it.each([
+      ['the root directory', (index: URL): RouteMeta[] => [{ path: '', file: index }]],
+      [
+        'a subdirectory with a layout',
+        (index: URL): RouteMeta[] => [
+          { path: 'layout-only', layout: layoutOnlyDirLayout, children: [{ path: '', file: index }] },
+        ],
+      ],
+      [
+        'a nested subdirectory without a layout',
+        (index: URL): RouteMeta[] => [
+          { path: 'parent', children: [{ path: 'child', children: [{ path: '', file: index }] }] },
+        ],
+      ],
+    ])('should throw if an "@index" view in %s overrides its route', async (_, createMeta) => {
       const indexFile = new URL('@index.tsx', layoutOnlyDir);
       await appendFile(
         indexFile,
@@ -55,11 +69,9 @@ describe('@vaadin/hilla-file-router', () => {
       );
 
       try {
-        await expect(
-          createViewConfigJson([
-            { path: 'layout-only', layout: layoutOnlyDirLayout, children: [{ path: '', file: indexFile }] },
-          ]),
-        ).to.be.rejectedWith('is an "@index" view and cannot override its route with "config.route"');
+        await expect(createViewConfigJson(createMeta(indexFile))).to.be.rejectedWith(
+          'is an "@index" view and cannot override its route with "config.route"',
+        );
       } finally {
         await rm(indexFile);
       }
