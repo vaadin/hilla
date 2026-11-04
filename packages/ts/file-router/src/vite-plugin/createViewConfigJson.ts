@@ -75,7 +75,7 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
             }
           }
 
-          if (file && path === '' && config?.route !== undefined) {
+          if (file && path === '' && config?.route) {
             throw new Error(
               `The file "${String(file)}" is an "@index" view and cannot override its route with "config.route". Rename the file or move it to a directory matching the desired route instead`,
             );
