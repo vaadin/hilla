@@ -1,10 +1,12 @@
 import { appendFile, mkdir, rm } from 'node:fs/promises';
+import chaiAsPromised from 'chai-as-promised';
 import chaiLike from 'chai-like';
 import { afterAll, beforeAll, beforeEach, chai, describe, expect, it } from 'vitest';
 import type { RouteMeta } from '../../src/vite-plugin/collectRoutesFromFS.js';
 import createViewConfigJson from '../../src/vite-plugin/createViewConfigJson.js';
 import { createTestingRouteFiles, createTestingRouteMeta, createTmpDir } from '../utils.js';
 
+chai.use(chaiAsPromised);
 chai.use(chaiLike);
 
 describe('@vaadin/hilla-file-router', () => {
@@ -43,6 +45,24 @@ describe('@vaadin/hilla-file-router', () => {
     it('should generate a JSON representation of the route tree', async () => {
       const config = JSON.stringify(await createViewConfigJson(meta), null, 2);
       await expect(config).toMatchFileSnapshot('fixtures/createViewConfigJson/view-config.snap.json');
+    });
+
+    it('should throw if an "@index" view overrides its route', async () => {
+      const indexFile = new URL('@index.tsx', layoutOnlyDir);
+      await appendFile(
+        indexFile,
+        "export const config = { route: 'landing' };\nexport default function LayoutOnlyIndex() {};",
+      );
+
+      try {
+        await expect(
+          createViewConfigJson([
+            { path: 'layout-only', layout: layoutOnlyDirLayout, children: [{ path: '', file: indexFile }] },
+          ]),
+        ).to.be.rejectedWith('is an "@index" view and cannot override its route with "config.route"');
+      } finally {
+        await rm(indexFile);
+      }
     });
   });
 });
