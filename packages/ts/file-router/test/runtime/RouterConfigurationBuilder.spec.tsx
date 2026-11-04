@@ -1,5 +1,6 @@
 import chaiLike from 'chai-like';
 import { createElement } from 'react';
+import { matchRoutes, type RouteObject } from 'react-router';
 import sinonChai from 'sinon-chai';
 import { expect, chai, describe, it, beforeEach, afterEach } from 'vitest';
 import { RouterConfigurationBuilder } from '../../src/runtime/configuration-builder/RouterConfigurationBuilder.js';
@@ -1058,5 +1059,81 @@ describe('RouterBuilder', () => {
       { path: '*', element: <Server /> },
       { index: true, element: <Server /> },
     ]);
+  });
+  // The route input below mirrors what the file router generates: eager routes
+  // (the root layout, "/" and "/login") pass the module config as is, while
+  // lazy routes pass the config copied from `file-routes.json`, which always
+  // contains `flowLayout`.
+  describe('consistency with file-routes.json', () => {
+    function Opt() {
+      return <></>;
+    }
+
+    function Wild() {
+      return <></>;
+    }
+
+    function resolve(routes: readonly RouteObject[], path: string): unknown {
+      const matches = matchRoutes([...routes], path) ?? [];
+      return matches[matches.length - 1]?.route.element;
+    }
+
+    it('should render an optional parameter view at its parent path', () => {
+      const { routes } = new RouterConfigurationBuilder()
+        .withFileRoutes([
+          {
+            path: '',
+            component: Layout,
+            children: [
+              {
+                path: 'opt',
+                children: [
+                  { path: ':id?', component: Opt, config: { route: ':id?', flowLayout: false, title: 'Opt' } },
+                ],
+              },
+            ],
+          },
+        ])
+        .withFallback(Server)
+        .build();
+
+      expect(resolve(routes, '/opt')).to.deep.equal(<Opt />);
+      expect(resolve(routes, '/opt/1')).to.deep.equal(<Opt />);
+    });
+
+    it('should render a wildcard view at its parent path', () => {
+      const { routes } = new RouterConfigurationBuilder()
+        .withFileRoutes([
+          {
+            path: '',
+            component: Layout,
+            children: [
+              {
+                path: 'wild',
+                children: [{ path: '*', component: Wild, config: { route: '*', flowLayout: false, title: 'Wild' } }],
+              },
+            ],
+          },
+        ])
+        .withFallback(Server)
+        .build();
+
+      expect(resolve(routes, '/wild')).to.deep.equal(<Wild />);
+      expect(resolve(routes, '/wild/a/b')).to.deep.equal(<Wild />);
+    });
+
+    it('should render a view whose route is overridden with an empty string at its parent path', () => {
+      const { routes } = new RouterConfigurationBuilder()
+        .withFileRoutes([
+          {
+            path: 'sub',
+            children: [{ path: 'next-test', component: NextTest, config: { route: '', flowLayout: false } }],
+          },
+        ])
+        .withFallback(Server)
+        .build();
+
+      expect(resolve(routes, '/sub')).to.deep.equal(<NextTest />);
+    });
   });
 });
