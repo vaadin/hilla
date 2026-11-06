@@ -10,7 +10,6 @@
     "@polymer/iron-meta": "3.0.1",
     "@polymer/iron-resizable-behavior": "3.0.1",
     "@vaadin/a11y-base": "25.4.0-alpha5",
-    "@vaadin/common-frontend": "0.0.25",
     "@vaadin/component-base": "25.4.0-alpha5",
     "@vaadin/field-base": "25.4.0-alpha5",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
@@ -52,7 +51,6 @@
     "dependencies": {
       "@adobe/lit-mobx": "2.0.0-rc.4",
       "@vaadin/a11y-base": "25.4.0-alpha5",
-      "@vaadin/common-frontend": "0.0.25",
       "@vaadin/component-base": "25.4.0-alpha5",
       "@vaadin/field-base": "25.4.0-alpha5",
       "@vaadin/hilla-frontend": "25.4.0-alpha4",
@@ -90,7 +88,7 @@
       "vite": "8.3.5",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "20d86f4ef6cd1e7c360e15f14dc9d60124bb6179203c959920ecb7c6879af401"
+    "hash": "00f639122bed07a48dfbad68cde5f70bf3db5d6fed374d0ae42fe58edfed0219"
   },
   "overrides": {
     "@adobe/lit-mobx": "$@adobe/lit-mobx",
@@ -100,7 +98,6 @@
     "@polymer/iron-meta": "$@polymer/iron-meta",
     "@polymer/iron-resizable-behavior": "$@polymer/iron-resizable-behavior",
     "@vaadin/a11y-base": "$@vaadin/a11y-base",
-    "@vaadin/common-frontend": "$@vaadin/common-frontend",
     "@vaadin/component-base": "$@vaadin/component-base",
     "@vaadin/field-base": "$@vaadin/field-base",
     "@vaadin/icon": "$@vaadin/icon",

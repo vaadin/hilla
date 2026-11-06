@@ -4,7 +4,6 @@
   "type": "module",
   "dependencies": {
     "@vaadin/a11y-base": "25.4.0-alpha5",
-    "@vaadin/common-frontend": "0.0.25",
     "@vaadin/field-base": "25.4.0-alpha5",
     "@vaadin/hilla-file-router": "file:../../../../ts/file-router",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
@@ -49,7 +48,6 @@
   "vaadin": {
     "dependencies": {
       "@vaadin/a11y-base": "25.4.0-alpha5",
-      "@vaadin/common-frontend": "0.0.25",
       "@vaadin/field-base": "25.4.0-alpha5",
       "@vaadin/hilla-file-router": "25.4.0-alpha4",
       "@vaadin/hilla-frontend": "25.4.0-alpha4",
@@ -91,7 +89,7 @@
       "vite": "8.3.5",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "dc500e8dc095ec7de389ba4d70a1c48c2cbbf499e9bbe9b3b947008753167d32"
+    "hash": "2b264a5865efd638d6f157291f7cbc386093d4c1cefdc82c417246f723ae7358"
   },
   "overrides": {
     "@vaadin/a11y-base": "$@vaadin/a11y-base",
@@ -109,7 +107,6 @@
     "@vaadin/checkbox": "25.3.0-beta1",
     "@vaadin/checkbox-group": "25.3.0-beta1",
     "@vaadin/combo-box": "25.3.0-beta1",
-    "@vaadin/common-frontend": "$@vaadin/common-frontend",
     "@vaadin/component-base": "25.4.0-alpha5",
     "@vaadin/confirm-dialog": "25.3.0-beta1",
     "@vaadin/context-menu": "25.3.0-beta1",

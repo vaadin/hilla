@@ -4,7 +4,6 @@
   "type": "module",
   "dependencies": {
     "@vaadin/a11y-base": "25.4.0-alpha5",
-    "@vaadin/common-frontend": "0.0.25",
     "@vaadin/component-base": "25.4.0-alpha5",
     "@vaadin/field-base": "25.4.0-alpha5",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
@@ -49,7 +48,6 @@
   "vaadin": {
     "dependencies": {
       "@vaadin/a11y-base": "25.4.0-alpha5",
-      "@vaadin/common-frontend": "0.0.25",
       "@vaadin/component-base": "25.4.0-alpha5",
       "@vaadin/field-base": "25.4.0-alpha5",
       "@vaadin/hilla-frontend": "25.4.0-alpha4",
@@ -91,11 +89,10 @@
       "workbox-routing": "7.4.1",
       "workbox-strategies": "7.4.1"
     },
-    "hash": "5bcfc056dcc4e95d5e81294826cb8858d536eb7daa8bfb52fb1b481aa20e0308"
+    "hash": "fb67ca1e953131c11f7c8cd4739d276fe359c21ea93e58d6f4c01dc76f474f5f"
   },
   "overrides": {
     "@vaadin/a11y-base": "$@vaadin/a11y-base",
-    "@vaadin/common-frontend": "$@vaadin/common-frontend",
     "@vaadin/component-base": "$@vaadin/component-base",
     "@vaadin/field-base": "$@vaadin/field-base",
     "@vaadin/icon": "$@vaadin/icon",
