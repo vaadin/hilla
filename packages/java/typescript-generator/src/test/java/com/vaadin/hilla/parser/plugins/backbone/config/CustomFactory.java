@@ -35,6 +35,10 @@ public class CustomFactory extends JacksonObjectMapperFactory.Json {
                 .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .addMixIn(CustomConfigEndpoint.CustomConfigEntity.class,
                         VisibilityMixIn.class)
+                .addMixIn(CustomConfigEndpoint.ConfiguredKindBase.class,
+                        VisibilityMixIn.class)
+                .addMixIn(CustomConfigEndpoint.ConfiguredKindSub.class,
+                        VisibilityMixIn.class)
                 .build();
     }
 }

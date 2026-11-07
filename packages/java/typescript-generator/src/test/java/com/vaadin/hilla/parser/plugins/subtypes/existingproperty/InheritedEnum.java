@@ -1,0 +1,42 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.hilla.parser.plugins.subtypes.existingproperty;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "colour")
+@JsonSubTypes(@JsonSubTypes.Type(value = InheritedEnum.Red.class, name = "RED"))
+public class InheritedEnum {
+    /**
+     * Read from a getter rather than from a field, which is how Jackson usually
+     * reads a property, and serialized under a name other than its Java one:
+     * the discriminator is found by the name Jackson writes.
+     */
+    @JsonProperty("colour")
+    public Colour getShade() {
+        return null;
+    }
+
+    public enum Colour {
+        RED, BLUE
+    }
+
+    public static class Red extends InheritedEnum {
+        public String note;
+    }
+}
