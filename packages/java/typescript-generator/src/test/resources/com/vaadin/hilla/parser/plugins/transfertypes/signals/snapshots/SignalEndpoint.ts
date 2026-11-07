@@ -1,6 +1,6 @@
 import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
 import type { Signal, SignalMethodOptions } from '@vaadin/hilla-react-signals';
-import { ListSignal, NumberSignal, ValueSignal } from '@vaadin/hilla-react-signals';
+import { ListSignal, MapSignal, NumberSignal, ValueSignal } from '@vaadin/hilla-react-signals';
 import client from './connect-client.default.js';
 
 function getNumberSignal(): NumberSignal | undefined {
@@ -19,6 +19,14 @@ function getStringListSignal(): ListSignal<string | undefined> | undefined {
   });
 }
 
+function getStringMapSignal(): MapSignal<string | undefined> | undefined {
+  return new MapSignal({
+    client: client,
+    endpoint: 'SignalEndpoint',
+    method: 'getStringMapSignal',
+  });
+}
+
 async function getStringSignal(init?: EndpointRequestInit): Promise<Signal<string | undefined> | undefined> {
   return client.call('SignalEndpoint', 'getStringSignal', {}, init);
 }
@@ -31,4 +39,4 @@ function getStringValueSignal(options?: SignalMethodOptions<string | undefined>)
   });
 }
 
-export { getNumberSignal, getStringListSignal, getStringSignal, getStringValueSignal };
+export { getNumberSignal, getStringListSignal, getStringMapSignal, getStringSignal, getStringValueSignal };
