@@ -16,6 +16,10 @@
 package com.vaadin.hilla.parser.plugins.backbone.enumtype;
 
 import java.util.List;
+import java.util.Locale;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
@@ -37,6 +41,57 @@ public class EnumTypeEndpoint {
 
     public void setEnum(EnumEntity value) {
         this.value = value;
+    }
+
+    public RenamedEnum echoRenamed(RenamedEnum value) {
+        return value;
+    }
+
+    public NumberedEnum echoNumbered(NumberedEnum value) {
+        return value;
+    }
+
+    public LabelledEnum echoLabelled(LabelledEnum value) {
+        return value;
+    }
+
+    /**
+     * Constants Jackson writes under a name of their own, one of which
+     * TypeScript only accepts as a string.
+     */
+    public enum RenamedEnum {
+        @JsonProperty("very-low")
+        VERY_LOW, @JsonProperty("it's high")
+        HIGH, UNCHANGED;
+
+        // A public field of the enum class which is not one of its constants
+        public static final RenamedEnum DEFAULT = UNCHANGED;
+    }
+
+    /**
+     * Constants with a label of their own, which Jackson writes them as unless
+     * the mapper is told otherwise.
+     */
+    public enum LabelledEnum {
+        LOW, HIGH;
+
+        @Override
+        public String toString() {
+            return name().charAt(0)
+                    + name().substring(1).toLowerCase(Locale.ROOT)
+                    + " priority";
+        }
+    }
+
+    /**
+     * Constants Jackson writes as numbers. The generated enum holds strings, so
+     * they keep their names, which is a known limitation: the server sends 0
+     * and 1, not these names. What is pinned here is only that such an enum
+     * does not break the generation.
+     */
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
+    public enum NumberedEnum {
+        FIRST, SECOND
     }
 
     public enum EnumEntity {
