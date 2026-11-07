@@ -17,6 +17,7 @@ package com.vaadin.hilla;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -53,6 +54,21 @@ public class ExplicitNullableTypeChecker {
             return true;
         }
 
+        return isRequired(getNullabilityAnnotations(element),
+                requiredByContext);
+    }
+
+    /**
+     * Gets the annotations of the reflected element that may define its
+     * nullability: its own annotations and the type-use annotations of its
+     * type, or of its return type for a method.
+     *
+     * @param element
+     *            a field, a method or a parameter
+     * @return the annotations of the element
+     */
+    static Stream<Annotation> getNullabilityAnnotations(
+            AnnotatedElement element) {
         Stream<Annotation> annotations = Stream.of(element.getAnnotations());
 
         if (element instanceof Field) {
@@ -67,6 +83,22 @@ public class ExplicitNullableTypeChecker {
                             .getAnnotations()));
         }
 
+        return annotations;
+    }
+
+    /**
+     * Checks if a node with the given annotations, collected from all the
+     * places that declare it, should be required (not nullable) in the
+     * generated Typescript code.
+     *
+     * @param annotations
+     *            the annotations of the node
+     * @param requiredByContext
+     *            {@code true} if the context defines that the node is required
+     * @return a result of check
+     */
+    static boolean isRequired(Stream<Annotation> annotations,
+            boolean requiredByContext) {
         if (requiredByContext) {
             return !hasAnnotation(annotations, NULLABLE_ANNOTATION_NAME);
         }
@@ -126,10 +158,18 @@ public class ExplicitNullableTypeChecker {
             return null;
         }
         if (annotatedElement instanceof Method) {
-            return checkValueForType(value,
-                    ((Method) annotatedElement).getGenericReturnType());
+            return checkValueForAnnotatedType(value,
+                    ((Method) annotatedElement).getAnnotatedReturnType(),
+                    requiredByContext);
         }
         return null;
+    }
+
+    String checkValueForAnnotatedType(Object value, AnnotatedType expectedType,
+            boolean requiredByContext) {
+        return new ExplicitNullableTypeCheckerHelper()
+                .checkValueForAnnotatedType(value, expectedType,
+                        requiredByContext);
     }
 
     String checkValueForType(Object value, Type expectedType) {

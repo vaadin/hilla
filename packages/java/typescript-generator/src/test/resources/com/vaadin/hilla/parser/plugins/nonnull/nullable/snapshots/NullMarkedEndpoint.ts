@@ -7,16 +7,32 @@ async function nullMarkedModel(nullMarkedModel: NullMarkedModel, init?: Endpoint
   return client.call('NullMarkedEndpoint', 'nullMarkedModel', { nullMarkedModel }, init);
 }
 
+async function nullableArray(init?: EndpointRequestInit): Promise<Array<string> | undefined> {
+  return client.call('NullMarkedEndpoint', 'nullableArray', {}, init);
+}
+
+async function nullableItemArray(init?: EndpointRequestInit): Promise<Array<string | undefined>> {
+  return client.call('NullMarkedEndpoint', 'nullableItemArray', {}, init);
+}
+
 async function nullableMethod(param: string | undefined, init?: EndpointRequestInit): Promise<NullMarkedModel | undefined> {
   return client.call('NullMarkedEndpoint', 'nullableMethod', { param }, init);
+}
+
+async function nullableNestedList(init?: EndpointRequestInit): Promise<Array<Array<string | undefined>>> {
+  return client.call('NullMarkedEndpoint', 'nullableNestedList', {}, init);
 }
 
 async function nullableTypeArgumentMethod(param: Array<string | undefined>, init?: EndpointRequestInit): Promise<Array<string | undefined>> {
   return client.call('NullMarkedEndpoint', 'nullableTypeArgumentMethod', { param }, init);
 }
 
+async function nullableValueMap(init?: EndpointRequestInit): Promise<Record<string, string | undefined>> {
+  return client.call('NullMarkedEndpoint', 'nullableValueMap', {}, init);
+}
+
 async function unmarkedModel(unmarkedModel: UnmarkedModel, init?: EndpointRequestInit): Promise<UnmarkedModel> {
   return client.call('NullMarkedEndpoint', 'unmarkedModel', { unmarkedModel }, init);
 }
 
-export { nullMarkedModel, nullableMethod, nullableTypeArgumentMethod, unmarkedModel };
+export { nullMarkedModel, nullableArray, nullableItemArray, nullableMethod, nullableNestedList, nullableTypeArgumentMethod, nullableValueMap, unmarkedModel };
