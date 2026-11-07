@@ -9,7 +9,6 @@ class Address(
     var city: String?,
 ): AbstractEntity<Long?>() {
     // Declared as always there, and empty all the same when the server sends
-    // nothing for it. Kept off Person, which already has a property that
-    // exists as getter alone: the JVM does not keep the order of methods.
+    // nothing for it
     fun getLabel(): Optional<String> = Optional.empty()
 }

@@ -55,10 +55,10 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
     /*
      * This method is overridden to sort the child nodes of the EntityNode,
      * first by the order of the properties in the class constructor, and then for the
-     * computed properties, the order is determined by the order of the getter/setter methods.
-     * The computed properties are listed after other properties and fields, and the order
-     * of the setter/getter methods is determined by what Java reflection 'declaredMethods'
-     * is returning, which is not guaranteed be in the same order of appearance in the class.
+     * computed properties, which are listed after other properties and fields, by their
+     * names: Java reflection 'declaredMethods' returns the getter/setter methods in no
+     * particular order, which can change from one run to another, so it cannot be used
+     * if the same classes are to give the same output every time.
      */
     override fun scan(nodeDependencies: NodeDependencies): NodeDependencies {
         if (nodeDependencies.node !is EntityNode) return nodeDependencies
@@ -87,7 +87,7 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
             .filter { it.name.startsWith("set") && it.parameterCount == 1 }
             .map { it.name.removePrefix("set").replaceFirstChar(Char::lowercase) }
 
-        return (fields + getters + setters).distinct()
+        return (fields + (getters + setters).sorted()).distinct()
     }
 
     override fun resolve(node: Node<*, *>, parentPath: NodePath<*>): Node<*, *> {
