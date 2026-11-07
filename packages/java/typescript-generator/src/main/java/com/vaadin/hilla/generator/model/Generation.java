@@ -15,7 +15,10 @@
  */
 package com.vaadin.hilla.generator.model;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Everything one run of the parser found, which is what the TypeScript of an
@@ -28,12 +31,32 @@ import java.util.List;
  *            their own
  * @param unions
  *            the polymorphic ones among them, with the subtypes a value can be
+ * @param files
+ *            the files the plugins already rendered while the walk ran, by
+ *            their path relative to the output folder
  */
 public record Generation(List<EndpointModel> endpoints,
-        List<EntityModel> entities, List<UnionModel> unions) {
+        List<EntityModel> entities, List<UnionModel> unions,
+        Map<String, String> files) {
     public Generation {
         endpoints = List.copyOf(endpoints);
         entities = List.copyOf(entities);
         unions = List.copyOf(unions);
+        files = Collections.unmodifiableMap(new LinkedHashMap<>(files));
+    }
+
+    /**
+     * What a walk found, without any file rendered while it ran.
+     */
+    public Generation(List<EndpointModel> endpoints, List<EntityModel> entities,
+            List<UnionModel> unions) {
+        this(endpoints, entities, unions, Map.of());
+    }
+
+    /**
+     * The same generation, with the given files rendered while the walk ran.
+     */
+    public Generation withFiles(Map<String, String> files) {
+        return new Generation(endpoints, entities, unions, files);
     }
 }

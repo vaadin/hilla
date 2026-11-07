@@ -33,7 +33,9 @@ import reactor.core.publisher.Flux;
 import com.vaadin.hilla.EndpointSubscription;
 import com.vaadin.hilla.generator.model.EndpointModelPlugin;
 import com.vaadin.hilla.generator.model.Generation;
+import com.vaadin.hilla.generator.typescript.EntityDeclarationPlugin;
 import com.vaadin.hilla.generator.typescript.TypeScriptWriter;
+import com.vaadin.hilla.parser.core.Output;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
@@ -170,15 +172,17 @@ public final class FullStackGenerator {
      * of TypeScript is written from.
      */
     public Generation parseGeneration() {
-        parse();
-        return modelPlugin.getGeneration();
+        var output = parse();
+        return modelPlugin.getGeneration().withFiles(output.print());
     }
 
     /**
      * Runs only the Java part of the pipeline. Available for the few tests
      * which assert on things that are not visible in the generated TypeScript.
+     *
+     * @return the files the plugins rendered while the walk ran
      */
-    public void parse() {
+    public Output parse() {
         try {
             var classPath = ResourceLoader.getClasspath(SCANNED_TYPES.stream()
                     .map(ResourceLoader::new).collect(Collectors.toList()));
@@ -191,9 +195,10 @@ public final class FullStackGenerator {
             // goes first so that it is the last to exit a node, by which time
             // the plugins deciding whether a value can be absent have run
             parser.addPlugin(modelPlugin);
+            parser.addPlugin(new EntityDeclarationPlugin());
             plugins.forEach(parser::addPlugin);
 
-            parser.execute(endpointClasses);
+            return parser.execute(endpointClasses);
         } catch (URISyntaxException e) {
             throw new IllegalStateException("Unable to build the classpath", e);
         }
