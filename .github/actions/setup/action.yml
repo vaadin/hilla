@@ -5,7 +5,7 @@ inputs:
   node-version:
     description: Node.js version
     required: true
-    default: 'lts/*'
+    default: '26'
   java-version:
     description: Java version
     required: true
