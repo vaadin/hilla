@@ -29,6 +29,7 @@ import tools.jackson.databind.JavaType;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ValueDeserializer;
 import tools.jackson.databind.deser.std.StdConvertingDeserializer;
+import tools.jackson.databind.exc.InvalidFormatException;
 import tools.jackson.databind.module.SimpleModule;
 import tools.jackson.databind.node.POJONode;
 import tools.jackson.databind.ser.std.StdDelegatingSerializer;
@@ -108,6 +109,9 @@ public class EndpointTransferMapper {
          * @param transferType
          *            the value used in communication with the client
          * @return the value used in the endpoint
+         * @throws IllegalArgumentException
+         *             if the transfer value cannot be converted; a call
+         *             receiving such a value fails with a validation error
          */
         ENDPOINTTYPE toEndpointType(TRANSFERTYPE transferType);
 
@@ -162,6 +166,20 @@ public class EndpointTransferMapper {
         jacksonModule.addSerializer(endpointType, serializer);
 
         var converter = new StdConverter<TRANSFERTYPE, ENDPOINTTYPE>() {
+            @Override
+            public ENDPOINTTYPE convert(DeserializationContext ctxt,
+                    TRANSFERTYPE value) {
+                try {
+                    return convert(value);
+                } catch (IllegalArgumentException e) {
+                    // Report an unconvertible client value as invalid input,
+                    // like Jackson does for its own types, instead of letting
+                    // a non-Jackson exception escape the deserialization
+                    throw InvalidFormatException.from(ctxt.getParser(),
+                            e.getMessage(), value, endpointType);
+                }
+            }
+
             @Override
             public ENDPOINTTYPE convert(TRANSFERTYPE value) {
                 return mapper.toEndpointType(value);

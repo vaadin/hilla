@@ -50,6 +50,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -152,6 +153,10 @@ public class EndpointControllerTest {
         }
 
         public void testArrayMethod(int[] numbers) {
+            // no op
+        }
+
+        public void testUuidMethod(UUID id) {
             // no op
         }
 
@@ -1115,6 +1120,26 @@ public class EndpointControllerTest {
                 validationErrorData.get("parameterName").asText());
         assertTrue(validationErrorData.get("message").asText()
                 .contains("'int[]'"));
+    }
+
+    @Test
+    public void should_ReturnValidationError_When_TransferMapperConversionFails()
+            throws IOException {
+        ResponseEntity<String> response = createVaadinController(TEST_ENDPOINT)
+                .serveEndpoint(TEST_ENDPOINT_NAME, "testUuidMethod",
+                        createRequestParameters("{\"id\": \"NotAUuid\"}"),
+                        requestMock);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        ObjectNode jsonNodes = new ObjectMapper().readValue(response.getBody(),
+                ObjectNode.class);
+        assertEquals(EndpointValidationException.class.getName(),
+                jsonNodes.get("type").asText());
+        JsonNode validationErrorData = jsonNodes.get("validationErrorData")
+                .get(0);
+        assertEquals("id", validationErrorData.get("parameterName").asText());
+        assertTrue(validationErrorData.get("message").asText()
+                .contains("'java.util.UUID'"));
     }
 
     @Test
