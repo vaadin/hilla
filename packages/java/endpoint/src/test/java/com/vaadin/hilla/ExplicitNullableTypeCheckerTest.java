@@ -478,6 +478,10 @@ public class ExplicitNullableTypeCheckerTest {
         Assert.assertNull("Nullable item type should allow null item",
                 explicitNullableTypeChecker.checkValueForType(nullMarkedEntity,
                         NullMarkedEntity.class));
+        nullMarkedEntity.setGetterNullableItems(Arrays.asList("item", null));
+        Assert.assertNull("Nullable item type of getter should allow null item",
+                explicitNullableTypeChecker.checkValueForType(nullMarkedEntity,
+                        NullMarkedEntity.class));
 
         nullMarkedEntity.setValue(null);
         Assert.assertNotNull(explicitNullableTypeChecker
