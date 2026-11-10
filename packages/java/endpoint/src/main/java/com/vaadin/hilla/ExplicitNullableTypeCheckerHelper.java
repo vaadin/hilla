@@ -20,6 +20,9 @@ import static com.vaadin.hilla.ExplicitNullableTypeChecker.isRequired;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.AnnotatedArrayType;
+import java.lang.reflect.AnnotatedParameterizedType;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -92,6 +95,44 @@ class ExplicitNullableTypeCheckerHelper {
      *         not explicitly allow null, or null meaning the value is OK.
      */
     String checkValueForType(Object value, Type expectedType) {
+        return checkValueForType(value, expectedType, null);
+    }
+
+    /**
+     * Validates the given value for the given expected annotated type. Unlike
+     * {@link #checkValueForType(Object, Type)}, this also takes the type-use
+     * annotations of the type arguments and array components into account, so
+     * that, e.g., a {@code null} item is allowed in a
+     * {@code List<@Nullable String>}.
+     *
+     * @param value
+     *            the value to validate
+     * @param expectedType
+     *            the declared annotated type expected for the value
+     * @return error message when the value is null while the expected type does
+     *         not explicitly allow null, or null meaning the value is OK.
+     */
+    String checkValueForAnnotatedType(Object value,
+            AnnotatedType expectedType) {
+        return checkValueForType(value, expectedType.getType(), expectedType);
+    }
+
+    /**
+     * Validates the given value for the given expected type, taking the
+     * nullability annotations of the given annotated type into account.
+     *
+     * @param value
+     *            the value to validate
+     * @param expectedType
+     *            the declared type expected for the value
+     * @param annotatedType
+     *            the annotated form of {@code expectedType}, or {@code null}
+     *            when no annotations are available
+     * @return error message when the value is null while the expected type does
+     *         not explicitly allow null, or null meaning the value is OK.
+     */
+    String checkValueForType(Object value, Type expectedType,
+            AnnotatedType annotatedType) {
         Class<?> clazz;
         if (expectedType instanceof TypeVariable) {
             return null;
@@ -103,12 +144,14 @@ class ExplicitNullableTypeCheckerHelper {
 
         if (value != null) {
             if (Iterable.class.isAssignableFrom(clazz)) {
-                return checkIterable((Iterable<?>) value, expectedType);
+                return checkIterable((Iterable<?>) value, expectedType,
+                        annotatedType);
             } else if (clazz.isArray() && value instanceof Object[]) {
                 return checkIterable(Arrays.asList((Object[]) value),
-                        expectedType);
+                        expectedType, annotatedType);
             } else if (Map.class.isAssignableFrom(clazz)) {
-                return checkMapValues((Map<?, ?>) value, expectedType);
+                return checkMapValues((Map<?, ?>) value, expectedType,
+                        annotatedType);
             } else if (expectedType instanceof Class<?>
                     && !clazz.getName().startsWith("java.")) {
                 return checkBeanFields(value, expectedType);
@@ -127,6 +170,10 @@ class ExplicitNullableTypeCheckerHelper {
             return null;
         }
 
+        if (annotatedType != null && isNullable(annotatedType)) {
+            return null;
+        }
+
         if (Optional.class.isAssignableFrom(clazz)) {
             return String.format(
                     "Got null value for type '%s', consider Optional.empty",
@@ -139,12 +186,28 @@ class ExplicitNullableTypeCheckerHelper {
                 expectedType.getTypeName());
     }
 
-    private String checkIterable(Iterable<?> value, Type expectedType) {
+    private static boolean isNullable(AnnotatedType annotatedType) {
+        return Arrays.stream(annotatedType.getAnnotations())
+                .anyMatch(annotation -> "nullable".equalsIgnoreCase(
+                        annotation.annotationType().getSimpleName()));
+    }
+
+    private static AnnotatedType getAnnotatedTypeArgument(
+            AnnotatedType annotatedType, int index) {
+        return annotatedType instanceof AnnotatedParameterizedType parameterized
+                ? parameterized.getAnnotatedActualTypeArguments()[index]
+                : null;
+    }
+
+    private String checkIterable(Iterable<?> value, Type expectedType,
+            AnnotatedType annotatedType) {
         Type itemType = Object.class;
+        AnnotatedType annotatedItemType = null;
         String iterableDescription = "iterable";
         if (expectedType instanceof ParameterizedType) {
             itemType = ((ParameterizedType) expectedType)
                     .getActualTypeArguments()[0];
+            annotatedItemType = getAnnotatedTypeArgument(annotatedType, 0);
             iterableDescription = "collection";
         } else if (expectedType instanceof Class<?>) {
             var expectedClass = ((Class<?>) expectedType);
@@ -156,12 +219,16 @@ class ExplicitNullableTypeCheckerHelper {
                 iterableDescription = "collection";
             } else {
                 itemType = expectedClass.getComponentType();
+                if (annotatedType instanceof AnnotatedArrayType array) {
+                    annotatedItemType = array
+                            .getAnnotatedGenericComponentType();
+                }
                 iterableDescription = "array";
             }
         }
 
         for (Object item : value) {
-            String error = checkValueForType(item, itemType);
+            String error = checkValueForType(item, itemType, annotatedItemType);
             if (error != null) {
                 return String.format("Unexpected null item in %s type '%s'. %s",
                         iterableDescription, expectedType, error);
@@ -171,16 +238,20 @@ class ExplicitNullableTypeCheckerHelper {
         return null;
     }
 
-    private String checkMapValues(Map<?, ?> value, Type expectedType) {
+    private String checkMapValues(Map<?, ?> value, Type expectedType,
+            AnnotatedType annotatedType) {
         Type valueType = Object.class;
+        AnnotatedType annotatedValueType = null;
 
         if (expectedType instanceof ParameterizedType) {
             valueType = ((ParameterizedType) expectedType)
                     .getActualTypeArguments()[1];
+            annotatedValueType = getAnnotatedTypeArgument(annotatedType, 1);
         }
 
         for (Map.Entry<?, ?> e : value.entrySet()) {
-            String error = checkValueForType(e.getValue(), valueType);
+            String error = checkValueForType(e.getValue(), valueType,
+                    annotatedValueType);
             if (error != null) {
                 return String.format(
                         "Unexpected null value for key '%s' of "
@@ -211,10 +282,11 @@ class ExplicitNullableTypeCheckerHelper {
                 }
 
                 Method readMethod = propertyDescriptor.getReadMethod();
-                Type propertyType = readMethod.getGenericReturnType();
                 Object propertyValue = readMethod.invoke(value);
 
-                String error = checkValueForType(propertyValue, propertyType);
+                String error = checkValueForAnnotatedType(propertyValue,
+                        getAnnotatedPropertyType(readMethod,
+                                propertyDescriptor.getName()));
                 if (error != null) {
                     return String.format(
                             "Unexpected null value in Java "
@@ -231,6 +303,24 @@ class ExplicitNullableTypeCheckerHelper {
         }
 
         return null;
+    }
+
+    /**
+     * Returns the annotated type of the property, preferring the field's one as
+     * the field also decides whether the property is checked at all.
+     */
+    private static AnnotatedType getAnnotatedPropertyType(Method readMethod,
+            String name) {
+        try {
+            Field field = readMethod.getDeclaringClass().getDeclaredField(name);
+            if (field.getGenericType()
+                    .equals(readMethod.getGenericReturnType())) {
+                return field.getAnnotatedType();
+            }
+        } catch (NoSuchFieldException e) {
+            // Fall back to the getter
+        }
+        return readMethod.getAnnotatedReturnType();
     }
 
     private boolean isPropertySubjectForChecking(

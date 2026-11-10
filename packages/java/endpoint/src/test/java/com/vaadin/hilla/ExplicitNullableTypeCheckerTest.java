@@ -15,6 +15,8 @@
  */
 package com.vaadin.hilla;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -24,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -232,8 +235,8 @@ public class ExplicitNullableTypeCheckerTest {
         // The first interaction is the obvious
         verify(checker).checkValueForType(list, stringListType);
 
-        verify(checker).checkValueForType("foo", String.class);
-        verify(checker).checkValueForType("bar", String.class);
+        verify(checker).checkValueForType("foo", String.class, null);
+        verify(checker).checkValueForType("bar", String.class, null);
     }
 
     private static class MyList extends ArrayList<String> {
@@ -250,8 +253,8 @@ public class ExplicitNullableTypeCheckerTest {
         checker.checkValueForType(list, MyList.class);
         verify(checker).checkValueForType(list, MyList.class);
 
-        verify(checker).checkValueForType("foo", String.class);
-        verify(checker).checkValueForType("bar", String.class);
+        verify(checker).checkValueForType("foo", String.class, null);
+        verify(checker).checkValueForType("bar", String.class, null);
     }
 
     @Test
@@ -283,8 +286,8 @@ public class ExplicitNullableTypeCheckerTest {
         // The first interaction is the obvious
         verify(checker).checkValueForType(map, stringToDateMapType);
 
-        verify(checker).checkValueForType(dateOne, Date.class);
-        verify(checker).checkValueForType(dateTwo, Date.class);
+        verify(checker).checkValueForType(dateOne, Date.class, null);
+        verify(checker).checkValueForType(dateTwo, Date.class, null);
     }
 
     @Test
@@ -316,8 +319,8 @@ public class ExplicitNullableTypeCheckerTest {
         // The first interaction is the obvious
         verify(checker).checkValueForType(array, stringArrayType);
 
-        verify(checker).checkValueForType("foo", String.class);
-        verify(checker).checkValueForType("bar", String.class);
+        verify(checker).checkValueForType("foo", String.class, null);
+        verify(checker).checkValueForType("bar", String.class, null);
     }
 
     @Test
@@ -354,9 +357,9 @@ public class ExplicitNullableTypeCheckerTest {
         // The first interaction is the obvious
         verify(checker).checkValueForType(bean, Bean.class);
 
-        verify(checker).checkValueForType("foo", String.class);
+        verify(checker).checkValueForType(eq("foo"), eq(String.class), any());
         // Should not check non-bean properties
-        verify(checker, never()).checkValueForType("bar", String.class);
+        verify(checker, never()).checkValueForType(eq("bar"), any(), any());
     }
 
     @Test
@@ -406,8 +409,9 @@ public class ExplicitNullableTypeCheckerTest {
 
         Assert.assertNull("Should allow values with @NonNull", error);
 
-        verify(explicitNullableTypeChecker).checkValueForType(notNullValue,
-                String.class);
+        verify(explicitNullableTypeChecker).checkValueForAnnotatedType(
+                notNullValue,
+                getClass().getMethod("stringNonnull").getAnnotatedReturnType());
     }
 
     @Test
@@ -476,9 +480,39 @@ public class ExplicitNullableTypeCheckerTest {
                 explicitNullableTypeChecker.checkValueForType(nullMarkedEntity,
                         NullMarkedEntity.class));
 
+        nullMarkedEntity.setNullableItems(Arrays.asList("item", null));
+        Assert.assertNull("Nullable item type should allow null item",
+                explicitNullableTypeChecker.checkValueForType(nullMarkedEntity,
+                        NullMarkedEntity.class));
+
         nullMarkedEntity.setValue(null);
         Assert.assertNotNull(explicitNullableTypeChecker
                 .checkValueForType(nullMarkedEntity, NullMarkedEntity.class));
+    }
+
+    @Test
+    public void should_ReturnNull_When_GivenNullItem_ForNullableTypeArgument()
+            throws NoSuchMethodException {
+        Assert.assertNull("Nullable list item type should allow null item",
+                explicitNullableTypeChecker.checkValueForAnnotatedElement(
+                        Arrays.asList("", null),
+                        getClass().getMethod("nullableItemList"), false));
+        Assert.assertNull("Nullable array item type should allow null item",
+                explicitNullableTypeChecker.checkValueForAnnotatedElement(
+                        new String[] { "", null },
+                        getClass().getMethod("nullableItemArray"), false));
+        Assert.assertNull("Nullable map value type should allow null value",
+                explicitNullableTypeChecker.checkValueForAnnotatedElement(
+                        Collections.singletonMap("key", null),
+                        getClass().getMethod("nullableValueMap"), false));
+
+        String error = explicitNullableTypeChecker
+                .checkValueForAnnotatedElement(
+                        Arrays.asList(Arrays.asList("", null)),
+                        getClass().getMethod("nonNullItemNestedList"), false);
+        Assert.assertNotNull(
+                "Non-nullable nested item type should reject null item", error);
+        Assert.assertTrue(error.contains("Unexpected null item"));
     }
 
     @Test
@@ -510,6 +544,22 @@ public class ExplicitNullableTypeCheckerTest {
 
     public String[] arrayMethod(String... args) {
         return args;
+    }
+
+    public @NonNull List<@org.jspecify.annotations.Nullable String> nullableItemList() {
+        return null;
+    }
+
+    public @org.jspecify.annotations.Nullable String @NonNull [] nullableItemArray() {
+        return null;
+    }
+
+    public @NonNull Map<String, @org.jspecify.annotations.Nullable String> nullableValueMap() {
+        return null;
+    }
+
+    public @NonNull List<List<String>> nonNullItemNestedList() {
+        return null;
     }
 
     /**

@@ -17,6 +17,7 @@ package com.vaadin.hilla;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -126,8 +127,8 @@ public class ExplicitNullableTypeChecker {
             return null;
         }
         if (annotatedElement instanceof Method) {
-            return checkValueForType(value,
-                    ((Method) annotatedElement).getGenericReturnType());
+            return checkValueForAnnotatedType(value,
+                    ((Method) annotatedElement).getAnnotatedReturnType());
         }
         return null;
     }
@@ -135,5 +136,11 @@ public class ExplicitNullableTypeChecker {
     String checkValueForType(Object value, Type expectedType) {
         return new ExplicitNullableTypeCheckerHelper().checkValueForType(value,
                 expectedType);
+    }
+
+    String checkValueForAnnotatedType(Object value,
+            AnnotatedType expectedType) {
+        return new ExplicitNullableTypeCheckerHelper()
+                .checkValueForAnnotatedType(value, expectedType);
     }
 }

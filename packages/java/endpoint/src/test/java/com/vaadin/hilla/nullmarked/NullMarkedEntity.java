@@ -15,11 +15,15 @@
  */
 package com.vaadin.hilla.nullmarked;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jspecify.annotations.Nullable;
 
 public class NullMarkedEntity {
     private String value;
     private @Nullable String nullableValue;
+    private List<@Nullable String> nullableItems = new ArrayList<>();
 
     public String getValue() {
         return value;
@@ -35,5 +39,13 @@ public class NullMarkedEntity {
 
     public void setNullableValue(@Nullable String nullableValue) {
         this.nullableValue = nullableValue;
+    }
+
+    public List<@Nullable String> getNullableItems() {
+        return nullableItems;
+    }
+
+    public void setNullableItems(List<@Nullable String> nullableItems) {
+        this.nullableItems = nullableItems;
     }
 }
