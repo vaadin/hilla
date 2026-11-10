@@ -15,6 +15,7 @@
  */
 package com.vaadin.hilla;
 
+import static com.vaadin.hilla.ExplicitNullableTypeChecker.isNullable;
 import static com.vaadin.hilla.ExplicitNullableTypeChecker.isRequired;
 
 import java.beans.IntrospectionException;
@@ -184,12 +185,6 @@ class ExplicitNullableTypeCheckerHelper {
                 "Got null value for type '%s', which is neither Optional"
                         + " nor void",
                 expectedType.getTypeName());
-    }
-
-    private static boolean isNullable(AnnotatedType annotatedType) {
-        return Arrays.stream(annotatedType.getAnnotations())
-                .anyMatch(annotation -> "nullable".equalsIgnoreCase(
-                        annotation.annotationType().getSimpleName()));
     }
 
     private static AnnotatedType getAnnotatedTypeArgument(

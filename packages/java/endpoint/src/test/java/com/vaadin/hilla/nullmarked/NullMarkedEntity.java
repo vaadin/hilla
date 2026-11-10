@@ -41,7 +41,8 @@ public class NullMarkedEntity {
         this.nullableValue = nullableValue;
     }
 
-    public List<@Nullable String> getNullableItems() {
+    // Only the field declares the nullable items, which is enough
+    public List<String> getNullableItems() {
         return nullableItems;
     }
 

@@ -94,6 +94,20 @@ public class ExplicitNullableTypeChecker {
         return hasAnnotation(annotations, NONNULL_ANNOTATION_NAME);
     }
 
+    /**
+     * Checks if the given annotated type is explicitly marked nullable with a
+     * type-use annotation, e.g. the item type in
+     * {@code List<@Nullable String>}.
+     *
+     * @param annotatedType
+     *            the annotated type to check
+     * @return {@code true} if the type is annotated nullable
+     */
+    static boolean isNullable(AnnotatedType annotatedType) {
+        return hasAnnotation(Stream.of(annotatedType.getAnnotations()),
+                NULLABLE_ANNOTATION_NAME);
+    }
+
     private static boolean hasAnnotation(List<AnnotationExpr> annotations,
             String annotationName) {
         return annotations != null && annotations.stream()
