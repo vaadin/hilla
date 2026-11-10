@@ -5,7 +5,10 @@ updates:
     schedule:
       interval: "daily"
     ignore:
-      # Stay on ClassGraph 4.x. ClassGraph 6 requires JDK 25 or newer, while
-      # Hilla still supports JDK 21, and moving to 5.x is a deliberate decision.
+      # Flow, TestBench and other Vaadin artifacts move in lockstep with the
+      # Vaadin platform release and are updated as part of it.
+      - dependency-name: "com.vaadin:*"
+      # Major ClassGraph upgrades are done manually: 6.x requires JDK 25,
+      # while Hilla supports JDK 21.
       - dependency-name: "io.github.classgraph:classgraph"
         versions: [">= 5"]
