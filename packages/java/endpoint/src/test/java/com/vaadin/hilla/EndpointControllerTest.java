@@ -156,8 +156,8 @@ public class EndpointControllerTest {
             // no op
         }
 
-        public void testUuidMethod(UUID id) {
-            // no op
+        public String testUuidMethod(UUID id) {
+            return id.toString();
         }
 
         @AnonymousAllowed
@@ -1120,6 +1120,19 @@ public class EndpointControllerTest {
                 validationErrorData.get("parameterName").asText());
         assertTrue(validationErrorData.get("message").asText()
                 .contains("'int[]'"));
+    }
+
+    @Test
+    public void should_ConvertArgument_When_TransferMapperConversionSucceeds() {
+        String id = "123e4567-e89b-12d3-a456-426614174000";
+        ResponseEntity<String> response = createVaadinController(TEST_ENDPOINT)
+                .serveEndpoint(TEST_ENDPOINT_NAME, "testUuidMethod",
+                        createRequestParameters(
+                                String.format("{\"id\": \"%s\"}", id)),
+                        requestMock);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(String.format("\"%s\"", id), response.getBody());
     }
 
     @Test
