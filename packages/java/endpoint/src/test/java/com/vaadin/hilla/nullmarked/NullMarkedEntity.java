@@ -25,6 +25,8 @@ public class NullMarkedEntity {
     private @Nullable String nullableValue;
     private List<@Nullable String> nullableItems = new ArrayList<>();
     private List<String> getterNullableItems = new ArrayList<>();
+    private List<String> setterNullableItems = new ArrayList<>();
+    private List<String> items = new ArrayList<>();
 
     public String getValue() {
         return value;
@@ -47,7 +49,7 @@ public class NullMarkedEntity {
         return nullableItems;
     }
 
-    public void setNullableItems(List<@Nullable String> nullableItems) {
+    public void setNullableItems(List<String> nullableItems) {
         this.nullableItems = nullableItems;
     }
 
@@ -58,5 +60,23 @@ public class NullMarkedEntity {
 
     public void setGetterNullableItems(List<String> getterNullableItems) {
         this.getterNullableItems = getterNullableItems;
+    }
+
+    // Only the setter declares the items nullable
+    public List<String> getSetterNullableItems() {
+        return setterNullableItems;
+    }
+
+    public void setSetterNullableItems(
+            List<@Nullable String> setterNullableItems) {
+        this.setterNullableItems = setterNullableItems;
+    }
+
+    public List<String> getItems() {
+        return items;
+    }
+
+    public void setItems(List<String> items) {
+        this.items = items;
     }
 }
