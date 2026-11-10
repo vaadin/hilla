@@ -23,13 +23,13 @@
     "react-router": "8.5.1"
   },
   "devDependencies": {
-    "@babel/core": "7.29.7",
+    "@babel/core": "7.29.13",
     "@babel/plugin-transform-react-jsx-development": "7.29.7",
     "@babel/preset-react": "7.29.7",
     "@babel/types": "7.29.11",
     "@preact/signals-react": "3.12.0",
     "@preact/signals-react-transform": "0.8.3",
-    "@rolldown/plugin-babel": "0.2.4",
+    "@rolldown/plugin-babel": "0.3.0",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.5.1",
     "@types/node": "26.6.6",
@@ -47,14 +47,14 @@
     "@vaadin/hilla-generator-plugin-subtypes": "file:../../../../ts/generator-plugin-subtypes",
     "@vaadin/hilla-generator-plugin-transfertypes": "file:../../../../ts/generator-plugin-transfertypes",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
-    "@vitejs/plugin-react": "6.1.2",
+    "@vitejs/plugin-react": "6.2.1",
     "magic-string": "1.4.5",
     "rollup-plugin-brotli": "3.1.0",
-    "rollup-plugin-visualizer": "7.1.1",
+    "rollup-plugin-visualizer": "7.1.2",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "npm:@typescript/typescript6@6.0.2",
-    "vite": "8.3.5",
+    "vite": "8.3.6",
     "vite-plugin-checker": "0.14.5"
   },
   "vaadin": {
@@ -79,13 +79,13 @@
       "react-router": "8.5.1"
     },
     "devDependencies": {
-      "@babel/core": "7.29.7",
+      "@babel/core": "7.29.13",
       "@babel/plugin-transform-react-jsx-development": "7.29.7",
       "@babel/preset-react": "7.29.7",
       "@babel/types": "7.29.11",
       "@preact/signals-react": "3.12.0",
       "@preact/signals-react-transform": "0.8.3",
-      "@rolldown/plugin-babel": "0.2.4",
+      "@rolldown/plugin-babel": "0.3.0",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.5.1",
       "@types/node": "26.6.6",
@@ -103,17 +103,17 @@
       "@vaadin/hilla-generator-plugin-subtypes": "25.3.5",
       "@vaadin/hilla-generator-plugin-transfertypes": "25.3.5",
       "@vaadin/hilla-generator-utils": "25.3.5",
-      "@vitejs/plugin-react": "6.1.2",
+      "@vitejs/plugin-react": "6.2.1",
       "magic-string": "1.4.5",
       "rollup-plugin-brotli": "3.1.0",
-      "rollup-plugin-visualizer": "7.1.1",
+      "rollup-plugin-visualizer": "7.1.2",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "npm:@typescript/typescript6@6.0.2",
-      "vite": "8.3.5",
+      "vite": "8.3.6",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "34b43c9a09fe0ce9fc04c70cb3d158f1430cc3adad5f127128f0ec648d3ec978"
+    "hash": "ea0a5865eeeee0a005c194e518b51b360f857b3987d4ae8e3d0109ca5699e8f7"
   },
   "overrides": {
     "@vaadin/a11y-base": "25.3.0-beta1",
