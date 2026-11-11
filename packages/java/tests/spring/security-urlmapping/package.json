@@ -109,7 +109,7 @@
     "@vaadin/hilla-generator-plugin-transfertypes": "file:../../../../ts/generator-plugin-transfertypes",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
     "@vitejs/plugin-react": "5.2.0",
-    "glob": "13.0.6",
+    "glob": "13.0.7",
     "magic-string": "0.30.21",
     "rollup-plugin-brotli": "3.1.0",
     "rollup-plugin-visualizer": "6.0.11",
@@ -222,7 +222,7 @@
       "@vaadin/hilla-generator-plugin-transfertypes": "24.9.27",
       "@vaadin/hilla-generator-utils": "24.9.27",
       "@vitejs/plugin-react": "5.2.0",
-      "glob": "13.0.6",
+      "glob": "13.0.7",
       "magic-string": "0.30.21",
       "rollup-plugin-brotli": "3.1.0",
       "rollup-plugin-visualizer": "6.0.11",
@@ -232,7 +232,7 @@
       "vite": "7.3.7",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "a45c91ea38adbef877820dde673807239f3a09a960fcf3ce331670fca6f5978f",
+    "hash": "2e763183f2cc5aeb4d0819ae5be80005e3921c07332c1342e92289e6ab431ff5",
     "overrides": {
       "@adobe/lit-mobx": "$@adobe/lit-mobx",
       "@polymer/iron-icon": "$@polymer/iron-icon",
