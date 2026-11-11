@@ -223,12 +223,7 @@ export class I18n {
     }
 
     if (partialLoad && language !== this.#language.value) {
-      // The language changed while loading, so the result is in the wrong language.
-      // Keys are requested again by their signals, but a chunk is not, so load it
-      // again in the current language.
-      if (chunkName) {
-        await this.updateLanguage({ chunkName });
-      }
+      // The language changed while loading, so the result is in the wrong language
       return;
     }
 
@@ -257,6 +252,12 @@ export class I18n {
         updateLanguageSettings({ language });
       }
     });
+
+    if (chunks && !partialLoad) {
+      // Chunks registered while loading are missing from the result
+      const missingChunks = [...this.#chunks].filter((chunk) => !chunks.includes(chunk));
+      await Promise.all(missingChunks.map(async (chunk) => this.updateLanguage({ chunkName: chunk })));
+    }
   }
 
   /**
