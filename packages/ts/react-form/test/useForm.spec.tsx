@@ -502,5 +502,33 @@ describe('@vaadin/hilla-react-form', () => {
       updatePlayers(() => [player2]);
       await waitForElementToBeRemoved(lastName);
     });
+
+    it('should iterate on optional array items', async () => {
+      function TeamTagsForm({ tags }: { tags?: string[] }) {
+        const { field, model, read } = useForm(TeamModel);
+        const { items } = useFormArrayPart(model.tags);
+
+        useEffect(() => {
+          read({ id: 1, name: 'Team 1', players: [], tags });
+        }, []);
+
+        return (
+          <>
+            <output data-testid="tags.count">{items.length}</output>
+            {items.map((tag, index) => (
+              <input key={index} data-testid={`tag.${index}`} type="text" {...field(tag)} />
+            ))}
+          </>
+        );
+      }
+
+      const { findByTestId, unmount } = render(<TeamTagsForm />);
+      expect(await findByTestId('tags.count')).to.have.text('0');
+      unmount();
+
+      const result = render(<TeamTagsForm tags={['red', 'blue']} />);
+      expect(await result.findByTestId('tag.0')).to.have.value('red');
+      expect(await result.findByTestId('tag.1')).to.have.value('blue');
+    });
   });
 });
