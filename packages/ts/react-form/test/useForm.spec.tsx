@@ -9,12 +9,13 @@ import {
 } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { ValidationError } from '@vaadin/hilla-lit-form';
+import type { StringModel } from '@vaadin/hilla-models';
 import chaiAsPromised from 'chai-as-promised';
 import chaiDom from 'chai-dom';
 import { useEffect, useState } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { afterEach, beforeEach, chai, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, chai, describe, expect, expectTypeOf, it } from 'vitest';
 import { useForm as _useForm, useFormArrayPart, useFormPart } from '../src';
 import {
   type Contract,
@@ -503,10 +504,16 @@ describe('@vaadin/hilla-react-form', () => {
       await waitForElementToBeRemoved(lastName);
     });
 
-    it('should iterate on optional array items', async () => {
+    describe('optional', () => {
+      let addTag: (tag: string) => void;
+
       function TeamTagsForm({ tags }: { tags?: string[] }) {
         const { field, model, read } = useForm(TeamModel);
-        const { items } = useFormArrayPart(model.tags);
+        // Accepting `model.tags` here is checked at compile time by `typecheck`
+        const { items, value, setValue } = useFormArrayPart(model.tags);
+        expectTypeOf(items).toEqualTypeOf<readonly StringModel[]>();
+
+        addTag = (tag) => setValue([...(value ?? []), tag]);
 
         useEffect(() => {
           read({ id: 1, name: 'Team 1', players: [], tags });
@@ -514,6 +521,7 @@ describe('@vaadin/hilla-react-form', () => {
 
         return (
           <>
+            <input data-testid="team.name" type="text" {...field(model.name)} />
             <output data-testid="tags.count">{items.length}</output>
             {items.map((tag, index) => (
               <input key={index} data-testid={`tag.${index}`} type="text" {...field(tag)} />
@@ -522,13 +530,24 @@ describe('@vaadin/hilla-react-form', () => {
         );
       }
 
-      const { findByTestId, unmount } = render(<TeamTagsForm />);
-      expect(await findByTestId('tags.count')).to.have.text('0');
-      unmount();
+      it('should iterate on array items', async () => {
+        const { findByTestId } = render(<TeamTagsForm tags={['red', 'blue']} />);
 
-      const result = render(<TeamTagsForm tags={['red', 'blue']} />);
-      expect(await result.findByTestId('tag.0')).to.have.value('red');
-      expect(await result.findByTestId('tag.1')).to.have.value('blue');
+        await waitFor(async () => expect(await findByTestId('tags.count')).to.have.text('2'));
+        expect(await findByTestId('tag.0')).to.have.value('red');
+        expect(await findByTestId('tag.1')).to.have.value('blue');
+      });
+
+      it('should add item to undefined array', async () => {
+        const { findByTestId } = render(<TeamTagsForm />);
+
+        expect(await findByTestId('team.name')).to.have.value('Team 1');
+        expect(await findByTestId('tags.count')).to.have.text('0');
+
+        addTag('red');
+        expect(await findByTestId('tag.0')).to.have.value('red');
+        expect(await findByTestId('tags.count')).to.have.text('1');
+      });
     });
   });
 });
