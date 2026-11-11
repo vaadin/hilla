@@ -702,6 +702,7 @@ describe('@vaadin/hilla-lit-form', () => {
         { tag: 'input', type: 'radio' },
         { tag: 'vaadin-checkbox', type: '' },
         { tag: 'vaadin-radio-button', type: '' },
+        { tag: 'vaadin-switch', type: '' },
       ].forEach(({ tag, type }) => {
         it(`CheckedFieldStrategy ${tag} ${type}`, async () => {
           const tagName = unsafeStatic(tag);
