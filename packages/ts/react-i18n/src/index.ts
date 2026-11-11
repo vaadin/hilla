@@ -223,7 +223,12 @@ export class I18n {
     }
 
     if (partialLoad && language !== this.#language.value) {
-      // The language changed while loading, so the result is in the wrong language
+      // The language changed while loading, so the result is in the wrong language.
+      // Keys are requested again by their signals, but a chunk is not, so load it
+      // again in the current language.
+      if (chunkName) {
+        await this.updateLanguage({ chunkName });
+      }
       return;
     }
 

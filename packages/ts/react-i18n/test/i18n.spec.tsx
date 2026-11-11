@@ -332,6 +332,47 @@ describe('@vaadin/hilla-react-i18n', () => {
         expect(fetchMock.callHistory.calls()).to.have.length(1);
         expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['street']);
       });
+
+      it('should load chunk again when switching language during loading', async () => {
+        await i18n.registerChunk('city');
+        await i18n.configure({ language });
+
+        let respondCityAU: (() => void) | undefined;
+        let respondStreet: (() => void) | undefined;
+        fetchMock
+          .removeRoutes()
+          .clearHistory()
+          .get(
+            /\?v-r=i18n&langtag=en-AU&chunks=city$/u,
+            new Promise((resolve) => {
+              respondCityAU = () => resolve({ body: { 'addresses.form.city.label': 'Australian City Chunked' } });
+            }),
+          )
+          .get(
+            /\?v-r=i18n&langtag=en&chunks=street$/u,
+            new Promise((resolve) => {
+              respondStreet = () => resolve({ body: { 'addresses.form.street.label': 'Street Chunked' } });
+            }),
+          )
+          .get(/\?v-r=i18n&langtag=en-AU&chunks=street$/u, {
+            body: { 'addresses.form.street.label': 'Australian Street Chunked' },
+          });
+
+        const languageChange = i18n.setLanguage('en-AU');
+        const chunkRegistration = i18n.registerChunk('street');
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, 1);
+        });
+
+        // The street chunk response in the previous language arrives after the change
+        respondCityAU?.();
+        await languageChange;
+        respondStreet?.();
+        await chunkRegistration;
+
+        expect(i18n.translate(key`addresses.form.city.label`)).to.equal('Australian City Chunked');
+        expect(i18n.translate(key`addresses.form.street.label`)).to.equal('Australian Street Chunked');
+      });
     });
 
     describe('translate', () => {
