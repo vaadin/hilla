@@ -184,11 +184,6 @@ export class I18n {
     this.#batchedKeysPromise = undefined;
     const batchedKeys = [...this.#batchedKeys];
     return this.updateLanguage({ keys: batchedKeys }).then(() => {
-      // The request is done, so the keys must not block requesting them again,
-      // e.g., in another language after the translations are replaced.
-      for (const key of batchedKeys) {
-        this.#batchedKeys.delete(key);
-      }
       console.warn(['A server call was made to translate keys those were not loaded:', ...batchedKeys].join('\n  - '));
     });
   }
@@ -227,6 +222,11 @@ export class I18n {
       return;
     }
 
+    if (partialLoad && language !== this.#language.value) {
+      // The language changed while loading, so the result is in the wrong language
+      return;
+    }
+
     // Update all signals together to avoid triggering side effects multiple times
     batch(() => {
       this.#translations.value = partialLoad
@@ -241,6 +241,9 @@ export class I18n {
 
       if (!partialLoad) {
         this.#alreadyRequestedKeys.value = new Set<string>();
+        // Allow requesting the keys again in the new language, including the
+        // keys of a request that is still pending in the previous language
+        this.#batchedKeys.clear();
       } else if (keys?.length) {
         this.#alreadyRequestedKeys.value = new Set([...this.#alreadyRequestedKeys.value, ...keys]);
       }

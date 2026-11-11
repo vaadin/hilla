@@ -496,6 +496,49 @@ describe('@vaadin/hilla-react-i18n', () => {
         expect(fetchMock.callHistory.called(/langtag=de-DE&keys=addresses.form.missing.label$/u)).to.be.true;
         expect(missing.value).to.equal('!de: addresses.form.missing.label');
       });
+
+      it('should load keys dynamically again when language changes during loading', async () => {
+        let respondMissing: (() => void) | undefined;
+        fetchMock
+          .removeRoutes()
+          .get(
+            `?v-r=i18n&langtag=${navigator.language}&keys=addresses.form.missing.label`,
+            new Promise((resolve) => {
+              respondMissing = () =>
+                resolve({
+                  body: { 'addresses.form.missing.label': 'Missing' },
+                  status: 200,
+                  headers: { 'X-Vaadin-Retrieved-Locale': 'und' },
+                });
+            }),
+          )
+          .get(/\?v-r=i18n&langtag=de-DE&keys=addresses.form.missing.label$/u, {
+            body: { 'addresses.form.missing.label': 'Fehlend' },
+            status: 200,
+            headers: { 'X-Vaadin-Retrieved-Locale': 'de-DE' },
+          })
+          .get(/\?v-r=i18n&.*$/u, {
+            body: { 'addresses.form.city.label': 'Stadt' },
+            status: 200,
+            headers: { 'X-Vaadin-Retrieved-Locale': 'de-DE' },
+          });
+
+        const missing = i18n.translateDynamic('addresses.form.missing.label');
+        expect(missing.value).to.equal('');
+        // Wait for batched keys request
+        await new Promise<void>(queueMicrotask);
+
+        await i18n.setLanguage('de-DE');
+        expect(missing.value).to.equal('');
+
+        // The response in the previous language arrives after the change
+        respondMissing?.();
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, 1);
+        });
+
+        expect(missing.value).to.equal('Fehlend');
+      });
     });
 
     describe('global side effects', () => {
