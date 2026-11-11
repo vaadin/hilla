@@ -219,8 +219,9 @@ it before anything else is sent:
 - `InvalidSessionMiddleware` calls back on a `401`. When the callback
   resolves with a successful login, it retries the call with the current CSRF
   headers from `csrfInfoSource`, which `login` has updated, and with the
-  result's `token`, if any, as the Vaadin CSRF token. The retry only matters
-  when `login` gets a `navigate` option, as it reloads the page by default.
+  result's `token`, if any, as the Vaadin CSRF token. It does not retry
+  when the callback started a page reload, which `login` does by default
+  unless it gets a `navigate` option.
 
 Both helpers reload the page by default afterwards. An application that
 navigates without a reload keeps the open push connection, with the CSRF

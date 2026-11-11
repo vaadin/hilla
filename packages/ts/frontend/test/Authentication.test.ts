@@ -389,6 +389,19 @@ describe('@vaadin/hilla-frontend', () => {
         });
       });
 
+      it('should not retry the call when the login reloads the page', async () => {
+        fetchMock.post(`${base}/connect/FooEndpoint/fooMethod`, 401);
+        // A fragment-only target keeps the test page from actually reloading
+        fetchMock.post('login', { headers: { ...happyCaseResponseHeaders, 'Default-url': '#reload' } });
+
+        const middleware = new InvalidSessionMiddleware(async () => originalLogin('valid-username', 'valid-password'));
+
+        const client = new ConnectClient({ middlewares: [middleware] });
+
+        await expect(client.call('FooEndpoint', 'fooMethod')).rejects.toThrow('401');
+        expect(fetchMock.callHistory.calls(`${base}/connect/FooEndpoint/fooMethod`)).to.have.lengthOf(1);
+      });
+
       it('should not retry the call when the login fails', async () => {
         fetchMock.post(`${base}/connect/FooEndpoint/fooMethod`, 401);
 

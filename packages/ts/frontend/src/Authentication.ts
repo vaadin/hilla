@@ -169,6 +169,11 @@ function normalizePath(url: string): string {
   return normalized;
 }
 
+// Counts the page reloads that the helpers start, so that
+// InvalidSessionMiddleware doesn't send a call again on a page that is going
+// away: the server would run it, but nobody would get the result.
+let pageReloadCount = 0;
+
 /**
  * Navigates to the provided path using page reload.
  *
@@ -177,6 +182,7 @@ function normalizePath(url: string): string {
 function navigateWithPageReload(to: string) {
   // Consider absolute path to be within application context
   const url = to.startsWith('/') ? new URL(`.${to}`, document.baseURI) : to;
+  pageReloadCount += 1;
   window.location.replace(url);
 }
 
@@ -298,9 +304,9 @@ export async function logout(options?: LogoutOptions): Promise<void> {
  *
  * Resolve with the result of the login: when it is successful
  * (`error: false`), the endpoint call is sent again. By default, `login`
- * reloads the page after a successful login, which discards the call; pass a
- * `navigate` option to `login`, for example a no-op, to keep the page and get
- * the result of the call.
+ * reloads the page after a successful login, and then the call is not sent
+ * again; pass a `navigate` option to `login`, for example a no-op, to keep the
+ * page and get the result of the call.
  */
 export type OnInvalidSessionCallback = () => Promise<LoginResult>;
 
@@ -313,8 +319,8 @@ export type OnInvalidSessionCallback = () => Promise<LoginResult>;
  * callback. If the callback resolves with a successful login result, the call
  * is sent again with the current CSRF headers, such as the token that
  * {@link login} received from the server. If the result also has a `token`,
- * it is sent as the Vaadin CSRF token. Otherwise, the call fails with the
- * original response.
+ * it is sent as the Vaadin CSRF token. Otherwise, or if the callback started
+ * a page reload, the call fails with the original response.
  */
 export class InvalidSessionMiddleware implements MiddlewareClass {
   private readonly onInvalidSessionCallback: OnInvalidSessionCallback;
@@ -328,8 +334,9 @@ export class InvalidSessionMiddleware implements MiddlewareClass {
     clonedContext.request = context.request.clone();
     const response = await next(context);
     if (response.status === 401) {
+      const pageReloadCountBefore = pageReloadCount;
       const loginResult = await this.onInvalidSessionCallback();
-      if (!loginResult.error) {
+      if (!loginResult.error && pageReloadCount === pageReloadCountBefore) {
         const csrfInfo = await csrfInfoSource.get();
         for (const [name, value] of csrfInfo.headerEntries) {
           clonedContext.request.headers.set(name, value);
