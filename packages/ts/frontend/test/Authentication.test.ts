@@ -371,6 +371,35 @@ describe('@vaadin/hilla-frontend', () => {
         });
       });
 
+      it('should retry the call with the new CSRF token after a successful login', async () => {
+        const newSpringCsrfToken = 'new-spring-csrf-token';
+        fetchMock.post(`${base}/connect/FooEndpoint/fooMethod`, 401, { repeat: 1 });
+        fetchMock.post(`${base}/connect/FooEndpoint/fooMethod`, { fooData: 'foo' });
+        fetchMock.post('login', {
+          headers: { ...happyCaseResponseHeaders, 'Spring-CSRF-token': newSpringCsrfToken },
+        });
+
+        const middleware = new InvalidSessionMiddleware(async () => login('valid-username', 'valid-password'));
+
+        const client = new ConnectClient({ middlewares: [middleware] });
+
+        expect(await client.call('FooEndpoint', 'fooMethod')).to.deep.equal({ fooData: 'foo' });
+        expect(fetchMock.callHistory.lastCall()?.options.headers).to.deep.include({
+          [TEST_SPRING_CSRF_HEADER_NAME]: newSpringCsrfToken,
+        });
+      });
+
+      it('should not retry the call when the login fails', async () => {
+        fetchMock.post(`${base}/connect/FooEndpoint/fooMethod`, 401);
+
+        const middleware = new InvalidSessionMiddleware(async () => Promise.resolve({ error: true }));
+
+        const client = new ConnectClient({ middlewares: [middleware] });
+
+        await expect(client.call('FooEndpoint', 'fooMethod')).rejects.toThrow('401');
+        expect(fetchMock.callHistory.calls()).to.have.lengthOf(1);
+      });
+
       it('should not invoke the onInvalidSession callback on 200 response', async () => {
         fetchMock.post(`${base}/connect/FooEndpoint/fooMethod`, { fooData: 'foo' });
 

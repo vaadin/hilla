@@ -294,9 +294,10 @@ export async function logout(options?: LogoutOptions): Promise<void> {
 
 /**
  * It defines what to do when it detects a session is invalid. E.g.,
- * show a login view.
- * It takes an <code>EndpointCallContinue</code> parameter, which can be
- * used to continue the endpoint call.
+ * show a login view and log the user in with {@link login}.
+ *
+ * Resolve with the result of the login: when it is successful
+ * (`error: false`), the endpoint call is sent again.
  */
 export type OnInvalidSessionCallback = () => Promise<LoginResult>;
 
@@ -304,6 +305,12 @@ export type OnInvalidSessionCallback = () => Promise<LoginResult>;
  * A helper class for handling invalid sessions during an endpoint call.
  * E.g., you can use this to show user a login page when the session has
  * expired.
+ *
+ * When a call fails with `401 Unauthorized`, the middleware invokes the
+ * callback. If the callback resolves with a successful login result, the call
+ * is sent again with the current CSRF headers, such as the token that
+ * {@link login} received from the server. Otherwise, the call fails with the
+ * original response.
  */
 export class InvalidSessionMiddleware implements MiddlewareClass {
   private readonly onInvalidSessionCallback: OnInvalidSessionCallback;
@@ -318,8 +325,14 @@ export class InvalidSessionMiddleware implements MiddlewareClass {
     const response = await next(context);
     if (response.status === 401) {
       const loginResult = await this.onInvalidSessionCallback();
-      if (loginResult.token) {
-        clonedContext.request.headers.set(VAADIN_CSRF_HEADER, loginResult.token);
+      if (!loginResult.error) {
+        const csrfInfo = await csrfInfoSource.get();
+        for (const [name, value] of csrfInfo.headerEntries) {
+          clonedContext.request.headers.set(name, value);
+        }
+        if (loginResult.token) {
+          clonedContext.request.headers.set(VAADIN_CSRF_HEADER, loginResult.token);
+        }
         return next(clonedContext);
       }
     }
