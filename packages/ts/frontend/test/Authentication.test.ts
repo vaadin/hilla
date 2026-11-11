@@ -394,12 +394,22 @@ describe('@vaadin/hilla-frontend', () => {
         // A fragment-only target keeps the test page from actually reloading
         fetchMock.post('login', { headers: { ...happyCaseResponseHeaders, 'Default-url': '#reload' } });
 
-        const middleware = new InvalidSessionMiddleware(async () => originalLogin('valid-username', 'valid-password'));
+        let loginResult: LoginResult | undefined;
+        const middleware = new InvalidSessionMiddleware(async () => {
+          loginResult = await originalLogin('valid-username', 'valid-password');
+          return loginResult;
+        });
 
         const client = new ConnectClient({ middlewares: [middleware] });
 
-        await expect(client.call('FooEndpoint', 'fooMethod')).rejects.toThrow('401');
-        expect(fetchMock.callHistory.calls(`${base}/connect/FooEndpoint/fooMethod`)).to.have.lengthOf(1);
+        try {
+          await expect(client.call('FooEndpoint', 'fooMethod')).rejects.toThrow('401');
+          expect(loginResult?.error).to.be.false;
+          expect(window.location.hash).to.equal('#reload');
+          expect(fetchMock.callHistory.calls(`${base}/connect/FooEndpoint/fooMethod`)).to.have.lengthOf(1);
+        } finally {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
       });
 
       it('should not retry the call when the login fails', async () => {

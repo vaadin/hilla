@@ -220,8 +220,8 @@ it before anything else is sent:
   resolves with a successful login, it retries the call with the current CSRF
   headers from `csrfInfoSource`, which `login` has updated, and with the
   result's `token`, if any, as the Vaadin CSRF token. It does not retry
-  when the callback started a page reload, which `login` does by default
-  unless it gets a `navigate` option.
+  when the callback made `login` or `logout` reload the page with their
+  default navigation, that is, without a `navigate` option.
 
 Both helpers reload the page by default afterwards. An application that
 navigates without a reload keeps the open push connection, with the CSRF

@@ -319,8 +319,10 @@ export type OnInvalidSessionCallback = () => Promise<LoginResult>;
  * callback. If the callback resolves with a successful login result, the call
  * is sent again with the current CSRF headers, such as the token that
  * {@link login} received from the server. If the result also has a `token`,
- * it is sent as the Vaadin CSRF token. Otherwise, or if the callback started
- * a page reload, the call fails with the original response.
+ * it is sent as the Vaadin CSRF token. Otherwise, the call fails with the
+ * original response. It also fails if the callback made {@link login} or
+ * {@link logout} reload the page with their default navigation; a reload that
+ * the callback starts in some other way is not detected.
  */
 export class InvalidSessionMiddleware implements MiddlewareClass {
   private readonly onInvalidSessionCallback: OnInvalidSessionCallback;
