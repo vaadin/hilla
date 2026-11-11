@@ -218,7 +218,9 @@ it before anything else is sent:
   removes the JWT cookie of stateless authentication.
 - `InvalidSessionMiddleware` calls back on a `401`. When the callback
   resolves with a successful login, it retries the call with the current CSRF
-  headers from `csrfInfoSource`, which `login` has updated.
+  headers from `csrfInfoSource`, which `login` has updated, and with the
+  result's `token`, if any, as the Vaadin CSRF token. The retry only matters
+  when `login` gets a `navigate` option, as it reloads the page by default.
 
 Both helpers reload the page by default afterwards. An application that
 navigates without a reload keeps the open push connection, with the CSRF

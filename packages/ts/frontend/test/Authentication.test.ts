@@ -392,7 +392,9 @@ describe('@vaadin/hilla-frontend', () => {
       it('should not retry the call when the login fails', async () => {
         fetchMock.post(`${base}/connect/FooEndpoint/fooMethod`, 401);
 
-        const middleware = new InvalidSessionMiddleware(async () => Promise.resolve({ error: true }));
+        const middleware = new InvalidSessionMiddleware(async () =>
+          Promise.resolve({ error: true, token: TEST_VAADIN_CSRF_TOKEN_VALUE }),
+        );
 
         const client = new ConnectClient({ middlewares: [middleware] });
 

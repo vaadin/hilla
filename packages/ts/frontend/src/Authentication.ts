@@ -297,7 +297,10 @@ export async function logout(options?: LogoutOptions): Promise<void> {
  * show a login view and log the user in with {@link login}.
  *
  * Resolve with the result of the login: when it is successful
- * (`error: false`), the endpoint call is sent again.
+ * (`error: false`), the endpoint call is sent again. By default, `login`
+ * reloads the page after a successful login, which discards the call; pass a
+ * `navigate` option to `login`, for example a no-op, to keep the page and get
+ * the result of the call.
  */
 export type OnInvalidSessionCallback = () => Promise<LoginResult>;
 
@@ -309,7 +312,8 @@ export type OnInvalidSessionCallback = () => Promise<LoginResult>;
  * When a call fails with `401 Unauthorized`, the middleware invokes the
  * callback. If the callback resolves with a successful login result, the call
  * is sent again with the current CSRF headers, such as the token that
- * {@link login} received from the server. Otherwise, the call fails with the
+ * {@link login} received from the server. If the result also has a `token`,
+ * it is sent as the Vaadin CSRF token. Otherwise, the call fails with the
  * original response.
  */
 export class InvalidSessionMiddleware implements MiddlewareClass {
