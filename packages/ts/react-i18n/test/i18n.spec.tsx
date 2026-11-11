@@ -477,6 +477,25 @@ describe('@vaadin/hilla-react-i18n', () => {
         expect(buildingNo.value).to.equal('Building');
         expect(apartmentNo.value).to.equal('Apartment');
       });
+
+      it('should load keys dynamically again after language change', async () => {
+        const missing = i18n.translateDynamic('addresses.form.missing.label');
+        expect(missing.value).to.equal('');
+
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, 1);
+        });
+        expect(missing.value).to.equal('!en: addresses.form.missing.label');
+
+        await i18n.setLanguage('de-DE');
+        expect(missing.value).to.equal('');
+
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, 1);
+        });
+        expect(fetchMock.callHistory.called(/langtag=de-DE&keys=addresses.form.missing.label$/u)).to.be.true;
+        expect(missing.value).to.equal('!de: addresses.form.missing.label');
+      });
     });
 
     describe('global side effects', () => {

@@ -184,6 +184,11 @@ export class I18n {
     this.#batchedKeysPromise = undefined;
     const batchedKeys = [...this.#batchedKeys];
     return this.updateLanguage({ keys: batchedKeys }).then(() => {
+      // The request is done, so the keys must not block requesting them again,
+      // e.g., in another language after the translations are replaced.
+      for (const key of batchedKeys) {
+        this.#batchedKeys.delete(key);
+      }
       console.warn(['A server call was made to translate keys those were not loaded:', ...batchedKeys].join('\n  - '));
     });
   }
