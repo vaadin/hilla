@@ -118,7 +118,7 @@ jobs:
       - name: Run code review
         # Pinned to a commit of the shared action's main branch; bump the pin to
         # pick up changes there.
-        uses: vaadin/github-actions/code-review@5e91962ee15f7602a7366238d92375429afaa0d1 # main
+        uses: vaadin/github-actions/code-review@ae1f7829c521dde703f12c46198f067ac1bc876b # main
         with:
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
           pr-number: ${{ env.PR_NUMBER }}
