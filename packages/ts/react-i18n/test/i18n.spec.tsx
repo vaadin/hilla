@@ -582,7 +582,12 @@ describe('@vaadin/hilla-react-i18n', () => {
         await i18n.setLanguage('de-DE');
         expect(missing.value).to.equal('');
 
-        // The response in the previous language arrives after the change
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, 1);
+        });
+        expect(missing.value).to.equal('Fehlend');
+
+        // The response in the previous language arrives after the new one
         respondMissing?.();
         await new Promise<void>((resolve) => {
           setTimeout(resolve, 1);
