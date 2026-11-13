@@ -160,8 +160,7 @@ public class SignalsHandlerTest {
         expectedUpdatedSignalEventJson.set("nodes", nodesObject);
 
         StepVerifier.create(firstFlux).expectNextMatches(jsonNode -> {
-            // Check the structure matches what we expect, ignoring dynamic
-            // fields
+
             return jsonNode.has("@type")
                     && jsonNode.get("@type").asText().equals("snapshot")
                     && jsonNode.has("commandId") && jsonNode.has("nodes")
@@ -170,6 +169,30 @@ public class SignalsHandlerTest {
                     && jsonNode.get("nodes").get("").get("value")
                             .asDouble() == 42.0;
         }).thenCancel().verify();
+    }
+    @Test
+    public void serverSideSet_notifiesSubscriber() throws Exception {
+        SharedNumberSignal numberSignal = new SharedNumberSignal(10.0);
+
+        when(signalsRegistry.get(CLIENT_SIGNAL_ID_1))
+            .thenAnswer(invocation -> new InternalSignal(
+                numberSignal, new ObjectMapper()));
+
+        Flux<JsonNode> firstFlux = signalsHandler.subscribe(
+            "endpoint", "method", CLIENT_SIGNAL_ID_1, null);
+
+        var received = new java.util.ArrayList<JsonNode>();
+        var subscription = firstFlux.subscribe(received::add);
+
+        try {
+            numberSignal.set(42);
+
+            org.junit.jupiter.api.Assertions.assertEquals(2, received.size());
+            org.junit.jupiter.api.Assertions.assertEquals(
+                42.0, received.get(1).get("value").asDouble());
+        } finally {
+            subscription.dispose();
+        }
     }
 
     @Test
