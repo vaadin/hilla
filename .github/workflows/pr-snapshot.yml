@@ -63,10 +63,15 @@ jobs:
     # be triggered from the outside. Fork pull requests are skipped entirely -
     # labeling one does nothing.
     #
+    # Only in vaadin/hilla: the snapshot is published to the shared targets, the
+    # Maven repository and pkg.pr.new, so a copy of this repository inside the
+    # organization must not publish one, even with the secrets configured.
+    #
     # The label has to be present for both event types, and a `labeled` event
     # for some other label must not start a build of its own.
     if: >-
-      !github.event.pull_request.head.repo.fork
+      github.repository == 'vaadin/hilla'
+      && !github.event.pull_request.head.repo.fork
       && contains(github.event.pull_request.labels.*.name, 'snapshot build')
       && (github.event.action != 'labeled' || github.event.label.name == 'snapshot build')
     timeout-minutes: 90
