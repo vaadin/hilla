@@ -28,22 +28,25 @@ jobs:
     # member is reported as CONTRIBUTOR; the org-membership API call in the job
     # is what actually confirms access. PRs opened by the totally-not-ai app
     # (agent-created PRs) are reviewed too: the app is not an org member, so the
-    # job allows it explicitly.
+    # job allows it explicitly. The whole job only runs in vaadin/hilla, so a
+    # copy of this repository that has the organization secrets does not start
+    # reviews of its own.
     if: |
-      (github.event_name == 'issue_comment' &&
-       github.event.issue.pull_request &&
-       github.event.comment.body == '/code-review' &&
-       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)) ||
-      (github.event_name == 'pull_request' &&
-       github.event.action == 'review_requested' &&
-       github.event.requested_reviewer.login == 'vaadin-review-bot') ||
-      (github.event_name == 'pull_request' &&
-       contains(fromJSON('["opened", "ready_for_review"]'), github.event.action) &&
-       github.event.pull_request.draft == false &&
-       !contains(fromJSON('["dependabot[bot]", "vaadin-bot"]'), github.event.pull_request.user.login) &&
-       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association) &&
-       !startsWith(github.event.pull_request.title, 'chore:') &&
-       !startsWith(github.event.pull_request.title, 'chore('))
+      github.repository == 'vaadin/hilla' &&
+      ((github.event_name == 'issue_comment' &&
+        github.event.issue.pull_request &&
+        github.event.comment.body == '/code-review' &&
+        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)) ||
+       (github.event_name == 'pull_request' &&
+        github.event.action == 'review_requested' &&
+        github.event.requested_reviewer.login == 'vaadin-review-bot') ||
+       (github.event_name == 'pull_request' &&
+        contains(fromJSON('["opened", "ready_for_review"]'), github.event.action) &&
+        github.event.pull_request.draft == false &&
+        !contains(fromJSON('["dependabot[bot]", "vaadin-bot"]'), github.event.pull_request.user.login) &&
+        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association) &&
+        !startsWith(github.event.pull_request.title, 'chore:') &&
+        !startsWith(github.event.pull_request.title, 'chore(')))
     runs-on: ubuntu-26.04
     permissions:
       contents: read
