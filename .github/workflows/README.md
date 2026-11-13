@@ -68,7 +68,8 @@ warning.
 Publishing needs the credentials, and GitHub only hands secrets to pull
 requests from a branch of this repository. That is also what limits who can
 trigger a snapshot: pushing such a branch takes write access. Labeling a pull
-request from a fork does nothing.
+request from a fork does nothing. The build also runs only in `vaadin/hilla`:
+a copy of the repository publishes no snapshot, even with the credentials.
 
 Configuration:
 
