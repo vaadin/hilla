@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import com.github.javaparser.ast.expr.AnnotationExpr;
@@ -34,6 +35,10 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 public class ExplicitNullableTypeChecker {
     private static final String NULLABLE_ANNOTATION_NAME = "nullable";
     private static final String NONNULL_ANNOTATION_NAME = "nonnull";
+    // Id and Version usually mark values which are null until the entity is
+    // saved, so they make a value nullable, as in the generator
+    private static final Set<String> NULLABLE_PERSISTENCE_ANNOTATIONS = Set
+            .of("jakarta.persistence.Id", "jakarta.persistence.Version");
 
     /**
      * Checks if the reflected element should be required (not nullable) in the
@@ -90,8 +95,8 @@ public class ExplicitNullableTypeChecker {
      * Checks if a node with the given annotations, collected from all the
      * places that declare it, should be required (not nullable) in the
      * generated Typescript code. As in the generator, a nonnull annotation
-     * takes precedence over a nullable one, which takes precedence over the
-     * context.
+     * takes precedence over a nullable one or {@code @Id} and {@code @Version},
+     * which take precedence over the context.
      *
      * @param annotations
      *            the annotations of the node
@@ -105,7 +110,10 @@ public class ExplicitNullableTypeChecker {
         if (hasAnnotation(annotationList.stream(), NONNULL_ANNOTATION_NAME)) {
             return true;
         }
-        if (hasAnnotation(annotationList.stream(), NULLABLE_ANNOTATION_NAME)) {
+        if (hasAnnotation(annotationList.stream(), NULLABLE_ANNOTATION_NAME)
+                || annotationList.stream().anyMatch(
+                        annotation -> NULLABLE_PERSISTENCE_ANNOTATIONS.contains(
+                                annotation.annotationType().getName()))) {
             return false;
         }
         return requiredByContext;
