@@ -29,6 +29,13 @@ package com.vaadin.hilla.crud.filter;
  * <li>Do the actual comparison using the matcher / operator provided by
  * {@link #getMatcher()}</li>
  * </ul>
+ * <p>
+ * The value of an enum property is the name of the constant, as in
+ * {@code "VERY_LOW"}, which is what the built-in filtering resolves with
+ * {@code Enum.valueOf}. It is not necessarily the value a generated TypeScript
+ * enum holds for the constant: that is what the constant is serialized as,
+ * which differs from the name when the enum renames its constants, for example
+ * with {@code @JsonProperty}, or when the object mapper writes them otherwise.
  */
 public class PropertyStringFilter extends Filter {
     public enum Matcher {
