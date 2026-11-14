@@ -113,8 +113,22 @@ public class InternalSignal {
 
     private void notifySubscribers(SignalCommand processedCommand,
             CommandResult result) {
-        var commandToEmit = inProgressCommands
+        var submittedCommand = inProgressCommands
                 .remove(processedCommand.commandId());
+        // A command that originates on the server, e.g. from signal.set() in
+        // Java, has not been submitted by any client, so there is no JSON to
+        // reuse and it has to be serialized from the processed command:
+        ObjectNode commandToEmit = submittedCommand != null ? submittedCommand
+                : objectMapper.valueToTree(processedCommand);
+
+        // The client applies a command optimistically when submitting it, so it
+        // needs to know whether the command was accepted to be able to revert
+        // it again:
+        commandToEmit.put("accepted", result.accepted());
+        if (result instanceof CommandResult.Reject reject) {
+            commandToEmit.put("reason", reject.reason());
+        }
+
         if (result.accepted()) {
             subscribers.entrySet().removeIf(
                     client -> tryEmitCommandToSubscriber(commandToEmit,
