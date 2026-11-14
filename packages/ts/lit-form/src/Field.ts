@@ -419,6 +419,7 @@ export function getDefaultFieldStrategy<T>(elm: FieldElement<T>, model?: Model<T
   switch (elm.localName) {
     case 'vaadin-checkbox':
     case 'vaadin-radio-button':
+    case 'vaadin-switch':
       return new CheckedFieldStrategy(elm as CheckedFieldElement<T>, model);
     case 'vaadin-checkbox-group':
       return new CheckedGroupFieldStrategy(elm, model);
