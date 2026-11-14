@@ -216,8 +216,12 @@ it before anything else is sent:
   the browser navigate. When the logout fails, it retries with the token from
   a freshly loaded page, and as a last resort clears the token. It always
   removes the JWT cookie of stateless authentication.
-- `InvalidSessionMiddleware` calls back on a `401`, and retries the call with
-  the token the callback's login returned.
+- `InvalidSessionMiddleware` calls back on a `401`. When the callback
+  resolves with a successful login, it retries the call with the current CSRF
+  headers from `csrfInfoSource`, which `login` has updated, and with the
+  result's `token`, if any, as the Vaadin CSRF token. It does not retry
+  when the callback made `login` or `logout` reload the page with their
+  default navigation, that is, without a `navigate` option.
 
 Both helpers reload the page by default afterwards. An application that
 navigates without a reload keeps the open push connection, with the CSRF
