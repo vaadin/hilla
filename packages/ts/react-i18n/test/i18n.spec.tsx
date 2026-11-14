@@ -332,6 +332,57 @@ describe('@vaadin/hilla-react-i18n', () => {
         expect(fetchMock.callHistory.calls()).to.have.length(1);
         expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['street']);
       });
+
+      it.each(['before', 'after'])(
+        'should load chunk registered while switching language, response %s switch',
+        async (order) => {
+          await i18n.registerChunk('city');
+          await i18n.configure({ language });
+
+          let respondCityAU: (() => void) | undefined;
+          let respondStreet: (() => void) | undefined;
+          fetchMock
+            .removeRoutes()
+            .clearHistory()
+            .get(
+              /\?v-r=i18n&langtag=en-AU&chunks=city$/u,
+              new Promise((resolve) => {
+                respondCityAU = () => resolve({ body: { 'addresses.form.city.label': 'Australian City Chunked' } });
+              }),
+            )
+            .get(
+              /\?v-r=i18n&langtag=en&chunks=street$/u,
+              new Promise((resolve) => {
+                respondStreet = () => resolve({ body: { 'addresses.form.street.label': 'Street Chunked' } });
+              }),
+            )
+            .get(/\?v-r=i18n&langtag=en-AU&chunks=street$/u, {
+              body: { 'addresses.form.street.label': 'Australian Street Chunked' },
+            });
+
+          const languageChange = i18n.setLanguage('en-AU');
+          const chunkRegistration = i18n.registerChunk('street');
+          await new Promise<void>((resolve) => {
+            setTimeout(resolve, 1);
+          });
+
+          // The street chunk is loaded in the previous language
+          if (order === 'before') {
+            respondStreet?.();
+            await chunkRegistration;
+            respondCityAU?.();
+            await languageChange;
+          } else {
+            respondCityAU?.();
+            await languageChange;
+            respondStreet?.();
+            await chunkRegistration;
+          }
+
+          expect(i18n.translate(key`addresses.form.city.label`)).to.equal('Australian City Chunked');
+          expect(i18n.translate(key`addresses.form.street.label`)).to.equal('Australian Street Chunked');
+        },
+      );
     });
 
     describe('translate', () => {
@@ -476,6 +527,73 @@ describe('@vaadin/hilla-react-i18n', () => {
         // Translations should show up
         expect(buildingNo.value).to.equal('Building');
         expect(apartmentNo.value).to.equal('Apartment');
+      });
+
+      it('should load keys dynamically again after language change', async () => {
+        const missing = i18n.translateDynamic('addresses.form.missing.label');
+        expect(missing.value).to.equal('');
+
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, 1);
+        });
+        expect(missing.value).to.equal('!en: addresses.form.missing.label');
+
+        await i18n.setLanguage('de-DE');
+        expect(missing.value).to.equal('');
+
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, 1);
+        });
+        expect(fetchMock.callHistory.called(/langtag=de-DE&keys=addresses.form.missing.label$/u)).to.be.true;
+        expect(missing.value).to.equal('!de: addresses.form.missing.label');
+      });
+
+      it('should load keys dynamically again when language changes during loading', async () => {
+        let respondMissing: (() => void) | undefined;
+        fetchMock
+          .removeRoutes()
+          .get(
+            `?v-r=i18n&langtag=${navigator.language}&keys=addresses.form.missing.label`,
+            new Promise((resolve) => {
+              respondMissing = () =>
+                resolve({
+                  body: { 'addresses.form.missing.label': 'Missing' },
+                  status: 200,
+                  headers: { 'X-Vaadin-Retrieved-Locale': 'und' },
+                });
+            }),
+          )
+          .get(/\?v-r=i18n&langtag=de-DE&keys=addresses.form.missing.label$/u, {
+            body: { 'addresses.form.missing.label': 'Fehlend' },
+            status: 200,
+            headers: { 'X-Vaadin-Retrieved-Locale': 'de-DE' },
+          })
+          .get(/\?v-r=i18n&.*$/u, {
+            body: { 'addresses.form.city.label': 'Stadt' },
+            status: 200,
+            headers: { 'X-Vaadin-Retrieved-Locale': 'de-DE' },
+          });
+
+        const missing = i18n.translateDynamic('addresses.form.missing.label');
+        expect(missing.value).to.equal('');
+        // Wait for batched keys request
+        await new Promise<void>(queueMicrotask);
+
+        await i18n.setLanguage('de-DE');
+        expect(missing.value).to.equal('');
+
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, 1);
+        });
+        expect(missing.value).to.equal('Fehlend');
+
+        // The response in the previous language arrives after the new one
+        respondMissing?.();
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, 1);
+        });
+
+        expect(missing.value).to.equal('Fehlend');
       });
     });
 
