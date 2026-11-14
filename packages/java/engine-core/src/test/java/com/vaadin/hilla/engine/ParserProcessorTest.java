@@ -49,6 +49,11 @@ public class ParserProcessorTest {
                         .toList(),
                 "The classes the parser walked are what the TypeScript is"
                         + " written from");
+        assertEquals(List.of(
+                "com/vaadin/hilla/engine/fixtures/TestEndpoint/Greeting.ts"),
+                List.copyOf(generation.files().keySet()),
+                "The declarations of the types they send are rendered while"
+                        + " the walk runs");
         assertEquals(List.of(),
                 Files.walk(buildDir).filter(Files::isRegularFile).toList(),
                 "The walk is all there is to it");

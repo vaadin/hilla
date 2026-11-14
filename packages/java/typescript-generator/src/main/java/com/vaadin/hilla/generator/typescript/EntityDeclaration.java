@@ -15,16 +15,19 @@
  */
 package com.vaadin.hilla.generator.typescript;
 
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.generator.model.PropertyModel;
+import com.vaadin.hilla.parser.core.Output;
 
 /**
- * Writes the file declaring one of the types the endpoints refer to.
+ * The file declaring one of the types the endpoints refer to, as it is rendered
+ * while the walk runs, and printed once it is over.
  */
-public final class EntityWriter {
+public final class EntityDeclaration implements Output.Document {
     private static final String BEAN = """
             interface {{declaration}} {
               {{properties}}
@@ -39,16 +42,39 @@ public final class EntityWriter {
 
             export default {{name}};""";
 
-    public GeneratedFile write(EntityModel entity) {
-        var module = ModulePaths.moduleOf(entity.javaClass());
+    private final EntityModel entity;
 
-        return switch (entity) {
-        case EntityModel.Bean bean -> write(module, bean);
-        case EntityModel.Enumeration enumeration -> write(module, enumeration);
-        };
+    public EntityDeclaration(EntityModel entity) {
+        this.entity = Objects.requireNonNull(entity);
     }
 
-    private static GeneratedFile write(String module, EntityModel.Bean bean) {
+    /**
+     * The path of the file, relative to the output folder.
+     */
+    public String path() {
+        return ModulePaths.moduleOf(entity.javaClass()) + ".ts";
+    }
+
+    /**
+     * The entity declared.
+     */
+    public EntityModel entity() {
+        return entity;
+    }
+
+    @Override
+    public String print() {
+        var module = ModulePaths.moduleOf(entity.javaClass());
+
+        var file = switch (entity) {
+        case EntityModel.Bean bean -> print(module, bean);
+        case EntityModel.Enumeration enumeration -> print(module, enumeration);
+        };
+
+        return file.content();
+    }
+
+    private GeneratedFile print(String module, EntityModel.Bean bean) {
         var name = ModulePaths.entityName(bean.javaClass());
         var imports = new ImportRegistry();
 
@@ -70,7 +96,7 @@ public final class EntityWriter {
                 .concat(bean.properties().stream()
                         .map(property -> writeProperty(property, types)),
                         bean.discriminator().stream()
-                                .map(EntityWriter::writeDiscriminator))
+                                .map(EntityDeclaration::writeDiscriminator))
                 .collect(Collectors.joining("\n"));
 
         var body = Template.of(BEAN) //
@@ -82,7 +108,7 @@ public final class EntityWriter {
         return GeneratedFile.of(module, imports, body);
     }
 
-    private static GeneratedFile write(String module,
+    private static GeneratedFile print(String module,
             EntityModel.Enumeration enumeration) {
         var name = ModulePaths.entityName(enumeration.javaClass());
 
