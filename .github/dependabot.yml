@@ -1,0 +1,15 @@
+version: 2
+updates:
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    ignore:
+      # Flow, TestBench and other Vaadin artifacts move in lockstep with the
+      # Vaadin platform release and are updated as part of it.
+      - dependency-name: "com.vaadin:*"
+      - dependency-name: "com.vaadin.external.*:*"
+      # Stay on ClassGraph 4.x: 6.x requires JDK 25 while Hilla supports
+      # JDK 21, so leaving 4.x is done manually together with Flow.
+      - dependency-name: "io.github.classgraph:classgraph"
+        versions: [">= 5"]
