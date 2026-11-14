@@ -17,6 +17,7 @@ package com.vaadin.hilla;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -93,6 +94,20 @@ public class ExplicitNullableTypeChecker {
         return hasAnnotation(annotations, NONNULL_ANNOTATION_NAME);
     }
 
+    /**
+     * Checks if the given annotated type is explicitly marked nullable with a
+     * type-use annotation, e.g. the item type in
+     * {@code List<@Nullable String>}.
+     *
+     * @param annotatedType
+     *            the annotated type to check
+     * @return {@code true} if the type is annotated nullable
+     */
+    static boolean isNullable(AnnotatedType annotatedType) {
+        return hasAnnotation(Stream.of(annotatedType.getAnnotations()),
+                NULLABLE_ANNOTATION_NAME);
+    }
+
     private static boolean hasAnnotation(List<AnnotationExpr> annotations,
             String annotationName) {
         return annotations != null && annotations.stream()
@@ -126,8 +141,8 @@ public class ExplicitNullableTypeChecker {
             return null;
         }
         if (annotatedElement instanceof Method) {
-            return checkValueForType(value,
-                    ((Method) annotatedElement).getGenericReturnType());
+            return checkValueForAnnotatedType(value,
+                    ((Method) annotatedElement).getAnnotatedReturnType());
         }
         return null;
     }
@@ -135,5 +150,11 @@ public class ExplicitNullableTypeChecker {
     String checkValueForType(Object value, Type expectedType) {
         return new ExplicitNullableTypeCheckerHelper().checkValueForType(value,
                 expectedType);
+    }
+
+    String checkValueForAnnotatedType(Object value,
+            AnnotatedType expectedType) {
+        return new ExplicitNullableTypeCheckerHelper()
+                .checkValueForAnnotatedType(value, expectedType);
     }
 }

@@ -15,6 +15,8 @@
  */
 package com.vaadin.hilla;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -24,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -232,8 +235,8 @@ public class ExplicitNullableTypeCheckerTest {
         // The first interaction is the obvious
         verify(checker).checkValueForType(list, stringListType);
 
-        verify(checker).checkValueForType("foo", String.class);
-        verify(checker).checkValueForType("bar", String.class);
+        verify(checker).checkValueForType(eq("foo"), eq(String.class), any());
+        verify(checker).checkValueForType(eq("bar"), eq(String.class), any());
     }
 
     private static class MyList extends ArrayList<String> {
@@ -250,8 +253,8 @@ public class ExplicitNullableTypeCheckerTest {
         checker.checkValueForType(list, MyList.class);
         verify(checker).checkValueForType(list, MyList.class);
 
-        verify(checker).checkValueForType("foo", String.class);
-        verify(checker).checkValueForType("bar", String.class);
+        verify(checker).checkValueForType(eq("foo"), eq(String.class), any());
+        verify(checker).checkValueForType(eq("bar"), eq(String.class), any());
     }
 
     @Test
@@ -283,8 +286,8 @@ public class ExplicitNullableTypeCheckerTest {
         // The first interaction is the obvious
         verify(checker).checkValueForType(map, stringToDateMapType);
 
-        verify(checker).checkValueForType(dateOne, Date.class);
-        verify(checker).checkValueForType(dateTwo, Date.class);
+        verify(checker).checkValueForType(eq(dateOne), eq(Date.class), any());
+        verify(checker).checkValueForType(eq(dateTwo), eq(Date.class), any());
     }
 
     @Test
@@ -316,8 +319,8 @@ public class ExplicitNullableTypeCheckerTest {
         // The first interaction is the obvious
         verify(checker).checkValueForType(array, stringArrayType);
 
-        verify(checker).checkValueForType("foo", String.class);
-        verify(checker).checkValueForType("bar", String.class);
+        verify(checker).checkValueForType(eq("foo"), eq(String.class), any());
+        verify(checker).checkValueForType(eq("bar"), eq(String.class), any());
     }
 
     @Test
@@ -354,9 +357,9 @@ public class ExplicitNullableTypeCheckerTest {
         // The first interaction is the obvious
         verify(checker).checkValueForType(bean, Bean.class);
 
-        verify(checker).checkValueForType("foo", String.class);
+        verify(checker).checkValueForType(eq("foo"), eq(String.class), any());
         // Should not check non-bean properties
-        verify(checker, never()).checkValueForType("bar", String.class);
+        verify(checker, never()).checkValueForType(eq("bar"), any(), any());
     }
 
     @Test
@@ -396,18 +399,13 @@ public class ExplicitNullableTypeCheckerTest {
     }
 
     @Test
-    public void should_InvokeCheckValueForType_When_AnnotatedNonnull()
+    public void should_ReturnNull_When_AnnotatedNonnullAndValuePresent()
             throws NoSuchMethodException {
-        explicitNullableTypeChecker = spy(explicitNullableTypeChecker);
-        String notNullValue = "someValue";
         String error = explicitNullableTypeChecker
-                .checkValueForAnnotatedElement(notNullValue,
+                .checkValueForAnnotatedElement("someValue",
                         getClass().getMethod("stringNonnull"), false);
 
         Assert.assertNull("Should allow values with @NonNull", error);
-
-        verify(explicitNullableTypeChecker).checkValueForType(notNullValue,
-                String.class);
     }
 
     @Test
@@ -476,9 +474,63 @@ public class ExplicitNullableTypeCheckerTest {
                 explicitNullableTypeChecker.checkValueForType(nullMarkedEntity,
                         NullMarkedEntity.class));
 
+        nullMarkedEntity.setNullableItems(Arrays.asList("item", null));
+        Assert.assertNull("Nullable item type should allow null item",
+                explicitNullableTypeChecker.checkValueForType(nullMarkedEntity,
+                        NullMarkedEntity.class));
+        nullMarkedEntity.setGetterNullableItems(Arrays.asList("item", null));
+        Assert.assertNull("Nullable item type of getter should allow null item",
+                explicitNullableTypeChecker.checkValueForType(nullMarkedEntity,
+                        NullMarkedEntity.class));
+        nullMarkedEntity.setSetterNullableItems(Arrays.asList("item", null));
+        Assert.assertNull("Nullable item type of setter should allow null item",
+                explicitNullableTypeChecker.checkValueForType(nullMarkedEntity,
+                        NullMarkedEntity.class));
+
+        nullMarkedEntity.setItems(Arrays.asList("item", null));
+        String error = explicitNullableTypeChecker
+                .checkValueForType(nullMarkedEntity, NullMarkedEntity.class);
+        Assert.assertNotNull("Non-nullable item type should reject null item",
+                error);
+        Assert.assertTrue(error.contains("property 'items'"));
+        nullMarkedEntity.setItems(new ArrayList<>());
+
         nullMarkedEntity.setValue(null);
         Assert.assertNotNull(explicitNullableTypeChecker
                 .checkValueForType(nullMarkedEntity, NullMarkedEntity.class));
+    }
+
+    @Test
+    public void should_RespectNullableTypeArguments_When_GivenNullItem()
+            throws NoSuchMethodException {
+        List<String> listWithNull = Arrays.asList("", null);
+        String[] arrayWithNull = { "", null };
+        Map<String, String> mapWithNull = Collections.singletonMap("key", null);
+
+        assertNullItemAllowed("nullableItemList", listWithNull);
+        assertNullItemAllowed("nullableItemNestedList", List.of(listWithNull));
+        assertNullItemAllowed("nullableItemArray", arrayWithNull);
+        assertNullItemAllowed("nullableValueMap", mapWithNull);
+
+        assertNullItemRejected("nonNullItemNestedList", List.of(listWithNull));
+        assertNullItemRejected("nonNullItemArray", arrayWithNull);
+        assertNullItemRejected("nonNullValueMap", mapWithNull);
+    }
+
+    private void assertNullItemAllowed(String methodName, Object value)
+            throws NoSuchMethodException {
+        Assert.assertNull(methodName + " should allow a null item",
+                explicitNullableTypeChecker.checkValueForAnnotatedElement(value,
+                        getClass().getMethod(methodName), false));
+    }
+
+    private void assertNullItemRejected(String methodName, Object value)
+            throws NoSuchMethodException {
+        String error = explicitNullableTypeChecker
+                .checkValueForAnnotatedElement(value,
+                        getClass().getMethod(methodName), false);
+        Assert.assertNotNull(methodName + " should reject a null item", error);
+        Assert.assertTrue(error.contains("Unexpected null"));
     }
 
     @Test
@@ -510,6 +562,34 @@ public class ExplicitNullableTypeCheckerTest {
 
     public String[] arrayMethod(String... args) {
         return args;
+    }
+
+    public @NonNull List<@org.jspecify.annotations.Nullable String> nullableItemList() {
+        return null;
+    }
+
+    public @org.jspecify.annotations.Nullable String @NonNull [] nullableItemArray() {
+        return null;
+    }
+
+    public @NonNull Map<String, @org.jspecify.annotations.Nullable String> nullableValueMap() {
+        return null;
+    }
+
+    public @NonNull List<List<String>> nonNullItemNestedList() {
+        return null;
+    }
+
+    public @NonNull List<List<@org.jspecify.annotations.Nullable String>> nullableItemNestedList() {
+        return null;
+    }
+
+    public String @NonNull [] nonNullItemArray() {
+        return null;
+    }
+
+    public @NonNull Map<String, String> nonNullValueMap() {
+        return null;
     }
 
     /**
