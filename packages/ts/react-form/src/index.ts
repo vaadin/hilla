@@ -15,7 +15,7 @@ import {
   type ArrayItemModel,
   getStringConverter,
 } from '@vaadin/hilla-lit-form';
-import m, { type ArrayModel, Model } from '@vaadin/hilla-models';
+import m, { type ArrayModel, Model, type OptionalModel } from '@vaadin/hilla-models';
 import { useEffect, useMemo, useReducer, useRef } from 'react';
 import type { Writable } from 'type-fest';
 
@@ -78,7 +78,10 @@ export type UseFormResult<M extends Model> = Omit<UseFormPartResult<M>, 'setValu
     update(): void;
   }>;
 
-export type UseFormArrayPartResult<M extends ArrayModel> = Omit<UseFormPartResult<M>, 'field'> & {
+export type UseFormArrayPartResult<M extends ArrayModel | OptionalModel<ArrayModel>> = Omit<
+  UseFormPartResult<M>,
+  'field'
+> & {
   items: ReadonlyArray<ArrayItemModel<M>>;
 };
 
@@ -302,10 +305,12 @@ export function useFormPart<M extends Model>(model: M): UseFormPartResult<M> {
  * Hook to access an array model part of a form. It provides the same API as `useFormPart`,
  * but adds an `items` property that allows to iterate over the items in form of an array of models.
  *
- * @param model - The array model to access
+ * @param model - The array model to access, which can be optional
  * @returns The array model part of the form
  */
-export function useFormArrayPart<M extends ArrayModel>(model: M): UseFormArrayPartResult<M> {
+export function useFormArrayPart<M extends ArrayModel | OptionalModel<ArrayModel>>(
+  model: M,
+): UseFormArrayPartResult<M> {
   isRendering = true;
   const binderNode = getBinderNode(model);
   isRendering = false;

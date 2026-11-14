@@ -81,6 +81,7 @@ export interface Team {
   id: number;
   name: string;
   players: Player[];
+  tags?: string[];
 }
 
 const intModel: NumberModel = m.meta(NumberModel, { jvmType: 'int' });
@@ -105,12 +106,18 @@ export type PlayerModel = typeof PlayerModel;
 
 export const TeamModel: ObjectModel<
   Team,
-  { readonly id: NumberModel; readonly name: StringModel; readonly players: ArrayModel<PlayerModel> }
+  {
+    readonly id: NumberModel;
+    readonly name: StringModel;
+    readonly players: ArrayModel<PlayerModel>;
+    readonly tags: OptionalModel<ArrayModel<StringModel>>;
+  }
 > = m
   .object<Team>('Team')
   .property('id', intModel)
   .property('name', stringModel)
   .property('players', m.meta(m.array(PlayerModel), { jvmType: 'java.util.List' }))
+  .property('tags', m.meta(m.optional(m.array(stringModel)), { jvmType: 'java.util.List' }))
   .build();
 export type TeamModel = typeof TeamModel;
 
