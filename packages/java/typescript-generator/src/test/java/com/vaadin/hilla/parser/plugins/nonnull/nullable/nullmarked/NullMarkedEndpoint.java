@@ -16,6 +16,7 @@
 package com.vaadin.hilla.parser.plugins.nonnull.nullable.nullmarked;
 
 import java.util.List;
+import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
 
@@ -36,6 +37,22 @@ public class NullMarkedEndpoint {
     public List<@Nullable String> nullableTypeArgumentMethod(
             List<@Nullable String> param) {
         return param;
+    }
+
+    public @Nullable String[] nullableItemArray() {
+        return new String[0];
+    }
+
+    public String @Nullable [] nullableArray() {
+        return new String[0];
+    }
+
+    public Map<String, @Nullable String> nullableValueMap() {
+        return Map.of();
+    }
+
+    public List<List<@Nullable String>> nullableNestedList() {
+        return List.of();
     }
 
     public UnmarkedModel unmarkedModel(UnmarkedModel unmarkedModel) {
