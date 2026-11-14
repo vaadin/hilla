@@ -49,6 +49,8 @@ import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.EndpointProperties;
 import com.vaadin.hilla.EndpointSubscription;
 import com.vaadin.hilla.ServletContextTestSetup;
+import com.vaadin.hilla.exception.EndpointValidationException;
+import com.vaadin.hilla.exception.EndpointValidationException.ValidationErrorData;
 import com.vaadin.hilla.push.PushMessageHandler.SubscriptionInfo;
 import com.vaadin.hilla.push.messages.fromclient.SubscribeMessage;
 import com.vaadin.hilla.push.messages.fromclient.UnsubscribeMessage;
@@ -74,6 +76,8 @@ public class PushMessageHandlerTest {
     private static final String ENDPOINT_SUBSCRIPTION_METHOD = "testEndpointSubscription";
     private static final String INFINITE_ENDPOINT_SUBSCRIPTION_METHOD = "testInfiniteEndpointSubscription";
     private static final String ENDPOINT_SUBSCRIPTION_WITH_EXCEPTION_METHOD = "testEndpointSubscriptionWithException";
+    private static final String FLUX_WITH_INVALID_PARAMS_METHOD = "testFluxWithInvalidParams";
+    private static final String VALIDATION_ERROR_MESSAGE = "Validation error in endpoint 'TestEndpoint' method 'testFluxWithInvalidParams'";
 
     @Autowired
     private PushMessageHandler pushMessageHandler;
@@ -101,7 +105,9 @@ public class PushMessageHandlerTest {
                     String methodName = request.getArgument(1);
                     if (methodName.equals(FLUX_METHOD)
                             || methodName.equals(FLUX_WITH_EXCEPTION_METHOD)
-                            || methodName.equals(INFINITE_FLUX_METHOD)) {
+                            || methodName.equals(INFINITE_FLUX_METHOD)
+                            || methodName
+                                    .equals(FLUX_WITH_INVALID_PARAMS_METHOD)) {
                         return Flux.class;
                     } else if (methodName.equals(ENDPOINT_SUBSCRIPTION_METHOD)
                             || methodName.equals(
@@ -140,6 +146,12 @@ public class PushMessageHandlerTest {
                             ENDPOINT_SUBSCRIPTION_WITH_EXCEPTION_METHOD)) {
                         return EndpointSubscription.of(createErrorFlux(),
                                 unsubscribeHandler);
+                    } else if (methodName
+                            .equals(FLUX_WITH_INVALID_PARAMS_METHOD)) {
+                        throw new EndpointValidationException(
+                                VALIDATION_ERROR_MESSAGE,
+                                List.of(new ValidationErrorData(
+                                        "must not be blank", "s")));
                     }
                     return null;
                 });
@@ -261,6 +273,23 @@ public class PushMessageHandlerTest {
                 TimeUnit.SECONDS);
         Assert.assertEquals(subscribeMessage.getId(), clientMessage.getId());
         Assert.assertEquals("Exception in Flux", clientMessage.getMessage());
+    }
+
+    @Test
+    public void fluxSubscription_invalidParametersErrorDeliveredToClient() {
+        SubscribeMessage subscribeMessage = createFluxSubscribe();
+        subscribeMessage.setMethodName(FLUX_WITH_INVALID_PARAMS_METHOD);
+        List<AbstractClientMessage> messages = new ArrayList<>();
+        pushMessageHandler.handleMessage(connectionId, subscribeMessage,
+                messages::add);
+
+        Assert.assertEquals(1, messages.size());
+        ClientMessageError clientMessage = (ClientMessageError) messages.get(0);
+        Assert.assertEquals(subscribeMessage.getId(), clientMessage.getId());
+        Assert.assertEquals(VALIDATION_ERROR_MESSAGE,
+                clientMessage.getMessage());
+        Assert.assertEquals(0, pushMessageHandler.fluxSubscriptionInfos
+                .get(connectionId).size());
     }
 
     @Test
