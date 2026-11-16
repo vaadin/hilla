@@ -38,16 +38,16 @@
     "transform-ast": "2.4.4",
     "typescript": "npm:@typescript/typescript6@6.0.2",
     "vite": "8.3.8",
-    "vite-plugin-checker": "0.14.5"
+    "vite-plugin-checker": "1.0.0"
   },
   "vaadin": {
     "dependencies": {
       "@vaadin/a11y-base": "25.4.0-alpha7",
       "@vaadin/component-base": "25.4.0-alpha7",
       "@vaadin/field-base": "25.4.0-alpha7",
-      "@vaadin/hilla-frontend": "25.4.0-alpha6",
-      "@vaadin/hilla-lit-form": "25.4.0-alpha6",
-      "@vaadin/hilla-models": "25.4.0-alpha6",
+      "@vaadin/hilla-frontend": "25.4.0-alpha7",
+      "@vaadin/hilla-lit-form": "25.4.0-alpha7",
+      "@vaadin/hilla-models": "25.4.0-alpha7",
       "@vaadin/icon": "25.4.0-alpha7",
       "@vaadin/icons": "25.4.0-alpha7",
       "@vaadin/input-container": "25.4.0-alpha7",
@@ -68,7 +68,7 @@
       "@rolldown/plugin-babel": "0.3.1",
       "@types/node": "26.6.6",
       "@typescript/native": "npm:typescript@7.0.2",
-      "@vaadin/hilla-generator-utils": "25.4.0-alpha6",
+      "@vaadin/hilla-generator-utils": "25.4.0-alpha7",
       "@vitejs/plugin-react": "6.3.0",
       "magic-string": "1.4.5",
       "rollup-plugin-brotli": "3.1.0",
@@ -77,9 +77,9 @@
       "transform-ast": "2.4.4",
       "typescript": "npm:@typescript/typescript6@6.0.2",
       "vite": "8.3.8",
-      "vite-plugin-checker": "0.14.5"
+      "vite-plugin-checker": "1.0.0"
     },
-    "hash": "3ebee199e0433ce191d9318117afeaf001a5ba1e6a5d9cf4493a1fe59e6de776"
+    "hash": "4d992d2cae34748cb01879712a223e02865c6d1357d1cd7c2d910b83d16546df"
   },
   "overrides": {
     "@vaadin/a11y-base": "$@vaadin/a11y-base",
