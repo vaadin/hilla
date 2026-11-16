@@ -43,21 +43,21 @@
     "transform-ast": "2.4.4",
     "typescript": "npm:@typescript/typescript6@6.0.2",
     "vite": "8.3.8",
-    "vite-plugin-checker": "0.14.5"
+    "vite-plugin-checker": "1.0.0"
   },
   "vaadin": {
     "dependencies": {
       "@vaadin/a11y-base": "25.4.0-alpha7",
       "@vaadin/field-base": "25.4.0-alpha7",
-      "@vaadin/hilla-file-router": "25.4.0-alpha6",
-      "@vaadin/hilla-frontend": "25.4.0-alpha6",
-      "@vaadin/hilla-lit-form": "25.4.0-alpha6",
-      "@vaadin/hilla-models": "25.4.0-alpha6",
-      "@vaadin/hilla-react-auth": "25.4.0-alpha6",
-      "@vaadin/hilla-react-crud": "25.4.0-alpha6",
-      "@vaadin/hilla-react-form": "25.4.0-alpha6",
-      "@vaadin/hilla-react-i18n": "25.4.0-alpha6",
-      "@vaadin/hilla-react-signals": "25.4.0-alpha6",
+      "@vaadin/hilla-file-router": "25.4.0-alpha7",
+      "@vaadin/hilla-frontend": "25.4.0-alpha7",
+      "@vaadin/hilla-lit-form": "25.4.0-alpha7",
+      "@vaadin/hilla-models": "25.4.0-alpha7",
+      "@vaadin/hilla-react-auth": "25.4.0-alpha7",
+      "@vaadin/hilla-react-crud": "25.4.0-alpha7",
+      "@vaadin/hilla-react-form": "25.4.0-alpha7",
+      "@vaadin/hilla-react-i18n": "25.4.0-alpha7",
+      "@vaadin/hilla-react-signals": "25.4.0-alpha7",
       "@vaadin/react-components": "25.4.0-alpha3",
       "@vaadin/react-components-pro": "25.4.0-alpha3",
       "@vaadin/vaadin-lumo-styles": "25.4.0-alpha7",
@@ -78,7 +78,7 @@
       "@types/react": "19.3.0",
       "@types/react-dom": "19.3.0",
       "@typescript/native": "npm:typescript@7.0.2",
-      "@vaadin/hilla-generator-utils": "25.4.0-alpha6",
+      "@vaadin/hilla-generator-utils": "25.4.0-alpha7",
       "@vitejs/plugin-react": "6.3.0",
       "magic-string": "1.4.5",
       "rollup-plugin-brotli": "3.1.0",
@@ -87,9 +87,9 @@
       "transform-ast": "2.4.4",
       "typescript": "npm:@typescript/typescript6@6.0.2",
       "vite": "8.3.8",
-      "vite-plugin-checker": "0.14.5"
+      "vite-plugin-checker": "1.0.0"
     },
-    "hash": "e529904e4ec5421ba1ddfd05755fcbe7b2e4bae95bd843fcc1cf045b4d2262ab"
+    "hash": "97c851ac82bb8140c48b873f5ef4fc3a6fdc9debe2576fe3e7197aa35982abd5"
   },
   "overrides": {
     "@vaadin/a11y-base": "$@vaadin/a11y-base",
