@@ -69,7 +69,7 @@
     <junit.version>5.10.1</junit.version>
     <mockito.version>4.5.0</mockito.version>
     <flow.version>25.4-SNAPSHOT</flow.version>
-    <slf4j.version>2.0.9</slf4j.version>
+    <slf4j.version>2.0.20</slf4j.version>
     <spring.boot.version>4.2.0-RC2</spring.boot.version>
     <testbench.version>25.4.0-alpha1</testbench.version>
     <jakarta.validation.version>3.1.1</jakarta.validation.version>
@@ -82,7 +82,7 @@
     <guava.version>33.7.2-jre</guava.version>
     <jetty.version>12.0.3</jetty.version>
     <atmosphere.version>3.0.5.slf4jvaadin1</atmosphere.version>
-    <kotlin.version>2.4.20</kotlin.version>
+    <kotlin.version>2.4.21</kotlin.version>
   </properties>
 
   <organization>
