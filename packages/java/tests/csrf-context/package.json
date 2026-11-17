@@ -6,19 +6,19 @@
     "@vaadin/common-frontend": "0.0.25",
     "@vaadin/hilla-frontend": "file:../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../ts/lit-form",
-    "@vaadin/icon": "25.3.5",
-    "@vaadin/icons": "25.3.5",
+    "@vaadin/icon": "25.3.6",
+    "@vaadin/icons": "25.3.6",
     "@vaadin/router": "2.0.1",
-    "@vaadin/tooltip": "25.3.5",
-    "@vaadin/vaadin-lumo-styles": "25.3.5",
-    "@vaadin/vaadin-themable-mixin": "25.3.5",
+    "@vaadin/tooltip": "25.3.6",
+    "@vaadin/vaadin-lumo-styles": "25.3.6",
+    "@vaadin/vaadin-themable-mixin": "25.3.6",
     "lit": "3.3.3"
   },
   "devDependencies": {
     "@babel/core": "7.29.13",
     "@babel/plugin-transform-react-jsx-development": "7.29.7",
     "@babel/preset-react": "7.29.7",
-    "@babel/types": "7.29.11",
+    "@babel/types": "7.29.14",
     "@preact/signals-react": "3.12.0",
     "@preact/signals-react-transform": "0.8.3",
     "@rolldown/plugin-babel": "0.3.1",
@@ -44,7 +44,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "npm:@typescript/typescript6@6.0.2",
-    "vite": "8.3.6",
+    "vite": "8.3.8",
     "vite-plugin-checker": "0.14.5"
   },
   "vaadin": {
@@ -52,19 +52,19 @@
       "@vaadin/common-frontend": "0.0.25",
       "@vaadin/hilla-frontend": "25.3.5",
       "@vaadin/hilla-lit-form": "25.3.5",
-      "@vaadin/icon": "25.3.5",
-      "@vaadin/icons": "25.3.5",
+      "@vaadin/icon": "25.3.6",
+      "@vaadin/icons": "25.3.6",
       "@vaadin/router": "2.0.1",
-      "@vaadin/tooltip": "25.3.5",
-      "@vaadin/vaadin-lumo-styles": "25.3.5",
-      "@vaadin/vaadin-themable-mixin": "25.3.5",
+      "@vaadin/tooltip": "25.3.6",
+      "@vaadin/vaadin-lumo-styles": "25.3.6",
+      "@vaadin/vaadin-themable-mixin": "25.3.6",
       "lit": "3.3.3"
     },
     "devDependencies": {
       "@babel/core": "7.29.13",
       "@babel/plugin-transform-react-jsx-development": "7.29.7",
       "@babel/preset-react": "7.29.7",
-      "@babel/types": "7.29.11",
+      "@babel/types": "7.29.14",
       "@preact/signals-react": "3.12.0",
       "@preact/signals-react-transform": "0.8.3",
       "@rolldown/plugin-babel": "0.3.1",
@@ -90,10 +90,10 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "npm:@typescript/typescript6@6.0.2",
-      "vite": "8.3.6",
+      "vite": "8.3.8",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "54ac6700c4b3fa84fc124707614f29c9d19c73cfcdd6d5e51c926869ee454482"
+    "hash": "72092f817d9e9243996ff0f9f69ab30299c102d9c8c9e6a9bee0c52d0a5e3c78"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
