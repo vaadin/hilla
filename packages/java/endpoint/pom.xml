@@ -17,6 +17,7 @@
 
     <properties>
         <formatter.basedir>${project.parent.basedir}</formatter.basedir>
+        <jpms.module.name>com.vaadin.hilla.endpoint</jpms.module.name>
     </properties>
 
     <dependencyManagement>

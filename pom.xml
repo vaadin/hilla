@@ -78,6 +78,11 @@
     <jakarta.servlet.api.version>6.1.0</jakarta.servlet.api.version>
     <hibernate.validator.version>8.0.2.Final</hibernate.validator.version>
     <jaxb.version>4.0.4</jaxb.version>
+    <!-- Stable JPMS module name, written as Automatic-Module-Name to the main
+         jar. A module that publishes a runtime jar sets it after the jar's
+         main package, following the rule in vaadin/flow CONVENTIONS.md.
+         Empty means no entry. -->
+    <jpms.module.name/>
     <github.javaparser.core.version>3.28.2</github.javaparser.core.version>
     <guava.version>33.7.2-jre</guava.version>
     <jetty.version>12.0.3</jetty.version>
@@ -344,7 +349,21 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.2.2</version>
+        <version>3.5.1</version>
+        <executions>
+          <execution>
+            <!-- Only the main jar gets the module name, a test-jar with the
+                 same name would clash on the module path -->
+            <id>default-jar</id>
+            <configuration>
+              <archive>
+                <manifestEntries>
+                  <Automatic-Module-Name>${jpms.module.name}</Automatic-Module-Name>
+                </manifestEntries>
+              </archive>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -429,7 +448,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.3.2</version>
+        <version>3.12.0</version>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -441,6 +460,10 @@
         </executions>
         <configuration>
           <quiet>true</quiet>
+          <!-- Generate on the class path even for jars that declare an
+               Automatic-Module-Name; module mode fails on packages that
+               only have a package-info.java -->
+          <legacyMode>true</legacyMode>
         </configuration>
       </plugin>
 
