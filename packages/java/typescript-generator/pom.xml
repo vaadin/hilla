@@ -18,6 +18,7 @@
 
   <properties>
     <formatter.basedir>${project.parent.basedir}</formatter.basedir>
+    <jpms.module.name>com.vaadin.hilla.parser</jpms.module.name>
   </properties>
 
   <dependencies>
