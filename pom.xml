@@ -81,7 +81,10 @@
     <!-- Stable JPMS module name, written as Automatic-Module-Name to the main
          jar. A module that publishes a runtime jar sets it after the jar's
          main package, following the rule in vaadin/flow CONVENTIONS.md.
-         Empty means no entry. -->
+         com.vaadin.hilla is the namespace root of all Hilla jars, so a jar
+         whose main package is that root gets a qualifier instead
+         (hilla-endpoint is com.vaadin.hilla.endpoint). Empty means no
+         entry. -->
     <jpms.module.name/>
     <github.javaparser.core.version>3.28.2</github.javaparser.core.version>
     <guava.version>33.7.2-jre</guava.version>
