@@ -281,7 +281,7 @@ function useColumns(
     ];
   }
   const { totalCount, filteredCount, itemCounts, footerCountRenderer } = options;
-  if (totalCount ?? filteredCount) {
+  if (totalCount || filteredCount) {
     const col = (
       <FooterContext.Provider
         key="grid-footer"
@@ -389,7 +389,8 @@ function AutoGridInner<TItem>(
 
   useEffect(() => {
     // Log an error if totalCount or filteredCount is enabled but the service doesn't implement CountService
-    if ((!isCountService(service) && totalCount) ?? filteredCount) {
+    const hasCountService = isCountService(service);
+    if (!hasCountService && (totalCount || filteredCount)) {
       console.error(
         '"totalCount" and "filteredCount" props require the provided service to implement the CountService interface.',
       );
@@ -403,7 +404,8 @@ function AutoGridInner<TItem>(
         initialFilter: experimentalFilter ?? internalFilter,
         loadTotalCount: totalCount,
         afterLoad(newItemCounts: ItemCounts) {
-          setItemCounts(newItemCounts);
+          // Without a CountService, the filtered count is only the infinite scrolling size estimate
+          setItemCounts(hasCountService ? newItemCounts : undefined);
 
           if (firstUpdate) {
             // Workaround for https://github.com/vaadin/react-components/issues/129
