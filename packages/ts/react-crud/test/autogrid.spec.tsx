@@ -295,7 +295,7 @@ describe('@vaadin/hilla-react-crud', () => {
             .map((i) => ({ ...personData[i % 2], id: i }) satisfies Person);
           sinon.stub(service, 'list').resolves(personTestData);
           sinon.stub(service, 'count').resolves(personTestData.length);
-          const result = render(<TestAutoGridNoHeaderFilters service={service} filteredCount />);
+          const result = render(<TestAutoGridNoHeaderFilters service={service} totalCount={false} filteredCount />);
           const grid = await GridController.init(result, user);
 
           expect(grid.getRowCount()).to.equal(156);
@@ -464,6 +464,40 @@ describe('@vaadin/hilla-react-crud', () => {
           const result = render(<TestAutoGrid service={service} model={PersonModel} filteredCount totalCount />);
           await GridController.init(result, user);
 
+          expect(console.error).to.have.been.calledWith(
+            '"totalCount" and "filteredCount" props require the provided service to implement the CountService interface.',
+          );
+        });
+
+        it('does not render an estimated count when the service does not implement CountService', async () => {
+          const service = personListService();
+          const personTestData: Person[] = Array(387)
+            .fill(null)
+            .map((i) => ({ ...personData[i % 2], id: i }) satisfies Person);
+          sinon
+            .stub(service, 'list')
+            .callsFake(async ({ pageNumber, pageSize }) =>
+              Promise.resolve(personTestData.slice(pageNumber * pageSize, (pageNumber + 1) * pageSize)),
+            );
+
+          const result = render(
+            <TestAutoGridNoHeaderFilters
+              service={service}
+              totalCount={false}
+              filteredCount
+              footerCountRenderer={({ filteredCount, totalCount }) => (
+                <p>
+                  Custom: {String(filteredCount)} / {String(totalCount)}
+                </p>
+              )}
+            />,
+          );
+          const grid = await GridController.init(result, user);
+
+          expect(grid.getRowCount()).to.be.greaterThan(0);
+          await waitFor(() =>
+            expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Custom: undefined / undefined'),
+          );
           expect(console.error).to.have.been.calledWith(
             '"totalCount" and "filteredCount" props require the provided service to implement the CountService interface.',
           );
