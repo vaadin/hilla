@@ -55,13 +55,13 @@ describe('findNpmVersion', () => {
   });
 
   it('should ignore an entry that declares no npm package', () => {
-    assert.equal(findNpmVersion(versionsWith({ flow: { javaVersion: '25.4-SNAPSHOT' } }), '@vaadin/flow'), undefined);
+    assert.equal(findNpmVersion(versionsWith({ flow: { javaVersion: '25.5-SNAPSHOT' } }), '@vaadin/flow'), undefined);
   });
 });
 
 describe('withNpmPackages', () => {
   it('should declare a package the platform does not, named without its scope', () => {
-    const versions = withNpmPackages(versionsWith({ flow: { javaVersion: '25.4-SNAPSHOT' } }), parseNpmPackages(LUMO));
+    const versions = withNpmPackages(versionsWith({ flow: { javaVersion: '25.5-SNAPSHOT' } }), parseNpmPackages(LUMO));
 
     assert.deepEqual(versions.core['vaadin-lumo-styles'], {
       jsVersion: '25.3.0-beta2',
@@ -69,7 +69,7 @@ describe('withNpmPackages', () => {
       npmName: '@vaadin/vaadin-lumo-styles',
     });
     assert.equal(findNpmVersion(versions, '@vaadin/vaadin-themable-mixin'), '25.3.0-beta2');
-    assert.deepEqual(versions.core.flow, { javaVersion: '25.4-SNAPSHOT' });
+    assert.deepEqual(versions.core.flow, { javaVersion: '25.5-SNAPSHOT' });
   });
 
   it('should leave a package the platform declares at the platform version', () => {
