@@ -371,6 +371,60 @@ describe('@vaadin/hilla-frontend', () => {
         });
       });
 
+      it('should retry the call with the new CSRF token after a successful login', async () => {
+        const newSpringCsrfToken = 'new-spring-csrf-token';
+        fetchMock.post(`${base}/connect/FooEndpoint/fooMethod`, 401, { repeat: 1 });
+        fetchMock.post(`${base}/connect/FooEndpoint/fooMethod`, { fooData: 'foo' });
+        fetchMock.post('login', {
+          headers: { ...happyCaseResponseHeaders, 'Spring-CSRF-token': newSpringCsrfToken },
+        });
+
+        const middleware = new InvalidSessionMiddleware(async () => login('valid-username', 'valid-password'));
+
+        const client = new ConnectClient({ middlewares: [middleware] });
+
+        expect(await client.call('FooEndpoint', 'fooMethod')).to.deep.equal({ fooData: 'foo' });
+        expect(fetchMock.callHistory.lastCall()?.options.headers).to.deep.include({
+          [TEST_SPRING_CSRF_HEADER_NAME]: newSpringCsrfToken,
+        });
+      });
+
+      it('should not retry the call when the login reloads the page', async () => {
+        fetchMock.post(`${base}/connect/FooEndpoint/fooMethod`, 401);
+        // A fragment-only target keeps the test page from actually reloading
+        fetchMock.post('login', { headers: { ...happyCaseResponseHeaders, 'Default-url': '#reload' } });
+
+        let loginResult: LoginResult | undefined;
+        const middleware = new InvalidSessionMiddleware(async () => {
+          loginResult = await originalLogin('valid-username', 'valid-password');
+          return loginResult;
+        });
+
+        const client = new ConnectClient({ middlewares: [middleware] });
+
+        try {
+          await expect(client.call('FooEndpoint', 'fooMethod')).rejects.toThrow('401');
+          expect(loginResult?.error).to.be.false;
+          expect(window.location.hash).to.equal('#reload');
+          expect(fetchMock.callHistory.calls(`${base}/connect/FooEndpoint/fooMethod`)).to.have.lengthOf(1);
+        } finally {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+      });
+
+      it('should not retry the call when the login fails', async () => {
+        fetchMock.post(`${base}/connect/FooEndpoint/fooMethod`, 401);
+
+        const middleware = new InvalidSessionMiddleware(async () =>
+          Promise.resolve({ error: true, token: TEST_VAADIN_CSRF_TOKEN_VALUE }),
+        );
+
+        const client = new ConnectClient({ middlewares: [middleware] });
+
+        await expect(client.call('FooEndpoint', 'fooMethod')).rejects.toThrow('401');
+        expect(fetchMock.callHistory.calls()).to.have.lengthOf(1);
+      });
+
       it('should not invoke the onInvalidSession callback on 200 response', async () => {
         fetchMock.post(`${base}/connect/FooEndpoint/fooMethod`, { fooData: 'foo' });
 
