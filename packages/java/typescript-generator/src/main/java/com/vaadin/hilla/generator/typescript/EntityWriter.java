@@ -87,7 +87,8 @@ public final class EntityWriter {
         var name = ModulePaths.entityName(enumeration.javaClass());
 
         var constants = enumeration.constants().stream()
-                .map(constant -> constant + " = '" + constant + "',")
+                .map(constant -> constant.name() + " = "
+                        + Names.string(constant.value()) + ",")
                 .collect(Collectors.joining("\n"));
 
         return GeneratedFile.of(module, new ImportRegistry(),
