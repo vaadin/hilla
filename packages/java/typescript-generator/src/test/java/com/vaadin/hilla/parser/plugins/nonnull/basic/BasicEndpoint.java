@@ -58,6 +58,12 @@ public class BasicEndpoint {
         return list;
     }
 
+    @Nonnull
+    public List<String> nonnullTypeWithTypeArgument(
+            @Nonnull List<String> list) {
+        return list;
+    }
+
     public List<@Nonnull NonNullableModel> typeWithTypeArgument(
             List<@Nonnull NonNullableModel> list) {
         return list;
