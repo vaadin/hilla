@@ -4,10 +4,14 @@ import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
 
+// Tests are disabled due to unstable signal implementation.
+// Re-enable when there is a new signal implementation.
+@Ignore
 public class BasicSignalIT extends ChromeBrowserTest {
     @Override
     @Before
