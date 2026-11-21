@@ -62,14 +62,21 @@ public final class TypeScriptWriter {
     public List<GeneratedFile> write(Generation generation) {
         var files = new ArrayList<GeneratedFile>();
         var endpoints = new EndpointWriter(clientModule);
-        var entities = new EntityWriter();
         var models = new FormModelWriter(generation.entities());
         var unions = new UnionWriter();
 
-        generation.entities().forEach(entity -> {
-            files.add(entities.write(entity));
-            files.add(models.write(entity));
-        });
+        // The declarations of the entities are rendered while the walk runs.
+        // A generation which was not walked, or walked without the plugin
+        // rendering them, still gets them, printed here instead
+        generation.files().forEach(
+                (path, content) -> files.add(new GeneratedFile(path, content)));
+        generation.entities().stream().map(EntityDeclaration::new)
+                .filter(declaration -> !generation.files()
+                        .containsKey(declaration.path()))
+                .forEach(declaration -> files.add(new GeneratedFile(
+                        declaration.path(), declaration.print())));
+        generation.entities()
+                .forEach(entity -> files.add(models.write(entity)));
         generation.unions().forEach(union -> files.add(unions.write(union)));
         generation.endpoints()
                 .forEach(endpoint -> files.add(endpoints.write(endpoint)));

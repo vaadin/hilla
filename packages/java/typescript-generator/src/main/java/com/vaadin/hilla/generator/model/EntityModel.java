@@ -100,6 +100,7 @@ public sealed interface EntityModel {
      */
     final class Builder {
         private Discriminator discriminator;
+        private EntityModel declaration;
 
         /**
          * The property saying which subtype of a polymorphic type a value is,
@@ -111,6 +112,19 @@ public sealed interface EntityModel {
 
         public void setDiscriminator(Discriminator discriminator) {
             this.discriminator = discriminator;
+        }
+
+        /**
+         * The declaration built once the walk has left the node, which is what
+         * the files of the entity are rendered from. There is none for a type
+         * the generated TypeScript refers to by name rather than declaring it.
+         */
+        public Optional<EntityModel> getDeclaration() {
+            return Optional.ofNullable(declaration);
+        }
+
+        public void setDeclaration(EntityModel declaration) {
+            this.declaration = declaration;
         }
 
         /**

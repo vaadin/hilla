@@ -19,4 +19,10 @@ import com.vaadin.hilla.engine.fixtures.annotations.Endpoint;
 
 @Endpoint
 public class TestEndpoint {
+    public Greeting greet() {
+        return new Greeting("Hello");
+    }
+
+    public record Greeting(String text) {
+    }
 }
