@@ -5,6 +5,10 @@ interface NullMarkedModel {
   nullableGetterItems: Array<string | undefined>;
   nullableSetter?: string;
   nullableSetterItems: Array<string | undefined>;
+  ignoredOnSetterIncludedOnGetter: string;
+  ignoredOnGetterIncludedOnField: string;
+  ignoredOnGetterIncludedOnSetter: string;
+  notIgnoredOnGetter: string;
 }
 
 export default NullMarkedModel;

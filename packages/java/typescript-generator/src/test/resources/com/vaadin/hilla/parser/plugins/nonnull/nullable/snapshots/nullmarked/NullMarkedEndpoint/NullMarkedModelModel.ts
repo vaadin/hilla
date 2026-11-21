@@ -9,6 +9,10 @@ const NullMarkedModelModel = m
   .property('nullableGetterItems', m.meta(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' })), { jvmType: 'java.util.List' }))
   .property('nullableSetter', m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' }))
   .property('nullableSetterItems', m.meta(m.array(m.meta(m.optional(StringModel), { jvmType: 'java.lang.String' })), { jvmType: 'java.util.List' }))
+  .property('ignoredOnSetterIncludedOnGetter', m.meta(StringModel, { jvmType: 'java.lang.String' }))
+  .property('ignoredOnGetterIncludedOnField', m.meta(StringModel, { jvmType: 'java.lang.String' }))
+  .property('ignoredOnGetterIncludedOnSetter', m.meta(StringModel, { jvmType: 'java.lang.String' }))
+  .property('notIgnoredOnGetter', m.meta(StringModel, { jvmType: 'java.lang.String' }))
   .build();
 type NullMarkedModelModel = typeof NullMarkedModelModel;
 
