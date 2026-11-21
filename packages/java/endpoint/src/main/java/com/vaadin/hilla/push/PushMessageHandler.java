@@ -37,6 +37,7 @@ import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointNotFoundException;
 import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.EndpointSubscription;
+import com.vaadin.hilla.exception.EndpointException;
 import com.vaadin.hilla.push.messages.fromclient.AbstractServerMessage;
 import com.vaadin.hilla.push.messages.fromclient.SubscribeMessage;
 import com.vaadin.hilla.push.messages.fromclient.UnsubscribeMessage;
@@ -203,6 +204,12 @@ public class PushMessageHandler {
             sender.accept(new ClientMessageError(fluxId, "No such endpoint"));
             return;
         } catch (EndpointHttpException e) {
+            sender.accept(new ClientMessageError(fluxId, e.getMessage()));
+            return;
+        } catch (EndpointException e) {
+            // E.g. parameter validation failures or exceptions thrown by the
+            // endpoint method itself; without this they would propagate to
+            // Atmosphere and the subscription would never end on the client
             sender.accept(new ClientMessageError(fluxId, e.getMessage()));
             return;
         }
