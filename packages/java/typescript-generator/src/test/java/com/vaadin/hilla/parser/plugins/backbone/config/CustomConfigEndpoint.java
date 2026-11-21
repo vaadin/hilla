@@ -15,6 +15,9 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.config;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
@@ -23,8 +26,32 @@ public class CustomConfigEndpoint {
         return new CustomConfigEntity();
     }
 
+    public ConfiguredKindBase getConfiguredKind() {
+        return new ConfiguredKindSub();
+    }
+
     public static class CustomConfigEntity {
         private int bar;
         private String foo;
+    }
+
+    public enum Kind {
+        SUB
+    }
+
+    /**
+     * Declares its discriminator as an enum in a field only the custom factory
+     * makes visible, so the hierarchy has to be read with that factory to leave
+     * the discriminator to what it is declared as.
+     */
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "kind")
+    @JsonSubTypes({
+            @JsonSubTypes.Type(value = ConfiguredKindSub.class, name = "SUB") })
+    public static class ConfiguredKindBase {
+        private Kind kind;
+    }
+
+    public static class ConfiguredKindSub extends ConfiguredKindBase {
+        private String name;
     }
 }

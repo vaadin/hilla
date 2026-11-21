@@ -29,6 +29,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.jspecify.annotations.NonNull;
+import tools.jackson.databind.SerializationConfig;
+import tools.jackson.databind.introspect.BeanPropertyDefinition;
 
 import com.vaadin.hilla.generator.model.EntityModel;
 import com.vaadin.hilla.parser.core.AbstractNode;
@@ -40,6 +42,7 @@ import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
+import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 import com.vaadin.hilla.parser.utils.Signatures;
 
@@ -73,7 +76,8 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
             var cls = entityNode.getSource();
 
             var info = findSubTypesInfo(cls);
-            var property = info.flatMap(SubTypesInfo::discriminatorProperty);
+            var property = info.flatMap(i -> i.discriminatorProperty(cls,
+                    entityNode.getSerializationConfig()));
             var values = info.map(i -> i.discriminatorValues(cls))
                     .orElseGet(List::of);
 
@@ -142,7 +146,8 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                 .filter(c -> c.getAnnotation(JsonTypeInfo.class) != null
                         && c.getAnnotation(JsonSubTypes.class) != null)
                 .findFirst()
-                .map(c -> new SubTypesInfo(c.getAnnotation(JsonTypeInfo.class),
+                .map(c -> new SubTypesInfo(c,
+                        c.getAnnotation(JsonTypeInfo.class),
                         c.getAnnotation(JsonSubTypes.class)));
     }
 
@@ -176,7 +181,17 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
      * The {@code @JsonTypeInfo} and {@code @JsonSubTypes} annotations that
      * apply to a class.
      */
-    private record SubTypesInfo(JsonTypeInfo typeInfo, JsonSubTypes subTypes) {
+    private record SubTypesInfo(Class<?> declaringClass, JsonTypeInfo typeInfo,
+            JsonSubTypes subTypes) {
+
+        /**
+         * What a type id, which is a string, can be declared as. Anything else
+         * cannot be described as the ids without contradicting the type the
+         * property is declared with.
+         */
+        private static final Set<Class<?>> TYPE_ID_TYPES = Set.of(String.class,
+                Object.class);
+
         /**
          * The type id strategies whose values are known here: both take the id
          * from the annotations and fall back to the name of the class itself.
@@ -191,9 +206,13 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
         /**
          * Returns the name of the property that holds the type discriminator,
          * or an empty optional if the type information is not serialized as a
-         * property of the object itself, or if its values are not known here.
+         * property of the object itself, if its values are not known here, or
+         * if the given class cannot pin it to its type ids. The properties the
+         * types declare are read with the given Jackson configuration, the one
+         * the entities are written with.
          */
-        Optional<String> discriminatorProperty() {
+        Optional<String> discriminatorProperty(Class<?> cls,
+                SerializationConfig config) {
             var include = typeInfo.include();
 
             if (include != JsonTypeInfo.As.PROPERTY
@@ -205,12 +224,88 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                 return Optional.empty();
             }
 
-            var property = typeInfo.property();
+            // An id strategy of its own decides the name when the annotation
+            // leaves it out, and not every one of them has one
+            var property = typeInfo.property().isBlank()
+                    ? typeInfo.use().getDefaultPropertyName()
+                    : typeInfo.property();
 
-            return property.isBlank()
-                    ? Optional
-                            .ofNullable(typeInfo.use().getDefaultPropertyName())
-                    : Optional.of(property);
+            return Optional.ofNullable(property)
+                    .filter(name -> include != JsonTypeInfo.As.EXISTING_PROPERTY
+                            || acceptsTypeIds(cls, name, config));
+        }
+
+        /**
+         * Whether the given class can pin the property to the type ids it
+         * accepts, which are strings.
+         *
+         * <p>
+         * With {@code As.EXISTING_PROPERTY} the discriminator is a property the
+         * types declare themselves, and Jackson serializes the type id as its
+         * value. Pinning it contradicts a type above the class that keeps
+         * declaring the property as something a string id does not fit into, an
+         * enum being the common case: the subtype would narrow an inherited
+         * {@code colour?: Colour} to {@code 'RED'}, which TypeScript rejects.
+         * Nothing is generated for the class then, which leaves the property as
+         * what it is declared as. A type above that is a subtype itself gets a
+         * discriminator of its own in place of its declaration, and a class
+         * declaring the property itself has it replaced by the ids, so neither
+         * contradicts anything. With {@code As.PROPERTY} Jackson writes the
+         * type id itself, so this question is not asked there.
+         */
+        private boolean acceptsTypeIds(Class<?> cls, String property,
+                SerializationConfig config) {
+            return superclassesOf(cls)
+                    .filter(superclass -> !isSubType(superclass))
+                    .flatMap(superclass -> declaredType(superclass, property,
+                            config).stream())
+                    .allMatch(TYPE_ID_TYPES::contains);
+        }
+
+        /**
+         * The superclasses of a class the generated TypeScript extends, which
+         * are the ones outside the JDK.
+         */
+        private static Stream<Class<?>> superclassesOf(Class<?> cls) {
+            return Stream.<Class<?>> iterate(cls.getSuperclass(),
+                    superclass -> superclass != null
+                            && !Signatures.isJDKClass(superclass),
+                    Class::getSuperclass);
+        }
+
+        private boolean isSubType(Class<?> cls) {
+            return Arrays.stream(subTypes.value())
+                    .anyMatch(type -> cls.equals(type.value()));
+        }
+
+        /**
+         * The type the given class declares the property with itself, if it
+         * does. The property is looked up by the name Jackson serializes it
+         * under, as the annotation names it, so a renamed member is found by
+         * its new name and not by its Java one.
+         */
+        private static Optional<Class<?>> declaredType(Class<?> cls,
+                String property, SerializationConfig config) {
+            return propertiesOf(cls, config)
+                    .filter(definition -> definition.getName().equals(property))
+                    // A property only a constructor takes is not one the
+                    // class declares a type for
+                    .filter(definition -> definition.hasGetter()
+                            || definition.hasSetter() || definition.hasField())
+                    .filter(definition -> cls.equals(PropertyNode.of(definition)
+                            .getPrimaryMember().getDeclaringClass()))
+                    .<Class<?>> map(BeanPropertyDefinition::getRawPrimaryType)
+                    .findFirst();
+        }
+
+        private static Stream<BeanPropertyDefinition> propertiesOf(Class<?> cls,
+                SerializationConfig config) {
+            var javaType = config.constructType(cls);
+            var introspector = config.classIntrospectorInstance();
+            return introspector
+                    .introspectForSerialization(javaType,
+                            introspector.introspectClassAnnotations(javaType))
+                    .findProperties().stream();
         }
 
         /**

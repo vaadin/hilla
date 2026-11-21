@@ -71,8 +71,10 @@ public final class PropertyPlugin
             return nodeDependencies;
         }
 
-        var node = nodeDependencies.getNode();
-        var cls = (Class<?>) node.getSource();
+        var node = (EntityNode) nodeDependencies.getNode();
+        node.setSerializationConfig(serializationConfig);
+
+        var cls = node.getSource();
 
         if (cls.isEnum()) {
             return nodeDependencies;
