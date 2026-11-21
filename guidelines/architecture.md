@@ -152,7 +152,8 @@ Signals shared between the server and the browser are handled by
 `com.vaadin.hilla.signals` (`SignalsHandler`, `SignalsRegistry`) on the server
 and `@vaadin/hilla-react-signals` on the client. The generator maps the signal
 types an endpoint returns to their client-side counterparts through the stand-in
-types in `runtime-plugin-transfertypes`.
+types in `runtime-plugin-transfertypes`. See
+[`react-signals/ARCHITECTURE.md`](../packages/ts/react-signals/ARCHITECTURE.md).
 
 ## Forms
 

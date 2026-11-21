@@ -57,6 +57,6 @@ public record MethodModel(String name, List<ParameterModel> parameters,
      * ones sharing a value with the server.
      */
     public enum Kind {
-        CALLED, SUBSCRIBED, NUMBER_SIGNAL, VALUE_SIGNAL, LIST_SIGNAL
+        CALLED, SUBSCRIBED, NUMBER_SIGNAL, VALUE_SIGNAL, LIST_SIGNAL, MAP_SIGNAL
     }
 }
