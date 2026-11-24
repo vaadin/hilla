@@ -220,7 +220,7 @@ Key points:
 ### Key Java Dependencies
 - Spring Boot 4
 - Jackson 3
-- Vaadin Flow 25.4-SNAPSHOT
+- Vaadin Flow 25.5-SNAPSHOT
 
 ### Key TypeScript Dependencies
 - TypeScript 5.9.3
