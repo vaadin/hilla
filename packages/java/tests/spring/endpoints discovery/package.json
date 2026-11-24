@@ -24,7 +24,7 @@
   "devDependencies": {
     "@babel/core": "7.29.13",
     "@babel/plugin-transform-react-jsx-development": "7.29.7",
-    "@babel/types": "7.29.14",
+    "@babel/types": "7.29.15",
     "@preact/signals-react": "3.12.0",
     "@preact/signals-react-transform": "0.8.3",
     "@rolldown/plugin-babel": "0.3.1",
@@ -63,7 +63,7 @@
     "devDependencies": {
       "@babel/core": "7.29.13",
       "@babel/plugin-transform-react-jsx-development": "7.29.7",
-      "@babel/types": "7.29.14",
+      "@babel/types": "7.29.15",
       "@preact/signals-react": "3.12.0",
       "@preact/signals-react-transform": "0.8.3",
       "@rolldown/plugin-babel": "0.3.1",
@@ -80,7 +80,7 @@
       "vite": "8.3.8",
       "vite-plugin-checker": "1.0.0"
     },
-    "hash": "cb93c592fe1fbdc1b81b9d659f5e06b1afa9da3c318bd4bcd307232b159ab8a8"
+    "hash": "e70515227b0055f497f9a9ebdd239555985de8738db8c07799423900ef4780b7"
   },
   "overrides": {
     "@vaadin/a11y-base": "$@vaadin/a11y-base",
