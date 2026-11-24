@@ -1,4 +1,4 @@
-import React, { type CSSProperties, forwardRef } from 'react';
+import { type CSSProperties, forwardRef, type JSX } from 'react';
 import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion.js';
 
 export type ComponentStyleProps = Readonly<{
@@ -42,7 +42,7 @@ function useFeatureRegistration(feature: string): void {
 }
 
 export function featureRegistration<C extends (...args: any[]) => any>(Component: C, feature: string): C {
-  return forwardRef<unknown, React.JSX.LibraryManagedAttributes<C, NonNullable<unknown>>>((props, ref) => {
+  return forwardRef<unknown, JSX.LibraryManagedAttributes<C, NonNullable<unknown>>>((props, ref) => {
     useFeatureRegistration(feature);
     return <Component {...(props as any)} ref={ref} />;
   }) as unknown as C;
