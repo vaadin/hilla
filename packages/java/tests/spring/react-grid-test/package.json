@@ -21,12 +21,12 @@
     "lit": "3.3.3",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "react-router": "8.5.1"
+    "react-router": "8.5.2"
   },
   "devDependencies": {
     "@babel/core": "7.29.13",
     "@babel/plugin-transform-react-jsx-development": "7.29.7",
-    "@babel/types": "7.29.14",
+    "@babel/types": "7.29.15",
     "@preact/signals-react": "3.12.0",
     "@preact/signals-react-transform": "0.8.3",
     "@rolldown/plugin-babel": "0.3.1",
@@ -65,12 +65,12 @@
       "lit": "3.3.3",
       "react": "19.3.1",
       "react-dom": "19.3.1",
-      "react-router": "8.5.1"
+      "react-router": "8.5.2"
     },
     "devDependencies": {
       "@babel/core": "7.29.13",
       "@babel/plugin-transform-react-jsx-development": "7.29.7",
-      "@babel/types": "7.29.14",
+      "@babel/types": "7.29.15",
       "@preact/signals-react": "3.12.0",
       "@preact/signals-react-transform": "0.8.3",
       "@rolldown/plugin-babel": "0.3.1",
@@ -89,7 +89,7 @@
       "vite": "8.3.8",
       "vite-plugin-checker": "1.0.0"
     },
-    "hash": "c7384cf0e6ef17219285497e0da59bf6a431c0497f27c84a650f54cd2b84bd60"
+    "hash": "ce0b2a03733409dec00c84659309b5183f004ed9aae48707aaa73eea74f6e66a"
   },
   "overrides": {
     "@vaadin/a11y-base": "$@vaadin/a11y-base",
