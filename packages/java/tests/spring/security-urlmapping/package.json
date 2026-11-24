@@ -30,7 +30,7 @@
   "devDependencies": {
     "@babel/core": "7.29.13",
     "@babel/plugin-transform-react-jsx-development": "7.29.7",
-    "@babel/types": "7.29.14",
+    "@babel/types": "7.29.15",
     "@preact/signals-react": "3.12.0",
     "@preact/signals-react-transform": "0.8.3",
     "@rolldown/plugin-babel": "0.3.1",
@@ -71,7 +71,7 @@
     "devDependencies": {
       "@babel/core": "7.29.13",
       "@babel/plugin-transform-react-jsx-development": "7.29.7",
-      "@babel/types": "7.29.14",
+      "@babel/types": "7.29.15",
       "@preact/signals-react": "3.12.0",
       "@preact/signals-react-transform": "0.8.3",
       "@rolldown/plugin-babel": "0.3.1",
@@ -88,7 +88,7 @@
       "vite": "8.3.8",
       "vite-plugin-checker": "1.0.0"
     },
-    "hash": "9878adec4b21c64690a95aa318a6169eaecd9c2a37034b4449940b6ba98c4243"
+    "hash": "939e14f2ab770ed0a58caa6d7c33a57a795d10056066e0be31831b5705fa9043"
   },
   "overrides": {
     "@adobe/lit-mobx": "$@adobe/lit-mobx",
