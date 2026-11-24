@@ -14,8 +14,8 @@
     "@vaadin/hilla-react-form": "file:../../../../ts/react-form",
     "@vaadin/hilla-react-i18n": "file:../../../../ts/react-i18n",
     "@vaadin/hilla-react-signals": "file:../../../../ts/react-signals",
-    "@vaadin/react-components": "25.4.0-beta1",
-    "@vaadin/react-components-pro": "25.4.0-beta1",
+    "@vaadin/react-components": "25.4.0-beta2",
+    "@vaadin/react-components-pro": "25.4.0-beta2",
     "@vaadin/vaadin-lumo-styles": "25.4.0-beta2",
     "@vaadin/vaadin-themable-mixin": "25.4.0-beta2",
     "lit": "3.3.3",
@@ -89,7 +89,7 @@
       "vite": "8.3.8",
       "vite-plugin-checker": "1.0.0"
     },
-    "hash": "1655783720b56d567cd701bdf4723d44c1710c351390df2352e265c947e538ec"
+    "hash": "b4ac917c9b76ffe326354fd11023ade862e88486aa61176871c803cda51b14e6"
   },
   "overrides": {
     "@vaadin/a11y-base": "$@vaadin/a11y-base",
