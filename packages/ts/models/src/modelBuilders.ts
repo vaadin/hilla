@@ -317,29 +317,11 @@ export class ObjectModelBuilder<
   property<const PK extends string & keyof V, const M extends Model<V[PK]>>(
     key: PK,
     model: M,
-  ): ObjectModelBuilder<
-    V,
-    {
-      readonly [key in keyof CV | PK]: key extends PK ? V[PK] : key extends keyof CV ? CV[key] : never;
-    },
-    {
-      readonly [key in keyof EX | PK]: key extends PK ? M : key extends keyof EX ? EX[key] : never;
-    },
-    F
-  >;
+  ): ObjectModelBuilder<V, CV & { readonly [key in PK]: V[PK] }, EX & { readonly [key in PK]: M }, F>;
   property<const PK extends string & keyof V, const MC extends ModelConverter>(
     key: PK,
     model: MC,
-  ): ObjectModelBuilder<
-    V,
-    {
-      readonly [key in keyof CV | PK]: key extends PK ? V[PK] : key extends keyof CV ? CV[key] : never;
-    },
-    {
-      readonly [key in keyof EX | PK]: key extends PK ? MC : key extends keyof EX ? EX[key] : never;
-    },
-    F
-  >;
+  ): ObjectModelBuilder<V, CV & { readonly [key in PK]: V[PK] }, EX & { readonly [key in PK]: MC }, F>;
   property<PK extends string & keyof V, M extends Model<V[PK]>>(
     key: PK,
     model: M | ((model: Model<V, EX>) => M),

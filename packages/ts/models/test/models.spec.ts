@@ -118,6 +118,140 @@ describe('@vaadin/hilla-models', () => {
     expect(StreetModel).to.have.property('building').which.is.instanceof(NumberModel);
   });
 
+  it('should build an object model with many properties', () => {
+    // Type checking this file fails with TS2589 ("Type instantiation is
+    // excessively deep") if each property nests the builder type deeper.
+    interface Wide {
+      p00?: string;
+      p01?: string;
+      p02?: string;
+      p03?: string;
+      p04?: string;
+      p05?: string;
+      p06?: string;
+      p07?: string;
+      p08?: string;
+      p09?: string;
+      p10?: string;
+      p11?: string;
+      p12?: string;
+      p13?: string;
+      p14?: string;
+      p15?: string;
+      p16?: string;
+      p17?: string;
+      p18?: string;
+      p19?: string;
+      p20?: string;
+      p21?: string;
+      p22?: string;
+      p23?: string;
+      p24?: string;
+      p25?: string;
+      p26?: string;
+      p27?: string;
+      p28?: string;
+      p29?: string;
+      p30?: string;
+      p31?: string;
+      p32?: string;
+      p33?: string;
+      p34?: string;
+      p35?: string;
+      p36?: string;
+      p37?: string;
+      p38?: string;
+      p39?: string;
+      p40?: string;
+      p41?: string;
+      p42?: string;
+      p43?: string;
+      p44?: string;
+      p45?: string;
+      p46?: string;
+      p47?: string;
+      p48?: string;
+      p49?: string;
+      p50?: string;
+      p51?: string;
+      p52?: string;
+      p53?: string;
+      p54?: string;
+      p55?: string;
+      p56?: string;
+      p57?: string;
+      p58?: string;
+      p59?: string;
+    }
+
+    const WideModel = m
+      .object<Wide>('Wide')
+      .property('p00', m.optional(StringModel))
+      .property('p01', m.optional(StringModel))
+      .property('p02', m.optional(StringModel))
+      .property('p03', m.optional(StringModel))
+      .property('p04', m.optional(StringModel))
+      .property('p05', m.optional(StringModel))
+      .property('p06', m.optional(StringModel))
+      .property('p07', m.optional(StringModel))
+      .property('p08', m.optional(StringModel))
+      .property('p09', m.optional(StringModel))
+      .property('p10', m.optional(StringModel))
+      .property('p11', m.optional(StringModel))
+      .property('p12', m.optional(StringModel))
+      .property('p13', m.optional(StringModel))
+      .property('p14', m.optional(StringModel))
+      .property('p15', m.optional(StringModel))
+      .property('p16', m.optional(StringModel))
+      .property('p17', m.optional(StringModel))
+      .property('p18', m.optional(StringModel))
+      .property('p19', m.optional(StringModel))
+      .property('p20', m.optional(StringModel))
+      .property('p21', m.optional(StringModel))
+      .property('p22', m.optional(StringModel))
+      .property('p23', m.optional(StringModel))
+      .property('p24', m.optional(StringModel))
+      .property('p25', m.optional(StringModel))
+      .property('p26', m.optional(StringModel))
+      .property('p27', m.optional(StringModel))
+      .property('p28', m.optional(StringModel))
+      .property('p29', m.optional(StringModel))
+      .property('p30', m.optional(StringModel))
+      .property('p31', m.optional(StringModel))
+      .property('p32', m.optional(StringModel))
+      .property('p33', m.optional(StringModel))
+      .property('p34', m.optional(StringModel))
+      .property('p35', m.optional(StringModel))
+      .property('p36', m.optional(StringModel))
+      .property('p37', m.optional(StringModel))
+      .property('p38', m.optional(StringModel))
+      .property('p39', m.optional(StringModel))
+      .property('p40', m.optional(StringModel))
+      .property('p41', m.optional(StringModel))
+      .property('p42', m.optional(StringModel))
+      .property('p43', m.optional(StringModel))
+      .property('p44', m.optional(StringModel))
+      .property('p45', m.optional(StringModel))
+      .property('p46', m.optional(StringModel))
+      .property('p47', m.optional(StringModel))
+      .property('p48', m.optional(StringModel))
+      .property('p49', m.optional(StringModel))
+      .property('p50', m.optional(StringModel))
+      .property('p51', m.optional(StringModel))
+      .property('p52', m.optional(StringModel))
+      .property('p53', m.optional(StringModel))
+      .property('p54', m.optional(StringModel))
+      .property('p55', m.optional(StringModel))
+      .property('p56', m.optional(StringModel))
+      .property('p57', m.optional(StringModel))
+      .property('p58', m.optional(StringModel))
+      .property('p59', m.optional(StringModel))
+      .build();
+
+    expect(WideModel.p59).to.be.instanceof(StringModel);
+    expect(WideModel.p59).to.have.property($optional, true);
+  });
+
   describe('a deferred base', () => {
     let LazilyNamedModel: typeof NamedModel;
     let LazyStreetModel: typeof StreetModel;
