@@ -118,7 +118,7 @@ describe('@vaadin/hilla-models', () => {
     expect(StreetModel).to.have.property('building').which.is.instanceof(NumberModel);
   });
 
-  it('should build an object model with many properties', () => {
+  it('should build a wide subtype that redefines an inherited property', () => {
     // Type checking this file fails with TS2589 ("Type instantiation is
     // excessively deep") if each property nests the builder type deeper.
     interface Shape {
