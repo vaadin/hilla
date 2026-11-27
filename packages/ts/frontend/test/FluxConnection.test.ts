@@ -421,12 +421,12 @@ describe('@vaadin/hilla-frontend', () => {
 
       it('should reload the page', () => {
         window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
-        expect(reloadStub).to.have.been.calledOnce;
+        expect(reloadStub.callCount).to.equal(1);
       });
 
       it('should not reload on the initial, non-persisted pageshow', () => {
         window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: false }));
-        expect(reloadStub).not.to.have.been.called;
+        expect(reloadStub.callCount).to.equal(0);
       });
     });
   });
