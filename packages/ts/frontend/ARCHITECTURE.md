@@ -117,6 +117,12 @@ Atmosphere reconnects on its own every 5 seconds, practically forever.
 Outside a browser (`VAADIN_BROWSER_ENVIRONMENT`), Atmosphere is not loaded and
 no connection is made.
 
+Atmosphere closes the connection on `pagehide`, which ends its subscriptions
+on the server. A page restored from the back/forward cache would show data that
+no longer updates, so once a `FluxConnection` exists, a `pageshow` with
+`persisted` set reloads the page, as Flow does. Pages that never create a
+`FluxConnection` (only endpoint calls) are restored from the cache as they are.
+
 The connection `State` is `ACTIVE`, `RECONNECTING` or `INACTIVE`, and a
 `state-changed` event reports when it becomes active or inactive. A message
 sent while the state is `INACTIVE`, or before the socket exists, is queued and
