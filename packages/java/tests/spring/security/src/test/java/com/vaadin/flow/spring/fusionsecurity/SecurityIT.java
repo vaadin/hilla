@@ -39,6 +39,9 @@ import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
 
 public class SecurityIT extends ChromeBrowserTest {
+    // Chrome 158 and newer block unload handlers registered by the client
+    // bundle, and log an error for it
+    private static final String UNLOAD_POLICY_VIOLATION = "Permissions policy violation: unload is not allowed";
 
     private static final String ROOT_PAGE_HEADER_TEXT = "Welcome to the TypeScript Bank of Vaadin";
 
@@ -67,10 +70,11 @@ public class SecurityIT extends ChromeBrowserTest {
 
     private void checkForBrowserErrors() {
         checkLogsForErrors(msg -> {
-            return msg
-                    .contains("/admin-only/secret.nocache.txt - Failed to load "
-                            + "resource: the "
-                            + "server responded with a status of 403")
+            return msg.contains(UNLOAD_POLICY_VIOLATION)
+                    || msg.contains(
+                            "/admin-only/secret.nocache.txt - Failed to load "
+                                    + "resource: the "
+                                    + "server responded with a status of 403")
                     || msg.contains(
                             "/admin-only/secret.nocache.txt?continue - Failed"
                                     + " to "

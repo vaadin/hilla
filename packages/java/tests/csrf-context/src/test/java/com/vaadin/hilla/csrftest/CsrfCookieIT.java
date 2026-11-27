@@ -25,6 +25,10 @@ import org.openqa.selenium.JavascriptExecutor;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
 
 public class CsrfCookieIT extends ChromeBrowserTest {
+    // Chrome 158 and newer block unload handlers registered by the client
+    // bundle, and log an error for it
+    private static final String UNLOAD_POLICY_VIOLATION = "Permissions policy violation: unload is not allowed";
+
     @Test
     public void csrfIndexHtmlRequestListener_should_setCsrfToken() {
         open();
@@ -43,10 +47,12 @@ public class CsrfCookieIT extends ChromeBrowserTest {
                         + "console.clear();\n"
                         + "fetch('logout', {method: 'POST'}).then(resolve);");
 
-        checkLogsForErrors(msg -> Stream
-                .of("favicon.ico", "sockjs-node", "[WDS] Disconnected!",
-                        "WebSocket connection to 'ws://")
-                .anyMatch(msg::contains));
+        checkLogsForErrors(
+                msg -> Stream
+                        .of("favicon.ico", "sockjs-node", "[WDS] Disconnected!",
+                                "WebSocket connection to 'ws://",
+                                UNLOAD_POLICY_VIOLATION)
+                        .anyMatch(msg::contains));
 
         executeScript("window.location.reload();");
 

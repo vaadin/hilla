@@ -25,6 +25,9 @@ import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
 
 public class FusionFormIT extends ChromeBrowserTest {
+    // Chrome 158 and newer block unload handlers registered by the client
+    // bundle, and log an error for it
+    private static final String UNLOAD_POLICY_VIOLATION = "Permissions policy violation: unload is not allowed";
 
     private static final int SERVER_PORT = 9999;
 
@@ -54,7 +57,8 @@ public class FusionFormIT extends ChromeBrowserTest {
                 return msg.contains(".slotStyles is not iterable")
                         // form validation errors
                         || msg.contains(
-                                "the server responded with a status of 400 ()");
+                                "the server responded with a status of 400 ()")
+                        || msg.contains(UNLOAD_POLICY_VIOLATION);
             });
         }
     }

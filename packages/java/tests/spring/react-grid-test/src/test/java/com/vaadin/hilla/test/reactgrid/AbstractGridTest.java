@@ -27,6 +27,9 @@ import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
 
 public abstract class AbstractGridTest extends ChromeBrowserTest {
+    // Chrome 158 and newer block unload handlers registered by the client
+    // bundle, and log an error for it
+    private static final String UNLOAD_POLICY_VIOLATION = "Permissions policy violation: unload is not allowed";
 
     protected GridElement grid;
 
@@ -51,7 +54,7 @@ public abstract class AbstractGridTest extends ChromeBrowserTest {
 
     @After
     public void checkBrowserLogs() {
-        checkLogsForErrors();
+        checkLogsForErrors(msg -> msg.contains(UNLOAD_POLICY_VIOLATION));
     }
 
     protected void assertColumns(String... expected) {
