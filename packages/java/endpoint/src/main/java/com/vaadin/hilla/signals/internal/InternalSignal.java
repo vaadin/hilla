@@ -111,32 +111,41 @@ public class InternalSignal {
         });
     }
 
+
     private void notifySubscribers(SignalCommand processedCommand,
-            CommandResult result) {
-        var commandToEmit = inProgressCommands
-                .remove(processedCommand.commandId());
+                                   CommandResult result) {
+
+        ObjectNode originalJson = inProgressCommands
+            .remove(processedCommand.commandId());
+
+        ObjectNode commandToEmit = originalJson != null
+            ? originalJson
+            : objectMapper.valueToTree(processedCommand);
+
         if (result.accepted()) {
             subscribers.entrySet().removeIf(
-                    client -> tryEmitCommandToSubscriber(commandToEmit,
-                            client.getKey(), client.getValue()));
+                client -> tryEmitCommandToSubscriber(commandToEmit,
+                    client.getKey(), client.getValue()));
         } else {
-            // only notify the client that issued the failed command
+            // Only notify the client that issued the failed command
             String clientSignalId = commandsOfSubscribers
-                    .get(processedCommand.commandId());
+                .get(processedCommand.commandId());
+
             if (clientSignalId == null) {
                 getLogger().debug(
-                        "No client signal id found for command id {}, skipping notification.",
-                        processedCommand.commandId());
+                    "No client signal id found for command id {}, skipping notification.",
+                    processedCommand.commandId());
                 return;
             }
 
             boolean failure = tryEmitCommandToSubscriber(commandToEmit,
-                    clientSignalId, subscribers.get(clientSignalId));
+                clientSignalId, subscribers.get(clientSignalId));
+
             if (failure) {
-                // remove the subscriber if it failed to emit to:
                 subscribers.remove(clientSignalId);
             }
         }
+
         commandsOfSubscribers.remove(processedCommand.commandId());
     }
 
