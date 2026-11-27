@@ -54,6 +54,13 @@ env:
   _HEAD_REF: ${{ github.head_ref }}
   _REF_NAME: ${{ github.ref_name }}
   _HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+  # Maven Central rate-limits the IP ranges GitHub-hosted runners share with
+  # every other project, so the global settings file resolves Central through
+  # Google's mirror of it. See the comment in that file. The Gradle steps get
+  # the same mirror from .github/gradle/central-mirror.init.gradle, as Gradle
+  # does not read Maven settings files.
+  MAVEN_ARGS: -gs ${{ github.workspace }}/.github/maven/settings.xml
+  _CENTRAL_MIRROR_INIT_SCRIPT: ${{ github.workspace }}/.github/gradle/central-mirror.init.gradle
 jobs:
   # Whether anything other than documentation changed, which is all the build
   # and the tests are skipped for. A run that a label or workflow_dispatch
@@ -414,14 +421,16 @@ jobs:
           TB_LICENSE=${{secrets.TB_LICENSE}}
           mkdir -p ~/.vaadin/
           echo '{"username":"'`echo $TB_LICENSE | cut -d / -f1`'","proKey":"'`echo $TB_LICENSE | cut -d / -f2`'"}' > ~/.vaadin/proKey
+      # The init script gives Gradle the Central mirror the Maven settings
+      # file gives Maven; functionalTest passes it on to the nested builds.
       - name: publish plugin to Maven Local
-        run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin build publishToMavenLocal -x functionalTest
+        run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin build publishToMavenLocal -x functionalTest --init-script "$_CENTRAL_MIRROR_INIT_SCRIPT"
       - name: Test gradle-plugin's functional tests
         if: ${{ matrix.task == 'plugin' }}
-        run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin functionalTest
+        run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin functionalTest --init-script "$_CENTRAL_MIRROR_INIT_SCRIPT"
       - name: Gradle ITs
         if: ${{ matrix.task == 'its' }}
-        run: ./packages/java/tests/gradle/single-module-tests/gradlew --info -p packages/java/tests/gradle/single-module-tests test
+        run: ./packages/java/tests/gradle/single-module-tests/gradlew --info -p packages/java/tests/gradle/single-module-tests test --init-script "$_CENTRAL_MIRROR_INIT_SCRIPT"
       - uses: actions/upload-artifact@v6
         if: ${{ failure() || success() }}
         with:
