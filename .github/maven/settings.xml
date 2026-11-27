@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Global Maven settings for CI, passed with -gs in MAVEN_ARGS so that every
+     mvn a workflow starts reads it. The user settings setup-java writes still
+     apply on top.
+
+     Central rate-limits by client IP, and GitHub-hosted runners share their IP
+     ranges with every other project on GitHub, so a validation run's parallel
+     jobs get 429 answers from repo.maven.apache.org. Central is read through
+     Google's mirror of it instead, which serves the same artifacts without
+     that limit. The mirror keeps the id central so that the
+     _remote.repositories records in the cached ~/.m2/repository still name the
+     repository a build resolves through; under another id Maven would no
+     longer trust the cached copies and download them again. -->
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+  <mirrors>
+    <mirror>
+      <id>central</id>
+      <name>Google Cloud Storage mirror of Maven Central</name>
+      <mirrorOf>central</mirrorOf>
+      <url>https://maven-central.storage-download.googleapis.com/maven2/</url>
+    </mirror>
+  </mirrors>
+</settings>
