@@ -121,6 +121,11 @@ task functionalTest(type: Test) {
         exceptionFormat = 'full'
         showStandardStreams = true
     }
+    // The nested builds run under a Gradle user home of their own, so an init
+    // script in ~/.gradle/init.d does not reach them. Hand them the ones this
+    // build was started with instead, see TestProject.
+    systemProperty 'functionalTest.initScripts',
+            gradle.startParameter.initScripts*.absolutePath.join(File.pathSeparator)
 }
 check.dependsOn functionalTest
 /***********************************************************************************************************************
