@@ -29,6 +29,9 @@ import com.vaadin.flow.testutil.ChromeBrowserTest;
 import com.vaadin.testbench.TestBenchElement;
 
 public class ComboBoxUseComboBoxDataProviderHookIT extends ChromeBrowserTest {
+    // Chrome 158 and newer block unload handlers registered by the client
+    // bundle, and log an error for it
+    private static final String UNLOAD_POLICY_VIOLATION = "Permissions policy violation: unload is not allowed";
 
     @Override
     protected String getTestPath() {
@@ -46,7 +49,7 @@ public class ComboBoxUseComboBoxDataProviderHookIT extends ChromeBrowserTest {
 
     @After
     public void checkBrowserLogs() {
-        checkLogsForErrors();
+        checkLogsForErrors(msg -> msg.contains(UNLOAD_POLICY_VIOLATION));
     }
 
     @Test
