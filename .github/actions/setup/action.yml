@@ -35,6 +35,18 @@ runs:
         key: ${{ inputs.cache-version }}-${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ inputs.cache-version }}-${{ runner.os }}-maven-
+    - name: Read Maven Central through a mirror in Gradle builds
+      # Gradle does not read the Maven settings file the workflows pass in
+      # MAVEN_ARGS, and some Gradle builds are started by Maven rather than
+      # by a workflow step, such as the one the gradle-plugin module forks
+      # in its package phase. An init script in the Gradle user home reaches
+      # all of them. TestKit builds use a Gradle user home of their own, so
+      # the functional tests still get it with --init-script.
+      shell: bash
+      run: |
+        INIT_D="${GRADLE_USER_HOME:-$HOME/.gradle}/init.d"
+        mkdir -p "$INIT_D"
+        cp "$GITHUB_WORKSPACE/.github/gradle/central-mirror.init.gradle" "$INIT_D/"
     - name: Evict stale Vaadin SNAPSHOTs
       # actions/cache restores the whole ~/.m2 tree, including Vaadin
       # SNAPSHOT jars (flow-server, flow-build-tools, hilla-*, vaadin-*)
