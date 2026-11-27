@@ -1,7 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import type { ReactiveController, ReactiveControllerHost } from '@lit/reactive-element';
 import sinon from 'sinon';
-import { ActionOnLostSubscription, FluxConnection, State } from '../src/FluxConnection.js';
+import { ActionOnLostSubscription, FluxConnection, page, State } from '../src/FluxConnection.js';
 import type {
   AbstractMessage,
   ClientCompleteMessage,
@@ -406,6 +406,28 @@ describe('@vaadin/hilla-frontend', () => {
       getSubscriptionEventSpies()?.onReconnect?.();
       getSubscriptionEventSpies()?.onReopen?.();
       expect(resubscribe).to.have.been.calledOnce;
+    });
+
+    describe('page restored from the back/forward cache', () => {
+      let reloadStub: sinon.SinonStub;
+
+      beforeEach(() => {
+        reloadStub = sinon.stub(page, 'reload');
+      });
+
+      afterEach(() => {
+        reloadStub.restore();
+      });
+
+      it('should reload the page', () => {
+        window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
+        expect(reloadStub.callCount).to.equal(1);
+      });
+
+      it('should not reload on the initial, non-persisted pageshow', () => {
+        window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: false }));
+        expect(reloadStub.callCount).to.equal(0);
+      });
     });
   });
 });
