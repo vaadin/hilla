@@ -93,6 +93,17 @@ export class FluxConnection extends EventTarget {
 
   constructor(connectPrefix: string, atmosphereOptions?: Partial<Atmosphere.Request>) {
     super();
+    if (VAADIN_BROWSER_ENVIRONMENT) {
+      // Atmosphere closes the push connection when the page is hidden, which
+      // ends its subscriptions on the server. A page restored from the
+      // back/forward cache would then show data that no longer updates, so
+      // reload it, as Flow does.
+      window.addEventListener('pageshow', (event) => {
+        if (event.persisted) {
+          window.location.reload();
+        }
+      });
+    }
     this.#ready = this.#connectWebsocket(connectPrefix.replace(/connect$/u, ''), atmosphereOptions ?? {});
   }
 
