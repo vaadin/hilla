@@ -100,6 +100,9 @@ function reloadWhenRestoredFromBackForwardCache() {
 
 /**
  * A representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
+ *
+ * Once a connection has been created in a browser, a page that the browser restores from the back/forward cache is
+ * reloaded, because its subscriptions have already ended on the server.
  */
 export class FluxConnection extends EventTarget {
   state: State = State.INACTIVE;
