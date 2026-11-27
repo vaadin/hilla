@@ -171,6 +171,9 @@
                             <vaadin.devmode.vite.options>
                                 ${vaadin.devmode.vite.options}
                             </vaadin.devmode.vite.options>
+                            <vaadin.contentSecurityPolicy>
+                                ${vaadin.contentSecurityPolicy}
+                            </vaadin.contentSecurityPolicy>
                         </systemPropertyVariables>
                     </configuration>
                 </plugin>

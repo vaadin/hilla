@@ -105,7 +105,13 @@ tasks.register('bootStart') {
         if (!bootJarFile.exists()) {
             throw new GradleException("The bootJar output file not found at: ${bootJarFile.absolutePath}")
         }
-		def processBuilder = new ProcessBuilder('java', '-jar', bootJarFile.absolutePath)
+		// Run in Flow's strict Content Security Policy mode, like the Maven
+		// test applications. Pass -Pvaadin.contentSecurityPolicy=off to turn
+		// it off.
+		def cspMode = project.findProperty('vaadin.contentSecurityPolicy') ?: 'strict'
+		def processBuilder = new ProcessBuilder('java',
+				"-Dvaadin.contentSecurityPolicy=${cspMode}", '-jar',
+				bootJarFile.absolutePath)
 		processBuilder.redirectErrorStream(true)
 		def process = processBuilder.start()
         def executor = Executors.newSingleThreadExecutor()
