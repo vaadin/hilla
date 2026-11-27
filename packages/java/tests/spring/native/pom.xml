@@ -156,6 +156,7 @@
                             <executable>${project.build.directory}/${project.artifactId}</executable>
                             <arguments>
                                 <argument>--server.port=${server.port}</argument>
+                                <argument>--vaadin.contentSecurityPolicy=${vaadin.contentSecurityPolicy}</argument>
                             </arguments>
                             <async>true</async>
                             <asyncDestroyOnShutdown>true</asyncDestroyOnShutdown>

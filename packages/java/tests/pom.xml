@@ -27,6 +27,13 @@
         <vaadin.allow.appshell.annotations>false</vaadin.allow.appshell.annotations>
         <vaadin.devmode.liveReload.enabled>false</vaadin.devmode.liveReload.enabled>
         <vaadin.devmode.vite.options>--host</vaadin.devmode.vite.options>
+        <!-- Run every test application in Flow's strict Content Security
+             Policy mode, so that what Hilla adds to the page keeps working
+             under it. In production mode the applications send a nonce-based
+             policy without 'unsafe-inline' and 'unsafe-eval'; in both modes
+             the APIs that send JavaScript as a string throw. Pass
+             -Dvaadin.contentSecurityPolicy=off to turn it off. -->
+        <vaadin.contentSecurityPolicy>strict</vaadin.contentSecurityPolicy>
         <!-- make sure we do not leave webpack-dev-server running after IT -->
         <vaadin.reuseDevServer>false</vaadin.reuseDevServer>
 
@@ -165,6 +172,7 @@
                     <!-- export test server port to integration tests -->
                     <systemPropertyVariables>
                         <serverPort>${server.port}</serverPort>
+                        <vaadin.contentSecurityPolicy>${vaadin.contentSecurityPolicy}</vaadin.contentSecurityPolicy>
                     </systemPropertyVariables>
                     <excludes>
                         <exclude>**/*$*</exclude>
@@ -265,6 +273,9 @@
                                     <vaadin.reuseDevServer>
                                         ${vaadin.reuseDevServer}
                                     </vaadin.reuseDevServer>
+                                    <vaadin.contentSecurityPolicy>
+                                        ${vaadin.contentSecurityPolicy}
+                                    </vaadin.contentSecurityPolicy>
                                     <vaadin.devmode.liveReload.enabled>
                                         ${vaadin.devmode.liveReload.enabled}
                                     </vaadin.devmode.liveReload.enabled>
