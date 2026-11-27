@@ -1,5 +1,5 @@
 import chaiLike from 'chai-like';
-import { beforeEach, chai, describe, expect, it } from 'vitest';
+import { beforeEach, chai, describe, expect, expectTypeOf, it } from 'vitest';
 import { ConstraintBuilder } from '../src/ConstraintBuilder.js';
 import m, {
   $defaultValue,
@@ -248,8 +248,24 @@ describe('@vaadin/hilla-models', () => {
       .property('p59', m.optional(StringModel))
       .build();
 
-    expect(WideModel.p59).to.be.instanceof(StringModel);
-    expect(WideModel.p59).to.have.property($optional, true);
+    expectTypeOf(WideModel.p59).toEqualTypeOf(m.optional(StringModel));
+    expectTypeOf<Value<typeof WideModel>>().toEqualTypeOf<Wide>();
+  });
+
+  it('should replace the model of an inherited property', () => {
+    interface Shape {
+      kind: string;
+    }
+
+    interface Square extends Shape {
+      kind: 'square';
+    }
+
+    const ShapeModel = m.object<Shape>('Shape').property('kind', StringModel).build();
+    const SquareModel = m.extend(ShapeModel).object<Square>('Square').property('kind', m.literal('square')).build();
+
+    expectTypeOf(SquareModel.kind).toEqualTypeOf(m.literal('square'));
+    expect(SquareModel.kind).to.have.property($literal, 'square');
   });
 
   describe('a deferred base', () => {
