@@ -71,8 +71,35 @@ type EndpointInfo = {
   reconnect?(): ActionOnLostSubscription | void;
 };
 
+/** @internal */
+export const page = {
+  reload(): void {
+    globalThis.location.reload();
+  },
+};
+
+let reloadListenerAdded = false;
+
+// Atmosphere closes the push connection when the page is hidden, which ends
+// its subscriptions on the server. A page restored from the back/forward cache
+// would then show data that no longer updates, so reload it, as Flow does.
+function reloadWhenRestoredFromBackForwardCache() {
+  if (reloadListenerAdded) {
+    return;
+  }
+  reloadListenerAdded = true;
+  globalThis.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+      page.reload();
+    }
+  });
+}
+
 /**
  * A representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
+ *
+ * Once a connection has been created in a browser, a page that the browser restores from the back/forward cache is
+ * reloaded, because its subscriptions have already ended on the server.
  */
 export class FluxConnection extends EventTarget {
   state: State = State.INACTIVE;
@@ -89,6 +116,7 @@ export class FluxConnection extends EventTarget {
 
   constructor(connectPrefix: string, atmosphereOptions?: Partial<Atmosphere.Request>) {
     super();
+    reloadWhenRestoredFromBackForwardCache();
     this.#connectWebsocket(connectPrefix.replace(/connect$/u, ''), atmosphereOptions ?? {});
   }
 
