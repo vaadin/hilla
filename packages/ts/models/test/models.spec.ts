@@ -121,17 +121,22 @@ describe('@vaadin/hilla-models', () => {
   it('should build an object model with many properties', () => {
     // Type checking this file fails with TS2589 ("Type instantiation is
     // excessively deep") if each property nests the builder type deeper.
-    interface Wide {
-      p00?: string;
-      p01?: string;
-      p02?: string;
-      p03?: string;
-      p04?: string;
-      p05?: string;
-      p06?: string;
-      p07?: string;
-      p08?: string;
-      p09?: string;
+    interface Shape {
+      kind: string;
+    }
+
+    interface Wide extends Shape {
+      kind: 'wide';
+      p00: string;
+      p01: string;
+      p02: string;
+      p03: string;
+      p04: string;
+      p05: string;
+      p06: string;
+      p07: string;
+      p08: string;
+      p09: string;
       p10?: string;
       p11?: string;
       p12?: string;
@@ -184,18 +189,20 @@ describe('@vaadin/hilla-models', () => {
       p59?: string;
     }
 
+    const ShapeModel = m.object<Shape>('Shape').property('kind', StringModel).build();
     const WideModel = m
+      .extend(ShapeModel)
       .object<Wide>('Wide')
-      .property('p00', m.optional(StringModel))
-      .property('p01', m.optional(StringModel))
-      .property('p02', m.optional(StringModel))
-      .property('p03', m.optional(StringModel))
-      .property('p04', m.optional(StringModel))
-      .property('p05', m.optional(StringModel))
-      .property('p06', m.optional(StringModel))
-      .property('p07', m.optional(StringModel))
-      .property('p08', m.optional(StringModel))
-      .property('p09', m.optional(StringModel))
+      .property('p00', StringModel)
+      .property('p01', StringModel)
+      .property('p02', StringModel)
+      .property('p03', StringModel)
+      .property('p04', StringModel)
+      .property('p05', StringModel)
+      .property('p06', StringModel)
+      .property('p07', StringModel)
+      .property('p08', StringModel)
+      .property('p09', StringModel)
       .property('p10', m.optional(StringModel))
       .property('p11', m.optional(StringModel))
       .property('p12', m.optional(StringModel))
@@ -246,26 +253,14 @@ describe('@vaadin/hilla-models', () => {
       .property('p57', m.optional(StringModel))
       .property('p58', m.optional(StringModel))
       .property('p59', m.optional(StringModel))
+      .property('kind', m.literal('wide'))
       .build();
 
+    expectTypeOf(WideModel.p00).toEqualTypeOf(StringModel);
     expectTypeOf(WideModel.p59).toEqualTypeOf(m.optional(StringModel));
+    expectTypeOf(WideModel.kind).toEqualTypeOf(m.literal('wide'));
     expectTypeOf<Value<typeof WideModel>>().toEqualTypeOf<Wide>();
-  });
-
-  it('should replace the model of an inherited property', () => {
-    interface Shape {
-      kind: string;
-    }
-
-    interface Square extends Shape {
-      kind: 'square';
-    }
-
-    const ShapeModel = m.object<Shape>('Shape').property('kind', StringModel).build();
-    const SquareModel = m.extend(ShapeModel).object<Square>('Square').property('kind', m.literal('square')).build();
-
-    expectTypeOf(SquareModel.kind).toEqualTypeOf(m.literal('square'));
-    expect(SquareModel.kind).to.have.property($literal, 'square');
+    expect(WideModel.kind).to.have.property($literal, 'wide');
   });
 
   describe('a deferred base', () => {
