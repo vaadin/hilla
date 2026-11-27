@@ -6,10 +6,12 @@
 // management and dependency resolution management), in the build scripts'
 // classpath repositories and in the projects' own.
 //
-// The Gradle steps in validation.yml pass it with --init-script. The
-// gradle-plugin's functionalTest task hands the init scripts of the outer
-// build on to the nested TestKit builds, which run under a Gradle user home of
-// their own and so would not see a script in ~/.gradle/init.d.
+// The setup action copies it into ~/.gradle/init.d, which covers every Gradle
+// build a job starts, including the one Maven forks for the gradle-plugin
+// module. The Gradle steps in validation.yml also pass it with --init-script:
+// the gradle-plugin's functionalTest task hands the init scripts given on the
+// command line on to the nested TestKit builds, which run under a Gradle user
+// home of their own and so would not see a script in ~/.gradle/init.d.
 
 def centralHost = 'repo.maven.apache.org'
 def centralMirror = 'https://maven-central.storage-download.googleapis.com/maven2/'
