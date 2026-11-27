@@ -38,7 +38,7 @@
     "transform-ast": "2.4.4",
     "typescript": "npm:@typescript/typescript6@6.0.2",
     "vite": "8.3.8",
-    "vite-plugin-checker": "1.0.0"
+    "vite-plugin-checker": "1.1.0"
   },
   "vaadin": {
     "dependencies": {
@@ -77,9 +77,9 @@
       "transform-ast": "2.4.4",
       "typescript": "npm:@typescript/typescript6@6.0.2",
       "vite": "8.3.8",
-      "vite-plugin-checker": "1.0.0"
+      "vite-plugin-checker": "1.1.0"
     },
-    "hash": "19e2be81b86bda50e6a4be0a68326d3ec3d4513a3c7231d29a65416714f84feb"
+    "hash": "6d6416bf70ded295327c720d2a818cd3ebffc61991fedaf5871b30efcf8b3eff"
   },
   "overrides": {
     "@vaadin/a11y-base": "$@vaadin/a11y-base",

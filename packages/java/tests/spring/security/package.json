@@ -40,7 +40,7 @@
     "transform-ast": "2.4.4",
     "typescript": "npm:@typescript/typescript6@6.0.2",
     "vite": "8.3.8",
-    "vite-plugin-checker": "1.0.0"
+    "vite-plugin-checker": "1.1.0"
   },
   "vaadin": {
     "dependencies": {
@@ -81,9 +81,9 @@
       "transform-ast": "2.4.4",
       "typescript": "npm:@typescript/typescript6@6.0.2",
       "vite": "8.3.8",
-      "vite-plugin-checker": "1.0.0"
+      "vite-plugin-checker": "1.1.0"
     },
-    "hash": "d84e3582ac25d33ce7d0535eafe507783520b589278003c92d552d4d5512e8be"
+    "hash": "716d3743d4ce93492926b1f7af00fb605fa47de7248e0d5d0c05c1605ac079ae"
   },
   "overrides": {
     "@adobe/lit-mobx": "$@adobe/lit-mobx",
