@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.connect;
+package com.vaadin.hilla.test;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -26,22 +26,26 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
 
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
 
 /**
  * Checks that the test applications really run in Flow's strict Content
  * Security Policy mode, which the tests pom turns on for all of them, and that
- * the page of a Hilla application works under the policy.
+ * a file-router React view of a Hilla application works under the policy.
  * <p>
- * Flow sends the policy in production mode only, so the checks are skipped in
- * development mode, and when the mode is turned off with
- * {@code -Dvaadin.contentSecurityPolicy=off}.
+ * The checks are skipped only when the mode is explicitly turned off, with
+ * {@code -Dvaadin.contentSecurityPolicy=off} or {@code warn}, so that losing
+ * the property fails the test rather than skipping it. Flow sends the policy in
+ * production mode only, so the checks are skipped in development mode.
  */
 public class ContentSecurityPolicyIT extends ChromeBrowserTest {
 
     private static final Pattern SCRIPT_TAG = Pattern
             .compile("<script\\b[^>]*>");
+    private static final String VIEW = "/BasicSignalView";
     private static final Pattern NONCE = Pattern
             .compile("'nonce-([A-Za-z0-9+/=_-]+)'");
 
@@ -50,12 +54,14 @@ public class ContentSecurityPolicyIT extends ChromeBrowserTest {
     @Override
     @Before
     public void setup() throws Exception {
-        Assume.assumeTrue("The strict Content Security Policy mode is off",
-                "strict".equalsIgnoreCase(
-                        System.getProperty("vaadin.contentSecurityPolicy")));
+        String mode = System.getProperty("vaadin.contentSecurityPolicy");
+        // Skip only on the documented modes other than strict: a missing or
+        // unresolved property must fail the test, not skip it
+        Assume.assumeFalse("The Content Security Policy mode is set to " + mode,
+                "off".equalsIgnoreCase(mode) || "warn".equalsIgnoreCase(mode));
         try (HttpClient client = HttpClient.newHttpClient()) {
             indexHtml = client.send(HttpRequest
-                    .newBuilder(URI.create(getRootURL() + "/flux")).build(),
+                    .newBuilder(URI.create(getRootURL() + VIEW)).build(),
                     HttpResponse.BodyHandlers.ofString());
         }
         Assume.assumeFalse(
@@ -91,10 +97,11 @@ public class ContentSecurityPolicyIT extends ChromeBrowserTest {
 
     @Test
     public void page_worksWithoutPolicyViolations() {
-        getDriver().get(getRootURL() + "/flux");
-        // Rendered by the React router from the bundle, which the policy
-        // allows only through the nonce
-        $("test-flux").waitForFirst();
+        getDriver().get(getRootURL() + VIEW);
+        // A file-router view rendered by the React router from the bundle,
+        // which the policy allows only through the nonce
+        $(TextFieldElement.class).waitForFirst();
+        waitUntil(driver -> !driver.findElements(By.id("out")).isEmpty());
 
         checkLogsForErrors(
                 message -> !message.contains("Content Security Policy"));
