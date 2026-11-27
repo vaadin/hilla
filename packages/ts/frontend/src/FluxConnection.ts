@@ -74,6 +74,30 @@ type EndpointInfo = {
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 const atmospherePromise = VAADIN_BROWSER_ENVIRONMENT ? import('atmosphere.js') : undefined;
 
+/** @internal */
+export const page = {
+  reload(): void {
+    globalThis.location.reload();
+  },
+};
+
+let reloadListenerAdded = false;
+
+// Atmosphere closes the push connection when the page is hidden, which ends
+// its subscriptions on the server. A page restored from the back/forward cache
+// would then show data that no longer updates, so reload it, as Flow does.
+function reloadWhenRestoredFromBackForwardCache() {
+  if (reloadListenerAdded) {
+    return;
+  }
+  reloadListenerAdded = true;
+  globalThis.addEventListener('pageshow', (event) => {
+    if ((event as PageTransitionEvent).persisted) {
+      page.reload();
+    }
+  });
+}
+
 /**
  * A representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
  */
@@ -94,15 +118,7 @@ export class FluxConnection extends EventTarget {
   constructor(connectPrefix: string, atmosphereOptions?: Partial<Atmosphere.Request>) {
     super();
     if (VAADIN_BROWSER_ENVIRONMENT) {
-      // Atmosphere closes the push connection when the page is hidden, which
-      // ends its subscriptions on the server. A page restored from the
-      // back/forward cache would then show data that no longer updates, so
-      // reload it, as Flow does.
-      window.addEventListener('pageshow', (event) => {
-        if (event.persisted) {
-          window.location.reload();
-        }
-      });
+      reloadWhenRestoredFromBackForwardCache();
     }
     this.#ready = this.#connectWebsocket(connectPrefix.replace(/connect$/u, ''), atmosphereOptions ?? {});
   }

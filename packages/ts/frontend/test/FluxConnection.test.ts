@@ -1,8 +1,8 @@
 import type { ReactiveController, ReactiveControllerHost } from '@lit/reactive-element';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { beforeEach, chai, describe, expect, it } from 'vitest';
-import { ActionOnLostSubscription, FluxConnection, FluxSubscriptionState, State } from '../src/FluxConnection.js';
+import { afterEach, beforeEach, chai, describe, expect, it } from 'vitest';
+import { ActionOnLostSubscription, FluxConnection, FluxSubscriptionState, page, State } from '../src/FluxConnection.js';
 import type {
   AbstractMessage,
   ClientCompleteMessage,
@@ -428,26 +428,26 @@ describe('@vaadin/hilla-frontend', () => {
       expect(resubscribe).to.have.been.calledOnce;
     });
 
-    it('should not reload on the initial, non-persisted pageshow', async () => {
-      subscribeStub.resetHistory();
-      const addEventListenerSpy = sinon.spy(window, 'addEventListener');
-      try {
-        await new FluxConnection('/connect').ready;
-      } finally {
-        addEventListenerSpy.restore();
-      }
-      const pageShowCall = addEventListenerSpy.getCalls().find((call) => (call.args[0] as string) === 'pageshow');
-      expect(pageShowCall).to.exist;
-      const listener = pageShowCall!.args[1] as unknown as (event: PageTransitionEvent) => void;
+    describe('page restored from the back/forward cache', () => {
+      let reloadStub: sinon.SinonStub;
 
-      // A persisted pageshow would reload the test page itself, so only the
-      // initial, non-persisted one is dispatched here.
-      const unloaded = new Promise<boolean>((resolve) => {
-        window.addEventListener('beforeunload', () => resolve(true), { once: true });
-        setTimeout(() => resolve(false), 100);
+      beforeEach(() => {
+        reloadStub = sinon.stub(page, 'reload');
       });
-      listener(new PageTransitionEvent('pageshow', { persisted: false }));
-      expect(await unloaded).to.be.false;
+
+      afterEach(() => {
+        reloadStub.restore();
+      });
+
+      it('should reload the page', () => {
+        window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
+        expect(reloadStub).to.have.been.calledOnce;
+      });
+
+      it('should not reload on the initial, non-persisted pageshow', () => {
+        window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: false }));
+        expect(reloadStub).not.to.have.been.called;
+      });
     });
 
     describe('flux subscription state', () => {
