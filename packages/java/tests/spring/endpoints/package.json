@@ -38,7 +38,7 @@
     "transform-ast": "2.4.4",
     "typescript": "npm:@typescript/typescript6@6.0.2",
     "vite": "8.3.8",
-    "vite-plugin-checker": "1.0.0",
+    "vite-plugin-checker": "1.1.0",
     "workbox-build": "7.4.1",
     "workbox-core": "7.4.1",
     "workbox-precaching": "7.4.1",
@@ -82,14 +82,14 @@
       "transform-ast": "2.4.4",
       "typescript": "npm:@typescript/typescript6@6.0.2",
       "vite": "8.3.8",
-      "vite-plugin-checker": "1.0.0",
+      "vite-plugin-checker": "1.1.0",
       "workbox-build": "7.4.1",
       "workbox-core": "7.4.1",
       "workbox-precaching": "7.4.1",
       "workbox-routing": "7.4.1",
       "workbox-strategies": "7.4.1"
     },
-    "hash": "ed94439db0fcc43624937d46b911fb5a297280051a20eb301c082706403f122d"
+    "hash": "6abe5fe128b9287403f3de9cf8b12235b7900fd6c70c7fb15cc96717bc280366"
   },
   "overrides": {
     "@vaadin/a11y-base": "$@vaadin/a11y-base",
