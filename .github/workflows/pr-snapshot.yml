@@ -48,6 +48,9 @@ env:
   # in front of it. This is the one the pull request comment hands out, and the
   # one the Flow and Flow Components snapshots are looked up in.
   MAVEN_SNAPSHOT_READ_URL: ${{ vars.MAVEN_SNAPSHOT_READ_URL || 'https://maven.vaadin.com/vaadin-prereleases' }}
+  # Central is read through Google's mirror of it, as in validation.yml. See
+  # the comment in the settings file.
+  MAVEN_ARGS: -gs ${{ github.workspace }}/.github/maven/settings.xml
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
   _HEAD_REF: ${{ github.head_ref }}
   _HEAD_SHA: ${{ github.event.pull_request.head.sha }}
