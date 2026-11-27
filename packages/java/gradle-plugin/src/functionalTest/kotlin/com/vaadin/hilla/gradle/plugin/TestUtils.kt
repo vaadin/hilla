@@ -241,6 +241,17 @@ class TestProject {
         .forwardOutput()   // a must, otherwise ./gradlew check freezes on windows!
         .withGradleVersion("8.7")
 
+    /**
+     * The `--init-script` arguments for the init scripts the outer build was
+     * started with, which the `functionalTest` task passes on. CI uses one to
+     * read Maven Central through a mirror.
+     */
+    private val initScriptArgs: List<String> =
+        (System.getProperty("functionalTest.initScripts") ?: "")
+            .split(File.pathSeparator)
+            .filter { it.isNotBlank() }
+            .flatMap { listOf("--init-script", it) }
+
     override fun toString(): String = "TestProject(dir=$dir)"
 
     /**
@@ -292,7 +303,7 @@ class TestProject {
 
         println("$dir/./gradlew ${args.joinToString(" ")}")
         val result: BuildResult = createGradleRunner()
-            .withArguments(args.toList() + "--stacktrace" + "--info")
+            .withArguments(args.toList() + initScriptArgs + "--stacktrace" + "--info")
             .build()
 
         if (checkTasksSuccessful) {
@@ -312,7 +323,7 @@ class TestProject {
     fun buildAndFail(vararg args: String): BuildResult {
         println("$dir/./gradlew ${args.joinToString(" ")}")
         return createGradleRunner()
-                .withArguments(args.toList() + "--stacktrace" + "--info")
+                .withArguments(args.toList() + initScriptArgs + "--stacktrace" + "--info")
                 .buildAndFail()
     }
 
