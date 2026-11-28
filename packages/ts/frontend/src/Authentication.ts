@@ -169,6 +169,11 @@ function normalizePath(url: string): string {
   return normalized;
 }
 
+// Counts the page reloads that the helpers start, so that
+// InvalidSessionMiddleware doesn't send a call again on a page that is going
+// away: the server would run it, but nobody would get the result.
+let pageReloadCount = 0;
+
 /**
  * Navigates to the provided path using page reload.
  *
@@ -177,6 +182,7 @@ function normalizePath(url: string): string {
 function navigateWithPageReload(to: string) {
   // Consider absolute path to be within application context
   const url = to.startsWith('/') ? new URL(`.${to}`, document.baseURI) : to;
+  pageReloadCount += 1;
   window.location.replace(url);
 }
 
@@ -294,9 +300,13 @@ export async function logout(options?: LogoutOptions): Promise<void> {
 
 /**
  * It defines what to do when it detects a session is invalid. E.g.,
- * show a login view.
- * It takes an <code>EndpointCallContinue</code> parameter, which can be
- * used to continue the endpoint call.
+ * show a login view and log the user in with {@link login}.
+ *
+ * Resolve with the result of the login: when it is successful
+ * (`error: false`), the endpoint call is sent again. By default, `login`
+ * reloads the page after a successful login, and then the call is not sent
+ * again; pass a `navigate` option to `login`, for example a no-op, to keep the
+ * page and get the result of the call.
  */
 export type OnInvalidSessionCallback = () => Promise<LoginResult>;
 
@@ -304,6 +314,15 @@ export type OnInvalidSessionCallback = () => Promise<LoginResult>;
  * A helper class for handling invalid sessions during an endpoint call.
  * E.g., you can use this to show user a login page when the session has
  * expired.
+ *
+ * When a call fails with `401 Unauthorized`, the middleware invokes the
+ * callback. If the callback resolves with a successful login result, the call
+ * is sent again with the current CSRF headers, such as the token that
+ * {@link login} received from the server. If the result also has a `token`,
+ * it is sent as the Vaadin CSRF token. Otherwise, the call fails with the
+ * original response. It also fails if the callback made {@link login} or
+ * {@link logout} reload the page with their default navigation; a reload that
+ * the callback starts in some other way is not detected.
  */
 export class InvalidSessionMiddleware implements MiddlewareClass {
   private readonly onInvalidSessionCallback: OnInvalidSessionCallback;
@@ -317,9 +336,16 @@ export class InvalidSessionMiddleware implements MiddlewareClass {
     clonedContext.request = context.request.clone();
     const response = await next(context);
     if (response.status === 401) {
+      const pageReloadCountBefore = pageReloadCount;
       const loginResult = await this.onInvalidSessionCallback();
-      if (loginResult.token) {
-        clonedContext.request.headers.set(VAADIN_CSRF_HEADER, loginResult.token);
+      if (!loginResult.error && pageReloadCount === pageReloadCountBefore) {
+        const csrfInfo = await csrfInfoSource.get();
+        for (const [name, value] of csrfInfo.headerEntries) {
+          clonedContext.request.headers.set(name, value);
+        }
+        if (loginResult.token) {
+          clonedContext.request.headers.set(VAADIN_CSRF_HEADER, loginResult.token);
+        }
         return next(clonedContext);
       }
     }
