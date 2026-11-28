@@ -222,6 +222,11 @@ export class I18n {
       return;
     }
 
+    if (partialLoad && language !== this.#language.value) {
+      // The language changed while loading, so the result is in the wrong language
+      return;
+    }
+
     // Update all signals together to avoid triggering side effects multiple times
     batch(() => {
       this.#translations.value = partialLoad
@@ -236,6 +241,9 @@ export class I18n {
 
       if (!partialLoad) {
         this.#alreadyRequestedKeys.value = new Set<string>();
+        // Allow requesting the keys again in the new language, including the
+        // keys of a request that is still pending in the previous language
+        this.#batchedKeys.clear();
       } else if (keys?.length) {
         this.#alreadyRequestedKeys.value = new Set([...this.#alreadyRequestedKeys.value, ...keys]);
       }
@@ -244,6 +252,12 @@ export class I18n {
         updateLanguageSettings({ language });
       }
     });
+
+    if (chunks && !partialLoad) {
+      // Chunks registered while loading are missing from the result
+      const missingChunks = [...this.#chunks].filter((chunk) => !chunks.includes(chunk));
+      await Promise.all(missingChunks.map(async (chunk) => this.updateLanguage({ chunkName: chunk })));
+    }
   }
 
   /**
