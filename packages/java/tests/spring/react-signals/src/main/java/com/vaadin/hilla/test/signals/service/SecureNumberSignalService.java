@@ -40,12 +40,12 @@ public class SecureNumberSignalService {
 
     @AnonymousAllowed
     public Long fetchUserCounterValue() {
-        return userCounter.get().longValue();
+        return userCounter.peek().longValue();
     }
 
     @AnonymousAllowed
     public Long fetchAdminCounterValue() {
-        return adminCounter.get().longValue();
+        return adminCounter.peek().longValue();
     }
 
     @AnonymousAllowed
