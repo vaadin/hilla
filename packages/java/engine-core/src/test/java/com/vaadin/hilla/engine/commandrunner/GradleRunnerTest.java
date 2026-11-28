@@ -26,30 +26,40 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class GradleRunnerTest {
+
+    private static final String INVOCATIONS_FILE = "invocations.txt";
 
     @TempDir
     Path tmpDir;
 
-    @Test
-    void shouldRunIfBuildGradleIsAvailable() throws IOException {
-        Files.createFile(tmpDir.resolve("build.gradle"));
-        var opt = GradleRunner.forProject(tmpDir.toFile(), "-v");
+    @ParameterizedTest
+    @ValueSource(strings = { "build.gradle", "build.gradle.kts" })
+    void shouldRunIfBuildFileIsAvailable(String buildFile) throws IOException {
+        Files.createFile(tmpDir.resolve(buildFile));
+        createGradleWrapperStub();
+        var opt = GradleRunner.forProject(tmpDir.toFile(), "build");
         assertTrue(opt.isPresent());
         var runner = opt.orElseThrow();
         assertEquals(1, runner.arguments().length);
-        assertDoesNotThrow(() -> runner.run(null));
-    }
-
-    @Test
-    void shouldRunIfBuildGradleKtsIsAvailable() throws IOException {
-        Files.createFile(tmpDir.resolve("build.gradle.kts"));
-        var opt = GradleRunner.forProject(tmpDir.toFile(), "-v");
-        assertTrue(opt.isPresent());
-        var runner = opt.orElseThrow();
-        assertEquals(1, runner.arguments().length);
-        assertDoesNotThrow(() -> runner.run(null));
+        // A custom executable would be tried before the project's wrapper
+        String originalValue = System
+                .clearProperty(GradleRunner.EXECUTABLE_PROPERTY);
+        try {
+            assertDoesNotThrow(() -> runner.run(null));
+        } finally {
+            if (originalValue != null) {
+                System.setProperty(GradleRunner.EXECUTABLE_PROPERTY,
+                        originalValue);
+            }
+        }
+        // The wrapper is first tested with "-v", then run with the arguments
+        assertEquals(List.of("-v", "build"),
+                Files.readAllLines(tmpDir.resolve(INVOCATIONS_FILE)).stream()
+                        .map(String::strip).toList());
     }
 
     @Test
@@ -79,8 +89,25 @@ public class GradleRunnerTest {
                 System.setProperty(GradleRunner.EXECUTABLE_PROPERTY,
                         originalValue);
             } else {
-                System.clearProperty(MavenRunner.EXECUTABLE_PROPERTY);
+                System.clearProperty(GradleRunner.EXECUTABLE_PROPERTY);
             }
+        }
+    }
+
+    /**
+     * Creates a Gradle wrapper stub in the project directory that only records
+     * the arguments it is called with, so that the runner can be tested without
+     * a Gradle installation.
+     */
+    private void createGradleWrapperStub() throws IOException {
+        if (CommandRunner.IS_WINDOWS) {
+            Files.writeString(tmpDir.resolve("gradlew.bat"),
+                    "@echo %*>> " + INVOCATIONS_FILE + "\r\n");
+        } else {
+            var wrapper = tmpDir.resolve("gradlew");
+            Files.writeString(wrapper,
+                    "#!/bin/sh\necho \"$@\" >> " + INVOCATIONS_FILE + "\n");
+            assertTrue(wrapper.toFile().setExecutable(true));
         }
     }
 }
