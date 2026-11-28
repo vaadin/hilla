@@ -26,5 +26,13 @@ public class CustomConfigEndpoint {
     public static class CustomConfigEntity {
         private int bar;
         private String foo;
+        private Shade shade;
+    }
+
+    /**
+     * Written in lower case by the object mapper of the application.
+     */
+    public enum Shade {
+        LIGHT, DARK
     }
 }
